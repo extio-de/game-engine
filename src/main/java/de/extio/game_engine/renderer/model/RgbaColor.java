@@ -1,6 +1,7 @@
 package de.extio.game_engine.renderer.model;
 
 import java.awt.Color;
+import java.util.Objects;
 
 public class RgbaColor {
 	
@@ -166,13 +167,7 @@ public class RgbaColor {
 	
 	@Override
 	public int hashCode() {
-		final var prime = 31;
-		var result = 1;
-		result = prime * result + this.a;
-		result = prime * result + this.b;
-		result = prime * result + this.g;
-		result = prime * result + this.r;
-		return result;
+		return Objects.hash(this.r, this.g, this.b, this.a);
 	}
 	
 	@Override
@@ -180,38 +175,15 @@ public class RgbaColor {
 		if (this == obj) {
 			return true;
 		}
-		if ((obj == null) || (this.getClass() != obj.getClass())) {
+		if (!(obj instanceof final RgbaColor other)) {
 			return false;
 		}
-		final var other = (RgbaColor) obj;
-		if (this.a != other.a) {
-			return false;
-		}
-		if (this.b != other.b) {
-			return false;
-		}
-		if (this.g != other.g) {
-			return false;
-		}
-		if (this.r != other.r) {
-			return false;
-		}
-		return true;
+		return this.r == other.r && this.g == other.g && this.b == other.b && this.a == other.a;
 	}
 	
 	@Override
 	public String toString() {
-		final var builder = new StringBuilder();
-		builder.append("RgbaColor [r=");
-		builder.append(this.r);
-		builder.append(", g=");
-		builder.append(this.g);
-		builder.append(", b=");
-		builder.append(this.b);
-		builder.append(", a=");
-		builder.append(this.a);
-		builder.append("]");
-		return builder.toString();
+		return "RgbaColor [r=" + this.r + ", g=" + this.g + ", b=" + this.b + ", a=" + this.a + "]";
 	}
 	
 }

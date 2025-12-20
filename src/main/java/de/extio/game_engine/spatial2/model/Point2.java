@@ -1,5 +1,7 @@
 package de.extio.game_engine.spatial2.model;
 
+import java.util.Objects;
+
 /**
  * A point in 2D space
  */
@@ -26,10 +28,7 @@ public class Point2 implements HasPosition2 {
 	
 	@Override
 	public int hashCode() {
-		final var prime = 31;
-		var result = 1;
-		result = prime * result + ((this.coord == null) ? 0 : this.coord.hashCode());
-		return result;
+		return Objects.hash(this.coord);
 	}
 	
 	@Override
@@ -37,28 +36,15 @@ public class Point2 implements HasPosition2 {
 		if (this == obj) {
 			return true;
 		}
-		if ((obj == null) || (this.getClass() != obj.getClass())) {
+		if (!(obj instanceof final Point2 other)) {
 			return false;
 		}
-		final var other = (Point2) obj;
-		if (this.coord == null) {
-			if (other.coord != null) {
-				return false;
-			}
-		}
-		else if (!this.coord.equals(other.coord)) {
-			return false;
-		}
-		return true;
+		return Objects.equals(this.coord, other.coord);
 	}
 	
 	@Override
 	public String toString() {
-		final var builder = new StringBuilder();
-		builder.append("Point2 [coord=");
-		builder.append(this.coord);
-		builder.append("]");
-		return builder.toString();
+		return "Point2 [coord=" + this.coord + "]";
 	}
 	
 }

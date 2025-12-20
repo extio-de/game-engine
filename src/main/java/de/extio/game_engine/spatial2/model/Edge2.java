@@ -86,18 +86,12 @@ public enum Edge2 {
 	 * @return Vector
 	 */
 	public static CoordD2 toVectorD(final Edge2 edge2) {
-		switch (edge2) {
-			case BOTTOM:
-				return VD_BOTTOM;
-			case LEFT:
-				return VD_LEFT;
-			case RIGHT:
-				return VD_RIGHT;
-			case TOP:
-				return VD_TOP;
-		}
-		
-		return null;
+		return switch (edge2) {
+			case BOTTOM -> VD_BOTTOM;
+			case LEFT -> VD_LEFT;
+			case RIGHT -> VD_RIGHT;
+			case TOP -> VD_TOP;
+		};
 	}
 	
 	/**
@@ -106,18 +100,12 @@ public enum Edge2 {
 	 * @return Vector
 	 */
 	public static CoordI2 toVectorI(final Edge2 edge2) {
-		switch (edge2) {
-			case BOTTOM:
-				return VI_BOTTOM;
-			case LEFT:
-				return VI_LEFT;
-			case RIGHT:
-				return VI_RIGHT;
-			case TOP:
-				return VI_TOP;
-		}
-		
-		return null;
+		return switch (edge2) {
+			case BOTTOM -> VI_BOTTOM;
+			case LEFT -> VI_LEFT;
+			case RIGHT -> VI_RIGHT;
+			case TOP -> VI_TOP;
+		};
 	}
 	
 	public static String toString(final int edges) {

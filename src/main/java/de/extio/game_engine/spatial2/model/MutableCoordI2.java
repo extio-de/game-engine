@@ -1,5 +1,7 @@
 package de.extio.game_engine.spatial2.model;
 
+import java.util.Objects;
+
 /**
  * Immutable implementation of CoordI2
  */
@@ -178,11 +180,7 @@ public final class MutableCoordI2 implements CoordI2 {
 	
 	@Override
 	public int hashCode() {
-		final var prime = 31;
-		var result = 1;
-		result = prime * result + this.x;
-		result = prime * result + this.y;
-		return result;
+		return Objects.hash(this.x, this.y);
 	}
 	
 	@Override

@@ -1,5 +1,7 @@
 package de.extio.game_engine.spatial2.model;
 
+import java.util.Objects;
+
 /**
  * A 2D area, having a position (top left corner) and a dimension
  */
@@ -44,10 +46,7 @@ public class Area2 extends Point2 implements HasPositionAndDimension2, SpatialIn
 	
 	@Override
 	public int hashCode() {
-		final var prime = 31;
-		var result = super.hashCode();
-		result = prime * result + ((this.dimension == null) ? 0 : this.dimension.hashCode());
-		return result;
+		return Objects.hash(super.hashCode(), this.dimension);
 	}
 	
 	@Override
@@ -55,30 +54,15 @@ public class Area2 extends Point2 implements HasPositionAndDimension2, SpatialIn
 		if (this == obj) {
 			return true;
 		}
-		if (!super.equals(obj)) {
+		if (!super.equals(obj) || !(obj instanceof final Area2 other)) {
 			return false;
 		}
-		final var other = (Area2) obj;
-		if (this.dimension == null) {
-			if (other.dimension != null) {
-				return false;
-			}
-		}
-		else if (!this.dimension.equals(other.dimension)) {
-			return false;
-		}
-		return true;
+		return Objects.equals(this.dimension, other.dimension);
 	}
 	
 	@Override
 	public String toString() {
-		final var builder = new StringBuilder();
-		builder.append("Area2 [getPosition()=");
-		builder.append(this.getPosition());
-		builder.append(", dimension=");
-		builder.append(this.dimension);
-		builder.append("]");
-		return builder.toString();
+		return "Area2 [getPosition()=" + this.getPosition() + ", dimension=" + this.dimension + "]";
 	}
 	
 }

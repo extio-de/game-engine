@@ -1,5 +1,7 @@
 package de.extio.game_engine.spatial2.model;
 
+import java.util.Objects;
+
 /**
  * Immutable implementation of CoordD2
  */
@@ -25,8 +27,8 @@ public final class ImmutableCoordD2 implements CoordD2 {
 		if (other == null) {
 			return null;
 		}
-		if (other instanceof ImmutableCoordD2) {
-			return (ImmutableCoordD2) other;
+		if (other instanceof final ImmutableCoordD2 immutableCoordD2) {
+			return immutableCoordD2;
 		}
 		return new ImmutableCoordD2(other.getX(), other.getY());
 	}
@@ -149,14 +151,7 @@ public final class ImmutableCoordD2 implements CoordD2 {
 	
 	@Override
 	public int hashCode() {
-		final var prime = 31;
-		var result = 1;
-		long temp;
-		temp = Double.doubleToLongBits(this.x);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		temp = Double.doubleToLongBits(this.y);
-		result = prime * result + (int) (temp ^ (temp >>> 32));
-		return result;
+		return Objects.hash(this.x, this.y);
 	}
 	
 	@Override

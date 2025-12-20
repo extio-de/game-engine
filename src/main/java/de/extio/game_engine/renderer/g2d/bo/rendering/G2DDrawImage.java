@@ -206,13 +206,7 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 		
 		@Override
 		public String toString() {
-			final var builder = new StringBuilder();
-			builder.append("CachedImage [name=");
-			builder.append(this.name);
-			builder.append(", used=");
-			builder.append(this.used);
-			builder.append("]");
-			return builder.toString();
+			return "CachedImage [name=" + this.name + ", used=" + this.used + "]";
 		}
 		
 	}

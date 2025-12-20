@@ -1,5 +1,7 @@
 package de.extio.game_engine.spatial2.model;
 
+import java.util.Objects;
+
 /**
  * A rectangle represented by top left (c0) and bottom right (c1) vertices
  */
@@ -23,16 +25,16 @@ public class RectI2 {
 			return;
 		}
 		if (other.c0 != null) {
-			if (other.c0 instanceof ImmutableCoordI2) {
-				this.c0 = ImmutableCoordI2.create(other.c0);
+			if (other.c0 instanceof final ImmutableCoordI2 immutableC0) {
+				this.c0 = ImmutableCoordI2.create(immutableC0);
 			}
 			else {
 				this.c0 = MutableCoordI2.create(other.c0);
 			}
 		}
 		if (other.c1 != null) {
-			if (other.c1 instanceof ImmutableCoordI2) {
-				this.c1 = ImmutableCoordI2.create(other.c1);
+			if (other.c1 instanceof final ImmutableCoordI2 immutableC1) {
+				this.c1 = ImmutableCoordI2.create(immutableC1);
 			}
 			else {
 				this.c1 = MutableCoordI2.create(other.c1);
@@ -58,11 +60,7 @@ public class RectI2 {
 	
 	@Override
 	public int hashCode() {
-		final var prime = 31;
-		var result = 1;
-		result = prime * result + ((this.c0 == null) ? 0 : this.c0.hashCode());
-		result = prime * result + ((this.c1 == null) ? 0 : this.c1.hashCode());
-		return result;
+		return Objects.hash(this.c0, this.c1);
 	}
 	
 	@Override
@@ -70,27 +68,10 @@ public class RectI2 {
 		if (this == obj) {
 			return true;
 		}
-		if ((obj == null) || (this.getClass() != obj.getClass())) {
+		if (!(obj instanceof final RectI2 other)) {
 			return false;
 		}
-		final var other = (RectI2) obj;
-		if (this.c0 == null) {
-			if (other.c0 != null) {
-				return false;
-			}
-		}
-		else if (!this.c0.equals(other.c0)) {
-			return false;
-		}
-		if (this.c1 == null) {
-			if (other.c1 != null) {
-				return false;
-			}
-		}
-		else if (!this.c1.equals(other.c1)) {
-			return false;
-		}
-		return true;
+		return Objects.equals(this.c0, other.c0) && Objects.equals(this.c1, other.c1);
 	}
 	
 	@Override

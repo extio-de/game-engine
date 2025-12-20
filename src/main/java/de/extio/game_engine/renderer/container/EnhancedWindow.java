@@ -38,8 +38,8 @@ public class EnhancedWindow<T> extends Window {
 		
 		synchronized (WINDOWS) {
 			for (final Window window : WINDOWS) {
-				if (window instanceof EnhancedWindow) {
-					window.reset();
+				if (window instanceof final EnhancedWindow<?> enhancedWindow) {
+					enhancedWindow.reset();
 				}
 			}
 		}
