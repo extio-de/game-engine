@@ -1,4 +1,4 @@
-package de.extio.game_engine.renderer.options;
+package de.extio.game_engine.renderer.model.options;
 
 public final class VideoOptions {
 	

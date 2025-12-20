@@ -1,4 +1,4 @@
-package de.extio.game_engine.renderer.options;
+package de.extio.game_engine.renderer.model.options;
 
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;

@@ -2,8 +2,8 @@ package de.extio.game_engine.renderer;
 
 import java.util.function.Consumer;
 
-import de.extio.game_engine.renderer.options.UiOptions;
-import de.extio.game_engine.renderer.options.VideoOptions;
+import de.extio.game_engine.renderer.model.options.UiOptions;
+import de.extio.game_engine.renderer.model.options.VideoOptions;
 
 public class RendererData {
 	
