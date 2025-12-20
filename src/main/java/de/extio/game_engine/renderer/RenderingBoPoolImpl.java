@@ -1,0 +1,118 @@
+package de.extio.game_engine.renderer;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Stack;
+
+import de.extio.game_engine.renderer.model.RenderingBo;
+
+public class RenderingBoPoolImpl implements RenderingBoPool {
+	
+	public final static Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> INTERFACE_TO_BO_G2D = new HashMap<>();
+	
+	private final RendererData rendererData;
+	
+	private final Map<Class<? extends RenderingBo>, Stack<RenderingBo>> pool = new HashMap<>();
+	
+	private final LastMapping lastMapping = new LastMapping();
+	
+	private final LastReverseMapping lastReverseMapping = new LastReverseMapping();
+	
+	private static class LastMapping {
+		
+		volatile Class<? extends RenderingBo> clazz;
+		
+		volatile Class<? extends RenderingBo> impl;
+		
+		volatile Stack<RenderingBo> pooled;
+	}
+	
+	private static class LastReverseMapping {
+		
+		volatile Class<? extends RenderingBo> clazz;
+		
+		volatile Stack<RenderingBo> pooled;
+	}
+	
+	public RenderingBoPoolImpl(final RendererData rendererData) {
+		this.rendererData = rendererData;
+	}
+	
+	@Override
+	@SuppressWarnings("unchecked")
+	public <T extends RenderingBo> T acquire(final Class<T> clazz) {
+		Stack<RenderingBo> pooled;
+		Class<? extends RenderingBo> impl;
+		
+		if (this.lastMapping != null && this.lastMapping.clazz == clazz) {
+			impl = this.lastMapping.impl;
+			pooled = this.lastMapping.pooled;
+		}
+		else {
+			if (!clazz.isInterface()) {
+				impl = clazz;
+			}
+			else {
+				impl = INTERFACE_TO_BO_G2D.get(clazz);
+				if (impl == null) {
+					throw new IllegalArgumentException(clazz.getSimpleName() + " not mapped");
+				}
+			}
+			
+			pooled = this.pool.get(impl);
+			if (pooled == null) {
+				pooled = new Stack<>();
+				this.pool.put(impl, pooled);
+			}
+			
+			this.lastMapping.clazz = clazz;
+			this.lastMapping.impl = impl;
+			this.lastMapping.pooled = pooled;
+		}
+		
+		if (pooled.isEmpty()) {
+			T instance;
+			try {
+				instance = clazz.cast(impl.getDeclaredConstructor().newInstance());
+			}
+			catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException e) {
+				throw new RuntimeException(e);
+			}
+			instance.setRendererData(this.rendererData);
+			return instance;
+		}
+		
+		return (T) pooled.pop();
+	}
+	
+	@Override
+	public void release(final RenderingBo obj) {
+		try {
+			obj.close();
+			
+			final Class<? extends RenderingBo> clazz = obj.getClass();
+			Stack<RenderingBo> pooled;
+			
+			if (this.lastReverseMapping != null && this.lastReverseMapping.clazz == clazz) {
+				pooled = this.lastReverseMapping.pooled;
+			}
+			else {
+				pooled = this.pool.get(clazz);
+				if (pooled == null) {
+					pooled = new Stack<>();
+					this.pool.put(clazz, pooled);
+				}
+				
+				this.lastReverseMapping.clazz = clazz;
+				this.lastReverseMapping.pooled = pooled;
+			}
+			
+			pooled.push(obj);
+		}
+		catch (final Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+	
+}

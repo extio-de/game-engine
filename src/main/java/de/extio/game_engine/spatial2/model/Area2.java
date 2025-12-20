@@ -1,0 +1,92 @@
+/* Copyright (C) 2023 Stephan Birkl - All Rights Reserved.
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE 
+ * OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+package de.extio.game_engine.spatial2.model;
+
+/**
+ * A 2D area, having a position (top left corner) and a dimension
+ */
+public class Area2 extends Point2 implements HasPositionAndDimension2, SpatialIndex2Capable {
+	
+	private CoordI2 dimension;
+	
+	private transient long bsi2Session;
+	
+	public Area2() {
+		super();
+	}
+	
+	public Area2(final CoordI2 coord, final CoordI2 dimension) {
+		super(coord);
+		this.setDimension(dimension);
+	}
+	
+	public Area2(final HasPositionAndDimension2 other) {
+		super(ImmutableCoordI2.create(other.getPosition()));
+		this.setDimension(ImmutableCoordI2.create(other.getDimension()));
+	}
+	
+	@Override
+	public CoordI2 getDimension() {
+		return this.dimension;
+	}
+	
+	public void setDimension(final CoordI2 dimension) {
+		this.dimension = dimension;
+	}
+	
+	@Override
+	public boolean isInSpatialIndex2ResultSet(final long session) {
+		return this.bsi2Session == session;
+	}
+	
+	@Override
+	public void includeInSpatialIndex2ResultSet(final long session) {
+		this.bsi2Session = session;
+	}
+	
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = super.hashCode();
+		result = prime * result + ((this.dimension == null) ? 0 : this.dimension.hashCode());
+		return result;
+	}
+	
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!super.equals(obj)) {
+			return false;
+		}
+		final Area2 other = (Area2) obj;
+		if (this.dimension == null) {
+			if (other.dimension != null) {
+				return false;
+			}
+		}
+		else if (!this.dimension.equals(other.dimension)) {
+			return false;
+		}
+		return true;
+	}
+	
+	@Override
+	public String toString() {
+		final StringBuilder builder = new StringBuilder();
+		builder.append("Area2 [getPosition()=");
+		builder.append(this.getPosition());
+		builder.append(", dimension=");
+		builder.append(this.dimension);
+		builder.append("]");
+		return builder.toString();
+	}
+	
+}

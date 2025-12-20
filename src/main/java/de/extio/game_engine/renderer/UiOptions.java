@@ -1,0 +1,115 @@
+/* Copyright (C) 2023 Stephan Birkl - All Rights Reserved.
+ * THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, 
+ * INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR 
+ * PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE 
+ * LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, 
+ * TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE 
+ * OR OTHER DEALINGS IN THE SOFTWARE.
+ */
+package de.extio.game_engine.renderer;
+
+import de.extio.game_engine.spatial2.model.CoordI2;
+import de.extio.game_engine.spatial2.model.MutableCoordI2;
+
+/**
+ * General options for the client UI
+ */
+public final class UiOptions {
+	
+	private String backgroundResourceModName0 = null;
+	
+	private String backgroundResourceName0 = null;
+	
+	private boolean backgroundScrolling0;
+	
+	private boolean backgroundScrollingReverse0;
+	
+	private boolean backgroundScrolling1;
+	
+	private boolean backgroundScrollingReverse1;
+	
+	private boolean drawFps;
+	
+	private CoordI2 backgroundOffset0 = MutableCoordI2.create();
+	
+	private CoordI2 backgroundOffset1 = MutableCoordI2.create();
+	
+	public UiOptions() {
+		if ("true".equals(System.getProperty("debug"))) {
+			this.drawFps = true;
+		}
+	}
+	
+	public boolean isDrawFps() {
+		return this.drawFps;
+	}
+	
+	public void setDrawFps(final boolean drawFps) {
+		this.drawFps = drawFps;
+	}
+	
+	public String getBackgroundResourceName0() {
+		return this.backgroundResourceName0;
+	}
+	
+	public void setBackgroundResourceName0(final String background0) {
+		this.backgroundResourceName0 = background0;
+	}
+	
+	public boolean isBackgroundScrolling0() {
+		return this.backgroundScrolling0;
+	}
+	
+	public void setBackgroundScrolling0(final boolean backgroundScrolling0) {
+		this.backgroundScrolling0 = backgroundScrolling0;
+	}
+	
+	public boolean isBackgroundScrollingReverse0() {
+		return this.backgroundScrollingReverse0;
+	}
+	
+	public void setBackgroundScrollingReverse0(final boolean backgroundScrollingReverse0) {
+		this.backgroundScrollingReverse0 = backgroundScrollingReverse0;
+	}
+	
+	public boolean isBackgroundScrolling1() {
+		return this.backgroundScrolling1;
+	}
+	
+	public void setBackgroundScrolling1(final boolean backgroundScrolling1) {
+		this.backgroundScrolling1 = backgroundScrolling1;
+	}
+	
+	public boolean isBackgroundScrollingReverse1() {
+		return this.backgroundScrollingReverse1;
+	}
+	
+	public void setBackgroundScrollingReverse1(final boolean backgroundScrollingReverse1) {
+		this.backgroundScrollingReverse1 = backgroundScrollingReverse1;
+	}
+	
+	public CoordI2 getBackgroundOffset0() {
+		return this.backgroundOffset0;
+	}
+	
+	public void setBackgroundOffset0(final CoordI2 backgroundOffset0) {
+		this.backgroundOffset0 = backgroundOffset0;
+	}
+	
+	public CoordI2 getBackgroundOffset1() {
+		return this.backgroundOffset1;
+	}
+	
+	public void setBackgroundOffset1(final CoordI2 backgroundOffset1) {
+		this.backgroundOffset1 = backgroundOffset1;
+	}
+	
+	public String getBackgroundResourceModName0() {
+		return this.backgroundResourceModName0;
+	}
+	
+	public void setBackgroundResourceModName0(final String backgroundResourceModName0) {
+		this.backgroundResourceModName0 = backgroundResourceModName0;
+	}
+	
+}

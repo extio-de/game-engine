@@ -1,0 +1,359 @@
+package de.extio.game_engine.renderer.g2d.control;
+
+import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DButtonControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DLabelControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DSetFocusControl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DSliderControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DSwitchControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DTableControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DTextfieldControlImpl2;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
+import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
+import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
+import de.extio.game_engine.renderer.model.RenderingBo;
+import de.extio.game_engine.renderer.model.RenderingBoLayer;
+import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.spatial2.model.CoordI2;
+import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
+
+public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRenderingBo {
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(G2DDrawControl.class);
+	
+	private static Map<String, BaseControl> CACHED_CONTROLS = new HashMap<>();
+	
+	public static Map<String, List<BaseControl>> CONTROL_GROUPS = new HashMap<>();
+	
+	private String id;
+	
+	private Class<? extends BaseControl> clazz;
+	
+	private String caption;
+	
+	private String controlGroup;
+	
+	private int fontSize = 16;
+	
+	private Object customData;
+	
+	private Object customData2;
+	
+	private Object customData3;
+	
+	private Object customData4;
+	
+	private boolean visible;
+	
+	private boolean enabled = true;
+	
+	private String tooltip;
+	
+	public G2DDrawControl() {
+		super(RenderingBoLayer.UI0_0);
+	}
+	
+	@Override
+	public ControlRenderingBo setId(final String id) {
+		this.id = id;
+		return this;
+	}
+	
+	@Override
+	public String getId() {
+		return this.id;
+	}
+	
+	@Override
+	public ControlRenderingBo setType(final Class<? extends BaseControl> clazz) {
+		this.clazz = clazz;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setCaption(final String caption) {
+		this.caption = caption;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setControlGroup(final String controlGroup) {
+		this.controlGroup = controlGroup;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setFontSize(final int size) {
+		this.fontSize = size;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setCustomData(final Object data) {
+		this.customData = data;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setCustomData2(final Object data) {
+		this.customData2 = data;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setCustomData3(final Object data) {
+		this.customData3 = data;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setCustomData4(final Object data) {
+		this.customData4 = data;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setVisible(final boolean visible) {
+		this.visible = visible;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setEnabled(final boolean enabled) {
+		this.enabled = enabled;
+		return this;
+	}
+	
+	@Override
+	public ControlRenderingBo setTooltip(final String tooltip) {
+		this.tooltip = tooltip;
+		return this;
+	}
+	
+	@Override
+	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
+		G2DBaseControlImpl control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);
+		if (control == null) {
+			if (this.clazz == ButtonControl.class) {
+				control = new G2DButtonControlImpl();
+			}
+			else if (this.clazz == LabelControl.class) {
+				control = new G2DLabelControlImpl();
+			}
+			else if (this.clazz == TextfieldControl.class) {
+				//				control = new G2DTextfieldControlImpl();
+				control = new G2DTextfieldControlImpl2();
+			}
+			else if (this.clazz == ToggleButtonControl.class) {
+				control = new G2DToggleButtonControlImpl();
+			}
+			else if (this.clazz == SwitchControl.class) {
+				control = new G2DSwitchControlImpl();
+			}
+			else if (this.clazz == WindowCloseButtonControl.class) {
+				control = new G2DWindowCloseButtonControlImpl();
+			}
+			else if (this.clazz == SliderControl.class) {
+				control = new G2DSliderControlImpl();
+			}
+			else if (this.clazz == TableControl.class) {
+				control = new G2DTableControlImpl();
+			}
+			else if (this.clazz == SetFocusControl.class) {
+				control = new G2DSetFocusControl();
+			}
+			else if (this.clazz == TooltipControl.class) {
+				control = new G2DTooltipControl();
+			}
+			else if (this.clazz == null) {
+				throw new IllegalArgumentException("G2DDrawControl: control type not specified");
+			}
+			else {
+				throw new UnsupportedOperationException("Not implemented " + this.clazz.getName());
+			}
+			
+			control.setScaleFactor(scaleFactor)
+					.setControlGroup(this.controlGroup)
+					.setRendererData(this.rendererData)
+					.setId(this.id);
+			if (this.clazz == TextfieldControl.class && this.customData instanceof Boolean) {
+				((TextfieldControl) control).setMultiLine(((Boolean) this.customData).booleanValue());
+			}
+			this.setControlProps(control, scaleFactor);
+			
+			control.build();
+			
+			CACHED_CONTROLS.put(this.id, control);
+			if (this.controlGroup != null && !this.controlGroup.isEmpty()) {
+				List<BaseControl> controls = CONTROL_GROUPS.get(this.controlGroup);
+				if (controls == null) {
+					controls = new ArrayList<>();
+					CONTROL_GROUPS.put(this.controlGroup, controls);
+				}
+				
+				controls.add(control);
+			}
+			
+			LOGGER.debug("Added control " + control.toString());
+		}
+		
+		this.setControlProps(control, scaleFactor);
+		control.setMainFrameGraphics(graphics);
+		control.setInUse(true);
+		control.render();
+	}
+	
+	@SuppressWarnings("unchecked")
+	private void setControlProps(final G2DBaseControlImpl control, final double scaleFactor) {
+		control.setScaleFactor(scaleFactor);
+		control.setX((int) (this.x * scaleFactor));
+		control.setY((int) (this.y * scaleFactor));
+		control.setFontSize(this.fontSize);
+		control.setWidth((int) (this.width * scaleFactor));
+		control.setHeight((int) (this.height * scaleFactor));
+		control.setVisible(this.visible);
+		control.setEnabled(this.enabled);
+		control.setCaption(this.caption);
+		control.setTooltip(this.tooltip);
+		
+		if (this.clazz == LabelControl.class) {
+			((LabelControl) control).setForegroundColor(this.color);
+			if (this.customData instanceof RgbaColor) {
+				((LabelControl) control).setBackgroundColor((RgbaColor) this.customData);
+			}
+			if (this.customData2 instanceof DrawFontRenderingBoTextAlignment) {
+				((LabelControl) control).setTextAlignment((DrawFontRenderingBoTextAlignment) this.customData2);
+			}
+		}
+		else if (this.clazz == ToggleButtonControl.class) {
+			((ButtonControl) control).setBackgroundColor(this.color);
+			if (this.customData instanceof Boolean) {
+				((ToggleButtonControl) control).setToggled(((Boolean) this.customData).booleanValue());
+			}
+			if (this.customData2 instanceof String) {
+				((ButtonControl) control).setIconResourceName((String) this.customData2);
+			}
+		}
+		else if (this.clazz == SwitchControl.class) {
+			((ButtonControl) control).setBackgroundColor(this.color);
+			if (this.customData instanceof Boolean) {
+				((SwitchControl) control).setToggled(((Boolean) this.customData).booleanValue());
+			}
+			if (this.customData2 instanceof String) {
+				((ButtonControl) control).setIconResourceName((String) this.customData2);
+			}
+			if (this.customData4 instanceof Boolean) {
+				((SwitchControl) control).setDrawBorder(((Boolean) this.customData4).booleanValue());
+			}
+		}
+		else if (this.clazz == ButtonControl.class) {
+			((ButtonControl) control).setBackgroundColor(this.color);
+			if (this.customData2 instanceof String) {
+				((ButtonControl) control).setIconResourceName((String) this.customData2);
+			}
+		}
+		else if (this.clazz == WindowCloseButtonControl.class) {
+			((ButtonControl) control).setBackgroundColor(this.color);
+			if (this.customData instanceof Boolean) {
+				((WindowCloseButtonControl) control).setThickBorder(((Boolean) this.customData).booleanValue());
+			}
+		}
+		else if (this.clazz == SliderControl.class) {
+			((SliderControl) control).setColor(this.color);
+			if (this.customData instanceof Boolean) {
+				((SliderControl) control).setHorizontal(((Boolean) this.customData).booleanValue());
+			}
+			if (this.customData2 instanceof Double) {
+				((SliderControl) control).setValue(((Double) this.customData2).doubleValue());
+			}
+			if (this.customData3 instanceof Double) {
+				((SliderControl) control).setValue2(((Double) this.customData3).doubleValue());
+			}
+		}
+		else if (this.clazz == TableControl.class) {
+			if (this.customData instanceof List) {
+				((TableControl) control).setData((List<Object>) this.customData);
+			}
+			if (this.customData2 instanceof Integer) {
+				((TableControl) control).setRows((Integer) this.customData2);
+			}
+			if (this.customData3 instanceof Long) {
+				((TableControl) control).setVersion((Long) this.customData3);
+			}
+			if (this.customData4 instanceof Boolean) { // This parameter could be changed to a more generic way to set column sizing 
+				((TableControl) control).setFirstColDoubleSize((Boolean) this.customData4);
+			}
+		}
+		else if (this.clazz == SetFocusControl.class) {
+			if (this.customData instanceof String) {
+				((SetFocusControl) control).setFocusId((String) this.customData);
+			}
+		}
+		else if (this.clazz == TextfieldControl.class) {
+			((TextfieldControl) control).setBackgroundColor(this.color);
+			if (this.customData2 instanceof Boolean) {
+				((TextfieldControl) control).setReadonly((Boolean) this.customData2);
+			}
+		}
+	}
+	
+	@Override
+	public void close() throws Exception {
+		super.close();
+		
+		this.id = null;
+		this.clazz = null;
+		this.caption = null;
+		this.controlGroup = null;
+		this.fontSize = 16;
+		this.customData = null;
+		this.customData2 = null;
+		this.customData3 = null;
+		this.customData4 = null;
+		this.visible = false;
+		this.enabled = true;
+		this.tooltip = null;
+	}
+	
+	public static void closeStatic() {
+		final Iterator<BaseControl> it = CACHED_CONTROLS.values().iterator();
+		while (it.hasNext()) {
+			final BaseControl control = it.next();
+			if (control.getInUse()) {
+				control.setInUse(false);
+			}
+			else {
+				if (control.getControlGroup() != null && !control.getControlGroup().isEmpty()) {
+					final List<BaseControl> controls = CONTROL_GROUPS.get(control.getControlGroup());
+					if (controls != null) {
+						controls.remove(control);
+					}
+				}
+				
+				control.close();
+				it.remove();
+				LOGGER.debug("Removed control " + control.toString());
+			}
+		}
+	}
+	
+	public static void reset() {
+		CACHED_CONTROLS.values().forEach(control -> control.close());
+		CACHED_CONTROLS.clear();
+	}
+	
+}
