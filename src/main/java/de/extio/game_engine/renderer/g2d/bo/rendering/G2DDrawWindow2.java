@@ -9,10 +9,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
-import de.extio.game_engine.renderer.model.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
+import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindowRenderingBo {
 	

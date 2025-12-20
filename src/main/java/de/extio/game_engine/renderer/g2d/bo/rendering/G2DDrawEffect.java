@@ -8,9 +8,9 @@ import java.util.List;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
-import de.extio.game_engine.renderer.model.DrawEffectRenderingBoEffects;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
+import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
 import de.extio.game_engine.spatial2.WorldUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;

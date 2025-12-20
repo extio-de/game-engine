@@ -8,9 +8,9 @@ import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
+import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;

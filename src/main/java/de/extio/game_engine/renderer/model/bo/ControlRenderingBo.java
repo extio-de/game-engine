@@ -3,9 +3,8 @@ package de.extio.game_engine.renderer.model.bo;
 import java.util.List;
 
 import de.extio.game_engine.renderer.RendererData;
-import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.renderer.model.RenderingBoHasDimension;
-import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 /**
  * This bo renders ui controls (buttons, ...)

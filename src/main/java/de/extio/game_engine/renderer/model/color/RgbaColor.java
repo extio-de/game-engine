@@ -1,4 +1,4 @@
-package de.extio.game_engine.renderer.model;
+package de.extio.game_engine.renderer.model.color;
 
 import java.awt.Color;
 

@@ -32,13 +32,13 @@ import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawTestRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.TakeScreenshotEvent;
 import de.extio.game_engine.util.RingBuffer;
 

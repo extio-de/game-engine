@@ -1,6 +1,7 @@
 package de.extio.game_engine.renderer.model;
 
 import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.spatial2.model.HasPosition2;
 
 /**

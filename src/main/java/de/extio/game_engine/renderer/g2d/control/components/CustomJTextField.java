@@ -9,8 +9,8 @@ import javax.swing.text.BadLocationException;
 import javax.swing.text.Position.Bias;
 
 import de.extio.game_engine.renderer.g2d.control.G2DControlHasExclusiveKeyEvent;
-import de.extio.game_engine.renderer.model.ImmutableRgbaColor;
-import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 @SuppressWarnings("serial")
 public class CustomJTextField extends JTextField implements G2DControlHasExclusiveKeyEvent {

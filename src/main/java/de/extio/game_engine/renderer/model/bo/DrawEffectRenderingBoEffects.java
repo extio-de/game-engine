@@ -1,4 +1,4 @@
-package de.extio.game_engine.renderer.model;
+package de.extio.game_engine.renderer.model.bo;
 
 public enum DrawEffectRenderingBoEffects {
 	

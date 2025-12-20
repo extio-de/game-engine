@@ -9,7 +9,7 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.RendererData;
-import de.extio.game_engine.renderer.RendererData.VideoOptions.VideoOptionsVideoMode;
+import de.extio.game_engine.renderer.options.VideoOptions.VideoOptionsVideoMode;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 

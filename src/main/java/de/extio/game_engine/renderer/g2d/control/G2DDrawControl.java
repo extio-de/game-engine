@@ -21,10 +21,10 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DTextfieldControlImpl2;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
-import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
+import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRenderingBo {
 	

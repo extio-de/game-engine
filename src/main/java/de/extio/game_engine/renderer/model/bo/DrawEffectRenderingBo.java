@@ -2,7 +2,6 @@ package de.extio.game_engine.renderer.model.bo;
 
 import java.util.List;
 
-import de.extio.game_engine.renderer.model.DrawEffectRenderingBoEffects;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.spatial2.model.CoordI2;
 

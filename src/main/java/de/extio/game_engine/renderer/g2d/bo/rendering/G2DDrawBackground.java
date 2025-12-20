@@ -15,9 +15,9 @@ import java.util.Objects;
 import javax.imageio.ImageIO;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
-import de.extio.game_engine.renderer.model.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;

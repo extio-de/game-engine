@@ -1,6 +1,5 @@
 package de.extio.game_engine.renderer.model.bo;
 
-import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.renderer.model.RenderingBoHasDimension;
 
 /**

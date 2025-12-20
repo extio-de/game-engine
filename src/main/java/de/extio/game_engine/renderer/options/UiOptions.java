@@ -1,15 +1,10 @@
-package de.extio.game_engine.renderer;
+package de.extio.game_engine.renderer.options;
 
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
-/**
- * General options for the client UI
- */
 public final class UiOptions {
-	
-	private String backgroundResourceModName0 = null;
-	
+		
 	private String backgroundResourceName0 = null;
 	
 	private boolean backgroundScrolling0;
@@ -94,14 +89,6 @@ public final class UiOptions {
 	
 	public void setBackgroundOffset1(final CoordI2 backgroundOffset1) {
 		this.backgroundOffset1 = backgroundOffset1;
-	}
-	
-	public String getBackgroundResourceModName0() {
-		return this.backgroundResourceModName0;
-	}
-	
-	public void setBackgroundResourceModName0(final String backgroundResourceModName0) {
-		this.backgroundResourceModName0 = backgroundResourceModName0;
 	}
 	
 }

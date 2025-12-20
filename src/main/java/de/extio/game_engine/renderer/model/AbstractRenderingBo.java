@@ -4,6 +4,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.spatial2.model.HasPosition2;
 
 public abstract class AbstractRenderingBo implements RenderingBo {

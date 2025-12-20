@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 @SuppressWarnings("serial")
 public class CustomWindowCloseButton extends CustomAbstractButton {

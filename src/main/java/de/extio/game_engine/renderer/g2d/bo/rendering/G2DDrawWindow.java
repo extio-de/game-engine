@@ -3,10 +3,10 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 import java.awt.Graphics2D;
 
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
-import de.extio.game_engine.renderer.model.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
+import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 public class G2DDrawWindow extends G2DAbstractRenderingBo implements DrawWindowRenderingBo {
 	

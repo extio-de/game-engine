@@ -5,8 +5,8 @@ import java.awt.Graphics2D;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.model.MutableRgbaColor;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
+import de.extio.game_engine.renderer.model.color.MutableRgbaColor;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
 public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {

@@ -14,9 +14,9 @@ import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.g2d.control.components.CustomJTextArea;
 import de.extio.game_engine.renderer.g2d.control.components.CustomJTextField;
-import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldControl;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 
 public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements TextfieldControl {
