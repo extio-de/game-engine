@@ -9,15 +9,15 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 
 public class RenderingBoPoolImpl implements RenderingBoPool {
 	
-	public final static Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> INTERFACE_TO_BO_G2D = new HashMap<>();
-	
-	private final RendererData rendererData;
+	public final Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> mapping;
 	
 	private final Map<Class<? extends RenderingBo>, Stack<RenderingBo>> pool = new HashMap<>();
 	
 	private final LastMapping lastMapping = new LastMapping();
 	
 	private final LastReverseMapping lastReverseMapping = new LastReverseMapping();
+	
+	private RendererData rendererData;
 	
 	private static class LastMapping {
 		
@@ -34,11 +34,11 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 		
 		volatile Stack<RenderingBo> pooled;
 	}
-	
-	public RenderingBoPoolImpl(final RendererData rendererData) {
-		this.rendererData = rendererData;
+
+	public RenderingBoPoolImpl(final Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> mapping) {
+		this.mapping = mapping;
 	}
-	
+
 	@Override
 	@SuppressWarnings("unchecked")
 	public <T extends RenderingBo> T acquire(final Class<T> clazz) {
@@ -54,7 +54,7 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 				impl = clazz;
 			}
 			else {
-				impl = INTERFACE_TO_BO_G2D.get(clazz);
+				impl = mapping.get(clazz);
 				if (impl == null) {
 					throw new IllegalArgumentException(clazz.getSimpleName() + " not mapped");
 				}
@@ -113,6 +113,11 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 		catch (final Exception e) {
 			throw new RuntimeException(e);
 		}
+	}
+
+	@Override
+	public void setRendererData(final RendererData rendererData) {
+		this.rendererData = rendererData;	
 	}
 	
 }

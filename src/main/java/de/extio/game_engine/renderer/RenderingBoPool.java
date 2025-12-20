@@ -21,4 +21,6 @@ public interface RenderingBoPool {
 	 */
 	void release(RenderingBo obj);
 	
+
+	void setRendererData(RendererData rendererData);
 }

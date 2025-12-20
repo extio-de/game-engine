@@ -14,6 +14,8 @@ import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
+import org.springframework.stereotype.Component;
+
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
@@ -23,6 +25,7 @@ import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 import de.extio.game_engine.util.rng.ThreadLocalXorShift128Random;
 
+@Component
 public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	
 	private static VolatileImage BACKGROUND_IMAGE;

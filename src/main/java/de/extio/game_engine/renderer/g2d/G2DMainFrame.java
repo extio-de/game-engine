@@ -39,7 +39,6 @@ import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
-@SuppressWarnings("serial")
 public class G2DMainFrame extends Frame {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(G2DMainFrame.class);
@@ -62,8 +61,10 @@ public class G2DMainFrame extends Frame {
 		this.setBackground(Color.BLACK);
 		
 		try (var in = this.getClass().getClassLoader().getResourceAsStream("icon.png")) {
-			final var icon = ImageIO.read(in);
-			this.setIconImage(icon);
+			if (in != null) {
+				final var icon = ImageIO.read(in);
+				this.setIconImage(icon);
+			}
 		}
 		catch (final IOException e) {
 			LOGGER.error(e.getMessage(), e);
@@ -93,7 +94,7 @@ public class G2DMainFrame extends Frame {
 			
 			@Override
 			public void windowClosing(final WindowEvent e) {
-				System.exit(0);
+				G2DMainFrame.this.rendererData.getRendererLoop().shutdown();
 			}
 			
 			@Override

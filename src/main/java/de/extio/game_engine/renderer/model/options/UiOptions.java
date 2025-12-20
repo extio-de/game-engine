@@ -15,7 +15,7 @@ public final class UiOptions {
 	
 	private boolean backgroundScrollingReverse1;
 	
-	private boolean drawFps;
+	private boolean drawFps = true;
 	
 	private CoordI2 backgroundOffset0 = MutableCoordI2.create();
 	

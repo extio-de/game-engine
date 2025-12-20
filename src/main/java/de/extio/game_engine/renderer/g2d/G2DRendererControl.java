@@ -19,9 +19,9 @@ public class G2DRendererControl implements RendererControl {
 	
 	private final static CoordI2 NO_SCALING_UPPER_LIMIT = ImmutableCoordI2.create(2560, 1440);
 	
-	private final RendererData rendererData;
-	
 	private final G2DRenderer renderer;
+	
+	private RendererData rendererData;
 	
 	private CoordI2 absoluteViewportDimension = REFERENCE_RESOLUTION;
 	
@@ -37,9 +37,8 @@ public class G2DRendererControl implements RendererControl {
 	
 	private volatile long videoOptionsAppliedAt;
 	
-	public G2DRendererControl(final G2DRenderer renderer, final RendererData rendererData) {
+	public G2DRendererControl(final G2DRenderer renderer) {
 		this.renderer = renderer;
-		this.rendererData = rendererData;
 	}
 	
 	@Override
@@ -82,7 +81,7 @@ public class G2DRendererControl implements RendererControl {
 				else {
 					mainFrame.windowed();
 				}
-				mainFrame.setTitle(this.renderer.getTitle());
+				mainFrame.setTitle(this.renderer.getTitle() == null ? "" : this.renderer.getTitle());
 				if (this.rendererData.getVideoOptions().getFrameRateTarget() == 0) {
 					this.rendererData.getVideoOptions().setFrameRateTarget(this.frameRate);
 				}
@@ -251,5 +250,10 @@ public class G2DRendererControl implements RendererControl {
 	@Override
 	public long getFrame() {
 		return this.rendererData.getFrame();
+	}
+
+	@Override
+	public void setRendererData(final RendererData rendererData) {
+		this.rendererData = rendererData;
 	}
 }

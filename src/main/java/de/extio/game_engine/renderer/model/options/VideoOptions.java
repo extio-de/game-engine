@@ -2,7 +2,7 @@ package de.extio.game_engine.renderer.model.options;
 
 public final class VideoOptions {
 	
-	private VideoOptionsVideoMode videoMode = VideoOptionsVideoMode.BORDERLESS;
+	private VideoOptionsVideoMode videoMode = VideoOptionsVideoMode.WINDOW;
 	
 	private int fullScreenNumber = -1;
 	

@@ -2,12 +2,15 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 
 import java.awt.Graphics2D;
 
+import org.springframework.stereotype.Component;
+
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
+@Component
 public class G2DDrawWindow extends G2DAbstractRenderingBo implements DrawWindowRenderingBo {
 	
 	private static final RgbaColor COLOR_WINDOW = new ImmutableRgbaColor(ComponentRenderingSupport.COLOR_COMPONENT_BORDER1.getRed(), ComponentRenderingSupport.COLOR_COMPONENT_BORDER1.getGreen(), ComponentRenderingSupport.COLOR_COMPONENT_BORDER1.getBlue());

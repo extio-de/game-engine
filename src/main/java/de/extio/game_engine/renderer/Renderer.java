@@ -16,4 +16,6 @@ public interface Renderer {
 	
 	void setTitle(final String title);
 	
+	void setRendererData(final RendererData rendererData);
+
 }

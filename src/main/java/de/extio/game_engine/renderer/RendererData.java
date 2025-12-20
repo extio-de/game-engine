@@ -1,5 +1,6 @@
 package de.extio.game_engine.renderer;
 
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.function.Consumer;
 
 import de.extio.game_engine.renderer.model.options.UiOptions;
@@ -7,26 +8,31 @@ import de.extio.game_engine.renderer.model.options.VideoOptions;
 
 public class RendererData {
 	
-	private Renderer renderer;
+	private final Renderer renderer;
 	
-	private RendererControl rendererControl;
+	private final RendererControl rendererControl;
 	
-	private RenderingBoPool renderingBoPool;
+	private final RenderingBoPool renderingBoPool;
+	
+	private final Consumer<Object> eventConsumer;
 	
 	private final UiOptions uiOptions = new UiOptions();
 	
 	private final VideoOptions videoOptions = new VideoOptions();
 	
-	private long frame;
+	private final AtomicLong frame = new AtomicLong();
 	
-	private Consumer<Object> eventConsumer;
+	private RendererLoop rendererLoop;
 	
+	public RendererData(final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final Consumer<Object> eventConsumer) {
+		this.renderer = renderer;
+		this.rendererControl = rendererControl;
+		this.renderingBoPool = renderingBoPool;
+		this.eventConsumer = eventConsumer;
+	}
+
 	public RendererControl getRendererControl() {
 		return this.rendererControl;
-	}
-	
-	public void setRendererControl(final RendererControl rendererControl) {
-		this.rendererControl = rendererControl;
 	}
 	
 	public UiOptions getUiOptions() {
@@ -37,24 +43,16 @@ public class RendererData {
 		return this.renderingBoPool;
 	}
 	
-	public void setRenderingBoPool(final RenderingBoPool renderingBoPool) {
-		this.renderingBoPool = renderingBoPool;
-	}
-	
 	public long getFrame() {
-		return this.frame;
+		return this.frame.get();
 	}
-	
-	public void setFrame(final long frame) {
-		this.frame = frame;
+
+	public long nextFrame() {
+		return this.frame.incrementAndGet();
 	}
 	
 	public Renderer getRenderer() {
 		return this.renderer;
-	}
-	
-	public void setRenderer(final Renderer renderer) {
-		this.renderer = renderer;
 	}
 	
 	public VideoOptions getVideoOptions() {
@@ -64,9 +62,13 @@ public class RendererData {
 	public Consumer<Object> getEventConsumer() {
 		return this.eventConsumer;
 	}
-	
-	public void setEventConsumer(final Consumer<Object> eventConsumer) {
-		this.eventConsumer = eventConsumer;
+
+	public void setRendererLoop(final RendererLoop rendererLoop) {
+		this.rendererLoop = rendererLoop;
+	}
+
+	public RendererLoop getRendererLoop() {
+		return this.rendererLoop;
 	}
 	
 }

@@ -8,6 +8,8 @@ import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.stereotype.Component;
+
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
@@ -15,6 +17,7 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
+@Component
 public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRenderingBo {
 	
 	private final static float FONT_SIZE_MIN = 12.0F;

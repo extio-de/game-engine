@@ -19,25 +19,15 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.Renderer;
 import de.extio.game_engine.renderer.RendererData;
-import de.extio.game_engine.renderer.RenderingBoPoolImpl;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawBackground;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawEffect;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFpsHistory;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawImage;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawTest;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawWindow;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawTestRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.TakeScreenshotEvent;
 import de.extio.game_engine.util.RingBuffer;
@@ -48,11 +38,11 @@ public class G2DRenderer implements Renderer {
 	
 	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(3);
 	
+	private final RingBuffer<Integer> fpsHistory = new RingBuffer<>(90);
+	
 	private volatile G2DMainFrame mainFrame;
 	
-	private final RendererData rendererData;
-	
-	private final RingBuffer<Integer> fpsHistory = new RingBuffer<>(90);
+	private RendererData rendererData;
 	
 	private long fpsMeasurement;
 	
@@ -70,28 +60,20 @@ public class G2DRenderer implements Renderer {
 	
 	private volatile boolean takeScreenshot;
 	
-	public G2DRenderer(final RendererData rendererData) {
+	public G2DRenderer() {
 		LOGGER.info("ctor");
 		
 		System.setProperty("sun.java2d.uiScale", "1");
 		System.setProperty("awt.nativeDoubleBuffering", "true");
 		System.setProperty("awt.useSystemAAFontSettings", "on");
 		System.setProperty("swing.aatext", "true");
-		
-		this.rendererData = rendererData;
-		
-		// TODO: Discover with spring dm
-		RenderingBoPoolImpl.INTERFACE_TO_BO_G2D.put(DrawFontRenderingBo.class, G2DDrawFont.class);
-		RenderingBoPoolImpl.INTERFACE_TO_BO_G2D.put(DrawImageRenderingBo.class, G2DDrawImage.class);
-		RenderingBoPoolImpl.INTERFACE_TO_BO_G2D.put(ControlRenderingBo.class, G2DDrawControl.class);
-		RenderingBoPoolImpl.INTERFACE_TO_BO_G2D.put(DrawWindowRenderingBo.class, G2DDrawWindow.class);
-		RenderingBoPoolImpl.INTERFACE_TO_BO_G2D.put(DrawTestRenderingBo.class, G2DDrawTest.class);
-		RenderingBoPoolImpl.INTERFACE_TO_BO_G2D.put(DrawEffectRenderingBo.class, G2DDrawEffect.class);
 	}
 	
 	@Override
 	public void show() {
 		try {
+			LOGGER.info("show()");
+			
 			EventQueue.invokeAndWait(() -> {
 				this.rendererData.getRendererControl().applyVideoOptions();
 			});
@@ -316,12 +298,17 @@ public class G2DRenderer implements Renderer {
 	@Override
 	public void setTitle(final String title) {
 		this.title = title;
-		if (this.mainFrame != null) {
+		if (this.mainFrame != null && title != null) {
 			this.mainFrame.setTitle(title);
 		}
 	}
 	
 	public String getTitle() {
 		return this.title;
+	}
+	
+	@Override
+	public void setRendererData(final RendererData rendererData) {
+		this.rendererData = rendererData;
 	}
 }

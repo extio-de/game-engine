@@ -6,6 +6,8 @@ import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.stereotype.Component;
+
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
@@ -17,6 +19,7 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
+@Component
 public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectRenderingBo {
 	
 	private DrawEffectRenderingBoEffects effect;

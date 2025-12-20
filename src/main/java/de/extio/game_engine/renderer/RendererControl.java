@@ -39,5 +39,7 @@ public interface RendererControl {
 	void setFrameRate(int frameRate);
 	
 	long getFrame();
+
+	void setRendererData(final RendererData rendererData);
 	
 }
