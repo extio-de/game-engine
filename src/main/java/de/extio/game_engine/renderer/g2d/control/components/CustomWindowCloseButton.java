@@ -7,7 +7,6 @@ import java.awt.event.ActionListener;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.model.RgbaColor;
-import de.extio.game_engine.spatial2.model.CoordI2;
 
 @SuppressWarnings("serial")
 public class CustomWindowCloseButton extends CustomAbstractButton {
@@ -18,10 +17,10 @@ public class CustomWindowCloseButton extends CustomAbstractButton {
 	
 	@Override
 	public void paint(final Graphics g) {
-		final Graphics2D g2d = (Graphics2D) g;
+		final var g2d = (Graphics2D) g;
 		
-		final boolean highlight = (this.state & (STATE_HOVERED | STATE_TOGGLED)) != 0;
-		final boolean pressed = (this.state & STATE_PRESSED) != 0;
+		final var highlight = (this.state & (STATE_HOVERED | STATE_TOGGLED)) != 0;
+		final var pressed = (this.state & STATE_PRESSED) != 0;
 		
 		Color color = null;
 		if (pressed) {
@@ -49,7 +48,7 @@ public class CustomWindowCloseButton extends CustomAbstractButton {
 			else {
 				g2d.setColor(Color.BLACK);
 			}
-			final CoordI2 textDim = G2DDrawFont.getTextDimensions("X", g2d, 16, this.scaleFactor);
+			final var textDim = G2DDrawFont.getTextDimensions("X", g2d, 16, this.scaleFactor);
 			G2DDrawFont.renderText(g2d, textDim, 1.0, ((this.getWidth() - textDim.getX()) / 2), ((this.getHeight() - textDim.getY()) / 2), (int) (16 * this.scaleFactor), "X");
 		}
 	}

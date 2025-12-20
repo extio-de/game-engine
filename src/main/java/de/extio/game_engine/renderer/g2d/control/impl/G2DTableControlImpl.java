@@ -15,15 +15,15 @@ import javax.swing.JTable;
 import javax.swing.ListSelectionModel;
 import javax.swing.table.DefaultTableCellRenderer;
 
+import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
+import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.g2d.control.components.CustomTable;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TableControl;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
-import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class G2DTableControlImpl extends G2DBaseControlImpl implements TableControl {
@@ -101,7 +101,6 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 		this.scrollbar.close();
 	}
 	
-	@SuppressWarnings("serial")
 	protected void createControl() {
 		this.control = new CustomTable();
 		this.control.setName(this.id);
@@ -110,8 +109,8 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			
 			@Override
 			public void mousePressed(final MouseEvent e) {
-				final int row = G2DTableControlImpl.this.control.rowAtPoint(e.getPoint());
-				final int col = G2DTableControlImpl.this.control.columnAtPoint(e.getPoint());
+				final var row = G2DTableControlImpl.this.control.rowAtPoint(e.getPoint());
+				final var col = G2DTableControlImpl.this.control.columnAtPoint(e.getPoint());
 				if (row > -1 && col > -1) {
 					if (G2DTableControlImpl.this.enabled) {
 						G2DTableControlImpl.this.rendererData.getEventConsumer().accept(new UiControlEvent(G2DTableControlImpl.this.id, ImmutableCoordI2.create(row, col)));
@@ -124,11 +123,11 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			@Override
 			public void mouseWheelMoved(final MouseWheelEvent e) {
 				if (e.getWheelRotation() == -1) {
-					final int displayRows = G2DTableControlImpl.this.control.getHeight() / G2DTableControlImpl.this.control.getRowHeight();
+					final var displayRows = G2DTableControlImpl.this.control.getHeight() / G2DTableControlImpl.this.control.getRowHeight();
 					G2DTableControlImpl.this.scrollbar.setValue(Math.min(1.0, Math.max(0.0, G2DTableControlImpl.this.scrollbar.getValue() + ((double) displayRows / G2DTableControlImpl.this.rows / 2.0))));
 				}
 				else {
-					final int displayRows = G2DTableControlImpl.this.control.getHeight() / G2DTableControlImpl.this.control.getRowHeight();
+					final var displayRows = G2DTableControlImpl.this.control.getHeight() / G2DTableControlImpl.this.control.getRowHeight();
 					G2DTableControlImpl.this.scrollbar.setValue(Math.min(1.0, Math.max(0.0, G2DTableControlImpl.this.scrollbar.getValue() - ((double) displayRows / G2DTableControlImpl.this.rows / 2.0))));
 				}
 				
@@ -142,7 +141,7 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			@Override
 			public Component getTableCellRendererComponent(final JTable table, final Object value, final boolean isSelected, final boolean hasFocus, final int row, final int column) {
 				if (row == 0) {
-					final Component component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+					final var component = super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
 					component.setFont(component.getFont().deriveFont(Font.BOLD));
 					return component;
 				}
@@ -169,23 +168,23 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			this.control.setBackground(ComponentRenderingSupport.COLOR_COMPONENT_BGR);
 			this.control.setForeground(Color.WHITE);
 			
-		if (this.dataModified || this.scrollPositionModified) {
-			//			LOGGER.debug("Table data modified " + this.id);
-			if (this.rows == 0 || this.data == null || this.data.isEmpty()) {
-				this.control.getDefaultModel().setRowCount(0);
-			}
+			if (this.dataModified || this.scrollPositionModified) {
+				//			LOGGER.debug("Table data modified " + this.id);
+				if (this.rows == 0 || this.data == null || this.data.isEmpty()) {
+					this.control.getDefaultModel().setRowCount(0);
+				}
 				else {
-					final int actualColumns = this.data.size() / this.rows;
+					final var actualColumns = this.data.size() / this.rows;
 					this.control.getDefaultModel().setColumnCount(actualColumns);
 					if (this.firstColDoubleSize) {
-						for (int i = 0; i < actualColumns; i++) {
+						for (var i = 0; i < actualColumns; i++) {
 							this.control.getColumnModel().getColumn(i).setPreferredWidth(i == 0 ? 200 : 100);
 						}
 					}
-					final int actualRows = (int) ((1.0 - this.scrollPositionPerc) * this.rows);
+					final var actualRows = (int) ((1.0 - this.scrollPositionPerc) * this.rows);
 					this.control.getDefaultModel().setRowCount(actualRows);
-					final int offset = (this.rows - actualRows) * actualColumns;
-					for (int i = 0; i < this.data.size() - offset; i++) {
+					final var offset = (this.rows - actualRows) * actualColumns;
+					for (var i = 0; i < this.data.size() - offset; i++) {
 						this.control.getDefaultModel().setValueAt(this.data.get(i + offset), i / this.control.getDefaultModel().getColumnCount(), i % this.control.getDefaultModel().getColumnCount());
 					}
 				}

@@ -178,8 +178,8 @@ public final class MutableCoordD2 implements CoordD2 {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		long temp;
 		temp = Double.doubleToLongBits(this.x);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -193,10 +193,9 @@ public final class MutableCoordD2 implements CoordD2 {
 		if (this == obj) {
 			return true;
 		}
-		if ((obj == null) || !(obj instanceof CoordD2)) {
+		if ((obj == null) || !(obj instanceof final CoordD2 other)) {
 			return false;
 		}
-		final CoordD2 other = (CoordD2) obj;
 		if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.getX())) {
 			return false;
 		}

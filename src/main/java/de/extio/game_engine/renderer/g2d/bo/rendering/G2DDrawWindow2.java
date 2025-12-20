@@ -2,19 +2,17 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 
 import java.awt.AlphaComposite;
 import java.awt.Color;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
-import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 
 public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindowRenderingBo {
 	
@@ -51,10 +49,10 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 			LAST_SCALEFACTOR = scaleFactor;
 		}
 		
-		final Long key = Long.valueOf((long) this.width | ((long) this.height << 12) | ((this.thickBorder ? 1L : 0L) << 24) | ((long) this.awtColor.getRGB() << 32));
-		G2DWindowCacheEntry entry = CACHE.get(key);
+		final var key = Long.valueOf((long) this.width | ((long) this.height << 12) | ((this.thickBorder ? 1L : 0L) << 24) | ((long) this.awtColor.getRGB() << 32));
+		var entry = CACHE.get(key);
 		if (entry == null) {
-			final BufferedImage img = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().getGraphicsConfiguration().createCompatibleImage((int) (this.width * scaleFactor), (int) (this.height * scaleFactor), Transparency.TRANSLUCENT);
+			final var img = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().getGraphicsConfiguration().createCompatibleImage((int) (this.width * scaleFactor), (int) (this.height * scaleFactor), Transparency.TRANSLUCENT);
 			this.paintWindow(img, scaleFactor);
 			
 			entry = new G2DWindowCacheEntry();
@@ -64,7 +62,7 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 		}
 		entry.setUsed(true);
 		
-		final Composite currentAlphaComposite = graphics.getComposite();
+		final var currentAlphaComposite = graphics.getComposite();
 		try {
 			if (alphaComposite == null) {
 				alphaComposite = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, 0.6F);
@@ -87,9 +85,9 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 	}
 	
 	public static void closeStatic() {
-		final Iterator<G2DWindowCacheEntry> it = CACHE.values().iterator();
+		final var it = CACHE.values().iterator();
 		while (it.hasNext()) {
-			final G2DWindowCacheEntry entry = it.next();
+			final var entry = it.next();
 			if (!entry.isUsed()) {
 				entry.close();
 				it.remove();
@@ -101,15 +99,15 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 	}
 	
 	private void paintWindow(final BufferedImage img, final double scaleFactor) {
-		final Graphics2D imgGraphics = img.createGraphics();
+		final var imgGraphics = img.createGraphics();
 		try {
-			final int swidth = (int) (this.width * scaleFactor);
-			final int sheight = (int) (this.height * scaleFactor);
-			final float[] baseColor = new float[3];
+			final var swidth = (int) (this.width * scaleFactor);
+			final var sheight = (int) (this.height * scaleFactor);
+			final var baseColor = new float[3];
 			this.awtColor.getRGBColorComponents(baseColor);
 			Color.RGBtoHSB((int) (baseColor[0] * 255), (int) (baseColor[1] * 255), (int) (baseColor[2] * 255), baseColor);
 			
-			final int size = (int) (5 * scaleFactor);
+			final var size = (int) (5 * scaleFactor);
 			
 			imgGraphics.setColor(Color.BLACK);
 			imgGraphics.fillRect(0, size, swidth, sheight - size * 3);
@@ -131,7 +129,7 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 			imgGraphics.fillPolygon(new int[] { swidth, swidth - size * 2, swidth - size * 2, swidth - size }, new int[] { sheight - size * 2, sheight, sheight - size, sheight - size * 2 }, 4);
 			
 			if (this.thickBorder) {
-				for (int i = 0; i < size * 2; i++) {
+				for (var i = 0; i < size * 2; i++) {
 					imgGraphics.setColor(Color.getHSBColor(baseColor[0], baseColor[1], baseColor[2] * ((0.5F / (size * 2) * i) + 0.5F)));
 					imgGraphics.drawLine(0, i, swidth, i);
 				}

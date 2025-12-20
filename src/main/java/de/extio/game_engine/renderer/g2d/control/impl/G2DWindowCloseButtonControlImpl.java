@@ -36,15 +36,15 @@ public class G2DWindowCloseButtonControlImpl extends G2DButtonControlImpl implem
 		}
 		else {
 			this.translations++;
-			final int x = this.x;
-			final int y = this.y;
-			final int w = this.width;
-			final int h = this.height;
+			final var x = this.x;
+			final var y = this.y;
+			final var w = this.width;
+			final var h = this.height;
 			try {
-				final int sx = (int) this.x;
-				final int sy = (int) this.y;
-				final int sw = (int) this.width;
-				final int strength = Math.max(2, (int) (3 * this.scaleFactor));
+				final var sx = (int) this.x;
+				final var sy = (int) this.y;
+				final var sw = (int) this.width;
+				final var strength = Math.max(2, (int) (3 * this.scaleFactor));
 				
 				this.x = sx + sw - strength * 9;
 				this.y = sy + strength * 2;

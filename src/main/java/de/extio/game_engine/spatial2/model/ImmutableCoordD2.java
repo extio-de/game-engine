@@ -129,28 +129,28 @@ public final class ImmutableCoordD2 implements CoordD2 {
 	
 	@Override
 	public ImmutableCoordD2 divide(final CoordD2 delta) {
-		final double dx = delta.getX() != 0.0 ? delta.getX() : 1.0;
-		final double dy = delta.getY() != 0.0 ? delta.getY() : 1.0;
+		final var dx = delta.getX() != 0.0 ? delta.getX() : 1.0;
+		final var dy = delta.getY() != 0.0 ? delta.getY() : 1.0;
 		return create(this.x / dx, this.y / dy);
 	}
 	
 	@Override
 	public ImmutableCoordD2 divide(final double dx, final double dy) {
-		final double dx_ = dx != 0.0 ? dx : 1.0;
-		final double dy_ = dy != 0.0 ? dy : 1.0;
+		final var dx_ = dx != 0.0 ? dx : 1.0;
+		final var dy_ = dy != 0.0 ? dy : 1.0;
 		return create(this.x / dx_, this.y / dy_);
 	}
 	
 	@Override
 	public CoordD2 divide(final double n) {
-		final double n_ = n != 0.0 ? n : 1.0;
+		final var n_ = n != 0.0 ? n : 1.0;
 		return create(this.x / n_, this.y / n_);
 	}
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		long temp;
 		temp = Double.doubleToLongBits(this.x);
 		result = prime * result + (int) (temp ^ (temp >>> 32));
@@ -164,10 +164,9 @@ public final class ImmutableCoordD2 implements CoordD2 {
 		if (this == obj) {
 			return true;
 		}
-		if ((obj == null) || !(obj instanceof CoordD2)) {
+		if ((obj == null) || !(obj instanceof final CoordD2 other)) {
 			return false;
 		}
-		final CoordD2 other = (CoordD2) obj;
 		if (Double.doubleToLongBits(this.x) != Double.doubleToLongBits(other.getX())) {
 			return false;
 		}

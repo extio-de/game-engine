@@ -2,7 +2,6 @@ package de.extio.game_engine.renderer.g2d.control.components;
 
 import java.awt.Color;
 import java.awt.Graphics;
-import java.awt.geom.Rectangle2D;
 
 import javax.swing.JTextField;
 import javax.swing.RepaintManager;
@@ -50,7 +49,7 @@ public class CustomJTextField extends JTextField implements G2DControlHasExclusi
 		
 		if (this.isFocusOwner()) {
 			try {
-				final Rectangle2D rect = this.getUI().modelToView2D(this, this.getCaret().getDot(), Bias.Forward);
+				final var rect = this.getUI().modelToView2D(this, this.getCaret().getDot(), Bias.Forward);
 				if (rect != null) {
 					this.drawGraphics.setColor((System.currentTimeMillis() % 1000 < 500) ? CARET_COLOR : CARET_COLOR2);
 					this.drawGraphics.fillRect((int) rect.getX(), (int) rect.getY(), Math.max(2, (int) rect.getWidth()), Math.max(6, (int) rect.getHeight()));

@@ -190,10 +190,10 @@ public final class WorldUtils2 {
 	public static RectI2 intersectRectangles(final RectI2 r0, final RectI2 r1) {
 		final CoordI2 size0 = ImmutableCoordI2.create(r0.getC1().getX() - r0.getC0().getX(), r0.getC1().getY() - r0.getC0().getY());
 		final CoordI2 size1 = ImmutableCoordI2.create(r1.getC1().getX() - r1.getC0().getX(), r1.getC1().getY() - r1.getC0().getY());
-		final Rectangle rect0 = new Rectangle(r0.getC0().getX(), r0.getC0().getY(), size0.getX(), size0.getY());
-		final Rectangle rect1 = new Rectangle(r1.getC0().getX(), r1.getC0().getY(), size1.getX(), size1.getY());
+		final var rect0 = new Rectangle(r0.getC0().getX(), r0.getC0().getY(), size0.getX(), size0.getY());
+		final var rect1 = new Rectangle(r1.getC0().getX(), r1.getC0().getY(), size1.getX(), size1.getY());
 		
-		final Rectangle intersection = rect0.intersection(rect1);
+		final var intersection = rect0.intersection(rect1);
 		if (intersection.isEmpty()) {
 			return null;
 		}
@@ -210,10 +210,10 @@ public final class WorldUtils2 {
 	 * @return The intersected area if r0 and r1 overlap, else null
 	 */
 	public static Area2 intersectAreas(final HasPositionAndDimension2 a0, final HasPositionAndDimension2 a1) {
-		final Rectangle rect0 = new Rectangle(a0.getPosition().getX(), a0.getPosition().getY(), a0.getDimension().getX(), a0.getDimension().getY());
-		final Rectangle rect1 = new Rectangle(a1.getPosition().getX(), a1.getPosition().getY(), a1.getDimension().getX(), a1.getDimension().getY());
+		final var rect0 = new Rectangle(a0.getPosition().getX(), a0.getPosition().getY(), a0.getDimension().getX(), a0.getDimension().getY());
+		final var rect1 = new Rectangle(a1.getPosition().getX(), a1.getPosition().getY(), a1.getDimension().getX(), a1.getDimension().getY());
 		
-		final Rectangle intersection = rect0.intersection(rect1);
+		final var intersection = rect0.intersection(rect1);
 		if (intersection.isEmpty()) {
 			return null;
 		}
@@ -242,10 +242,10 @@ public final class WorldUtils2 {
 	 * @return true / false whether obj0 intersects with obj1
 	 */
 	public static boolean intersects(final CoordI2 position0, final CoordI2 dimension0, final CoordI2 position1, final CoordI2 dimension1) {
-		int d0x = dimension0.getX();
-		int d0y = dimension0.getY();
-		int d1x = dimension1.getX();
-		int d1y = dimension1.getY();
+		var d0x = dimension0.getX();
+		var d0y = dimension0.getY();
+		var d1x = dimension1.getX();
+		var d1y = dimension1.getY();
 		if (d0x <= 0 || d0y <= 0 || d1x <= 0 || d1y <= 0) {
 			return false;
 		}
@@ -261,7 +261,6 @@ public final class WorldUtils2 {
 				(d1y < position1.getY() || d1y > position0.getY()));
 	}
 	
-	
 	/**
 	 * Builds an aligned Area2 from arbitrary points 
 	 * @return
@@ -273,7 +272,7 @@ public final class WorldUtils2 {
 		
 		final CoordI2 corner0 = MutableCoordI2.create(points[0]);
 		final CoordI2 corner1 = MutableCoordI2.create(points[0]).add(1, 1);
-		for (int i = 1; i < points.length; i++) {
+		for (var i = 1; i < points.length; i++) {
 			corner0.setXY(Math.min(corner0.getX(), points[i].getX()), Math.min(corner0.getY(), points[i].getY()));
 			corner1.setXY(Math.max(corner1.getX(), points[i].getX() + 1), Math.max(corner1.getY(), points[i].getY() + 1));
 		}
@@ -295,14 +294,14 @@ public final class WorldUtils2 {
 		final CoordD2 pTarget = ImmutableCoordD2.create(pTarget_);
 		final CoordD2 vTarget = ImmutableCoordD2.create(vTarget_);
 		
-		final double a = (vTarget.getX() * vTarget.getX()) + (vTarget.getY() * vTarget.getY()) - (velOrigin * velOrigin);
-		final double b = 2 * ((pTarget.getX() * vTarget.getX()) + (pTarget.getY() * vTarget.getY()) - (pOrigin.getX() * vTarget.getX()) - (pOrigin.getY() * vTarget.getY()));
-		final double c = (pTarget.getX() * pTarget.getX()) + (pTarget.getY() * pTarget.getY()) + (pOrigin.getX() * pOrigin.getX()) + (pOrigin.getY() * pOrigin.getY()) - (2 * pOrigin.getX() * pTarget.getX()) - (2 * pOrigin.getY() * pTarget.getY());
-		final double t0 = (-b + Math.sqrt((b * b) - (4.0 * a * c))) / (2.0 * a);
-		final double t1 = (-b - Math.sqrt((b * b) - (4.0 * a * c))) / (2.0 * a);
+		final var a = (vTarget.getX() * vTarget.getX()) + (vTarget.getY() * vTarget.getY()) - (velOrigin * velOrigin);
+		final var b = 2 * ((pTarget.getX() * vTarget.getX()) + (pTarget.getY() * vTarget.getY()) - (pOrigin.getX() * vTarget.getX()) - (pOrigin.getY() * vTarget.getY()));
+		final var c = (pTarget.getX() * pTarget.getX()) + (pTarget.getY() * pTarget.getY()) + (pOrigin.getX() * pOrigin.getX()) + (pOrigin.getY() * pOrigin.getY()) - (2 * pOrigin.getX() * pTarget.getX()) - (2 * pOrigin.getY() * pTarget.getY());
+		final var t0 = (-b + Math.sqrt((b * b) - (4.0 * a * c))) / (2.0 * a);
+		final var t1 = (-b - Math.sqrt((b * b) - (4.0 * a * c))) / (2.0 * a);
 		
-		final boolean t0Pass = !Double.isNaN(t0) && t0 > 0.0;
-		final boolean t1Pass = !Double.isNaN(t1) && t1 > 0.0;
+		final var t0Pass = !Double.isNaN(t0) && t0 > 0.0;
+		final var t1Pass = !Double.isNaN(t1) && t1 > 0.0;
 		double t;
 		if (t0Pass && t1Pass) {
 			t = Math.min(t0, t1);
@@ -341,7 +340,7 @@ public final class WorldUtils2 {
 		
 		Arrays.sort(dists, (e0, e1) -> Double.compare(e0.dist, e1.dist));
 		
-		final int sector = dists[0].sector | dists[1].sector;
+		final var sector = dists[0].sector | dists[1].sector;
 		
 		if (sector == 0b11) {
 			return Edge2.TOP;
@@ -366,22 +365,22 @@ public final class WorldUtils2 {
 	 * @return Pedal of altitude c
 	 */
 	public static CoordD2 getPedal(final CoordI2 a, final CoordI2 b, final CoordI2 c) {
-		final double distA = getDistance(a, b);
+		final var distA = getDistance(a, b);
 		if (distA == 0.0) {
 			return null;
 		}
-		final double distASquare = Math.pow(distA, 2.0);
-		final double distB = getDistance(b, c);
-		final double distBSquare = Math.pow(distB, 2.0);
-		final double distC = getDistance(c, a);
-		final double distCSquare = Math.pow(distC, 2.0);
+		final var distASquare = Math.pow(distA, 2.0);
+		final var distB = getDistance(b, c);
+		final var distBSquare = Math.pow(distB, 2.0);
+		final var distC = getDistance(c, a);
+		final var distCSquare = Math.pow(distC, 2.0);
 		
-		final double altA = Math.sqrt((2.0 * ((distASquare * distBSquare) + (distBSquare * distCSquare) + (distCSquare * distASquare))) - (Math.pow(distA, 4.0) + Math.pow(distB, 4.0) + Math.pow(distC, 4.0))) / (2.0 * distA);
+		final var altA = Math.sqrt((2.0 * ((distASquare * distBSquare) + (distBSquare * distCSquare) + (distCSquare * distASquare))) - (Math.pow(distA, 4.0) + Math.pow(distB, 4.0) + Math.pow(distC, 4.0))) / (2.0 * distA);
 		if (Double.isNaN(altA)) {
 			return null;
 		}
-		final double alpha = getVectorAngle(b.substract(a), c.substract(a));
-		final double scaleA = (Math.sqrt(distCSquare - Math.pow(altA, 2.0)) / distA) * copySign(Math.PI / 2.0 - Math.abs(alpha));
+		final var alpha = getVectorAngle(b.substract(a), c.substract(a));
+		final var scaleA = (Math.sqrt(distCSquare - Math.pow(altA, 2.0)) / distA) * copySign(Math.PI / 2.0 - Math.abs(alpha));
 		if (Double.isNaN(scaleA)) {
 			return null;
 		}
@@ -404,12 +403,12 @@ public final class WorldUtils2 {
 	 * Returns null if there is no pedal.
 	 */
 	public static CoordD2 getPedalOnLineSegmentAB(final CoordI2 a, final CoordI2 b, final CoordI2 c) {
-		final CoordD2 pedal = getPedal(a, b, c);
+		final var pedal = getPedal(a, b, c);
 		if (pedal == null) {
 			return null;
 		}
 		
-		double x = pedal.getX();
+		var x = pedal.getX();
 		final double minX = Math.min(a.getX(), b.getX());
 		if (x < minX) {
 			x = minX;
@@ -419,7 +418,7 @@ public final class WorldUtils2 {
 			x = maxX;
 		}
 		
-		double y = pedal.getY();
+		var y = pedal.getY();
 		final double minY = Math.min(a.getY(), b.getY());
 		if (y < minY) {
 			y = minY;
@@ -446,15 +445,15 @@ public final class WorldUtils2 {
 	 * @return
 	 */
 	public static CoordI2 getClosestPoint(final CoordI2 origin, final HasPositionAndDimension2 target) {
-		double minDistance = Double.MAX_VALUE;
+		var minDistance = Double.MAX_VALUE;
 		CoordI2 result = null;
 		
-		final List<CoordI2> vertices = getVertices(target);
-		for (int i = 1; i < 4; i++) {
-			final CoordD2 pedal = getPedalOnLineSegmentAB(vertices.get(i - 1), vertices.get(i), origin);
+		final var vertices = getVertices(target);
+		for (var i = 1; i < 4; i++) {
+			final var pedal = getPedalOnLineSegmentAB(vertices.get(i - 1), vertices.get(i), origin);
 			if (pedal != null) {
-				final CoordI2 pedalI = pedal.toImmutableCoordI2();
-				final double distance = getDistance(origin, pedalI);
+				final var pedalI = pedal.toImmutableCoordI2();
+				final var distance = getDistance(origin, pedalI);
 				if (distance < minDistance) {
 					minDistance = distance;
 					result = pedalI;
@@ -477,17 +476,17 @@ public final class WorldUtils2 {
 	 * @return Waypoints for evasion or null if there is no collision
 	 */
 	public static List<CoordI2> evade(final HasPositionAndDimension2 origin, final double velOrigin, final CoordD2 vOrigin, final HasPositionAndDimension2 target, final CoordD2 vTarget, final CoordI2 oTarget, final CoordI2 pInterception_) {
-		final double THRESHOLD_NOT_MOVING = 0.2;
+		final var THRESHOLD_NOT_MOVING = 0.2;
 		
 		final CoordI2 pOrigin = ImmutableCoordI2.create(origin.getPosition()).add(ImmutableCoordI2.create(origin.getDimension()).divide(2));
 		final CoordI2 pTarget = ImmutableCoordI2.create(target.getPosition()).add(ImmutableCoordI2.create(target.getDimension()).divide(2));
-		final double velTarget = getDistance(vTarget);
+		final var velTarget = getDistance(vTarget);
 		
 		if (velOrigin < THRESHOLD_NOT_MOVING) {
 			// Corner case: Origin is not moving
 			
 			final CoordD2 vOriginToTarget = ImmutableCoordD2.create(pTarget).substract(ImmutableCoordD2.create(pOrigin));
-			CoordD2 vEvasion = MutableCoordD2
+			var vEvasion = MutableCoordD2
 					.create(-vOriginToTarget.getY(), vOriginToTarget.getX()) // Rotate by PI/2
 					.toVNorm()
 					.multiply(getDistance(origin.getDimension()) * 2.0);
@@ -513,31 +512,31 @@ public final class WorldUtils2 {
 		final CoordI2 boxDim = ImmutableCoordI2.create(
 				Math.max(origin.getDimension().getX(), origin.getDimension().getY()) + 4,
 				Math.max(origin.getDimension().getX(), origin.getDimension().getY()) + 4);
-		final CoordI2 targetDimHalf = target.getDimension().divide(2);
-		final Area2 box = new Area2(pInterception
+		final var targetDimHalf = target.getDimension().divide(2);
+		final var box = new Area2(pInterception
 				.add(targetDimHalf.substract(oTarget))
 				.substract(targetDimHalf)
 				.substract(boxDim),
 				targetDimHalf
 						.add(boxDim)
 						.multiply(2));
-		final List<CoordI2> vertices = getVertices(box);
+		final var vertices = getVertices(box);
 		
 		// Rule out one or more vertices, because ...
 		
 		if (velTarget >= THRESHOLD_NOT_MOVING && Math.abs(getVectorAngle(vOrigin, vTarget)) < Math.PI / 4.0) { // Velocity vectors are similar -> collision from behind
 			// Remove both vertices in origin move direction 
 			
-			int removeVertexIdxLow = -1;
-			int removeVertexIdxHigh = -1;
+			var removeVertexIdxLow = -1;
+			var removeVertexIdxHigh = -1;
 			
-			double aLow = Math.PI;
-			double aHigh = 0.0;
-			for (int i = 0; i < vertices.size(); i++) {
-				final CoordI2 curVertex = vertices.get(i);
+			var aLow = Math.PI;
+			var aHigh = 0.0;
+			for (var i = 0; i < vertices.size(); i++) {
+				final var curVertex = vertices.get(i);
 				
-				final CoordD2 direction = pInterception.substract(curVertex).toImmutableCoordD2();
-				final double a = Math.abs(getVectorAngle(vOrigin, direction));
+				final var direction = pInterception.substract(curVertex).toImmutableCoordD2();
+				final var a = Math.abs(getVectorAngle(vOrigin, direction));
 				if (removeVertexIdxLow == -1 || a < aLow) {
 					aLow = a;
 					removeVertexIdxLow = i;
@@ -554,26 +553,26 @@ public final class WorldUtils2 {
 		else if (velTarget < velOrigin - 0.75) { // Origin speed is higher
 			// Remove vertex farthest from origin move direction, but closest vertex will never be ruled out (-> primary)
 			
-			int safeVertexIdx = 0;
-			double vLen = -1.0;
-			for (int i = 0; i < vertices.size(); i++) {
-				final CoordI2 curVertex = vertices.get(i);
-				final double curVLen = getDistance(pOrigin, curVertex);
+			var safeVertexIdx = 0;
+			var vLen = -1.0;
+			for (var i = 0; i < vertices.size(); i++) {
+				final var curVertex = vertices.get(i);
+				final var curVLen = getDistance(pOrigin, curVertex);
 				if (vLen < 0.0 || curVLen < vLen) {
 					vLen = curVLen;
 					safeVertexIdx = i;
 				}
 			}
 			
-			int removeVertexIdx = 0;
-			double aHigh = 0.0;
-			for (int i = 0; i < vertices.size(); i++) {
+			var removeVertexIdx = 0;
+			var aHigh = 0.0;
+			for (var i = 0; i < vertices.size(); i++) {
 				if (i == safeVertexIdx) {
 					continue;
 				}
 				
-				final CoordI2 curVertex = vertices.get(i);
-				final double a = Math.abs(getVectorAngle(curVertex.substract(pOrigin).toImmutableCoordD2(), vOrigin));
+				final var curVertex = vertices.get(i);
+				final var a = Math.abs(getVectorAngle(curVertex.substract(pOrigin).toImmutableCoordD2(), vOrigin));
 				if (a > aHigh) {
 					aHigh = a;
 					removeVertexIdx = i;
@@ -585,13 +584,13 @@ public final class WorldUtils2 {
 		else {
 			// Remove vertex closest to target move direction
 			
-			int removeVertexIdx = -1;
+			var removeVertexIdx = -1;
 			
-			double vLen = -1.0;
-			for (int i = 0; i < vertices.size(); i++) {
-				final CoordI2 curVertex = vertices.get(i);
+			var vLen = -1.0;
+			for (var i = 0; i < vertices.size(); i++) {
+				final var curVertex = vertices.get(i);
 				final CoordD2 curV = ImmutableCoordD2.create(pInterception.substract(curVertex)).add(vTarget);
-				final double curVLen = getDistance(curV);
+				final var curVLen = getDistance(curV);
 				if (vLen < 0.0 || curVLen < vLen) {
 					vLen = curVLen;
 					removeVertexIdx = i;
@@ -603,11 +602,11 @@ public final class WorldUtils2 {
 		
 		// Get closest vertex -> primary
 		
-		int primaryVertexIdx = -1;
-		double closestDist = -1.0;
-		for (int i = 0; i < vertices.size(); i++) {
+		var primaryVertexIdx = -1;
+		var closestDist = -1.0;
+		for (var i = 0; i < vertices.size(); i++) {
 			if (vertices.get(i) != null) {
-				final double curDist = getDistance(vertices.get(i), pOrigin);
+				final var curDist = getDistance(vertices.get(i), pOrigin);
 				if (closestDist < 0.0 || curDist < closestDist) {
 					closestDist = curDist;
 					primaryVertexIdx = i;
@@ -617,13 +616,13 @@ public final class WorldUtils2 {
 		
 		// Choose secondary vertex
 		
-		final int candidate0 = (primaryVertexIdx + 1) % vertices.size();
-		final int candidate1 = Math.floorMod(primaryVertexIdx - 1, vertices.size());
+		final var candidate0 = (primaryVertexIdx + 1) % vertices.size();
+		final var candidate1 = Math.floorMod(primaryVertexIdx - 1, vertices.size());
 		int secondVertexIdx;
 		if (vertices.get(candidate0) != null && vertices.get(candidate1) != null) {
 			// Center vertex, choose secondary which is closer to origin velocity vector 
-			final double a0 = getVectorAngle(pInterception.substract(pOrigin), vertices.get(candidate0).substract(pOrigin));
-			final double a1 = getVectorAngle(pInterception.substract(pOrigin), vertices.get(candidate1).substract(pOrigin));
+			final var a0 = getVectorAngle(pInterception.substract(pOrigin), vertices.get(candidate0).substract(pOrigin));
+			final var a1 = getVectorAngle(pInterception.substract(pOrigin), vertices.get(candidate1).substract(pOrigin));
 			if (Math.abs(a0) < Math.abs(a1)) {
 				secondVertexIdx = candidate0;
 			}
@@ -742,7 +741,7 @@ public final class WorldUtils2 {
 	 * @return random point in the circle
 	 */
 	public static CoordI2 getRandomPointOnCircle(final CoordI2 center, final int radius, final Random random) {
-		final double angle = random.nextDouble() * Math.PI * 2.0 - Math.PI;
+		final var angle = random.nextDouble() * Math.PI * 2.0 - Math.PI;
 		return MutableCoordD2
 				.create(Math.cos(angle), Math.sin(angle))
 				.multiply(radius)
@@ -758,7 +757,7 @@ public final class WorldUtils2 {
 	 * @return random point in the circle
 	 */
 	public static CoordI2 getReproduciblePointOnCircle(final CoordI2 center, final int radius, final AtomicInteger counter) {
-		final double angle = counter.incrementAndGet() / 3.0 % Math.PI * 2.0 - Math.PI;
+		final var angle = counter.incrementAndGet() / 3.0 % Math.PI * 2.0 - Math.PI;
 		return MutableCoordD2
 				.create(Math.cos(angle), Math.sin(angle))
 				.multiply(radius)
@@ -777,10 +776,10 @@ public final class WorldUtils2 {
 	 * @return Edges that are required as bit mask
 	 */
 	public static int calcEdgeRequirement(final CoordI2 c0, final CoordI2 c1) {
-		final int dx = c0.getX() - c1.getX();
-		final int dy = c0.getY() - c1.getY();
+		final var dx = c0.getX() - c1.getX();
+		final var dy = c0.getY() - c1.getY();
 		
-		int edgeReq = 0;
+		var edgeReq = 0;
 		if (dx < 0 && dy < 0) {
 			edgeReq = Edge2.LEFT.getBit() | Edge2.TOP.getBit();
 		}

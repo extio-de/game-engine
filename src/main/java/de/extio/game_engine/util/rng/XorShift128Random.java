@@ -22,7 +22,7 @@ public final class XorShift128Random extends Random {
 	}
 	
 	public XorShift128Random(final String state) {
-		final UUID uuid = UUID.fromString(state);
+		final var uuid = UUID.fromString(state);
 		this.state0 = uuid.getMostSignificantBits();
 		this.state1 = uuid.getLeastSignificantBits();
 	}
@@ -41,8 +41,8 @@ public final class XorShift128Random extends Random {
 	
 	@Override
 	public long nextLong() {
-		long s1 = this.state0;
-		final long s0 = this.state1;
+		var s1 = this.state0;
+		final var s0 = this.state1;
 		this.state0 = s0;
 		s1 ^= s1 << 23;
 		return (this.state1 = s1 ^ s0 ^ (s1 >>> 17) ^ (s0 >>> 26)) + s0;

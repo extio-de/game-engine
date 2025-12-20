@@ -166,8 +166,8 @@ public class RgbaColor {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		result = prime * result + this.a;
 		result = prime * result + this.b;
 		result = prime * result + this.g;
@@ -183,7 +183,7 @@ public class RgbaColor {
 		if ((obj == null) || (this.getClass() != obj.getClass())) {
 			return false;
 		}
-		final RgbaColor other = (RgbaColor) obj;
+		final var other = (RgbaColor) obj;
 		if (this.a != other.a) {
 			return false;
 		}
@@ -201,7 +201,7 @@ public class RgbaColor {
 	
 	@Override
 	public String toString() {
-		final StringBuilder builder = new StringBuilder();
+		final var builder = new StringBuilder();
 		builder.append("RgbaColor [r=");
 		builder.append(this.r);
 		builder.append(", g=");

@@ -1,7 +1,5 @@
 package de.extio.game_engine.renderer.g2d.control.impl;
 
-import java.util.List;
-
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SwitchControl;
@@ -45,13 +43,12 @@ public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonContro
 	}
 	
 	private void manageCtrlGroupToggleState() {
-		final List<BaseControl> controls = G2DDrawControl.CONTROL_GROUPS.get(this.controlGroup);
+		final var controls = G2DDrawControl.CONTROL_GROUPS.get(this.controlGroup);
 		if (controls != null && !controls.isEmpty()) {
-			boolean controlInGroupToggled = false;
+			var controlInGroupToggled = false;
 			
 			for (final BaseControl control : controls) {
-				if (control instanceof G2DToggleButtonControlImpl) {
-					final G2DToggleButtonControlImpl tbControl = (G2DToggleButtonControlImpl) control;
+				if (control instanceof final G2DToggleButtonControlImpl tbControl) {
 					if (tbControl.control == this.control) {
 						continue;
 					}

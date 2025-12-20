@@ -22,7 +22,7 @@ public final class KeyModifiers {
 			MODIFIER_ALTGR, "ALTGR ");
 	
 	public static String getModifierLabel(final int modifier) {
-		final StringBuilder label = new StringBuilder(12);
+		final var label = new StringBuilder(12);
 		for (final Entry<Integer, String> entry : MODIFIER_LABELS.entrySet()) {
 			if ((modifier & entry.getKey().intValue()) != 0) {
 				label.append(entry.getValue());

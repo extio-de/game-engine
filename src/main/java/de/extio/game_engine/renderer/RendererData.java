@@ -161,7 +161,7 @@ public class RendererData {
 		
 		}
 		
-	}	
+	}
 	
 	public RendererControl getRendererControl() {
 		return this.rendererControl;
@@ -198,17 +198,17 @@ public class RendererData {
 	public void setRenderer(final Renderer renderer) {
 		this.renderer = renderer;
 	}
-
+	
 	public VideoOptions getVideoOptions() {
-		return videoOptions;
+		return this.videoOptions;
 	}
-
+	
 	public Consumer<Object> getEventConsumer() {
-		return eventConsumer;
+		return this.eventConsumer;
 	}
-
-	public void setEventConsumer(Consumer<Object> eventConsumer) {
+	
+	public void setEventConsumer(final Consumer<Object> eventConsumer) {
 		this.eventConsumer = eventConsumer;
 	}
-
+	
 }

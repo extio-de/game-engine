@@ -14,10 +14,8 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
-import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonControl;
-import de.extio.game_engine.renderer.model.event.UiControlEvent;
+import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.spatial2.WorldUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordD2;
@@ -39,7 +37,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 	protected CoordD2 relativeScreenPosition = MutableCoordD2.create();
 	
 	protected final String name;
-
+	
 	private final RenderingBoPool renderingBoPool;
 	
 	private final RendererControl rendererControl;
@@ -168,15 +166,14 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 		return WorldUtils2.intersects(this.area.getPosition(), this.area.getDimension(), coord, ImmutableCoordI2.one());
 	}
 	
-	
 	public void render(final List<RenderingBo> renderingBo, final BiConsumer<List<RenderingBo>, RenderingBo> consumer) {
-		final CoordI2 currentEffectiveViewportDimension = rendererControl.getEffectiveViewportDimension();
+		final var currentEffectiveViewportDimension = this.rendererControl.getEffectiveViewportDimension();
 		if (!currentEffectiveViewportDimension.equals(this.lastEffectiveViewportDimension)) {
 			this.lastEffectiveViewportDimension = currentEffectiveViewportDimension;
 			this.updateArea();
 		}
 		
-		RenderingBo bo = renderingBoPool.acquire(DrawWindowRenderingBo.class)
+		var bo = this.renderingBoPool.acquire(DrawWindowRenderingBo.class)
 				.setThickBorder(this.draggable)
 				.withDimensionAbsolute(this.area.getDimension())
 				.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
@@ -187,7 +184,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 		consumer.accept(renderingBo, bo);
 		
 		if (this.drawCloseButton) {
-			bo = renderingBoPool.acquire(ControlRenderingBo.class)
+			bo = this.renderingBoPool.acquire(ControlRenderingBo.class)
 					.setType(WindowCloseButtonControl.class)
 					.setId(this.name + "_Close")
 					.setCustomData(this.draggable)
@@ -215,8 +212,8 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 	}
 	
 	protected void ensureBounds() {
-		final CoordI2 effectiveDim = this.rendererControl.getEffectiveViewportDimension();
-		boolean updated = false;
+		final var effectiveDim = this.rendererControl.getEffectiveViewportDimension();
+		var updated = false;
 		
 		if (this.area.getPosition().getX() < 0) {
 			this.area.getPosition().setX(0);
@@ -249,13 +246,13 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 	}
 	
 	protected void updateRelativeScreenPosition() {
-		final CoordI2 currentEffectiveViewportDimension = this.rendererControl.getEffectiveViewportDimension();
+		final var currentEffectiveViewportDimension = this.rendererControl.getEffectiveViewportDimension();
 		this.relativeScreenPosition.setX((double) this.area.getPosition().getX() / (double) currentEffectiveViewportDimension.getX());
 		this.relativeScreenPosition.setY((double) this.area.getPosition().getY() / (double) currentEffectiveViewportDimension.getY());
 	}
 	
 	protected void applyRelativeScreenPosition() {
-		final CoordI2 currentEffectiveViewportDimension = this.rendererControl.getEffectiveViewportDimension();
+		final var currentEffectiveViewportDimension = this.rendererControl.getEffectiveViewportDimension();
 		this.area.getPosition().setX((int) (this.relativeScreenPosition.getX() * (double) currentEffectiveViewportDimension.getX()));
 		this.area.getPosition().setY((int) (this.relativeScreenPosition.getY() * (double) currentEffectiveViewportDimension.getY()));
 		this.ensureBounds();

@@ -16,9 +16,13 @@ import java.util.NoSuchElementException;
 public class RingBuffer<E> extends AbstractQueue<E> {
 	
 	private final E[] buffer;
+	
 	private int head;
+	
 	private int tail;
+	
 	private int size;
+	
 	private final int capacity;
 	
 	/**
@@ -65,7 +69,7 @@ public class RingBuffer<E> extends AbstractQueue<E> {
 			return null;
 		}
 		
-		final E element = this.buffer[this.head];
+		final var element = this.buffer[this.head];
 		this.buffer[this.head] = null; // Help GC
 		this.head = (this.head + 1) % this.capacity;
 		this.size--;
@@ -93,7 +97,7 @@ public class RingBuffer<E> extends AbstractQueue<E> {
 	
 	@Override
 	public void clear() {
-		for (int i = 0; i < this.capacity; i++) {
+		for (var i = 0; i < this.capacity; i++) {
 			this.buffer[i] = null;
 		}
 		this.head = 0;
@@ -131,12 +135,14 @@ public class RingBuffer<E> extends AbstractQueue<E> {
 		if (index < 0 || index >= this.size) {
 			throw new IndexOutOfBoundsException("Index: " + index + ", Size: " + this.size);
 		}
-		final int actualIndex = (this.head + index) % this.capacity;
+		final var actualIndex = (this.head + index) % this.capacity;
 		return this.buffer[actualIndex];
 	}
 	
 	private class RingBufferIterator implements Iterator<E> {
+		
 		private int current = 0;
+		
 		private final int expectedSize = RingBuffer.this.size;
 		
 		@Override
@@ -149,7 +155,7 @@ public class RingBuffer<E> extends AbstractQueue<E> {
 			if (this.current >= this.expectedSize) {
 				throw new NoSuchElementException();
 			}
-			final E element = RingBuffer.this.get(this.current);
+			final var element = RingBuffer.this.get(this.current);
 			this.current++;
 			return element;
 		}

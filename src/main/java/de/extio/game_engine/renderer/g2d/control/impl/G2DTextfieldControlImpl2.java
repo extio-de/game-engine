@@ -8,16 +8,16 @@ import java.awt.event.MouseWheelListener;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
+import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.g2d.control.components.CustomJTextArea;
 import de.extio.game_engine.renderer.g2d.control.components.CustomJTextField;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldControl;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
-import de.extio.game_engine.renderer.model.RgbaColor;
 
 public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements TextfieldControl {
 	
@@ -109,7 +109,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 				
 				@Override
 				public void mouseWheelMoved(final MouseWheelEvent e) {
-					final int displayRows = countMatches(G2DTextfieldControlImpl2.this.lastCaption, '\n');
+					final var displayRows = G2DTextfieldControlImpl2.this.countMatches(G2DTextfieldControlImpl2.this.lastCaption, '\n');
 					if (displayRows == 0) {
 						return;
 					}
@@ -158,7 +158,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	
 	@Override
 	public void render() {
-		final String curComponentText = this.textComponent.getText();
+		final var curComponentText = this.textComponent.getText();
 		if (!curComponentText.equals(this.lastText) && !(this.lastText == null || this.lastText.isEmpty() || curComponentText == null || curComponentText.isEmpty())) {
 			this.lastText = curComponentText;
 			this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, this.lastText));
@@ -255,10 +255,10 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		try {
 			if (this.multiLine) {
 				if (this.scrollPositionModified || this.caption != null) {
-					final int displayRows = countMatches(this.lastCaption, '\n');
-					final int skipRows = (int) ((double) this.scrollPositionPerc * (double) displayRows);
-					int offset = 0;
-					for (int i = 0; i < skipRows; i++) {
+					final var displayRows = this.countMatches(this.lastCaption, '\n');
+					final var skipRows = (int) ((double) this.scrollPositionPerc * (double) displayRows);
+					var offset = 0;
+					for (var i = 0; i < skipRows; i++) {
 						offset = this.lastCaption.indexOf('\n', offset);
 						if (offset == -1) {
 							break;
@@ -285,7 +285,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			}
 			else {
 				if (this.caption != null && !this.textComponent.getText().equals(this.caption)) {
-					final int pos = this.textComponent.getCaretPosition();
+					final var pos = this.textComponent.getCaretPosition();
 					this.safeInvoke(() -> this.textComponent.setText(this.caption));
 					if (pos < this.textComponent.getText().length()) {
 						this.safeInvoke(() -> this.textComponent.setCaretPosition(pos));
@@ -310,8 +310,8 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		if (str == null || str.isEmpty()) {
 			return 0;
 		}
-		int count = 0;
-		for (int i = 0; i < str.length(); i++) {
+		var count = 0;
+		for (var i = 0; i < str.length(); i++) {
 			if (str.charAt(i) == ch) {
 				count++;
 			}

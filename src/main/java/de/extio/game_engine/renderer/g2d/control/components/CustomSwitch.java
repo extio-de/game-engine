@@ -6,7 +6,6 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.spatial2.model.CoordI2;
 
 @SuppressWarnings("serial")
 public class CustomSwitch extends CustomAbstractButton {
@@ -19,10 +18,10 @@ public class CustomSwitch extends CustomAbstractButton {
 	
 	@Override
 	public void paint(final Graphics g) {
-		final Graphics2D g2d = (Graphics2D) g;
+		final var g2d = (Graphics2D) g;
 		
-		final int dimY = this.getHeight() - 1;
-		final int dimX = (int) (dimY * 1.5);
+		final var dimY = this.getHeight() - 1;
+		final var dimX = (int) (dimY * 1.5);
 		
 		float h, s, b;
 		if ((this.state & STATE_TOGGLED) == 0) {
@@ -42,7 +41,7 @@ public class CustomSwitch extends CustomAbstractButton {
 			b += 0.25F;
 		}
 		
-		final Color bodyColor = Color.getHSBColor(h, s, b);
+		final var bodyColor = Color.getHSBColor(h, s, b);
 		Color border0Color;
 		Color border1Color;
 		if (dimX < 45) {
@@ -78,7 +77,7 @@ public class CustomSwitch extends CustomAbstractButton {
 		else {
 			g2d.setColor(Color.GRAY);
 		}
-		final CoordI2 textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
+		final var textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
 		G2DDrawFont.renderText(g2d,
 				textDim,
 				this.scaleFactor,

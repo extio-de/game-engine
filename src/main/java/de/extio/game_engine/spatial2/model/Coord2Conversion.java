@@ -59,7 +59,7 @@ public interface Coord2Conversion {
 			vNorm = (CoordD2) this;
 		}
 		
-		final double length = WorldUtils2.getDistance(vNorm);
+		final var length = WorldUtils2.getDistance(vNorm);
 		if (length > 0.0) {
 			vNorm = vNorm.divide(length);
 		}

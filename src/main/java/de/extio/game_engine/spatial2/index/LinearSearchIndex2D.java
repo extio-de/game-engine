@@ -48,8 +48,8 @@ public final class LinearSearchIndex2D<T extends SpatialIndex2Capable> implement
 	public List<T> find(final CoordI2 position, final CoordI2 dimension, final Predicate<T> filter) {
 		List<T> result = null;
 		
-		for (int i = 0; i < this.objects.size(); i++) {
-			final T obj = this.objects.get(i);
+		for (var i = 0; i < this.objects.size(); i++) {
+			final var obj = this.objects.get(i);
 			
 			if (WorldUtils2.intersects(position, dimension, obj.getPosition(), obj.getDimension())) {
 				if (filter == null || filter.test(obj)) {
@@ -73,8 +73,8 @@ public final class LinearSearchIndex2D<T extends SpatialIndex2Capable> implement
 	
 	@Override
 	public T findFirstAt(final CoordI2 position, final Predicate<T> filter) {
-		for (int i = 0; i < this.objects.size(); i++) {
-			final T obj = this.objects.get(i);
+		for (var i = 0; i < this.objects.size(); i++) {
+			final var obj = this.objects.get(i);
 			
 			if (WorldUtils2.intersects(position, ImmutableCoordI2.one(), obj.getPosition(), obj.getDimension())) {
 				if (filter == null || filter.test(obj)) {
@@ -88,8 +88,8 @@ public final class LinearSearchIndex2D<T extends SpatialIndex2Capable> implement
 	
 	@Override
 	public void executeAt(final CoordI2 position, final Consumer<T> consumer, final Predicate<T> filter) {
-		for (int i = 0; i < this.objects.size(); i++) {
-			final T obj = this.objects.get(i);
+		for (var i = 0; i < this.objects.size(); i++) {
+			final var obj = this.objects.get(i);
 			
 			if (WorldUtils2.intersects(position, ImmutableCoordI2.one(), obj.getPosition(), obj.getDimension())) {
 				if (filter == null || filter.test(obj)) {

@@ -5,23 +5,16 @@ import java.awt.Frame;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
-import java.util.Random;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
-import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.DrawEffectRenderingBoEffects;
-import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.spatial2.WorldUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
-import de.extio.game_engine.spatial2.model.CoordD2;
 import de.extio.game_engine.spatial2.model.CoordI2;
-import de.extio.game_engine.spatial2.model.ImmutableCoordD2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
-import de.extio.game_engine.spatial2.model.MutableCoordD2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
 public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectRenderingBo {
@@ -46,8 +39,8 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 			return;
 		}
 		
-		int x0 = (int) (this.x * scaleFactor);
-		int y0 = (int) (this.y * scaleFactor);
+		final var x0 = (int) (this.x * scaleFactor);
+		final var y0 = (int) (this.y * scaleFactor);
 		
 		List<CoordI2> coordinates = null;
 		if (this.relativeCoordinates != null && !this.relativeCoordinates.isEmpty()) {
@@ -62,10 +55,10 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				if (coordinates == null || coordinates.isEmpty()) {
 					break;
 				}
-				final int x1 = x0 + coordinates.get(0).getX();
-				final int y1 = y0 + coordinates.get(0).getY();
+				final var x1 = x0 + coordinates.get(0).getX();
+				final var y1 = y0 + coordinates.get(0).getY();
 				
-				final Area2 area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
 				if (this.cull(area)) {
 					break;
 				}
@@ -81,10 +74,10 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				if (coordinates == null || coordinates.isEmpty()) {
 					break;
 				}
-				final int x1 = x0 + coordinates.get(0).getX();
-				final int y1 = y0 + coordinates.get(0).getY();
+				final var x1 = x0 + coordinates.get(0).getX();
+				final var y1 = y0 + coordinates.get(0).getY();
 				
-				final Area2 area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
 				if (this.cull(area)) {
 					break;
 				}
@@ -102,9 +95,9 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 			
 			case CIRCLE:
 			case CIRCLE_FILLED: {
-				final int diameter = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
+				final var diameter = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
 				
-				final Area2 area = new Area2(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(diameter, diameter));
+				final var area = new Area2(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(diameter, diameter));
 				if (this.cull(area)) {
 					break;
 				}
@@ -122,9 +115,9 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 			
 			case CIRCLE_CENTERED:
 			case CIRCLE_CENTERED_FILLED: {
-				final int radius = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
+				final var radius = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
 				
-				final Area2 area = new Area2(ImmutableCoordI2.create(x0, y0).substract(radius), ImmutableCoordI2.zero().add(radius * 2));
+				final var area = new Area2(ImmutableCoordI2.create(x0, y0).substract(radius), ImmutableCoordI2.zero().add(radius * 2));
 				if (this.cull(area)) {
 					break;
 				}
@@ -144,21 +137,21 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				if (coordinates == null || coordinates.isEmpty()) {
 					break;
 				}
-				final int x1 = x0 + coordinates.get(0).getX();
-				final int y1 = y0 + coordinates.get(0).getY();
+				final var x1 = x0 + coordinates.get(0).getX();
+				final var y1 = y0 + coordinates.get(0).getY();
 				
 				final double width = Math.max(1, Math.max(Math.abs(x0 - x1), Math.abs(y0 - y1)) / 5);
-				final double height = width;
-				final int dx = x1 - x0;
-				final int dy = y1 - y0;
-				final double D = Math.max(1.0, Math.sqrt(Math.pow(dx, 2.0) + Math.pow(dy, 2.0)));
-				double xm = D - width;
-				double xn = xm;
-				double ym = height;
-				double yn = -height;
+				final var height = width;
+				final var dx = x1 - x0;
+				final var dy = y1 - y0;
+				final var D = Math.max(1.0, Math.sqrt(Math.pow(dx, 2.0) + Math.pow(dy, 2.0)));
+				var xm = D - width;
+				var xn = xm;
+				var ym = height;
+				var yn = -height;
 				double x;
-				final double sin = dy / D;
-				final double cos = dx / D;
+				final var sin = dy / D;
+				final var cos = dx / D;
 				
 				x = xm * cos - ym * sin + x0;
 				ym = xm * sin + ym * cos + y0;
@@ -168,7 +161,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				yn = xn * sin + yn * cos + y0;
 				xn = x;
 				
-				final Area2 area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create((int) xm, (int) ym), ImmutableCoordI2.create((int) xn, (int) yn));
+				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create((int) xm, (int) ym), ImmutableCoordI2.create((int) xn, (int) yn));
 				if (this.cull(area)) {
 					break;
 				}
@@ -185,12 +178,12 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				if (coordinates == null || coordinates.size() < 2) {
 					break;
 				}
-				final int x1 = x0 + coordinates.get(0).getX();
-				final int y1 = y0 + coordinates.get(0).getY();
-				final int x2 = x0 + coordinates.get(1).getX();
-				final int y2 = y0 + coordinates.get(1).getY();
+				final var x1 = x0 + coordinates.get(0).getX();
+				final var y1 = y0 + coordinates.get(0).getY();
+				final var x2 = x0 + coordinates.get(1).getX();
+				final var y2 = y0 + coordinates.get(1).getY();
 				
-				final Area2 area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create(x2, y2));
+				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create(x2, y2));
 				if (this.cull(area)) {
 					break;
 				}
@@ -207,15 +200,15 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				if (coordinates == null || coordinates.isEmpty()) {
 					break;
 				}
-				final int x1 = x0 + coordinates.get(0).getX();
-				final int y1 = y0 + coordinates.get(0).getY();
+				final var x1 = x0 + coordinates.get(0).getX();
+				final var y1 = y0 + coordinates.get(0).getY();
 				
-				final Area2 area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
 				if (this.cull(area)) {
 					break;
 				}
 				
-				final int strength = this.customInt0 <= 0 ? 2 : this.customInt0;
+				final var strength = this.customInt0 <= 0 ? 2 : this.customInt0;
 				
 				if (this.effect == DrawEffectRenderingBoEffects.DECORATIVE_BORDER) {
 					ComponentRenderingSupport.drawDecorativeBorder(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, this.color == null ? Color.WHITE : this.color.toAwtColor());

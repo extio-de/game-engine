@@ -84,10 +84,9 @@ public final class KeycodeRegistration {
 		if (this == obj) {
 			return true;
 		}
-		if (!(obj instanceof KeycodeRegistration)) {
+		if (!(obj instanceof final KeycodeRegistration other)) {
 			return false;
 		}
-		final KeycodeRegistration other = (KeycodeRegistration) obj;
 		return this.code == other.code && Objects.equals(this.displayText, other.displayText) && Objects.equals(this.keyCodeDisplay, other.keyCodeDisplay) && this.modifier == other.modifier && Objects.equals(this.qualifier, other.qualifier);
 	}
 	

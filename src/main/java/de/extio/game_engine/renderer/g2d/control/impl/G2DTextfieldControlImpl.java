@@ -7,14 +7,14 @@ import java.awt.TextField;
 import java.util.Objects;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
+import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.g2d.control.components.CustomTextArea;
 import de.extio.game_engine.renderer.g2d.control.components.CustomTextField;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldControl;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
-import de.extio.game_engine.renderer.model.RgbaColor;
 
 public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements TextfieldControl {
 	
@@ -74,7 +74,7 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 	
 	@Override
 	public void render() {
-		final String curComponentText = this.textComponent.getText();
+		final var curComponentText = this.textComponent.getText();
 		if (!Objects.equals(this.lastText, curComponentText) && !((this.lastText == null || this.lastText.isEmpty()) && (curComponentText == null || curComponentText.isEmpty()))) {
 			this.lastText = curComponentText;
 			this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, this.lastText));
@@ -126,7 +126,7 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 		
 		try {
 			if (this.caption != null && !this.textComponent.getText().equals(this.caption)) {
-				final int pos = this.textComponent.getCaretPosition();
+				final var pos = this.textComponent.getCaretPosition();
 				this.safeInvoke(() -> this.textComponent.setText(this.caption));
 				this.safeInvoke(() -> this.textComponent.setCaretPosition(pos));
 				this.lastText = this.caption;
@@ -139,7 +139,7 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 		if (this.multiLine) {
 			this.safeInvoke(() -> this.textComponent.setEditable(false));
 			this.safeInvoke(() -> this.textComponent.setFocusable(false));
-			final int scrollPos = (this.caption != null ? this.caption.lastIndexOf('\n') : -1) + 1;
+			final var scrollPos = (this.caption != null ? this.caption.lastIndexOf('\n') : -1) + 1;
 			this.safeInvoke(() -> this.textComponent.setCaretPosition(scrollPos));
 		}
 	}

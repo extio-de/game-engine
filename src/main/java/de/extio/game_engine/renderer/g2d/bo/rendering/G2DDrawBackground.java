@@ -3,7 +3,6 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.GraphicsConfiguration;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.FileInputStream;
@@ -12,7 +11,6 @@ import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Random;
 
 import javax.imageio.ImageIO;
 
@@ -60,7 +58,7 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
-		final CoordI2 windowDim = ((G2DRendererControl) this.rendererData.getRendererControl()).getAbsoluteViewportDimension();
+		final var windowDim = ((G2DRendererControl) this.rendererData.getRendererControl()).getAbsoluteViewportDimension();
 		
 		this.scroll(0, this.rendererData.getUiOptions().isBackgroundScrolling0(), this.rendererData.getUiOptions().isBackgroundScrollingReverse0(), windowDim);
 		this.tileBackground(graphics, 0, this.rendererData.getUiOptions().getBackgroundResourceName0(),
@@ -194,7 +192,7 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 		}
 		G2DDrawBackground.BACKGROUND_IMAGE = null;
 		
-		final GraphicsConfiguration gc = graphics.getDeviceConfiguration();
+		final var gc = graphics.getDeviceConfiguration();
 		G2DDrawBackground.BACKGROUND_IMAGE = gc.createCompatibleVolatileImage(G2DDrawBackground.BACKGROUND_BUFFEREDIMAGE.getWidth(), G2DDrawBackground.BACKGROUND_BUFFEREDIMAGE.getHeight());
 		G2DDrawBackground.BACKGROUND_IMAGE.validate(gc);
 		Graphics g = null;
@@ -212,9 +210,9 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	private void generateStars(final CoordI2 viewPort) {
 		if (!viewPort.equals(this.starsViewport)) {
 			this.starsViewport = viewPort.toImmutableCoordI2();
-			final Random rand = ThreadLocalXorShift128Random.current();
+			final var rand = ThreadLocalXorShift128Random.current();
 			this.stars.clear();
-			for (int i = 0; i < 350; i++) {
+			for (var i = 0; i < 350; i++) {
 				this.stars.add(new Star(
 						ImmutableCoordI2.create(rand.nextInt(this.starsViewport.getX()), rand.nextInt(this.starsViewport.getY())),
 						ImmutableCoordI2.create(rand.nextInt(3) + 2, rand.nextInt(3) + 2),

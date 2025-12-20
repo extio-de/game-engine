@@ -1,7 +1,6 @@
 package de.extio.game_engine.renderer.g2d.bo.rendering;
 
 import java.awt.AlphaComposite;
-import java.awt.Composite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
@@ -9,15 +8,13 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
-import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
-import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
+import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 
 public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRenderingBo {
 	
@@ -60,7 +57,7 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	@SuppressWarnings("resource")
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
-		CachedImage cachedImage = IMAGE_CACHE.get(this.resourceName);
+		var cachedImage = IMAGE_CACHE.get(this.resourceName);
 		if (cachedImage == null) {
 			cachedImage = new CachedImage();
 			cachedImage.setName(this.resourceName);
@@ -90,9 +87,9 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 		}
 		
 		if (this.transparency < 1.0f) {
-			final Composite currentAlphaComposite = graphics.getComposite();
+			final var currentAlphaComposite = graphics.getComposite();
 			try {
-				AlphaComposite ac = cachedImage.getAlphaComposite();
+				var ac = cachedImage.getAlphaComposite();
 				if (ac == null) {
 					ac = AlphaComposite.getInstance(AlphaComposite.SRC_OVER, this.transparency);
 					cachedImage.setAlphaComposite(ac);
@@ -124,9 +121,9 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	}
 	
 	public static void closeStatic() {
-		final Iterator<CachedImage> it = IMAGE_CACHE.values().iterator();
+		final var it = IMAGE_CACHE.values().iterator();
 		while (it.hasNext()) {
-			final CachedImage cachedImage = it.next();
+			final var cachedImage = it.next();
 			if (!cachedImage.isUsed()) {
 				LOGGER.debug("Removed image from cache: " + cachedImage.getName());
 				
@@ -209,7 +206,7 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 		
 		@Override
 		public String toString() {
-			final StringBuilder builder = new StringBuilder();
+			final var builder = new StringBuilder();
 			builder.append("CachedImage [name=");
 			builder.append(this.name);
 			builder.append(", used=");

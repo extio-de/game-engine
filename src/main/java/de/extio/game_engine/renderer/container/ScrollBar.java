@@ -16,7 +16,6 @@ import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
-
 /**
  * Helper for scrollbars.
  * I recommend to check for code examples to learn more about the usage of this helper and how to integrate in client modules.
@@ -38,7 +37,7 @@ public class ScrollBar {
 	}
 	
 	public void onEvent(final UiControlEvent event, final Predicate<CoordI2> positionIntersectsPredicate) {
-		final UiControlEvent uiControlEvent = (UiControlEvent) event;
+		final var uiControlEvent = (UiControlEvent) event;
 		
 		if (this.name.equals(uiControlEvent.getId())) {
 			this.scrollPosition = 1.0D - ((Double) uiControlEvent.getPayload()).doubleValue();
@@ -50,7 +49,7 @@ public class ScrollBar {
 				this.lastNumElements > 0 &&
 				positionIntersectsPredicate.test(absolutePos)) {
 			
-			final double perElem = (button == 4 ? -1.0 : 1.0) / this.lastNumElements;
+			final var perElem = (button == 4 ? -1.0 : 1.0) / this.lastNumElements;
 			this.scrollPosition = Math.min(1.0, Math.max(0.0, this.scrollPosition + perElem));
 		}
 	}
@@ -58,7 +57,7 @@ public class ScrollBar {
 	public void render(final List<RenderingBo> renderingBo, final Area2 renderingArea, final int numElements, final RenderingBoPool renderingBoPool) {
 		this.lastNumElements = numElements;
 		
-		final RenderingBo bo = renderingBoPool.acquire(ControlRenderingBo.class)
+		final var bo = renderingBoPool.acquire(ControlRenderingBo.class)
 				.setId(this.name)
 				.setType(SliderControl.class)
 				.setCustomData(Boolean.FALSE)

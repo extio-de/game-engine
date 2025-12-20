@@ -2,14 +2,11 @@ package de.extio.game_engine.renderer.g2d;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
-import java.awt.DisplayMode;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Graphics;
 import java.awt.GraphicsDevice;
 import java.awt.GraphicsEnvironment;
-import java.awt.Point;
-import java.awt.Rectangle;
 import java.awt.Toolkit;
 import java.awt.Window;
 import java.awt.event.AWTEventListener;
@@ -24,17 +21,13 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
-import java.awt.image.BufferedImage;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.extio.game_engine.spatial2.model.CoordI2;
-import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.keyboard.KeyModifiers;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.RendererData;
@@ -43,6 +36,8 @@ import de.extio.game_engine.renderer.model.event.KeyStrokeEvent;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
 import de.extio.game_engine.renderer.model.event.MouseEnterEvent;
 import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
+import de.extio.game_engine.spatial2.model.CoordI2;
+import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 @SuppressWarnings("serial")
 public class G2DMainFrame extends Frame {
@@ -66,8 +61,8 @@ public class G2DMainFrame extends Frame {
 		this.setLayout(null);
 		this.setBackground(Color.BLACK);
 		
-		try (InputStream in = this.getClass().getClassLoader().getResourceAsStream("icon.png")) {
-			final BufferedImage icon = ImageIO.read(in);
+		try (var in = this.getClass().getClassLoader().getResourceAsStream("icon.png")) {
+			final var icon = ImageIO.read(in);
 			this.setIconImage(icon);
 		}
 		catch (final IOException e) {
@@ -190,7 +185,7 @@ public class G2DMainFrame extends Frame {
 			
 			@Override
 			public void mouseMoved(final MouseEvent e) {
-				final int button = this.getButton(e);
+				final var button = this.getButton(e);
 				
 				try {
 					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
@@ -205,7 +200,7 @@ public class G2DMainFrame extends Frame {
 			
 			@Override
 			public void mouseDragged(final MouseEvent e) {
-				final int button = this.getButton(e);
+				final var button = this.getButton(e);
 				
 				try {
 					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseMoveEvent(true, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
@@ -219,7 +214,7 @@ public class G2DMainFrame extends Frame {
 			}
 			
 			private int getButton(final MouseEvent e) {
-				int button = MouseEvent.NOBUTTON;
+				var button = MouseEvent.NOBUTTON;
 				if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
 					button = MouseEvent.BUTTON1;
 				}
@@ -250,23 +245,22 @@ public class G2DMainFrame extends Frame {
 			
 			@Override
 			public void eventDispatched(final AWTEvent event) {
-				if (!(event instanceof KeyEvent)) {
+				if (!(event instanceof final KeyEvent e)) {
 					return;
 				}
 				
-				final KeyEvent e = (KeyEvent) event;
 				if (e.getComponent() instanceof G2DControlHasExclusiveKeyEvent) {
 					return;
 				}
 				
 				if (event.getID() == KeyEvent.KEY_PRESSED) {
 					LOGGER.trace("Press {} {} {}", e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
-					final KeyStrokeEvent keyPressMessage = new KeyStrokeEvent(false, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
+					final var keyPressMessage = new KeyStrokeEvent(false, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
 					G2DMainFrame.this.rendererData.getEventConsumer().accept(keyPressMessage);
 				}
 				else if (event.getID() == KeyEvent.KEY_RELEASED) {
 					LOGGER.trace("Release {} {} {}", e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
-					final KeyStrokeEvent keyPressMessage = new KeyStrokeEvent(true, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
+					final var keyPressMessage = new KeyStrokeEvent(true, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
 					G2DMainFrame.this.rendererData.getEventConsumer().accept(keyPressMessage);
 				}
 			}
@@ -327,7 +321,7 @@ public class G2DMainFrame extends Frame {
 	}
 	
 	private void registerFullScreenWindow(final int screenIdx, final Window window) {
-		final GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		final var env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice device;
 		if (screenIdx > -1 && screenIdx < env.getScreenDevices().length) {
 			device = env.getScreenDevices()[screenIdx];
@@ -335,7 +329,7 @@ public class G2DMainFrame extends Frame {
 		}
 		else {
 			device = env.getDefaultScreenDevice();
-			for (int i = 0; i < env.getScreenDevices().length; i++) {
+			for (var i = 0; i < env.getScreenDevices().length; i++) {
 				if (device.getIDstring().equals(env.getScreenDevices()[i].getIDstring())) {
 					this.rendererData.getVideoOptions().setFullScreenNumber(i);
 					this.fullScreenIdxRegistered = window != null ? screenIdx : -1;
@@ -345,8 +339,8 @@ public class G2DMainFrame extends Frame {
 		}
 		
 		if (window != null) {
-			final int x = (int) device.getDefaultConfiguration().getBounds().getWidth();
-			final int y = (int) device.getDefaultConfiguration().getBounds().getHeight();
+			final var x = (int) device.getDefaultConfiguration().getBounds().getWidth();
+			final var y = (int) device.getDefaultConfiguration().getBounds().getHeight();
 			LOGGER.debug("Full screen size: {}x{}", x, y);
 			window.setSize(x, y);
 		}
@@ -376,14 +370,14 @@ public class G2DMainFrame extends Frame {
 	}
 	
 	private void setupBorderlessWindow(final int screenIdx) {
-		final GraphicsEnvironment env = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		final var env = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		GraphicsDevice device;
 		if (screenIdx > -1 && screenIdx < env.getScreenDevices().length) {
 			device = env.getScreenDevices()[screenIdx];
 		}
 		else {
 			device = env.getDefaultScreenDevice();
-			for (int i = 0; i < env.getScreenDevices().length; i++) {
+			for (var i = 0; i < env.getScreenDevices().length; i++) {
 				if (device.getIDstring().equals(env.getScreenDevices()[i].getIDstring())) {
 					this.rendererData.getVideoOptions().setFullScreenNumber(i);
 					break;
@@ -391,10 +385,10 @@ public class G2DMainFrame extends Frame {
 			}
 		}
 		
-		final Point location = device.getDefaultConfiguration().getBounds().getLocation();
+		final var location = device.getDefaultConfiguration().getBounds().getLocation();
 		LOGGER.debug("Borderless screen location: {}", location);
 		this.setLocation(location);
-		final Rectangle bounds = device.getDefaultConfiguration().getBounds();
+		final var bounds = device.getDefaultConfiguration().getBounds();
 		LOGGER.debug("Borderless screen size: {}", bounds);
 		this.setSize(bounds.width, bounds.height);
 		
@@ -408,14 +402,14 @@ public class G2DMainFrame extends Frame {
 	}
 	
 	private void applyReferenceWindowGeometry() {
-		final DisplayMode mode = this.getGraphicsConfiguration().getDevice().getDisplayMode();
+		final var mode = this.getGraphicsConfiguration().getDevice().getDisplayMode();
 		final CoordI2 size = ImmutableCoordI2.create(Math.min(mode.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), Math.min(mode.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
 		this.setLocation(mode.getWidth() / 2 - size.getX() / 2, mode.getHeight() / 2 - size.getY() / 2);
 		this.setSize(size.getX(), size.getY());
 	}
 	
 	private static int getModifiers(final InputEvent event) {
-		int result = 0;
+		var result = 0;
 		
 		if (event.isShiftDown()) {
 			result |= KeyModifiers.MODIFIER_SHIFT;

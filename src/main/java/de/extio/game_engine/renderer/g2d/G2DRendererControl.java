@@ -72,7 +72,7 @@ public class G2DRendererControl implements RendererControl {
 					}
 				}
 				
-				final G2DMainFrame mainFrame = new G2DMainFrame(this.rendererData);
+				final var mainFrame = new G2DMainFrame(this.rendererData);
 				if (this.rendererData.getVideoOptions().getVideoMode() == VideoOptionsVideoMode.FULLSCREEN) {
 					mainFrame.fullscreen();
 				}
@@ -196,7 +196,7 @@ public class G2DRendererControl implements RendererControl {
 	}
 	
 	private void updateAbsoluteViewportPortDimension() {
-		final CoordI2 absoluteDim = this.absoluteViewportDimension;
+		final var absoluteDim = this.absoluteViewportDimension;
 		if (absoluteDim == null || absoluteDim.getX() != this.renderer.getMainFrame().getWidth() || absoluteDim.getY() != this.renderer.getMainFrame().getHeight()) {
 			this.absoluteViewportDimension = ImmutableCoordI2.create(this.renderer.getMainFrame().getWidth(), this.renderer.getMainFrame().getHeight());
 		}
@@ -204,13 +204,17 @@ public class G2DRendererControl implements RendererControl {
 	
 	private void calculateViewportEffectiveDimension() {
 		this.effectiveViewportDimension = ImmutableCoordI2.create((int) (this.absoluteViewportDimension.getX() / this.scaleFactor), (int) (this.absoluteViewportDimension.getY() / this.scaleFactor));
-		if (LOGGER.isDebugEnabled()) LOGGER.debug("Viewport absolute dimension: {}", this.absoluteViewportDimension);
-		if (LOGGER.isDebugEnabled()) LOGGER.debug("Viewport effective dimension: {}", this.effectiveViewportDimension);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Viewport absolute dimension: {}", this.absoluteViewportDimension);
+		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Viewport effective dimension: {}", this.effectiveViewportDimension);
+		}
 	}
 	
 	private void calculateScaleFactor() {
-		final double fLow = Math.min(this.absoluteViewportDimension.getX() / (double) REFERENCE_RESOLUTION.getX(), this.absoluteViewportDimension.getY() / (double) REFERENCE_RESOLUTION.getY());
-		final double fHigh = Math.min(this.absoluteViewportDimension.getX() / (double) NO_SCALING_UPPER_LIMIT.getX(), this.absoluteViewportDimension.getY() / (double) NO_SCALING_UPPER_LIMIT.getY());
+		final var fLow = Math.min(this.absoluteViewportDimension.getX() / (double) REFERENCE_RESOLUTION.getX(), this.absoluteViewportDimension.getY() / (double) REFERENCE_RESOLUTION.getY());
+		final var fHigh = Math.min(this.absoluteViewportDimension.getX() / (double) NO_SCALING_UPPER_LIMIT.getX(), this.absoluteViewportDimension.getY() / (double) NO_SCALING_UPPER_LIMIT.getY());
 		
 		double factor;
 		if (this.isForceAutoScaling()) {
@@ -229,7 +233,9 @@ public class G2DRendererControl implements RendererControl {
 		}
 		this.scaleFactor = Math.min(SCALE_FACTOR_MAX, Math.max(SCALE_FACTOR_MIN, factor));
 		
-		if (LOGGER.isDebugEnabled()) LOGGER.debug("Viewport scale factor: {}", this.scaleFactor);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("Viewport scale factor: {}", this.scaleFactor);
+		}
 	}
 	
 	@Override

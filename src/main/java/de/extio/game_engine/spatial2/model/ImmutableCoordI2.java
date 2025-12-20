@@ -20,9 +20,9 @@ public final class ImmutableCoordI2 implements CoordI2 {
 	private final static ImmutableCoordI2 COORD_ONE = new ImmutableCoordI2(1, 1);
 	
 	static {
-		int i = 0;
-		for (int x = -COORD_CACHE_BOUND; x < COORD_CACHE_BOUND; x++) {
-			for (int y = -COORD_CACHE_BOUND; y < COORD_CACHE_BOUND; y++) {
+		var i = 0;
+		for (var x = -COORD_CACHE_BOUND; x < COORD_CACHE_BOUND; x++) {
+			for (var y = -COORD_CACHE_BOUND; y < COORD_CACHE_BOUND; y++) {
 				COORD_CACHE[i++] = new ImmutableCoordI2(x, y);
 			}
 		}
@@ -52,13 +52,13 @@ public final class ImmutableCoordI2 implements CoordI2 {
 	
 	public static ImmutableCoordI2 create(final int x, final int y) {
 		if (x >= -COORD_CACHE_BOUND && x < COORD_CACHE_BOUND && y >= -COORD_CACHE_BOUND && y < COORD_CACHE_BOUND) {
-			final int idx = (x + COORD_CACHE_BOUND) * COORD_CACHE_DIM + (y + COORD_CACHE_BOUND);
+			final var idx = (x + COORD_CACHE_BOUND) * COORD_CACHE_DIM + (y + COORD_CACHE_BOUND);
 			if (idx >= 0 && idx < COORD_CACHE_SIZE) {
 				return COORD_CACHE[idx];
 			}
 		}
 		
-		ImmutableCoordI2 cached = LAST_CACHED;
+		var cached = LAST_CACHED;
 		if (cached.getX() != x || cached.getY() != y) {
 			cached = new ImmutableCoordI2(x, y);
 			LAST_CACHED = cached;
@@ -160,28 +160,28 @@ public final class ImmutableCoordI2 implements CoordI2 {
 	
 	@Override
 	public ImmutableCoordI2 divide(final HasPosition2 delta) {
-		final int dx = delta.getPosition().getX() != 0 ? delta.getPosition().getX() : 1;
-		final int dy = delta.getPosition().getY() != 0 ? delta.getPosition().getY() : 1;
+		final var dx = delta.getPosition().getX() != 0 ? delta.getPosition().getX() : 1;
+		final var dy = delta.getPosition().getY() != 0 ? delta.getPosition().getY() : 1;
 		return create(this.x / dx, this.y / dy);
 	}
 	
 	@Override
 	public ImmutableCoordI2 divide(final int dx, final int dy) {
-		final int dx_ = dx != 0 ? dx : 1;
-		final int dy_ = dy != 0 ? dy : 1;
+		final var dx_ = dx != 0 ? dx : 1;
+		final var dy_ = dy != 0 ? dy : 1;
 		return create(this.x / dx_, this.y / dy_);
 	}
 	
 	@Override
 	public ImmutableCoordI2 divide(final int n) {
-		final int n_ = n != 0 ? n : 1;
+		final var n_ = n != 0 ? n : 1;
 		return create(this.x / n_, this.y / n_);
 	}
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		result = prime * result + this.x;
 		result = prime * result + this.y;
 		return result;
@@ -192,10 +192,9 @@ public final class ImmutableCoordI2 implements CoordI2 {
 		if (this == obj) {
 			return true;
 		}
-		if ((obj == null) || !(obj instanceof CoordI2)) {
+		if ((obj == null) || !(obj instanceof final CoordI2 other)) {
 			return false;
 		}
-		final CoordI2 other = (CoordI2) obj;
 		if (this.x != other.getX()) {
 			return false;
 		}

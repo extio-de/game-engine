@@ -4,9 +4,9 @@ import java.util.function.Consumer;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomSlider;
+import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderControl;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
-import de.extio.game_engine.renderer.model.RgbaColor;
 
 public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderControl {
 	

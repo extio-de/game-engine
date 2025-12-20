@@ -143,7 +143,7 @@ public class CustomSlider extends Component {
 	}
 	
 	private void action(final MouseEvent e) {
-		double value = CustomSlider.this.horizontal ? ((double) e.getX() / (double) CustomSlider.this.getWidth()) : (1.0 - ((double) e.getY() / (double) CustomSlider.this.getHeight()));
+		var value = CustomSlider.this.horizontal ? ((double) e.getX() / (double) CustomSlider.this.getWidth()) : (1.0 - ((double) e.getY() / (double) CustomSlider.this.getHeight()));
 		value = Math.min(1.0, Math.max(0.0, value));
 		CustomSlider.this.setValue(value);
 		synchronized (this) {
@@ -168,7 +168,7 @@ public class CustomSlider extends Component {
 	
 	@Override
 	public void paint(final Graphics g) {
-		final Graphics2D g2d = (Graphics2D) g;
+		final var g2d = (Graphics2D) g;
 		
 		float h, s, b;
 		if (this.color == null) {
@@ -177,7 +177,7 @@ public class CustomSlider extends Component {
 			b = 0.80F;
 		}
 		else {
-			final float[] hsb = Color.RGBtoHSB(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), null);
+			final var hsb = Color.RGBtoHSB(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), null);
 			h = hsb[0];
 			s = hsb[1];
 			b = hsb[2];
@@ -196,9 +196,9 @@ public class CustomSlider extends Component {
 		
 		// Small lines
 		b -= 0.20F;
-		final int length = this.horizontal ? this.getWidth() : this.getHeight();
-		for (int i = 1; i < 10; i++) {
-			final int pos = (int) ((double) length / 10.0 * i);
+		final var length = this.horizontal ? this.getWidth() : this.getHeight();
+		for (var i = 1; i < 10; i++) {
+			final var pos = (int) ((double) length / 10.0 * i);
 			if (this.horizontal) {
 				this.drawLine(g2d, h, s, b, pos, this.getHeight() / 4, pos, this.getHeight() / 4 * 3, !this.horizontal);
 			}

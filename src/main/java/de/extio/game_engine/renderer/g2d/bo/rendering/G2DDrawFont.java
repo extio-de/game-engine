@@ -4,15 +4,13 @@ import java.awt.Color;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
-import java.awt.Rectangle;
-import java.awt.font.GlyphVector;
 import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
-import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
+import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
@@ -81,13 +79,13 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 				break;
 			
 			case CENTER: {
-				final CoordI2 textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
+				final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
 				renderText(graphics, textDim, scaleFactor, (this.width - textDim.getX()) / 2 + this.x, this.y, this.size, this.text);
 				break;
 			}
 			
 			case RIGHT: {
-				final CoordI2 textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
+				final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
 				renderText(graphics, textDim, scaleFactor, this.width - textDim.getX() + this.x, this.y, this.size, this.text);
 				break;
 			}
@@ -106,8 +104,8 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	}
 	
 	public static Font getFont(final double scaleFactor, final int size_) {
-		final int size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
-		final float sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
+		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
+		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
 		return baseFont.deriveFont(sizeScaled);
 	}
 	
@@ -120,9 +118,9 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 			return;
 		}
 		
-		final int size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
-		final float sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
-		final Font font = baseFont.deriveFont(sizeScaled);
+		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
+		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
+		final var font = baseFont.deriveFont(sizeScaled);
 		CoordI2 textDim;
 		if (textDim_ == null) {
 			textDim = getTextDimensions(text, graphics, size_, scaleFactor);
@@ -139,11 +137,11 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 			return ImmutableCoordI2.one();
 		}
 		
-		final int size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
-		final float sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
-		final Font font = baseFont.deriveFont(sizeScaled);
-		final GlyphVector gv = font.layoutGlyphVector(((Graphics2D) graphics).getFontRenderContext(), text.toCharArray(), 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
-		final Rectangle pixBounds = gv.getPixelBounds(((Graphics2D) graphics).getFontRenderContext(), 0, 0);
+		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
+		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
+		final var font = baseFont.deriveFont(sizeScaled);
+		final var gv = font.layoutGlyphVector(((Graphics2D) graphics).getFontRenderContext(), text.toCharArray(), 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
+		final var pixBounds = gv.getPixelBounds(((Graphics2D) graphics).getFontRenderContext(), 0, 0);
 		return MutableCoordI2.create(pixBounds.x + pixBounds.width, pixBounds.height - (int) pixBounds.getMaxY());
 	}
 	

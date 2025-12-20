@@ -11,7 +11,8 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 
 public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {
 	
-	public static record TooltipRecord(CoordI2 position, String text) {}
+	public static record TooltipRecord(CoordI2 position, String text) {
+	}
 	
 	public static TooltipRecord TOOLTIP = null;
 	
@@ -27,7 +28,7 @@ public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {
 			return;
 		}
 		
-		final CoordI2 textDim = G2DDrawFont.getTextDimensions(TOOLTIP.text(), graphics, 14, scaleFactor);
+		final var textDim = G2DDrawFont.getTextDimensions(TOOLTIP.text(), graphics, 14, scaleFactor);
 		
 		graphics.setColor(BACKGROUND);
 		graphics.fillRect(TOOLTIP.position().getX(), TOOLTIP.position().getY(), textDim.getX() + 20, textDim.getY() + 20);

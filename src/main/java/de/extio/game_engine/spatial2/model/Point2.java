@@ -26,8 +26,8 @@ public class Point2 implements HasPosition2 {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		result = prime * result + ((this.coord == null) ? 0 : this.coord.hashCode());
 		return result;
 	}
@@ -40,7 +40,7 @@ public class Point2 implements HasPosition2 {
 		if ((obj == null) || (this.getClass() != obj.getClass())) {
 			return false;
 		}
-		final Point2 other = (Point2) obj;
+		final var other = (Point2) obj;
 		if (this.coord == null) {
 			if (other.coord != null) {
 				return false;
@@ -54,7 +54,7 @@ public class Point2 implements HasPosition2 {
 	
 	@Override
 	public String toString() {
-		final StringBuilder builder = new StringBuilder();
+		final var builder = new StringBuilder();
 		builder.append("Point2 [coord=");
 		builder.append(this.coord);
 		builder.append("]");

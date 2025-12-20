@@ -10,7 +10,7 @@ public enum Edge2 {
 	LEFT(),
 	TOP();
 	
-	public final static Edge2[] VALUES_CACHED = new Edge2[] {
+	public final static Edge2[] VALUES_CACHED = {
 			RIGHT,
 			BOTTOM,
 			LEFT,
@@ -121,7 +121,7 @@ public enum Edge2 {
 	}
 	
 	public static String toString(final int edges) {
-		final StringBuilder sb = new StringBuilder();
+		final var sb = new StringBuilder();
 		sb.append("Edges [");
 		
 		for (final Edge2 edge : Edge2.VALUES_CACHED) {
@@ -135,7 +135,7 @@ public enum Edge2 {
 		return sb.toString();
 	}
 	
-	private int bit;
+	private final int bit;
 	
 	Edge2() {
 		this.bit = 1 << this.ordinal();

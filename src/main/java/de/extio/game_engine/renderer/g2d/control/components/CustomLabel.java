@@ -146,7 +146,7 @@ public class CustomLabel extends Component {
 	
 	@Override
 	public void paint(final Graphics g) {
-		final Graphics2D g2d = (Graphics2D) g;
+		final var g2d = (Graphics2D) g;
 		
 		if (this.backgroundColor != null) {
 			g2d.setColor(this.backgroundColor);
@@ -160,7 +160,7 @@ public class CustomLabel extends Component {
 			b = 0.80F;
 		}
 		else {
-			final float[] hsb = Color.RGBtoHSB(this.foregroundColor.getRed(), this.foregroundColor.getGreen(), this.foregroundColor.getBlue(), null);
+			final var hsb = Color.RGBtoHSB(this.foregroundColor.getRed(), this.foregroundColor.getGreen(), this.foregroundColor.getBlue(), null);
 			h = hsb[0];
 			s = hsb[1];
 			b = hsb[2];
@@ -183,8 +183,8 @@ public class CustomLabel extends Component {
 		b = Math.max(0.0f, Math.min(1.0f, b));
 		g2d.setColor(Color.getHSBColor(h, s, b));
 		
-		final DrawFontRenderingBoTextAlignment alignment = this.textAlignment == null ? DrawFontRenderingBoTextAlignment.CENTER : this.textAlignment;
-		final CoordI2 textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
+		final var alignment = this.textAlignment == null ? DrawFontRenderingBoTextAlignment.CENTER : this.textAlignment;
+		final var textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
 		switch (alignment) {
 			case LEFT: {
 				G2DDrawFont.renderText(g2d,

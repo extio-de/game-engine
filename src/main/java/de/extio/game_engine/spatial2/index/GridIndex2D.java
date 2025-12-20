@@ -49,7 +49,7 @@ public final class GridIndex2D<T extends HasPosition2> implements Iterable<T>, A
 	}
 	
 	public List<T> get(final HasPosition2 hasPosition2) {
-		final CoordI2 coord = hasPosition2.getPosition();
+		final var coord = hasPosition2.getPosition();
 		if (!this.checkBounds(coord)) {
 			return List.of();
 		}
@@ -101,7 +101,7 @@ public final class GridIndex2D<T extends HasPosition2> implements Iterable<T>, A
 					throw new ConcurrentModificationException();
 				}
 				
-				final T result = GridIndex2D.this.index.get(this.x).get(this.y).get(this.i);
+				final var result = GridIndex2D.this.index.get(this.x).get(this.y).get(this.i);
 				this.forward();
 				return result;
 			}
@@ -138,9 +138,9 @@ public final class GridIndex2D<T extends HasPosition2> implements Iterable<T>, A
 	
 	@Override
 	public void forEach(final Consumer<? super T> action) {
-		for (int x = 0; x < this.index.size(); x++) {
-			for (int y = 0; y < this.index.get(x).size(); y++) {
-				for (int i = 0; i < this.index.get(x).get(y).size(); i++) {
+		for (var x = 0; x < this.index.size(); x++) {
+			for (var y = 0; y < this.index.get(x).size(); y++) {
+				for (var i = 0; i < this.index.get(x).get(y).size(); i++) {
 					action.accept(this.index.get(x).get(y).get(i));
 				}
 			}
@@ -150,8 +150,8 @@ public final class GridIndex2D<T extends HasPosition2> implements Iterable<T>, A
 	public void forEach(final BiConsumer<CoordI2, List<T>> action) {
 		final CoordI2 coord = MutableCoordI2.create();
 		
-		for (int x = 0; x < this.index.size(); x++) {
-			for (int y = 0; y < this.index.get(x).size(); y++) {
+		for (var x = 0; x < this.index.size(); x++) {
+			for (var y = 0; y < this.index.get(x).size(); y++) {
 				if (this.index.get(x).get(y).size() > 0) {
 					coord.setXY(x, y);
 					action.accept(coord, this.index.get(x).get(y));
@@ -161,7 +161,7 @@ public final class GridIndex2D<T extends HasPosition2> implements Iterable<T>, A
 	}
 	
 	private void ensureBounds(final CoordI2 coord) {
-		int delta = this.index.size() - coord.getX();
+		var delta = this.index.size() - coord.getX();
 		if (delta < 1) {
 			for (delta = -delta; delta >= 0; delta--) {
 				this.index.add(new ArrayList<>());

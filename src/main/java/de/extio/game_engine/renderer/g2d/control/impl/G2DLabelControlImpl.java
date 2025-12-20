@@ -2,10 +2,10 @@ package de.extio.game_engine.renderer.g2d.control.impl;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomLabel;
-import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
-import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.renderer.model.RgbaColor;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
+import de.extio.game_engine.renderer.model.event.UiControlEvent;
 
 public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelControl {
 	

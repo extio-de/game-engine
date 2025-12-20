@@ -5,7 +5,8 @@ import java.awt.Graphics2D;
 
 public class ComponentRenderingSupport {
 	
-	public final static record HSB(float h, float s, float b) {}
+	public final static record HSB(float h, float s, float b) {
+	}
 	
 	public final static HSB HSB_COMPONENT_BORDER0 = new HSB(0.71f, 0.12f, 0.50f);
 	
@@ -34,8 +35,8 @@ public class ComponentRenderingSupport {
 	public final static Color COLOR_WINDOW_BGR = new Color(0, 0, 0, 180);
 	
 	public static void drawDecorativeBorder(final Graphics2D g2d, final int x, final int y, final int w, final int h, final int strength, final Color color) {
-		final int strength2 = strength * 2;
-		final int strength4 = strength * 4;
+		final var strength2 = strength * 2;
+		final var strength4 = strength * 4;
 		
 		g2d.setColor(color);
 		

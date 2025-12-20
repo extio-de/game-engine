@@ -8,15 +8,15 @@ import java.util.Objects;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRenderingHintFactory;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip.TooltipRecord;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.spatial2.WorldUtils2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
-import de.extio.game_engine.renderer.RendererData;
-import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 
 public abstract class G2DBaseControlImpl implements BaseControl {
 	
@@ -220,7 +220,7 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 				this.tooltipMousePosition != null &&
 				WorldUtils2.isInBounds(this.tooltipMousePosition, ImmutableCoordI2.create(Math.max(1, this.width), Math.max(1, this.height)))) {
 			
-			G2DDrawControlTooltip.TOOLTIP = new TooltipRecord(ImmutableCoordI2.create(this.x + 10 + this.tooltipMousePosition.getX(), this.y + 10 + this.tooltipMousePosition.getY()), this.tooltip); 
+			G2DDrawControlTooltip.TOOLTIP = new TooltipRecord(ImmutableCoordI2.create(this.x + 10 + this.tooltipMousePosition.getX(), this.y + 10 + this.tooltipMousePosition.getY()), this.tooltip);
 		}
 	}
 	

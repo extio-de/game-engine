@@ -178,8 +178,8 @@ public final class MutableCoordI2 implements CoordI2 {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		result = prime * result + this.x;
 		result = prime * result + this.y;
 		return result;
@@ -190,10 +190,9 @@ public final class MutableCoordI2 implements CoordI2 {
 		if (this == obj) {
 			return true;
 		}
-		if ((obj == null) || !(obj instanceof CoordI2)) {
+		if ((obj == null) || !(obj instanceof final CoordI2 other)) {
 			return false;
 		}
-		final CoordI2 other = (CoordI2) obj;
 		if (this.x != other.getX()) {
 			return false;
 		}

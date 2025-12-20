@@ -3,14 +3,13 @@ package de.extio.game_engine.renderer.g2d.control;
 import java.awt.Graphics2D;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DLabelControlImpl;
@@ -22,14 +21,10 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DTextfieldControlImpl2;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
-import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.DrawFontRenderingBoTextAlignment;
-import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.RgbaColor;
-import de.extio.game_engine.spatial2.model.CoordI2;
-import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 
 public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRenderingBo {
 	
@@ -146,7 +141,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
-		G2DBaseControlImpl control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);
+		var control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);
 		if (control == null) {
 			if (this.clazz == ButtonControl.class) {
 				control = new G2DButtonControlImpl();
@@ -199,7 +194,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			
 			CACHED_CONTROLS.put(this.id, control);
 			if (this.controlGroup != null && !this.controlGroup.isEmpty()) {
-				List<BaseControl> controls = CONTROL_GROUPS.get(this.controlGroup);
+				var controls = CONTROL_GROUPS.get(this.controlGroup);
 				if (controls == null) {
 					controls = new ArrayList<>();
 					CONTROL_GROUPS.put(this.controlGroup, controls);
@@ -330,15 +325,15 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	}
 	
 	public static void closeStatic() {
-		final Iterator<BaseControl> it = CACHED_CONTROLS.values().iterator();
+		final var it = CACHED_CONTROLS.values().iterator();
 		while (it.hasNext()) {
-			final BaseControl control = it.next();
+			final var control = it.next();
 			if (control.getInUse()) {
 				control.setInUse(false);
 			}
 			else {
 				if (control.getControlGroup() != null && !control.getControlGroup().isEmpty()) {
-					final List<BaseControl> controls = CONTROL_GROUPS.get(control.getControlGroup());
+					final var controls = CONTROL_GROUPS.get(control.getControlGroup());
 					if (controls != null) {
 						controls.remove(control);
 					}

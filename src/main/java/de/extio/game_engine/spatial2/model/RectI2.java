@@ -58,8 +58,8 @@ public class RectI2 {
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = 1;
+		final var prime = 31;
+		var result = 1;
 		result = prime * result + ((this.c0 == null) ? 0 : this.c0.hashCode());
 		result = prime * result + ((this.c1 == null) ? 0 : this.c1.hashCode());
 		return result;
@@ -73,7 +73,7 @@ public class RectI2 {
 		if ((obj == null) || (this.getClass() != obj.getClass())) {
 			return false;
 		}
-		final RectI2 other = (RectI2) obj;
+		final var other = (RectI2) obj;
 		if (this.c0 == null) {
 			if (other.c0 != null) {
 				return false;

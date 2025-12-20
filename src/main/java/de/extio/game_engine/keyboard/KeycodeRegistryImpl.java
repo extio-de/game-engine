@@ -18,20 +18,20 @@ public class KeycodeRegistryImpl implements KeycodeRegistry {
 			this.registry.put(keycodeRegistration.getQualifier(), new KeycodeRegistration(keycodeRegistration));
 		}
 		
-//		EngineFacade.instance().storePersistentClientState();
+		//		EngineFacade.instance().storePersistentClientState();
 	}
 	
 	@Override
 	public void registerDefault(final KeycodeRegistration... keycodeRegistrations) {
 		this.lazyLoadRegistry();
 		
-		boolean added = false;
+		var added = false;
 		for (final KeycodeRegistration keycodeRegistration : keycodeRegistrations) {
 			added |= this.registry.putIfAbsent(keycodeRegistration.getQualifier(), new KeycodeRegistration(keycodeRegistration)) == null;
 		}
 		
 		if (added) {
-//			EngineFacade.instance().storePersistentClientState();
+			//			EngineFacade.instance().storePersistentClientState();
 		}
 	}
 	
@@ -43,7 +43,7 @@ public class KeycodeRegistryImpl implements KeycodeRegistry {
 			this.registry.remove(qualifier);
 		}
 		
-//		EngineFacade.instance().storePersistentClientState();
+		//		EngineFacade.instance().storePersistentClientState();
 	}
 	
 	@Override
@@ -74,7 +74,7 @@ public class KeycodeRegistryImpl implements KeycodeRegistry {
 	public boolean check(final String qualifier, final int code, final int modifiers) {
 		this.lazyLoadRegistry();
 		
-		final KeycodeRegistration reg = this.registry.get(qualifier);
+		final var reg = this.registry.get(qualifier);
 		if (reg == null) {
 			return false;
 		}
@@ -82,17 +82,16 @@ public class KeycodeRegistryImpl implements KeycodeRegistry {
 		return reg.getCode() == code && reg.getModifier() == modifiers;
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void lazyLoadRegistry() {
 		if (this.registry == null) {
 			synchronized (this) {
 				if (this.registry == null) {
-//					this.registry = (Map<String, KeycodeRegistration>) this.clientEngineData.getPersistentClientState().state.get("KeycodeRegistry");
-//					if (this.registry == null) {
-						this.registry = Collections.synchronizedMap(new LinkedHashMap<>());
-//						this.clientEngineData.getPersistentClientState().state.put("KeycodeRegistry", this.registry);
-//						EngineFacade.instance().storePersistentClientState();
-//					}
+					//					this.registry = (Map<String, KeycodeRegistration>) this.clientEngineData.getPersistentClientState().state.get("KeycodeRegistry");
+					//					if (this.registry == null) {
+					this.registry = Collections.synchronizedMap(new LinkedHashMap<>());
+					//						this.clientEngineData.getPersistentClientState().state.put("KeycodeRegistry", this.registry);
+					//						EngineFacade.instance().storePersistentClientState();
+					//					}
 				}
 			}
 		}

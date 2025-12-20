@@ -1,6 +1,5 @@
 package de.extio.game_engine.renderer.g2d.bo.rendering;
 
-import java.awt.Color;
 import java.awt.Graphics2D;
 
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
@@ -29,24 +28,24 @@ public class G2DDrawWindow extends G2DAbstractRenderingBo implements DrawWindowR
 	
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
-		final int sx = (int) (this.x * scaleFactor);
-		final int sy = (int) (this.y * scaleFactor);
-		final int sw = (int) (this.width * scaleFactor);
-		final int sh = (int) (this.height * scaleFactor);
-		final int strength = Math.max(2, (int) (3 * scaleFactor));
+		final var sx = (int) (this.x * scaleFactor);
+		final var sy = (int) (this.y * scaleFactor);
+		final var sw = (int) (this.width * scaleFactor);
+		final var sh = (int) (this.height * scaleFactor);
+		final var strength = Math.max(2, (int) (3 * scaleFactor));
 		if (this.color == null) {
 			this.color = COLOR_WINDOW;
 		}
 		
-		final Color cMain = this.color.toAwtColor();
-		final RgbaColor rgbaDarker = new RgbaColor(cMain);
+		final var cMain = this.color.toAwtColor();
+		final var rgbaDarker = new RgbaColor(cMain);
 		rgbaDarker.setR(rgbaDarker.getR() / 2);
 		rgbaDarker.setG(rgbaDarker.getG() / 2);
 		rgbaDarker.setB(rgbaDarker.getB() / 2);
-		final Color cDarker = rgbaDarker.toAwtColor();
+		final var cDarker = rgbaDarker.toAwtColor();
 		
 		if (this.thickBorder) {
-			final int borderStrength = strength * 2;
+			final var borderStrength = strength * 2;
 			graphics.setColor(cMain);
 			graphics.fillRect(sx + strength * 2, sy + strength * 2, sw - strength * 4, borderStrength);
 			graphics.setColor(cDarker);

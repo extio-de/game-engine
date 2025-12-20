@@ -80,7 +80,7 @@ public class EnhancedWindow<T> extends Window {
 	@Override
 	public void updateArea() {
 		if (this.areaFunction != null) {
-			final Area2 area = this.areaFunction.apply(this.state);
+			final var area = this.areaFunction.apply(this.state);
 			this.setDimension(area.getDimension());
 			//			this.resizeCentered(area.getDimension());
 			if (!this.persistentPosition) {
@@ -117,7 +117,7 @@ public class EnhancedWindow<T> extends Window {
 			// 	this.applyRelativeScreenPosition();
 			// }
 			/*else*/ if (this.areaFunction != null) {
-				final Area2 area = this.areaFunction.apply(this.state);
+				final var area = this.areaFunction.apply(this.state);
 				this.setPosition(area.getPosition());
 			}
 		}
@@ -125,7 +125,6 @@ public class EnhancedWindow<T> extends Window {
 	
 	private void savePosition() {
 		if (!this.persistentPosition) {
-			return;
 		}
 		
 		// final CoordD2 existingPosition = (CoordD2) EngineFacade.instance().getPersistentClientState().state.get(this.getPersistentStateKeyName());

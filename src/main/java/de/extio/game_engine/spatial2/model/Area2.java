@@ -44,8 +44,8 @@ public class Area2 extends Point2 implements HasPositionAndDimension2, SpatialIn
 	
 	@Override
 	public int hashCode() {
-		final int prime = 31;
-		int result = super.hashCode();
+		final var prime = 31;
+		var result = super.hashCode();
 		result = prime * result + ((this.dimension == null) ? 0 : this.dimension.hashCode());
 		return result;
 	}
@@ -58,7 +58,7 @@ public class Area2 extends Point2 implements HasPositionAndDimension2, SpatialIn
 		if (!super.equals(obj)) {
 			return false;
 		}
-		final Area2 other = (Area2) obj;
+		final var other = (Area2) obj;
 		if (this.dimension == null) {
 			if (other.dimension != null) {
 				return false;
@@ -72,7 +72,7 @@ public class Area2 extends Point2 implements HasPositionAndDimension2, SpatialIn
 	
 	@Override
 	public String toString() {
-		final StringBuilder builder = new StringBuilder();
+		final var builder = new StringBuilder();
 		builder.append("Area2 [getPosition()=");
 		builder.append(this.getPosition());
 		builder.append(", dimension=");

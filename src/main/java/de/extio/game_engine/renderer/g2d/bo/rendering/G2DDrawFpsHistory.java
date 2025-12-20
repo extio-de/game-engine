@@ -33,14 +33,14 @@ public class G2DDrawFpsHistory extends G2DAbstractRenderingBo {
 			this.thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate());
 		}
 		
-		final int x = (int) (this.x * scaleFactor);
-		final int y = (int) (this.y * scaleFactor);
-		int i = 0;
+		final var x = (int) (this.x * scaleFactor);
+		final var y = (int) (this.y * scaleFactor);
+		var i = 0;
 		for (final Integer val : this.history) {
 			if (val == null) {
 				continue;
 			}
-			final int val_ = Math.max(1, Math.min((int) (100 * scaleFactor), (int) (val.intValue() * scaleFactor)));
+			final var val_ = Math.max(1, Math.min((int) (100 * scaleFactor), (int) (val.intValue() * scaleFactor)));
 			
 			if (val_ < this.thresholds[0]) {
 				graphics.setColor(Color.DARK_GRAY);

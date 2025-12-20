@@ -37,8 +37,8 @@ public final class Matrix2<T> implements Iterable<T> {
 		this.dimension.setX(other.matrix.size());
 		
 		this.matrix = new ArrayList<>(other.matrix);
-		for (int x = 0; x < this.matrix.size(); x++) {
-			final List<T> column = other.matrix.get(x);
+		for (var x = 0; x < this.matrix.size(); x++) {
+			final var column = other.matrix.get(x);
 			this.matrix.set(x, new ArrayList<>(column));
 			
 			if (column.size() > this.dimension.getY()) {
@@ -93,8 +93,8 @@ public final class Matrix2<T> implements Iterable<T> {
 	}
 	
 	public void removeAll() {
-		for (int x = 0; x < this.matrix.size(); x++) {
-			for (int y = 0; y < this.matrix.get(x).size(); y++) {
+		for (var x = 0; x < this.matrix.size(); x++) {
+			for (var y = 0; y < this.matrix.get(x).size(); y++) {
 				this.matrix.get(x).set(y, null);
 			}
 		}
@@ -127,11 +127,11 @@ public final class Matrix2<T> implements Iterable<T> {
 			return;
 		}
 		
-		int delta = this.matrix.size() - x;
+		var delta = this.matrix.size() - x;
 		if (delta < 1) {
 			for (delta = -delta; delta >= 0; delta--) {
 				final List<T> row = new ArrayList<>(y + 1);
-				for (int i = 0; i <= y; i++) {
+				for (var i = 0; i <= y; i++) {
 					row.add(null);
 				}
 				this.matrix.add(row);
@@ -165,8 +165,8 @@ public final class Matrix2<T> implements Iterable<T> {
 		this.allocate(origDim.getY() - 1, origDim.getX() - 1);
 		
 		final CoordI2 posSrc = MutableCoordI2.create();
-		for (int x = 0; x < origDim.getY(); x++) {
-			for (int y = 0; y < origDim.getX(); y++) {
+		for (var x = 0; x < origDim.getY(); x++) {
+			for (var y = 0; y < origDim.getX(); y++) {
 				if (direction == Edge2.LEFT) {
 					posSrc.setXY(origDim.getX() - y - 1, x);
 				}
@@ -174,7 +174,7 @@ public final class Matrix2<T> implements Iterable<T> {
 					posSrc.setXY(y, origDim.getY() - x - 1);
 				}
 				
-				final List<T> originalObjs = original.get(posSrc.getX());
+				final var originalObjs = original.get(posSrc.getX());
 				if (originalObjs.size() > posSrc.getY()) {
 					this.matrix.get(x).set(y, originalObjs.get(posSrc.getY()));
 				}
@@ -222,8 +222,8 @@ public final class Matrix2<T> implements Iterable<T> {
 					return this.obj;
 				}
 				
-				int x = this.x;
-				int y = this.y;
+				var x = this.x;
+				var y = this.y;
 				for (; x < Matrix2.this.matrix.size(); x++) {
 					for (; y < Matrix2.this.matrix.get(x).size(); y++) {
 						this.obj = Matrix2.this.matrix.get(x).get(y);
@@ -251,9 +251,9 @@ public final class Matrix2<T> implements Iterable<T> {
 	
 	@Override
 	public void forEach(final Consumer<? super T> action) {
-		for (int x = 0; x < this.matrix.size(); x++) {
-			for (int y = 0; y < this.matrix.get(x).size(); y++) {
-				final T obj = this.matrix.get(x).get(y);
+		for (var x = 0; x < this.matrix.size(); x++) {
+			for (var y = 0; y < this.matrix.get(x).size(); y++) {
+				final var obj = this.matrix.get(x).get(y);
 				if (obj != null) {
 					action.accept(obj);
 				}
@@ -264,9 +264,9 @@ public final class Matrix2<T> implements Iterable<T> {
 	public void forEach(final BiConsumer<CoordI2, T> consumer) {
 		final CoordI2 coord = MutableCoordI2.create();
 		
-		for (int x = 0; x < this.matrix.size(); x++) {
-			for (int y = 0; y < this.matrix.get(x).size(); y++) {
-				final T obj = this.matrix.get(x).get(y);
+		for (var x = 0; x < this.matrix.size(); x++) {
+			for (var y = 0; y < this.matrix.get(x).size(); y++) {
+				final var obj = this.matrix.get(x).get(y);
 				if (obj != null) {
 					coord.setXY(x, y);
 					consumer.accept(coord, obj);

@@ -51,10 +51,10 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	@SuppressWarnings("unchecked")
 	@Override
 	public void add(final T obj) {
-		final RectI2 rect = this.toRectI2(obj.getPosition(), obj.getDimension());
+		final var rect = this.toRectI2(obj.getPosition(), obj.getDimension());
 		this.expandTree(rect);
 		
-		Node<T> node = this.root;
+		var node = this.root;
 		traversal: while (true) {
 			if (node.branches == null) {
 				// Add leaf to fresh branch 
@@ -65,14 +65,14 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 				
 				// Overflow -> Split if not already at lowest level
 				if (node.createBranches()) {
-					final List<T> toSplit = node.leaves;
+					final var toSplit = node.leaves;
 					if (toSplit != null) {
 						node.leaves = null;
 						
-						splitLeaves: for (int l = 0; l < toSplit.size(); l++) {
-							final T leaf = toSplit.get(l);
+						splitLeaves: for (var l = 0; l < toSplit.size(); l++) {
+							final var leaf = toSplit.get(l);
 							
-							for (int b = 0; b < ORDER; b++) {
+							for (var b = 0; b < ORDER; b++) {
 								if (this.contains(node.branches[b], leaf)) {
 									this.addLeave(node.branches[b], leaf);
 									continue splitLeaves;
@@ -88,7 +88,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			}
 			else {
 				// Traverse
-				for (int i = 0; i < ORDER; i++) {
+				for (var i = 0; i < ORDER; i++) {
 					if (this.contains(node.branches[i], rect)) {
 						node = node.branches[i];
 						continue traversal;
@@ -105,17 +105,17 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	@SuppressWarnings("unchecked")
 	private void expandTree(final RectI2 rect) {
 		if (this.root == null) {
-			final int side = 1 << DEPTH_START;
+			final var side = 1 << DEPTH_START;
 			this.root = new Node<>(rect.getC0().getX() - side, rect.getC0().getY() - side, side << 1);
 			this.root.createBranches();
 			this.recalcDepth();
 		}
 		
-		for (int i = 0; !this.contains(this.root, rect); i++) {
-			final RectI2 expansion = new RectI2(MutableCoordI2.create(), MutableCoordI2.create());
-			final int[] branchesIntersect = new int[4];
-			int intersects = 0;
-			int containsBranch = -1;
+		for (var i = 0; !this.contains(this.root, rect); i++) {
+			final var expansion = new RectI2(MutableCoordI2.create(), MutableCoordI2.create());
+			final var branchesIntersect = new int[4];
+			var intersects = 0;
+			var containsBranch = -1;
 			
 			expansion.getC0().setXY(this.root.xMin, this.root.yMin);
 			expansion.getC1().setXY(Integer.MAX_VALUE, Integer.MAX_VALUE);
@@ -157,8 +157,8 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			}
 			
 			Node<T> rootNew = null;
-			final int branch = containsBranch != -1 ? containsBranch : branchesIntersect[i % intersects];
-			final int size = this.root.xMax - this.root.xMin + 1;
+			final var branch = containsBranch != -1 ? containsBranch : branchesIntersect[i % intersects];
+			final var size = this.root.xMax - this.root.xMin + 1;
 			switch (branch) {
 				case 0:
 					rootNew = new Node<>(this.root.xMin, this.root.yMin, size << 1);
@@ -221,7 +221,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	
 	@Override
 	public void remove(final T obj) {
-		final RectI2 rect = this.toRectI2Bounded(obj.getPosition(), obj.getDimension());
+		final var rect = this.toRectI2Bounded(obj.getPosition(), obj.getDimension());
 		if (rect == null) {
 			return;
 		}
@@ -231,7 +231,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	
 	@SuppressWarnings("unchecked")
 	private void remove(final T obj, final RectI2 rect) {
-		Node<T> node = this.root;
+		var node = this.root;
 		traversal: while (true) {
 			if (node.leaves != null) {
 				node.leaves.remove(obj);
@@ -243,7 +243,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			}
 			
 			if (node.branches != null) {
-				for (int i = 0; i < ORDER; i++) {
+				for (var i = 0; i < ORDER; i++) {
 					if (this.contains(node.branches[i], rect)) {
 						node = node.branches[i];
 						continue traversal;
@@ -256,9 +256,9 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	}
 	
 	private void shrink(final Node<T> node_) {
-		Node<T> node = node_;
+		var node = node_;
 		while (node.parent != null) {
-			for (int i = 0; i < ORDER; i++) {
+			for (var i = 0; i < ORDER; i++) {
 				if (node.parent.branches[i].leaves != null || node.parent.branches[i].branches != null) {
 					return;
 				}
@@ -272,17 +272,17 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	@SuppressWarnings("unchecked")
 	@Override
 	public void move(final T obj, final CoordI2 oldPosition, final CoordI2 oldDimension) {
-		final RectI2 rect = this.toRectI2Bounded(oldPosition, oldDimension);
+		final var rect = this.toRectI2Bounded(oldPosition, oldDimension);
 		if (rect != null) {
-			int nodes = 0;
-			Node<T> node = this.root;
+			var nodes = 0;
+			var node = this.root;
 			traversal: while (true) {
 				if (node.leaves != null) {
 					this.nodesCache[nodes++] = node;
 				}
 				
 				if (node.branches != null) {
-					for (int i = 0; i < ORDER; i++) {
+					for (var i = 0; i < ORDER; i++) {
 						if (this.contains(node.branches[i], rect)) {
 							node = node.branches[i];
 							continue traversal;
@@ -292,7 +292,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 				
 				if (!this.contains(node, obj)) {
 					while (nodes-- > 0) {
-						final Node<T> curNode = this.nodesCache[nodes];
+						final var curNode = this.nodesCache[nodes];
 						if (curNode.leaves != null) {
 							curNode.leaves.remove(obj);
 							if (curNode.leaves.isEmpty()) {
@@ -319,7 +319,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			return this.findDim1(position, filter);
 		}
 		
-		final RectI2 rect = this.toRectI2Bounded(position, dimension);
+		final var rect = this.toRectI2Bounded(position, dimension);
 		if (rect == null) {
 			return List.of();
 		}
@@ -337,7 +337,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			this.resultHolder.get().add(obj);
 		}, filter);
 		
-		final List<T> result = this.resultHolder.get();
+		final var result = this.resultHolder.get();
 		if (result == null) {
 			return List.of();
 		}
@@ -349,13 +349,13 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	private List<T> findDimN(final RectI2 rect, final Predicate<T> filter) {
 		List<T> result = null;
 		
-		int level = 0;
-		int branch = 0;
-		Node<T> node = this.root;
+		var level = 0;
+		var branch = 0;
+		var node = this.root;
 		
 		traversal: while (true) {
 			if (node.branches != null) {
-				for (int b = branch; b < ORDER; b++) {
+				for (var b = branch; b < ORDER; b++) {
 					if (this.intersects(node.branches[b], rect)) {
 						node = node.branches[b];
 						this.traverseStack[level++] = b + 1;
@@ -367,8 +367,8 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			}
 			
 			if (node.leaves != null) {
-				for (int i = 0; i < node.leaves.size(); i++) {
-					final T obj = node.leaves.get(i);
+				for (var i = 0; i < node.leaves.size(); i++) {
+					final var obj = node.leaves.get(i);
 					if (this.intersects(obj, rect) && (filter == null || filter.test((T) obj))) {
 						if (result == null) {
 							result = new ArrayList<>(this.resultDim);
@@ -397,16 +397,16 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	@SuppressWarnings("unchecked")
 	@Override
 	public T findFirstAt(final CoordI2 position, final Predicate<T> filter) {
-		final RectI2 rect = this.toRectI2Bounded(position, ImmutableCoordI2.one());
+		final var rect = this.toRectI2Bounded(position, ImmutableCoordI2.one());
 		if (rect == null) {
 			return null;
 		}
 		
-		Node<T> node = this.root;
+		var node = this.root;
 		traversal: while (true) {
 			if (node.leaves != null) {
-				for (int i = 0; i < node.leaves.size(); i++) {
-					final T obj = node.leaves.get(i);
+				for (var i = 0; i < node.leaves.size(); i++) {
+					final var obj = node.leaves.get(i);
 					if (this.contains(obj, rect) && (filter == null || filter.test((T) obj))) {
 						return obj;
 					}
@@ -414,7 +414,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			}
 			
 			if (node.branches != null) {
-				for (int i = 0; i < ORDER; i++) {
+				for (var i = 0; i < ORDER; i++) {
 					if (this.contains(node.branches[i], rect)) {
 						node = node.branches[i];
 						continue traversal;
@@ -431,16 +431,16 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	@SuppressWarnings("unchecked")
 	@Override
 	public void executeAt(final CoordI2 position, final Consumer<T> consumer, final Predicate<T> filter) {
-		final RectI2 rect = this.toRectI2Bounded(position, ImmutableCoordI2.one());
+		final var rect = this.toRectI2Bounded(position, ImmutableCoordI2.one());
 		if (rect == null) {
 			return;
 		}
 		
-		Node<T> node = this.root;
+		var node = this.root;
 		traversal: while (true) {
 			if (node.leaves != null) {
-				for (int i = 0; i < node.leaves.size(); i++) {
-					final T obj = node.leaves.get(i);
+				for (var i = 0; i < node.leaves.size(); i++) {
+					final var obj = node.leaves.get(i);
 					if (this.contains(obj, rect) && (filter == null || filter.test((T) obj))) {
 						consumer.accept(obj);
 					}
@@ -448,7 +448,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			}
 			
 			if (node.branches != null) {
-				for (int i = 0; i < ORDER; i++) {
+				for (var i = 0; i < ORDER; i++) {
 					if (this.contains(node.branches[i], rect)) {
 						node = node.branches[i];
 						continue traversal;
@@ -493,7 +493,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 					
 					if (this.node.leaves != null) {
 						if (this.leaf < this.node.leaves.size()) {
-							final T obj = this.node.leaves.get(this.leaf++);
+							final var obj = this.node.leaves.get(this.leaf++);
 							this.next = obj;
 							break traversal;
 						}
@@ -533,8 +533,8 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	public void forEach(final Consumer<? super T> action) {
 		this.traverseAll(node -> {
 			if (node.leaves != null) {
-				for (int i = 0; i < node.leaves.size(); i++) {
-					final T obj = node.leaves.get(i);
+				for (var i = 0; i < node.leaves.size(); i++) {
+					final var obj = node.leaves.get(i);
 					action.accept(obj);
 				}
 			}
@@ -564,9 +564,9 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 			return;
 		}
 		
-		int level = 0;
-		int branch = 0;
-		Node<T> node = this.root;
+		var level = 0;
+		var branch = 0;
+		var node = this.root;
 		
 		traversal: while (true) {
 			if (node.branches != null && branch < ORDER) {
@@ -644,8 +644,8 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 	}
 	
 	public boolean intersects(final T obj, final RectI2 rect) {
-		final int oUpperX = obj.getDimension().getX() + obj.getPosition().getX();
-		final int oUpperY = obj.getDimension().getY() + obj.getPosition().getY();
+		final var oUpperX = obj.getDimension().getX() + obj.getPosition().getX();
+		final var oUpperY = obj.getDimension().getY() + obj.getPosition().getY();
 		return ((oUpperX < obj.getPosition().getX() || oUpperX > rect.getC0().getX()) &&
 				(oUpperY < obj.getPosition().getY() || oUpperY > rect.getC0().getY()) &&
 				(rect.getC1().getX() + 1 < rect.getC0().getX() || rect.getC1().getX() >= obj.getPosition().getX()) &&
@@ -692,7 +692,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 		}
 		
 		boolean createBranches() {
-			final int partition = (this.xMax - this.xMin + 1) >> 1;
+			final var partition = (this.xMax - this.xMin + 1) >> 1;
 			if (partition == 0) {
 				return false;
 			}
@@ -708,7 +708,7 @@ public final class QuadTree<T extends SpatialIndex2Capable> implements SpatialIn
 		
 		@Override
 		public String toString() {
-			final StringBuilder builder = new StringBuilder();
+			final var builder = new StringBuilder();
 			builder.append("Node [xMin=");
 			builder.append(this.xMin);
 			builder.append(", xMax=");

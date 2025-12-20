@@ -4,7 +4,6 @@ import java.awt.Color;
 import java.awt.EventQueue;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
-import java.awt.image.BufferStrategy;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -19,9 +18,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.Renderer;
+import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.RenderingBoPoolImpl;
-import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
-import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawBackground;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawEffect;
@@ -30,7 +28,11 @@ import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFpsHistory;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawImage;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawTest;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawWindow;
-import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
+import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
+import de.extio.game_engine.renderer.model.RenderingBo;
+import de.extio.game_engine.renderer.model.RenderingBoLayer;
+import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
@@ -38,10 +40,6 @@ import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawTestRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.event.TakeScreenshotEvent;
-import de.extio.game_engine.renderer.model.RenderingBo;
-import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
-import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.util.RingBuffer;
 
 public class G2DRenderer implements Renderer {
@@ -126,7 +124,7 @@ public class G2DRenderer implements Renderer {
 					return;
 				}
 				
-				final CoordI2 viewPortDimension = this.rendererData.getRendererControl().getAbsoluteViewportDimension();
+				final var viewPortDimension = this.rendererData.getRendererControl().getAbsoluteViewportDimension();
 				
 				if (viewPortDimension.getX() < 10 || viewPortDimension.getY() < 10) {
 					// Some race condition happens rarely (mainly Windows 11) that window size is not initialized after entering full screen. Put a plaster on it...
@@ -135,7 +133,7 @@ public class G2DRenderer implements Renderer {
 				
 				BufferedImage screenshotImg = null;
 				Graphics2D screenshotGraphics = null;
-				final boolean takeScreenshot_ = this.takeScreenshot;
+				final var takeScreenshot_ = this.takeScreenshot;
 				if (takeScreenshot_) {
 					this.takeScreenshot = false;
 					screenshotImg = this.mainFrame.getGraphicsConfiguration().createCompatibleImage(viewPortDimension.getX(), viewPortDimension.getY());
@@ -148,7 +146,7 @@ public class G2DRenderer implements Renderer {
 				
 				Graphics2D screenGraphics = null;
 				try {
-					final BufferStrategy bufferStrategy = this.mainFrame.getBufferStrategy();
+					final var bufferStrategy = this.mainFrame.getBufferStrategy();
 					if (bufferStrategy == null) {
 						LOGGER.warn("bufferStrategy == null");
 						return;
@@ -223,13 +221,13 @@ public class G2DRenderer implements Renderer {
 		
 		// FPS
 		
-		final StringBuilder sb = new StringBuilder(15);
+		final var sb = new StringBuilder(15);
 		sb.append(this.fps);
 		sb.append("fps ");
 		sb.append(this.frameDur);
 		sb.append("ms");
 		
-		final RenderingBo drawFont = this.rendererData.getRenderingBoPool().acquire(DrawFontRenderingBo.class)
+		final var drawFont = this.rendererData.getRenderingBoPool().acquire(DrawFontRenderingBo.class)
 				.setText(sb.toString())
 				.setSize(14)
 				.setColor(RgbaColor.WHITE)
@@ -238,7 +236,7 @@ public class G2DRenderer implements Renderer {
 		renderingBOs.add(drawFont);
 		
 		this.fpsHistory.add(Integer.valueOf((int) this.frameDur));
-		final RenderingBo drawFpsHistory = this.rendererData.getRenderingBoPool().acquire(G2DDrawFpsHistory.class)
+		final var drawFpsHistory = this.rendererData.getRenderingBoPool().acquire(G2DDrawFpsHistory.class)
 				.setHistory(this.fpsHistory)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 50);
@@ -246,7 +244,7 @@ public class G2DRenderer implements Renderer {
 	}
 	
 	private void frameCap() throws InterruptedException {
-		final long fpsCurrentTime = System.currentTimeMillis();
+		final var fpsCurrentTime = System.currentTimeMillis();
 		if (fpsCurrentTime - this.fpsMeasurement >= 1000) {
 			this.fpsMeasurement = fpsCurrentTime;
 			this.fps = this.fpsCur;
@@ -259,16 +257,16 @@ public class G2DRenderer implements Renderer {
 		if (this.frameStart == 0) {
 			this.frameStart = System.nanoTime();
 		}
-		final long target = this.frameStart + 1000000000L / this.rendererData.getRendererControl().getFrameRate();
+		final var target = this.frameStart + 1000000000L / this.rendererData.getRendererControl().getFrameRate();
 		this.frameDur = (System.nanoTime() - this.frameStart) / 1000000L;
-		final long delta = target - System.nanoTime();
+		final var delta = target - System.nanoTime();
 		spinWait(delta);
 		this.frameStart = System.nanoTime();
 	}
 	
 	private static void spinWait(final long nanoDuration) throws InterruptedException {
-		final long end = System.nanoTime() + nanoDuration;
-		long timeLeft = nanoDuration;
+		final var end = System.nanoTime() + nanoDuration;
+		var timeLeft = nanoDuration;
 		do {
 			if (timeLeft > SLEEP_PRECISION) {
 				Thread.sleep(1);
@@ -286,7 +284,7 @@ public class G2DRenderer implements Renderer {
 	}
 	
 	private void publishScreenshot(final BufferedImage screenshotImg, final Graphics2D screenshotGraphics) {
-		try (ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
+		try (var baos = new ByteArrayOutputStream()) {
 			ImageIO.write(screenshotImg, "png", baos);
 			baos.flush();
 			
