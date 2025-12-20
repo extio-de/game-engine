@@ -5,8 +5,8 @@ import java.awt.Graphics2D;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.renderer.model.MutableRgbaColor;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.RgbaColor;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
 public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {
@@ -16,7 +16,7 @@ public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {
 	
 	public static TooltipRecord TOOLTIP = null;
 	
-	private static Color BACKGROUND = (new RgbaColor(0, 0, 0, 150)).toAwtColor();
+	private static Color BACKGROUND = (new MutableRgbaColor(0, 0, 0, 150)).toAwtColor();
 	
 	public G2DDrawControlTooltip() {
 		super(RenderingBoLayer.TOP);

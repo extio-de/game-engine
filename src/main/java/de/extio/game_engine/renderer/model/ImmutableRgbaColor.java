@@ -1,21 +1,33 @@
 package de.extio.game_engine.renderer.model;
 
 import java.awt.Color;
+import java.util.Objects;
 
-public final class ImmutableRgbaColor extends RgbaColor {
+public final class ImmutableRgbaColor implements RgbaColor {
+	
+	private final int r;
+	
+	private final int g;
+	
+	private final int b;
+	
+	private final int a;
 	
 	private transient Color awtColor;
 	
-	ImmutableRgbaColor() {
-		
+	public ImmutableRgbaColor(final Color color) {
+		this.r = color.getRed();
+		this.g = color.getGreen();
+		this.b = color.getBlue();
+		this.a = color.getAlpha();
+		this.awtColor = color;
 	}
-	
+
 	public ImmutableRgbaColor(final RgbaColor color) {
 		this.r = color.getR();
 		this.g = color.getG();
 		this.b = color.getB();
 		this.a = color.getA();
-		this.awtColor = super.toAwtColor();
 	}
 	
 	public ImmutableRgbaColor(final int r, final int g, final int b) {
@@ -23,7 +35,6 @@ public final class ImmutableRgbaColor extends RgbaColor {
 		this.g = g;
 		this.b = b;
 		this.a = 255;
-		this.awtColor = super.toAwtColor();
 	}
 	
 	public ImmutableRgbaColor(final int r, final int g, final int b, final int a) {
@@ -31,47 +42,26 @@ public final class ImmutableRgbaColor extends RgbaColor {
 		this.g = g;
 		this.b = b;
 		this.a = a;
-		this.awtColor = super.toAwtColor();
 	}
 	
 	@Override
-	public void xor(final RgbaColor other) {
-		throw new UnsupportedOperationException();
+	public int getR() {
+		return this.r;
 	}
 	
 	@Override
-	public void or(final RgbaColor other) {
-		throw new UnsupportedOperationException();
+	public int getG() {
+		return this.g;
 	}
 	
 	@Override
-	public void and(final RgbaColor other) {
-		throw new UnsupportedOperationException();
+	public int getB() {
+		return this.b;
 	}
 	
 	@Override
-	public void screen(final RgbaColor other) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void setA(final int a) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void setB(final int b) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void setG(final int g) {
-		throw new UnsupportedOperationException();
-	}
-	
-	@Override
-	public void setR(final int r) {
-		throw new UnsupportedOperationException();
+	public int getA() {
+		return this.a;
 	}
 	
 	@Override
@@ -79,7 +69,39 @@ public final class ImmutableRgbaColor extends RgbaColor {
 		if (this.awtColor != null) {
 			return this.awtColor;
 		}
-		return super.toAwtColor();
+		this.awtColor = new Color(this.r, this.g, this.b, this.a);
+		return this.awtColor;
+	}
+	
+	@Override
+	public ImmutableRgbaColor toImmutable() {
+		return this;
+	}
+	
+	@Override
+	public MutableRgbaColor toMutable() {
+		return new MutableRgbaColor(this);
+	}
+	
+	@Override
+	public int hashCode() {
+		return Objects.hash(this.r, this.g, this.b, this.a);
+	}
+	
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+		if (!(obj instanceof final RgbaColor other)) {
+			return false;
+		}
+		return this.r == other.getR() && this.g == other.getG() && this.b == other.getB() && this.a == other.getA();
+	}
+	
+	@Override
+	public String toString() {
+		return "ImmutableRgbaColor [r=" + this.r + ", g=" + this.g + ", b=" + this.b + ", a=" + this.a + "]";
 	}
 	
 }

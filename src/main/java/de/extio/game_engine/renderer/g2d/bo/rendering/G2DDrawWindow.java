@@ -38,7 +38,7 @@ public class G2DDrawWindow extends G2DAbstractRenderingBo implements DrawWindowR
 		}
 		
 		final var cMain = this.color.toAwtColor();
-		final var rgbaDarker = new RgbaColor(cMain);
+		final var rgbaDarker = this.color.toMutable();
 		rgbaDarker.setR(rgbaDarker.getR() / 2);
 		rgbaDarker.setG(rgbaDarker.getG() / 2);
 		rgbaDarker.setB(rgbaDarker.getB() / 2);
