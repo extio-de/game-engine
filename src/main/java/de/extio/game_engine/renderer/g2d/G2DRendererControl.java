@@ -23,9 +23,9 @@ public class G2DRendererControl implements RendererControl {
 	
 	private RendererData rendererData;
 	
-	private CoordI2 absoluteViewportDimension = REFERENCE_RESOLUTION;
+	private CoordI2 absoluteViewportDimension = ImmutableCoordI2.one();
 	
-	private CoordI2 effectiveViewportDimension = REFERENCE_RESOLUTION;
+	private CoordI2 effectiveViewportDimension = ImmutableCoordI2.one();
 	
 	private double scaleFactor = 1.0;
 	
@@ -153,15 +153,16 @@ public class G2DRendererControl implements RendererControl {
 	public void updateViewPort(final boolean lockRenderer, final boolean async) {
 		// This method is called several times in a row by mainFrame resize event handler by intention
 		// I've discovered in debugger that sometimes when only a black viewPort is displayed the volatile image backing the bufferStrategy is only a few pixels in size
-		// Letting the resize events do their job seemed to fix it
+		// Letting the resize events do their job seemed to fix it --> createBufferStrategy is called multiple times in a row here intentionally
 		
 		final Runnable run = () -> {
 			if (lockRenderer) {
 				this.renderer.getWriteLock().lock();
 			}
 			try {
-				this.updateAbsoluteViewportPortDimension();
-				this.recalculate();
+				if (this.updateAbsoluteViewportPortDimension()) {
+					this.recalculate();
+				}
 				this.renderer.getMainFrame().createBufferStrategy();
 				this.renderer.getMainFrame().resizeListenerEnabled = true;
 			}
@@ -185,11 +186,14 @@ public class G2DRendererControl implements RendererControl {
 		this.calculateViewportEffectiveDimension();
 	}
 	
-	private void updateAbsoluteViewportPortDimension() {
+	private boolean updateAbsoluteViewportPortDimension() {
+		boolean changed = false;
 		final var absoluteDim = this.absoluteViewportDimension;
 		if (absoluteDim == null || absoluteDim.getX() != this.renderer.getMainFrame().getWidth() || absoluteDim.getY() != this.renderer.getMainFrame().getHeight()) {
 			this.absoluteViewportDimension = ImmutableCoordI2.create(this.renderer.getMainFrame().getWidth(), this.renderer.getMainFrame().getHeight());
+			changed = true;
 		}
+		return changed;
 	}
 	
 	private void calculateViewportEffectiveDimension() {
@@ -242,7 +246,7 @@ public class G2DRendererControl implements RendererControl {
 	public long getFrame() {
 		return this.rendererData.getFrame();
 	}
-
+	
 	@Override
 	public void setRendererData(final RendererData rendererData) {
 		this.rendererData = rendererData;
