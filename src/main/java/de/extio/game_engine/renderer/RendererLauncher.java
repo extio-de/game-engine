@@ -26,11 +26,6 @@ public class RendererLauncher implements InitializingBean, DisposableBean {
 		this.rendererData = rendererData;
 	}
 	
-	// @Override
-	// public void start() {
-	// 	this.launch();
-	// }
-	
 	@Override
 	public void afterPropertiesSet() throws Exception {
 		this.launch();
@@ -40,16 +35,6 @@ public class RendererLauncher implements InitializingBean, DisposableBean {
 	public void destroy() throws Exception {
 		this.shutdown();
 	}
-	
-	// @Override
-	// public void stop() {
-	// 	this.shutdown();
-	// }
-	
-	// @Override
-	// public boolean isRunning() {
-	// 	return this.rendererLoopThread != null && this.rendererLoopThread.isAlive();
-	// }
 	
 	private void launch() {
 		if (this.rendererLoopThread != null && this.rendererLoopThread.isAlive()) {
