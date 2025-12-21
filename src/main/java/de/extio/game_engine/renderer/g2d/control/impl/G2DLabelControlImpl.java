@@ -62,7 +62,7 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 	@Override
 	public void performAction() {
 		if (this.enabled) {
-			this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, null));
+			this.rendererData.getEventService().fire(new UiControlEvent(this.id, null));
 		}
 	}
 	

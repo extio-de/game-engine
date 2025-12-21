@@ -1,9 +1,11 @@
 package de.extio.game_engine.renderer.model.event;
 
+import de.extio.game_engine.event.Event;
+
 /**
  * This event contains a screenshot created by the renderer. Screenshot creation can be triggered via RendererControl
  */
-public final class TakeScreenshotEvent {
+public final class TakeScreenshotEvent implements Event {
 	
 	private final String id;
 	

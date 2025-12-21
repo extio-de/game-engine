@@ -293,7 +293,7 @@ public class G2DRenderer implements Renderer {
 			
 			LOGGER.debug("Took screenshot");
 			
-			this.rendererData.getEventConsumer().accept(new TakeScreenshotEvent(null, baos.toByteArray()));
+			this.rendererData.getEventService().fire(new TakeScreenshotEvent(null, baos.toByteArray()));
 		}
 		catch (final IOException e) {
 			throw new RuntimeException(e);

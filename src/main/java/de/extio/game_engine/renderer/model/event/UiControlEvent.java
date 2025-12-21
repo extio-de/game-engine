@@ -1,9 +1,11 @@
 package de.extio.game_engine.renderer.model.event;
 
+import de.extio.game_engine.event.Event;
+
 /**
  * This event is fired when a user interacted with a control in the UI, for example clicked on a button, entered text, ...
  */
-public final class UiControlEvent {
+public final class UiControlEvent implements Event {
 	
 	private final String id;
 	

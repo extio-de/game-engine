@@ -1,9 +1,11 @@
 package de.extio.game_engine.renderer.model.event;
 
+import de.extio.game_engine.event.Event;
+
 /**
  * Message sent by game client engine on any key stroke. You may want to use the respective callback provided by ClientModule instead. 
  */
-public final class KeyStrokeEvent {
+public final class KeyStrokeEvent implements Event {
 	
 	private boolean released;
 	

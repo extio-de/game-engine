@@ -130,7 +130,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			this.textComponent = new CustomJTextField();
 			((JTextField) this.textComponent).addActionListener(event -> {
 				// Simulate pressing enter
-				this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, (this.lastText == null ? "" : this.lastText) + "\n"));
+				this.rendererData.getEventService().fire(new UiControlEvent(this.id, (this.lastText == null ? "" : this.lastText) + "\n"));
 			});
 		}
 		this.textComponent.setName(this.id);
@@ -161,7 +161,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		final var curComponentText = this.textComponent.getText();
 		if (!curComponentText.equals(this.lastText) && !(this.lastText == null || this.lastText.isEmpty() || curComponentText == null || curComponentText.isEmpty())) {
 			this.lastText = curComponentText;
-			this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, this.lastText));
+			this.rendererData.getEventService().fire(new UiControlEvent(this.id, this.lastText));
 		}
 		
 		boolean componentDirty;

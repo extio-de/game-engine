@@ -87,7 +87,7 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 	public void performAction() {
 		if (this.enabled) {
 			if (this.actionConsumer == null) {
-				this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, this.lastValue));
+				this.rendererData.getEventService().fire(new UiControlEvent(this.id, this.lastValue));
 			}
 			else {
 				this.actionConsumer.accept(this.lastValue);

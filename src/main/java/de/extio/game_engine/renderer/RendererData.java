@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import org.springframework.context.ApplicationContext;
 
+import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
@@ -19,8 +20,6 @@ public class RendererData {
 	
 	private final RenderingBoPool renderingBoPool;
 	
-	private final Consumer<Object> eventConsumer;
-	
 	private final UiOptions uiOptions = new UiOptions();
 	
 	private final VideoOptions videoOptions = new VideoOptions();
@@ -28,16 +27,18 @@ public class RendererData {
 	private final AtomicLong frame = new AtomicLong();
 
 	private final KeycodeRegistry keycodeRegistry;
+
+	private final EventService eventService;
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final Consumer<Object> eventConsumer, final KeycodeRegistry keycodeRegistry) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
 		this.renderingBoPool = renderingBoPool;
-		this.eventConsumer = eventConsumer;
 		this.keycodeRegistry = keycodeRegistry;
+		this.eventService = eventService;
 	}
 	
 	public ApplicationContext getApplicationContext() {
@@ -72,10 +73,6 @@ public class RendererData {
 		return this.videoOptions;
 	}
 	
-	public Consumer<Object> getEventConsumer() {
-		return this.eventConsumer;
-	}
-
 	public void setRendererLoop(final RendererLoop rendererLoop) {
 		this.rendererLoop = rendererLoop;
 	}
@@ -88,4 +85,7 @@ public class RendererData {
 		return this.keycodeRegistry;
 	}
 	
+	public EventService getEventService() {
+		return this.eventService;
+	}
 }

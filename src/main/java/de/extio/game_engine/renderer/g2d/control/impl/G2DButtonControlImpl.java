@@ -32,7 +32,7 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	@Override
 	public void performAction() {
 		if (this.enabled) {
-			this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, null));
+			this.rendererData.getEventService().fire(new UiControlEvent(this.id, null));
 		}
 	}
 	

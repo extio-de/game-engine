@@ -1,8 +1,9 @@
 package de.extio.game_engine.renderer.model.event;
 
+import de.extio.game_engine.event.Event;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
-public abstract class MouseEvent {
+public abstract class MouseEvent implements Event {
 	
 	private CoordI2 coord;
 	

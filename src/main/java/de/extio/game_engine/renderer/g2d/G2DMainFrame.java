@@ -142,7 +142,7 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseReleased(final MouseEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseClickEvent(false, G2DMainFrame.getModifiers(e), e.getButton(), ImmutableCoordI2.create(e.getX(), e.getY())));
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(false, G2DMainFrame.getModifiers(e), e.getButton(), ImmutableCoordI2.create(e.getX(), e.getY())));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -153,7 +153,7 @@ public class G2DMainFrame extends Frame {
 			public void mousePressed(final MouseEvent e) {
 				try {
 					G2DMainFrame.this.requestFocus();
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getButton(), ImmutableCoordI2.create(e.getX(), e.getY())));
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getButton(), ImmutableCoordI2.create(e.getX(), e.getY())));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -163,7 +163,7 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseExited(final MouseEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), null, 0));
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), null, 0));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -173,7 +173,7 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseEntered(final MouseEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseEnterEvent(G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY())));
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseEnterEvent(G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY())));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -193,7 +193,7 @@ public class G2DMainFrame extends Frame {
 				final var button = this.getButton(e);
 				
 				try {
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
 				}
 				catch (final Exception exc) {
 					if ("Engine not started up yet".equals(exc.getMessage())) {
@@ -208,7 +208,7 @@ public class G2DMainFrame extends Frame {
 				final var button = this.getButton(e);
 				
 				try {
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseMoveEvent(true, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(true, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
 				}
 				catch (final Exception exc) {
 					if ("Engine not started up yet".equals(exc.getMessage())) {
@@ -238,7 +238,7 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseWheelMoved(final MouseWheelEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getWheelRotation() == -1 ? 4 : 5, ImmutableCoordI2.create(e.getX(), e.getY())));
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getWheelRotation() == -1 ? 4 : 5, ImmutableCoordI2.create(e.getX(), e.getY())));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -261,7 +261,7 @@ public class G2DMainFrame extends Frame {
 				if (event.getID() == KeyEvent.KEY_PRESSED) {
 					LOGGER.trace("Press {} {} {}", e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
 					final var keyPressMessage = new KeyStrokeEvent(false, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(keyPressMessage);
+					G2DMainFrame.this.rendererData.getEventService().fire(keyPressMessage);
 				}
 				else if (event.getID() == KeyEvent.KEY_RELEASED) {
 					LOGGER.trace("Release {} {} {}", e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
@@ -282,7 +282,7 @@ public class G2DMainFrame extends Frame {
 					}
 					else {
 						final var keyPressMessage = new KeyStrokeEvent(true, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
-						G2DMainFrame.this.rendererData.getEventConsumer().accept(keyPressMessage);
+						G2DMainFrame.this.rendererData.getEventService().fire(keyPressMessage);
 					}
 				}
 			}

@@ -40,13 +40,6 @@ public class Main {
 		builder.run(args);
 	}
 	
-	@Bean(name = "gameEngineEventConsumer")
-	@Conditional(StandaloneEnvCondition.class)
-	public Consumer<Object> eventConsumer() {
-		return event -> {
-		};
-	}
-	
 	static class StandaloneEnvCondition implements Condition {
 		
 		public StandaloneEnvCondition() {

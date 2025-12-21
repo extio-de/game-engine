@@ -14,7 +14,7 @@ public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonContro
 	public void performAction() {
 		if (this.enabled) {
 			this.manageCtrlGroupToggleState();
-			this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, this.control.isToggled()));
+			this.rendererData.getEventService().fire(new UiControlEvent(this.id, this.control.isToggled()));
 		}
 	}
 	

@@ -60,7 +60,7 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 		if (!this.multiLine) {
 			((TextField) this.textComponent).addActionListener(event -> {
 				// Simulate pressing enter
-				this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, (this.lastText != null ? this.lastText : "") + "\n"));
+				this.rendererData.getEventService().fire(new UiControlEvent(this.id, (this.lastText != null ? this.lastText : "") + "\n"));
 			});
 		}
 		
@@ -77,7 +77,7 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 		final var curComponentText = this.textComponent.getText();
 		if (!Objects.equals(this.lastText, curComponentText) && !((this.lastText == null || this.lastText.isEmpty()) && (curComponentText == null || curComponentText.isEmpty()))) {
 			this.lastText = curComponentText;
-			this.rendererData.getEventConsumer().accept(new UiControlEvent(this.id, this.lastText));
+			this.rendererData.getEventService().fire(new UiControlEvent(this.id, this.lastText));
 		}
 		
 		boolean componentDirty;

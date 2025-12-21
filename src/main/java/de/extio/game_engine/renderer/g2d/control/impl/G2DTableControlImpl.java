@@ -113,7 +113,7 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 				final var col = G2DTableControlImpl.this.control.columnAtPoint(e.getPoint());
 				if (row > -1 && col > -1) {
 					if (G2DTableControlImpl.this.enabled) {
-						G2DTableControlImpl.this.rendererData.getEventConsumer().accept(new UiControlEvent(G2DTableControlImpl.this.id, ImmutableCoordI2.create(row, col)));
+						G2DTableControlImpl.this.rendererData.getEventService().fire(new UiControlEvent(G2DTableControlImpl.this.id, ImmutableCoordI2.create(row, col)));
 					}
 				}
 			}
