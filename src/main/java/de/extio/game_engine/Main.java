@@ -34,7 +34,6 @@ public class Main {
 		// logger.setUseParentHandlers(false);
 		// logger.addHandler(consoleHandler);
 
-		// SpringApplication.run(Main.class, args);
 		final SpringApplicationBuilder builder = new SpringApplicationBuilder(Main.class);
 		builder.headless(false);
 		builder.properties("logging.level.de.extio=TRACE");
@@ -47,14 +46,6 @@ public class Main {
 		return event -> {
 		};
 	}
-	
-	// @Bean
-	// @Conditional(StandaloneEnvCondition.class)
-	// public ApplicationListener<ContextClosedEvent> shutdownListener() {
-	// 	return event -> {
-	// 		System.exit(0);
-	// 	};
-	// }
 	
 	static class StandaloneEnvCondition implements Condition {
 		
