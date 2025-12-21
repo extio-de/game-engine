@@ -36,7 +36,6 @@ import de.extio.game_engine.renderer.model.event.KeyStrokeEvent;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
 import de.extio.game_engine.renderer.model.event.MouseEnterEvent;
 import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
-import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class G2DMainFrame extends Frame {
@@ -403,10 +402,13 @@ public class G2DMainFrame extends Frame {
 	}
 	
 	private void applyReferenceWindowGeometry() {
-		final var mode = this.getGraphicsConfiguration().getDevice().getDisplayMode();
-		final CoordI2 size = ImmutableCoordI2.create(Math.min(mode.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), Math.min(mode.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
-		this.setLocation(mode.getWidth() / 2 - size.getX() / 2, mode.getHeight() / 2 - size.getY() / 2);
-		this.setSize(size.getX(), size.getY());
+		// final var mode = this.getGraphicsConfiguration().getDevice().getDisplayMode();
+		// final var size = ImmutableCoordI2.create(Math.min(mode.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), Math.min(mode.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
+		// this.setLocation(mode.getWidth() / 2 - size.getX() / 2, mode.getHeight() / 2 - size.getY() / 2);
+		final var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		final var bounds = ge.getDefaultScreenDevice().getDefaultConfiguration().getBounds();
+		this.setLocation(bounds.x, bounds.y);
+		this.setSize((int)Math.min(bounds.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), (int)Math.min(bounds.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
 	}
 	
 	private static int getModifiers(final InputEvent event) {
