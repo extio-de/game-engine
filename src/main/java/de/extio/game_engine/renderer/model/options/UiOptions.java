@@ -11,7 +11,7 @@ public final class UiOptions {
 	
 	private boolean backgroundScrollingReverse0;
 	
-	private boolean backgroundScrolling1;
+	private boolean backgroundScrolling1 = true;
 	
 	private boolean backgroundScrollingReverse1;
 	
