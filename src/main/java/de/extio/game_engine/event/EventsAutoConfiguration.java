@@ -20,7 +20,7 @@ public class EventsAutoConfiguration {
 
 	@Bean
 	EventService eventService(final EventHandlerRegistry registry, final EventExecutor executor) {
-		final EventService eventService = new EventService(registry, executor);
+		final EventService eventService = new EventServiceImpl(registry, executor);
 		return eventService;
 	}
 }
