@@ -16,7 +16,7 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.renderer.enabled", havingValue = "true", matchIfMissing = true)
-public class RendererConfiguration {
+public class RendererAutoConfiguration {
 	
 	@SuppressWarnings("unchecked")
 	@Bean
