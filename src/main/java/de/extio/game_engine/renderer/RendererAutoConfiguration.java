@@ -20,7 +20,7 @@ public class RendererAutoConfiguration {
 	
 	@SuppressWarnings("unchecked")
 	@Bean
-	public RenderingBoPool renderingBoPool(final List<RenderingBo> renderingBoImplementations) {
+	RenderingBoPool renderingBoPool(final List<RenderingBo> renderingBoImplementations) {
 		final Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> mapping = new HashMap<>();
 		for (final var impl : renderingBoImplementations) {
 			for (final var interf : impl.getClass().getInterfaces()) {
@@ -34,7 +34,7 @@ public class RendererAutoConfiguration {
 	}
 	
 	@Bean
-	public RendererData rendererData(final ApplicationContext applicationContext,
+	RendererData rendererData(final ApplicationContext applicationContext,
 			final Renderer renderer,
 			final RendererControl rendererControl,
 			final RenderingBoPool renderingBoPool,
@@ -49,7 +49,7 @@ public class RendererAutoConfiguration {
 	}
 	
 	@Bean
-	public RendererLauncher rendererLauncher(final ApplicationContext applicationContext, final RendererData rendererData) {
+	RendererLauncher rendererLauncher(final ApplicationContext applicationContext, final RendererData rendererData) {
 		return new RendererLauncher(applicationContext, rendererData);
 	}
 	
