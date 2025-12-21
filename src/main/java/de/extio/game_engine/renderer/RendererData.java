@@ -5,6 +5,7 @@ import java.util.function.Consumer;
 
 import org.springframework.context.ApplicationContext;
 
+import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
 
@@ -25,15 +26,18 @@ public class RendererData {
 	private final VideoOptions videoOptions = new VideoOptions();
 	
 	private final AtomicLong frame = new AtomicLong();
+
+	private final KeycodeRegistry keycodeRegistry;
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final Consumer<Object> eventConsumer) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final Consumer<Object> eventConsumer, final KeycodeRegistry keycodeRegistry) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
 		this.renderingBoPool = renderingBoPool;
 		this.eventConsumer = eventConsumer;
+		this.keycodeRegistry = keycodeRegistry;
 	}
 	
 	public ApplicationContext getApplicationContext() {
@@ -78,6 +82,10 @@ public class RendererData {
 
 	public RendererLoop getRendererLoop() {
 		return this.rendererLoop;
+	}
+
+	public KeycodeRegistry getKeycodeRegistry() {
+		return this.keycodeRegistry;
 	}
 	
 }

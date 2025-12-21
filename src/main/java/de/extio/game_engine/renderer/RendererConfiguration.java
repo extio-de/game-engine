@@ -11,6 +11,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
+import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.renderer.model.RenderingBo;
 
 @AutoConfiguration
@@ -33,8 +34,14 @@ public class RendererConfiguration {
 	}
 	
 	@Bean
-	public RendererData rendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, @Qualifier("gameEngineEventConsumer") final Consumer<Object> eventConsumer) {
-		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, eventConsumer);
+	public RendererData rendererData(final ApplicationContext applicationContext,
+			final Renderer renderer,
+			final RendererControl rendererControl,
+			final RenderingBoPool renderingBoPool,
+			@Qualifier("gameEngineEventConsumer") final Consumer<Object> eventConsumer,
+			final KeycodeRegistry keycodeRegistry) {
+		
+		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, eventConsumer, keycodeRegistry);
 		renderer.setRendererData(rendererData);
 		rendererControl.setRendererData(rendererData);
 		renderingBoPool.setRendererData(rendererData);

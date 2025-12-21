@@ -22,6 +22,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
@@ -37,6 +38,8 @@ import de.extio.game_engine.renderer.model.event.KeyStrokeEvent;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
 import de.extio.game_engine.renderer.model.event.MouseEnterEvent;
 import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
+import de.extio.game_engine.renderer.model.options.VideoOptions;
+import de.extio.game_engine.renderer.model.options.VideoOptions.VideoOptionsVideoMode;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class G2DMainFrame extends Frame {
@@ -262,8 +265,25 @@ public class G2DMainFrame extends Frame {
 				}
 				else if (event.getID() == KeyEvent.KEY_RELEASED) {
 					LOGGER.trace("Release {} {} {}", e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
-					final var keyPressMessage = new KeyStrokeEvent(true, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
-					G2DMainFrame.this.rendererData.getEventConsumer().accept(keyPressMessage);
+					if (G2DMainFrame.this.rendererData.getKeycodeRegistry().check("toggleFullScreen", e.getKeyCode(), G2DMainFrame.getModifiers(e))) {
+						final VideoOptions clientVideoOptions = G2DMainFrame.this.rendererData.getVideoOptions();
+						if (clientVideoOptions.getVideoMode() == VideoOptionsVideoMode.FULLSCREEN || clientVideoOptions.getVideoMode() == VideoOptionsVideoMode.BORDERLESS) {
+							clientVideoOptions.setVideoMode(VideoOptionsVideoMode.WINDOW);
+						}
+						else {
+							if (Objects.requireNonNullElse(System.getProperty("os.name"), "").toLowerCase().contains("windows")) {
+								clientVideoOptions.setVideoMode(VideoOptionsVideoMode.BORDERLESS);
+							}
+							else {
+								clientVideoOptions.setVideoMode(VideoOptionsVideoMode.FULLSCREEN);
+							}
+						}
+						G2DMainFrame.this.rendererData.getRendererControl().applyVideoOptions();
+					}
+					else {
+						final var keyPressMessage = new KeyStrokeEvent(true, e.getKeyCode(), KeyEvent.getKeyText(e.getKeyCode()), G2DMainFrame.getModifiers(e));
+						G2DMainFrame.this.rendererData.getEventConsumer().accept(keyPressMessage);
+					}
 				}
 			}
 		};
@@ -410,7 +430,7 @@ public class G2DMainFrame extends Frame {
 		final var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		final var bounds = ge.getDefaultScreenDevice().getDefaultConfiguration().getBounds();
 		this.setLocation(bounds.x, bounds.y);
-		this.setSize((int)Math.min(bounds.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), (int)Math.min(bounds.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
+		this.setSize((int) Math.min(bounds.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), (int) Math.min(bounds.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
 	}
 	
 	private static int getModifiers(final InputEvent event) {

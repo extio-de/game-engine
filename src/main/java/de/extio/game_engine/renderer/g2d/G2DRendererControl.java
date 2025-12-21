@@ -88,6 +88,9 @@ public class G2DRendererControl implements RendererControl {
 				Toolkit.getDefaultToolkit().sync();
 				
 				this.updateViewPort(false, false);
+
+				// TODO: Save video options to user preferences
+
 			}
 			finally {
 				this.renderer.getWriteLock().unlock();

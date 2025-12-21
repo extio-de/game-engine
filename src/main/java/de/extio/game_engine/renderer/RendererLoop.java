@@ -1,9 +1,13 @@
 package de.extio.game_engine.renderer;
 
+import java.awt.event.KeyEvent;
 import java.util.ArrayList;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.extio.game_engine.keyboard.KeyModifiers;
+import de.extio.game_engine.keyboard.KeycodeRegistration;
 
 public class RendererLoop implements Runnable {
 	
@@ -22,6 +26,10 @@ public class RendererLoop implements Runnable {
 		this.shutdown = false;
 		
 		try {
+			this.rendererData.getKeycodeRegistry().registerDefault(new KeycodeRegistration("toggleFullScreen", "675", KeyEvent.VK_ENTER, KeyModifiers.MODIFIER_ALT, "ALT ENTER"));
+			
+			// TODO: Load video options from user preferences
+
 			this.rendererData.getRenderer().show();
 			
 			LOGGER.info("Renderer loop started");
