@@ -5,28 +5,28 @@ import java.util.ArrayList;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class RendererLoop extends Thread {
+public class RendererLoop implements Runnable {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(RendererLoop.class);
 	
-	private final RendererData rendererData;
+	private volatile boolean shutdown;
 	
-	private volatile boolean running = true;
+	private final RendererData rendererData;
 	
 	public RendererLoop(final RendererData rendererData) {
 		this.rendererData = rendererData;
-		this.setName("Renderer-Loop");
-		this.setDaemon(false);
 	}
 	
 	@Override
 	public void run() {
+		this.shutdown = false;
+		
 		try {
 			this.rendererData.getRenderer().show();
-
+			
 			LOGGER.info("Renderer loop started");
 			int exceptionCount = 0;
-			while (this.running) {
+			while (!this.shutdown) {
 				try {
 					this.rendererData.nextFrame();
 					this.rendererData.getRenderer().run(new ArrayList<>()); // TODO: Pass actual renderables
@@ -45,7 +45,7 @@ public class RendererLoop extends Thread {
 					}
 				}
 			}
-
+			
 			LOGGER.info("Renderer loop exited");
 		}
 		catch (final Throwable t) {
@@ -54,7 +54,8 @@ public class RendererLoop extends Thread {
 	}
 	
 	public void shutdown() {
-		this.running = false;
+		LOGGER.info("RendererLoop shutdown requested");
+		this.shutdown = true;
 	}
 	
 }

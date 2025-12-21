@@ -98,6 +98,25 @@ public class G2DRenderer implements Renderer {
 	public void reset() {
 		G2DDrawControl.reset();
 	}
+
+	@Override
+	public void shutdown() {
+		LOGGER.info("shutdown()");
+		
+		this.rwLock.writeLock().lock();
+		try {
+			if (this.mainFrame != null) {
+				this.mainFrame.unregisterFullScreenWindow();
+				this.reset();
+				this.mainFrame.setVisible(false);
+				this.mainFrame.dispose();
+				this.mainFrame = null;
+			}
+		}
+		finally {
+			this.rwLock.writeLock().unlock();
+		}
+	}
 	
 	@Override
 	public void run(final List<RenderingBo> renderingBOs) throws InterruptedException {

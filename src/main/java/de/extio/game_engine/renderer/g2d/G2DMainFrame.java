@@ -27,6 +27,7 @@ import javax.imageio.ImageIO;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.boot.SpringApplication;
 
 import de.extio.game_engine.keyboard.KeyModifiers;
 import de.extio.game_engine.renderer.RendererControl;
@@ -93,7 +94,8 @@ public class G2DMainFrame extends Frame {
 			
 			@Override
 			public void windowClosing(final WindowEvent e) {
-				G2DMainFrame.this.rendererData.getRendererLoop().shutdown();
+				LOGGER.info("Window closing requested");
+				SpringApplication.exit(G2DMainFrame.this.rendererData.getApplicationContext(), () -> 0);
 			}
 			
 			@Override

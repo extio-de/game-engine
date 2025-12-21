@@ -8,6 +8,7 @@ import java.util.function.Consumer;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import de.extio.game_engine.renderer.model.RenderingBo;
@@ -32,8 +33,8 @@ public class RendererConfiguration {
 	}
 	
 	@Bean
-	public RendererData rendererData(final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, @Qualifier("gameEngineEventConsumer") final Consumer<Object> eventConsumer) {
-		final var rendererData = new RendererData(renderer, rendererControl, renderingBoPool, eventConsumer);
+	public RendererData rendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, @Qualifier("gameEngineEventConsumer") final Consumer<Object> eventConsumer) {
+		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, eventConsumer);
 		renderer.setRendererData(rendererData);
 		rendererControl.setRendererData(rendererData);
 		renderingBoPool.setRendererData(rendererData);
@@ -41,11 +42,8 @@ public class RendererConfiguration {
 	}
 	
 	@Bean
-	public RendererLoop rendererLoop(final RendererData rendererData) {
-		final var rendererLoop = new RendererLoop(rendererData);
-		rendererData.setRendererLoop(rendererLoop);
-		rendererLoop.start();
-		return rendererLoop;
+	public RendererLauncher rendererLauncher(final ApplicationContext applicationContext, final RendererData rendererData) {
+		return new RendererLauncher(applicationContext, rendererData);
 	}
 	
 }

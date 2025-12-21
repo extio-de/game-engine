@@ -163,8 +163,11 @@ public class G2DRendererControl implements RendererControl {
 				if (this.updateAbsoluteViewportPortDimension()) {
 					this.recalculate();
 				}
-				this.renderer.getMainFrame().createBufferStrategy();
-				this.renderer.getMainFrame().resizeListenerEnabled = true;
+				final var mainFrame = this.renderer.getMainFrame();
+				if (mainFrame != null) {
+					mainFrame.createBufferStrategy();
+					mainFrame.resizeListenerEnabled = true;
+				}
 			}
 			finally {
 				if (lockRenderer) {
@@ -174,7 +177,10 @@ public class G2DRendererControl implements RendererControl {
 		};
 		
 		if (async) {
-			EventQueue.invokeLater(run);
+			// EventQueue.invokeLater(run); // Using EventQueue here can clutter the AWT event queue with too many events when resizing on a system with high event rate
+			Thread.ofVirtual()
+				.name("G2DRendererControl-ViewportUpdater", 0)
+				.start(run);
 		}
 		else {
 			run.run();
@@ -189,7 +195,7 @@ public class G2DRendererControl implements RendererControl {
 	private boolean updateAbsoluteViewportPortDimension() {
 		boolean changed = false;
 		final var absoluteDim = this.absoluteViewportDimension;
-		if (absoluteDim == null || absoluteDim.getX() != this.renderer.getMainFrame().getWidth() || absoluteDim.getY() != this.renderer.getMainFrame().getHeight()) {
+		if (absoluteDim == null || (this.renderer.getMainFrame() != null && (absoluteDim.getX() != this.renderer.getMainFrame().getWidth() || absoluteDim.getY() != this.renderer.getMainFrame().getHeight()))) {
 			this.absoluteViewportDimension = ImmutableCoordI2.create(this.renderer.getMainFrame().getWidth(), this.renderer.getMainFrame().getHeight());
 			changed = true;
 		}

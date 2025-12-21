@@ -11,6 +11,8 @@ public interface Renderer {
 	void run(List<RenderingBo> renderingBOs) throws InterruptedException;
 	
 	void reset();
+
+	void shutdown();
 	
 	void takeScreenshot();
 	
