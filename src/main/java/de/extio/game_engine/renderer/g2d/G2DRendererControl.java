@@ -49,12 +49,7 @@ public class G2DRendererControl implements RendererControl {
 	@Override
 	public void applyVideoOptions() {
 		final Runnable run = () -> {
-			try {
-				this.renderer.getSemaphore().acquire();
-			}
-			catch (final InterruptedException e) {
-				return;
-			}
+			this.renderer.getWriteLock().lock();
 			try {
 				if (this.renderer.getMainFrame() != null) {
 					this.renderer.getMainFrame().unregisterFullScreenWindow();
@@ -95,7 +90,7 @@ public class G2DRendererControl implements RendererControl {
 				this.updateViewPort(false, false);
 			}
 			finally {
-				this.renderer.getSemaphore().release();
+				this.renderer.getWriteLock().unlock();
 				this.videoOptionsAppliedAt = System.currentTimeMillis();
 			}
 		};
@@ -162,11 +157,7 @@ public class G2DRendererControl implements RendererControl {
 		
 		final Runnable run = () -> {
 			if (lockRenderer) {
-				try {
-					this.renderer.getSemaphore().acquire();
-				}
-				catch (final InterruptedException e) {
-				}
+				this.renderer.getWriteLock().lock();
 			}
 			try {
 				this.updateAbsoluteViewportPortDimension();
@@ -176,7 +167,7 @@ public class G2DRendererControl implements RendererControl {
 			}
 			finally {
 				if (lockRenderer) {
-					this.renderer.getSemaphore().release();
+					this.renderer.getWriteLock().unlock();
 				}
 			}
 		};

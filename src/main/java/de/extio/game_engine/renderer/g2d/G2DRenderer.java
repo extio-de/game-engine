@@ -9,8 +9,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
-import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantReadWriteLock;
 
 import javax.imageio.ImageIO;
 
@@ -36,7 +37,7 @@ public class G2DRenderer implements Renderer {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(G2DRenderer.class);
 	
-	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(3);
+	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
 	
 	private final RingBuffer<Integer> fpsHistory = new RingBuffer<>(90);
 	
@@ -54,7 +55,7 @@ public class G2DRenderer implements Renderer {
 	
 	private long frameDur;
 	
-	private final Semaphore semaphore = new Semaphore(1);
+	private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock(true);
 	
 	private String title;
 	
@@ -63,6 +64,7 @@ public class G2DRenderer implements Renderer {
 	public G2DRenderer() {
 		LOGGER.info("ctor");
 		
+		System.setProperty("java.awt.headless", "false");
 		System.setProperty("sun.java2d.uiScale", "1");
 		System.setProperty("awt.nativeDoubleBuffering", "true");
 		System.setProperty("awt.useSystemAAFontSettings", "on");
@@ -100,7 +102,7 @@ public class G2DRenderer implements Renderer {
 	@Override
 	public void run(final List<RenderingBo> renderingBOs) throws InterruptedException {
 		try {
-			this.semaphore.acquire();
+			this.rwLock.readLock().lockInterruptibly();
 			try {
 				if (this.mainFrame == null) {
 					return;
@@ -180,7 +182,7 @@ public class G2DRenderer implements Renderer {
 				}
 			}
 			finally {
-				this.semaphore.release();
+				this.rwLock.readLock().unlock();
 			}
 		}
 		catch (final G2DRendererWindowNotInitializedException e) {
@@ -291,8 +293,12 @@ public class G2DRenderer implements Renderer {
 		this.mainFrame = mainFrame;
 	}
 	
-	public Semaphore getSemaphore() {
-		return this.semaphore;
+	public Lock getReadLock() {
+		return this.rwLock.readLock();
+	}
+	
+	public Lock getWriteLock() {
+		return this.rwLock.writeLock();
 	}
 	
 	@Override
