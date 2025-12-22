@@ -31,11 +31,11 @@ public abstract class AbstractClientModule extends AbstractModule {
 		
 	}
 	
-	public void runUiPreEvents() {
+	public void runUiPre() {
 		
 	}
 	
-	public void runUiPostEvents() {
+	public void runUiPost() {
 		
 	}
 	

@@ -10,11 +10,17 @@ import org.springframework.context.annotation.Bean;
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.module.enabled", havingValue = "true", matchIfMissing = true)
 public class ModuleManagerAutoConfiguration {
-
+	
 	@Bean
 	@ConditionalOnMissingBean
 	ModuleManager moduleManager(final List<AbstractModule> initialModules) {
 		return new ModuleManagerImpl(initialModules);
 	}
-
+	
+	@Bean
+	@ConditionalOnMissingBean
+	ModuleExecutor moduleExecutor(final ModuleManager moduleManager) {
+		return new ModuleExecutorImpl(moduleManager);
+	}
+	
 }

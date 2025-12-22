@@ -6,13 +6,13 @@ import java.util.Deque;
 import java.util.List;
 import java.util.function.Consumer;
 
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
 public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
-	private static final Logger LOGGER = LogManager.getLogger();
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleManagerImpl.class);
 	
 	private final List<AbstractModule> modulesInitial;
 	
