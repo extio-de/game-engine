@@ -8,9 +8,8 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
-import java.util.HashSet;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -25,7 +24,6 @@ import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawBackground;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFpsHistory;
-import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawImage;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
 import de.extio.game_engine.renderer.model.RenderingBo;
@@ -43,9 +41,11 @@ public class G2DRenderer implements Renderer {
 	
 	private final RingBuffer<Integer> fpsHistory = new RingBuffer<>(90);
 	
-	private final Set<Class<? extends RenderingBo>> releasedBoClasses = new HashSet<>();
-
 	private final StringBuilder fpsStringBuilder = new StringBuilder(15);
+	
+	private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock(true);
+	
+	private final List<RenderingBo> renderingBOs = new ArrayList<>();
 	
 	private volatile G2DMainFrame mainFrame;
 	
@@ -60,8 +60,6 @@ public class G2DRenderer implements Renderer {
 	private long frameStart;
 	
 	private long frameDur;
-	
-	private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock(true);
 	
 	private String title;
 	
@@ -104,7 +102,7 @@ public class G2DRenderer implements Renderer {
 	public void reset() {
 		G2DDrawControl.reset();
 	}
-
+	
 	@Override
 	public void shutdown() {
 		LOGGER.info("shutdown()");
@@ -125,7 +123,7 @@ public class G2DRenderer implements Renderer {
 	}
 	
 	@Override
-	public void run(final List<RenderingBo> renderingBOs) throws InterruptedException {
+	public void run() throws InterruptedException {
 		try {
 			this.rwLock.readLock().lockInterruptibly();
 			try {
@@ -150,8 +148,9 @@ public class G2DRenderer implements Renderer {
 					screenshotGraphics.setRenderingHints(G2DRenderingHintFactory.createDefault());
 				}
 				
-				this.addStaticRenderingBOs(renderingBOs);
-				renderingBOs.sort((bo0, bo1) -> bo0.getLayer().compareTo(bo1.getLayer()));
+				this.addStaticRenderingBOs();
+				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs);
+				this.renderingBOs.sort((bo0, bo1) -> bo0.getLayer().compareTo(bo1.getLayer()));
 				
 				Graphics2D screenGraphics = null;
 				try {
@@ -166,11 +165,11 @@ public class G2DRenderer implements Renderer {
 					screenGraphics.setColor(Color.BLACK);
 					screenGraphics.fillRect(0, 0, viewPortDimension.getX(), viewPortDimension.getY());
 					
-					for (final RenderingBo renderingBO : renderingBOs) {
-						if (renderingBO instanceof G2DAbstractRenderingBo) {
-							((G2DAbstractRenderingBo) renderingBO).render(screenGraphics, this.rendererData.getRendererControl().getScaleFactor(), false);
-							if (takeScreenshot_ && ((G2DAbstractRenderingBo) renderingBO).isScreenshotRelevant()) {
-								((G2DAbstractRenderingBo) renderingBO).render(screenshotGraphics, this.rendererData.getRendererControl().getScaleFactor(), true);
+					for (final RenderingBo renderingBO : this.renderingBOs) {
+						if (renderingBO instanceof final G2DAbstractRenderingBo g2dAbstractRenderingBo) {
+							g2dAbstractRenderingBo.render(screenGraphics, this.rendererData.getRendererControl().getScaleFactor(), false);
+							if (takeScreenshot_ && g2dAbstractRenderingBo.isScreenshotRelevant()) {
+								g2dAbstractRenderingBo.render(screenshotGraphics, this.rendererData.getRendererControl().getScaleFactor(), true);
 							}
 						}
 					}
@@ -192,14 +191,6 @@ public class G2DRenderer implements Renderer {
 					if (screenGraphics != null) {
 						screenGraphics.dispose();
 					}
-					
-					this.releasedBoClasses.clear();
-					for (final RenderingBo renderingBO : renderingBOs) {
-						if (this.releasedBoClasses.add(renderingBO.getClass()) && renderingBO instanceof final G2DAbstractRenderingBo g2dRenderingBo) {
-							g2dRenderingBo.closeStatic();
-						}
-						this.rendererData.getRenderingBoPool().release(renderingBO);
-					}
 				}
 				
 				if (takeScreenshot_) {
@@ -207,6 +198,7 @@ public class G2DRenderer implements Renderer {
 				}
 			}
 			finally {
+				this.renderingBOs.clear();
 				this.rwLock.readLock().unlock();
 			}
 		}
@@ -217,13 +209,14 @@ public class G2DRenderer implements Renderer {
 		}
 	}
 	
-	private void addStaticRenderingBOs(final List<RenderingBo> renderingBOs) {
-		renderingBOs.add(this.rendererData.getRenderingBoPool().acquire(G2DDrawBackground.class));
-		renderingBOs.add(this.rendererData.getRenderingBoPool().acquire(G2DDrawControlTooltip.class));
-		this.drawStatistics(renderingBOs);
+	private void addStaticRenderingBOs() {
+		this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
+		this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_control", G2DDrawControlTooltip.class));
+		this.drawStatistics();
+		this.rendererData.getRendererWorkingSet().commit("G2DRenderer", false);
 	}
 	
-	private void drawStatistics(final List<RenderingBo> renderingBOs) {
+	private void drawStatistics() {
 		if (!this.rendererData.getUiOptions().isDrawFps()) {
 			return;
 		}
@@ -236,20 +229,20 @@ public class G2DRenderer implements Renderer {
 		fpsStringBuilder.append(this.frameDur);
 		fpsStringBuilder.append("ms");
 		
-		final var drawFont = this.rendererData.getRenderingBoPool().acquire(DrawFontRenderingBo.class)
+		final var drawFont = this.rendererData.getRenderingBoPool().acquire("g2DRenderer_fpsText", DrawFontRenderingBo.class)
 				.setText(fpsStringBuilder.toString())
 				.setSize(14)
 				.setColor(RgbaColor.WHITE)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 35);
-		renderingBOs.add(drawFont);
+		this.rendererData.getRendererWorkingSet().add("G2DRenderer", drawFont);
 		
 		this.fpsHistory.add(Integer.valueOf((int) this.frameDur));
-		final var drawFpsHistory = this.rendererData.getRenderingBoPool().acquire(G2DDrawFpsHistory.class)
+		final var drawFpsHistory = this.rendererData.getRenderingBoPool().acquire("g2DRenderer_fpsHistory", G2DDrawFpsHistory.class)
 				.setHistory(this.fpsHistory)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 50);
-		renderingBOs.add(drawFpsHistory);
+		this.rendererData.getRendererWorkingSet().add("G2DRenderer", drawFpsHistory);
 	}
 	
 	private void frameCap() throws InterruptedException {

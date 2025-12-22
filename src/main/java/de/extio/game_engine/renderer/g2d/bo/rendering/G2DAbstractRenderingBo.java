@@ -10,13 +10,14 @@ public abstract class G2DAbstractRenderingBo extends AbstractRenderingBo {
 	public G2DAbstractRenderingBo(final RenderingBoLayer layer) {
 		super(layer);
 	}
-	
+
 	public boolean isScreenshotRelevant() {
 		return true;
 	}
 	
 	public abstract void render(Graphics2D graphics, double scaleFactor, boolean force);
 	
+	@Override
 	public void closeStatic() {
 		
 	}

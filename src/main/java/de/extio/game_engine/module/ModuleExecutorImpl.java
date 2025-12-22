@@ -20,6 +20,9 @@ public class ModuleExecutorImpl implements ModuleExecutor {
 	
 	@Override
 	public void execute() {
+
+		// TODO Subscriptions for modules to run only on certain conditions
+
 		this.runTasks(module -> () -> {
 			if (module instanceof final AbstractClientModule clientModule && this.moduleManager.getModulesDisplayedClientModules().contains(clientModule)) {
 				this.invokeSafe(clientModule, AbstractClientModule::runUiPre);

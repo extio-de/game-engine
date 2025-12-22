@@ -10,9 +10,11 @@ import de.extio.game_engine.spatial2.model.HasPosition2;
  * It is recommended to view my technical presentation on youtube about the game to learn more about how rendering works. 
  */
 public interface RenderingBo extends AutoCloseable {
-	
-	void setRendererData(RendererData RendererData);
-	
+
+	void setId(String id);
+
+	String getId();
+
 	/**
 	 * Sets a color you want to use for rendering. It depends on the rendering bo how this information is treated. 
 	 */
@@ -104,5 +106,9 @@ public interface RenderingBo extends AutoCloseable {
 	 * Positions this bo relative to it's parent. This can be for example game world for positioning tiles or a composite entity. Unit is usually not pixels but the position in the tile raster.
 	 */
 	RenderingBo withPositionRelative(HasPosition2 position);
-	
+
+	void closeStatic();
+
+	void setRendererData(RendererData RendererData);
+
 }

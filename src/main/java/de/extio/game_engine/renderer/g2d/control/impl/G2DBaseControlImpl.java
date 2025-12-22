@@ -72,7 +72,7 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	}
 	
 	@Override
-	public BaseControl setId(final String id) {
+	public BaseControl setControlId(final String id) {
 		this.id = id;
 		return this;
 	}

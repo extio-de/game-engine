@@ -353,9 +353,9 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	}
 	
 	@Override
-	public BaseControl setId(final String id) {
-		this.scrollbar.setId(id + "_scroll");
-		return super.setId(id);
+	public BaseControl setControlId(final String id) {
+		this.scrollbar.setControlId(id + "_scroll");
+		return super.setControlId(id);
 	}
 	
 }

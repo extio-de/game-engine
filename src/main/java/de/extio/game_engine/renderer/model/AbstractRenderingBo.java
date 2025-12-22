@@ -11,6 +11,8 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	
 	protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractRenderingBo.class);
 	
+	protected String id;
+
 	protected RendererData rendererData;
 	
 	protected RgbaColor color;
@@ -35,7 +37,17 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		this.layer = layer;
 		this.defaultLayer = layer;
 	}
-	
+
+	@Override
+	public void setId(final String id) {
+		this.id = id;
+	}
+
+	@Override
+	public String getId() {
+		return this.id;
+	}
+
 	@Override
 	public RenderingBo withPositionRelative(final int x, final int y) {
 		this.localX = x;
@@ -203,6 +215,7 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	
 	@Override
 	public void close() throws Exception {
+		this.id = null;
 		this.color = null;
 		this.x = 0;
 		this.y = 0;
@@ -211,6 +224,11 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		this.width = 0;
 		this.height = 0;
 		this.layer = this.defaultLayer;
+	}
+
+	@Override
+	public void closeStatic() {
+		
 	}
 	
 	@Override

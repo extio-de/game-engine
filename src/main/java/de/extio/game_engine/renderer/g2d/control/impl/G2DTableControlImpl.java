@@ -234,9 +234,9 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 	}
 	
 	@Override
-	public BaseControl setId(final String id) {
-		this.scrollbar.setId(id + "_scroll");
-		return super.setId(id);
+	public BaseControl setControlId(final String id) {
+		this.scrollbar.setControlId(id + "_scroll");
+		return super.setControlId(id);
 	}
 	
 	@Override

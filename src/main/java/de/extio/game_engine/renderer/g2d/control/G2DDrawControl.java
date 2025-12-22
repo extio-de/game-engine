@@ -39,7 +39,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	public static Map<String, List<BaseControl>> CONTROL_GROUPS = new HashMap<>();
 	
-	private String id;
+	private String controlId;
 	
 	private Class<? extends BaseControl> clazz;
 	
@@ -68,14 +68,14 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	}
 	
 	@Override
-	public ControlRenderingBo setId(final String id) {
-		this.id = id;
+	public ControlRenderingBo setControlId(final String id) {
+		this.controlId = id;
 		return this;
 	}
 	
 	@Override
-	public String getId() {
-		return this.id;
+	public String getControlId() {
+		return this.controlId;
 	}
 	
 	@Override
@@ -146,7 +146,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
-		var control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);
+		var control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.controlId);
 		if (control == null) {
 			if (this.clazz == ButtonControl.class) {
 				control = new G2DButtonControlImpl();
@@ -189,7 +189,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			control.setScaleFactor(scaleFactor)
 					.setControlGroup(this.controlGroup)
 					.setRendererData(this.rendererData)
-					.setId(this.id);
+					.setControlId(this.controlId);
 			if (this.clazz == TextfieldControl.class && this.customData instanceof Boolean) {
 				((TextfieldControl) control).setMultiLine(((Boolean) this.customData).booleanValue());
 			}
@@ -197,7 +197,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			
 			control.build();
 			
-			CACHED_CONTROLS.put(this.id, control);
+			CACHED_CONTROLS.put(this.controlId, control);
 			if (this.controlGroup != null && !this.controlGroup.isEmpty()) {
 				var controls = CONTROL_GROUPS.get(this.controlGroup);
 				if (controls == null) {
@@ -315,7 +315,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	public void close() throws Exception {
 		super.close();
 		
-		this.id = null;
+		this.controlId = null;
 		this.clazz = null;
 		this.caption = null;
 		this.controlGroup = null;

@@ -9,12 +9,12 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.RendererControl;
-import de.extio.game_engine.renderer.RenderingBoPool;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.spatial2.WorldUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
@@ -173,7 +173,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 			this.updateArea();
 		}
 		
-		var bo = this.renderingBoPool.acquire(DrawWindowRenderingBo.class)
+		var bo = this.renderingBoPool.acquire(this.name + "_Window", DrawWindowRenderingBo.class)
 				.setThickBorder(this.draggable)
 				.withDimensionAbsolute(this.area.getDimension())
 				.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
@@ -184,9 +184,9 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 		consumer.accept(renderingBo, bo);
 		
 		if (this.drawCloseButton) {
-			bo = this.renderingBoPool.acquire(ControlRenderingBo.class)
+			bo = this.renderingBoPool.acquire(this.name + "_Close", ControlRenderingBo.class)
 					.setType(WindowCloseButtonControl.class)
-					.setId(this.name + "_Close")
+					.setControlId(this.name + "_Close")
 					.setCustomData(this.draggable)
 					.setEnabled(true)
 					.setVisible(true)

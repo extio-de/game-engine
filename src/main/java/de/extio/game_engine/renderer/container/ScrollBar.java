@@ -6,13 +6,13 @@ import java.util.function.Predicate;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.extio.game_engine.renderer.RenderingBoPool;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
+import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
@@ -57,8 +57,8 @@ public class ScrollBar {
 	public void render(final List<RenderingBo> renderingBo, final Area2 renderingArea, final int numElements, final RenderingBoPool renderingBoPool) {
 		this.lastNumElements = numElements;
 		
-		final var bo = renderingBoPool.acquire(ControlRenderingBo.class)
-				.setId(this.name)
+		final var bo = renderingBoPool.acquire(this.name + "_Slider", ControlRenderingBo.class)
+				.setControlId(this.name)
 				.setType(SliderControl.class)
 				.setCustomData(Boolean.FALSE)
 				.setCustomData2(Double.valueOf(1.0D - this.scrollPosition))

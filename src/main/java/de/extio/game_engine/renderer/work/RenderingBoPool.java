@@ -1,5 +1,6 @@
-package de.extio.game_engine.renderer;
+package de.extio.game_engine.renderer.work;
 
+import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.model.RenderingBo;
 
 /**
@@ -14,7 +15,7 @@ public interface RenderingBoPool {
 	/**
 	 * Acquires a rendering business object by type from the pool.
 	 */
-	<T extends RenderingBo> T acquire(Class<T> clazz);
+	<T extends RenderingBo> T acquire(String id, Class<T> clazz);
 	
 	/**
 	 * Releases a rendering business object back to the pool. This is usually managed by the renderer.

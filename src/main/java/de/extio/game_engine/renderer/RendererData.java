@@ -9,6 +9,8 @@ import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
+import de.extio.game_engine.renderer.work.RendererWorkingSet;
+import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.storage.StorageService;
 
 public class RendererData {
@@ -32,10 +34,12 @@ public class RendererData {
 	private final EventService eventService;
 
 	private final StorageService storageService;
+
+	private final RendererWorkingSet rendererWorkingSet;
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
@@ -43,6 +47,7 @@ public class RendererData {
 		this.keycodeRegistry = keycodeRegistry;
 		this.eventService = eventService;
 		this.storageService = storageService;
+		this.rendererWorkingSet = rendererWorkingSet;
 	}
 	
 	public ApplicationContext getApplicationContext() {
@@ -95,5 +100,9 @@ public class RendererData {
 
 	public StorageService getStorageService() {
 		return storageService;
+	}
+
+	public RendererWorkingSet getRendererWorkingSet() {
+		return rendererWorkingSet;
 	}
 }

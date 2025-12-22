@@ -80,9 +80,6 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 			this.loadImage(graphics, index, backgroundName);
 		}
 		if (G2DDrawBackground.BACKGROUND_IMAGE == null) {
-			if (index == 0) {
-				this.fillBlack(graphics, viewPort);
-			}
 			return;
 		}
 		else if (BACKGROUND_IMAGE.validate(graphics.getDeviceConfiguration()) != VolatileImage.IMAGE_OK) {
@@ -160,11 +157,6 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 				}
 			}
 		}
-	}
-	
-	private void fillBlack(final Graphics2D graphics, final CoordI2 viewPort) {
-		graphics.setColor(Color.BLACK);
-		graphics.fillRect(0, 0, viewPort.getX(), viewPort.getY());
 	}
 	
 	private void loadImage(final Graphics2D graphics, final int index, final String backgroundName) {

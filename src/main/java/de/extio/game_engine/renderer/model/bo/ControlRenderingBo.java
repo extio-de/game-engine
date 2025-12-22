@@ -11,9 +11,9 @@ import de.extio.game_engine.renderer.model.color.RgbaColor;
  */
 public interface ControlRenderingBo extends RenderingBoHasDimension {
 	
-	ControlRenderingBo setId(String id);
+	ControlRenderingBo setControlId(String id);
 	
-	String getId();
+	String getControlId();
 	
 	/**
 	 * Sets the type of the control. See class tree of BaseControl
@@ -63,7 +63,7 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 		
 		boolean getInUse();
 		
-		BaseControl setId(String id);
+		BaseControl setControlId(String id);
 		
 		BaseControl setCaption(String caption);
 		

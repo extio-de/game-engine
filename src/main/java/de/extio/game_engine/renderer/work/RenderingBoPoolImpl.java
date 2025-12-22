@@ -1,10 +1,11 @@
-package de.extio.game_engine.renderer;
+package de.extio.game_engine.renderer.work;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
 
+import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.model.RenderingBo;
 
 public class RenderingBoPoolImpl implements RenderingBoPool {
@@ -34,14 +35,14 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 		
 		volatile Stack<RenderingBo> pooled;
 	}
-
+	
 	public RenderingBoPoolImpl(final Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> mapping) {
 		this.mapping = mapping;
 	}
-
+	
 	@Override
 	@SuppressWarnings("unchecked")
-	public <T extends RenderingBo> T acquire(final Class<T> clazz) {
+	public synchronized <T extends RenderingBo> T acquire(final String id, final Class<T> clazz) {
 		Stack<RenderingBo> pooled;
 		Class<? extends RenderingBo> impl;
 		
@@ -71,8 +72,8 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 			this.lastMapping.pooled = pooled;
 		}
 		
+		T instance;
 		if (pooled.isEmpty()) {
-			T instance;
 			try {
 				instance = clazz.cast(impl.getDeclaredConstructor().newInstance());
 			}
@@ -80,14 +81,17 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 				throw new RuntimeException(e);
 			}
 			instance.setRendererData(this.rendererData);
-			return instance;
+		}
+		else {
+			instance = (T) pooled.pop();
 		}
 		
-		return (T) pooled.pop();
+		instance.setId(id);
+		return instance;
 	}
 	
 	@Override
-	public void release(final RenderingBo obj) {
+	public synchronized void release(final RenderingBo obj) {
 		try {
 			obj.close();
 			
@@ -114,10 +118,10 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 			throw new RuntimeException(e);
 		}
 	}
-
+	
 	@Override
 	public void setRendererData(final RendererData rendererData) {
-		this.rendererData = rendererData;	
+		this.rendererData = rendererData;
 	}
 	
 }

@@ -15,6 +15,10 @@ import org.springframework.context.annotation.Bean;
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.renderer.model.RenderingBo;
+import de.extio.game_engine.renderer.work.RendererWorkingSet;
+import de.extio.game_engine.renderer.work.RendererWorkingSetImpl;
+import de.extio.game_engine.renderer.work.RenderingBoPool;
+import de.extio.game_engine.renderer.work.RenderingBoPoolImpl;
 import de.extio.game_engine.storage.StorageService;
 
 @AutoConfiguration
@@ -36,6 +40,12 @@ public class RendererAutoConfiguration {
 		
 		return new RenderingBoPoolImpl(mapping);
 	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	RendererWorkingSet rendererWorkingSet(final RenderingBoPool rendererBoPool) {
+		return new RendererWorkingSetImpl(rendererBoPool);
+	}
 	
 	@Bean
 	RendererData rendererData(final ApplicationContext applicationContext,
@@ -44,9 +54,10 @@ public class RendererAutoConfiguration {
 			final RenderingBoPool renderingBoPool,
 			final KeycodeRegistry keycodeRegistry,
 			final EventService eventService,
-			final StorageService storageService) {
+			final StorageService storageService,
+			final RendererWorkingSet rendererWorkingSet) {
 		
-		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, keycodeRegistry, eventService, storageService);
+		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, keycodeRegistry, eventService, storageService, rendererWorkingSet);
 		renderer.setRendererData(rendererData);
 		rendererControl.setRendererData(rendererData);
 		renderingBoPool.setRendererData(rendererData);

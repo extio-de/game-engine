@@ -1,7 +1,6 @@
 package de.extio.game_engine.renderer;
 
 import java.awt.event.KeyEvent;
-import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
@@ -41,7 +40,8 @@ public class RendererLoop implements Runnable {
 			while (!this.shutdown) {
 				try {
 					this.rendererData.nextFrame();
-					this.rendererData.getRenderer().run(new ArrayList<>()); // TODO: Pass actual renderables
+					// TODO run modules here
+					this.rendererData.getRenderer().run();
 					exceptionCount = 0;
 				}
 				catch (final InterruptedException e) {

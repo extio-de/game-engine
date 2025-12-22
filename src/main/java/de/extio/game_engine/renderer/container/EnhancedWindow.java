@@ -3,7 +3,7 @@ package de.extio.game_engine.renderer.container;
 import java.util.function.Function;
 
 import de.extio.game_engine.renderer.RendererControl;
-import de.extio.game_engine.renderer.RenderingBoPool;
+import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.spatial2.model.Area2;
 
 /**
