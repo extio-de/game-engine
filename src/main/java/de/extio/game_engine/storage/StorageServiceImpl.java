@@ -149,7 +149,7 @@ public class StorageServiceImpl implements StorageService {
 			}
 			
 			addToIndexAndSave(id, name, path);
-			LOGGER.debug("Stored object with id {} at path {}/{}", id, path, name);
+			LOGGER.info("Stored object with id {} at path {}/{}", id, path, name);
 			return id;
 		}
 		catch (final Exception e) {
@@ -171,7 +171,7 @@ public class StorageServiceImpl implements StorageService {
 			Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
 			
 			addToIndexAndSave(id, name, path);
-			LOGGER.debug("Stored stream with id {} at path {}/{}", id, path, name);
+			LOGGER.info("Stored stream with id {} at path {}/{}", id, path, name);
 			return id;
 		}
 		catch (final Exception e) {
@@ -263,6 +263,9 @@ public class StorageServiceImpl implements StorageService {
 		try {
 			try (final var in = Files.newInputStream(filePath)) {
 				final T obj = ObjectSerialization.deserialize(clazz, in, true, false, null, null, null);
+				if (obj != null) {
+					LOGGER.info("Loaded object with id {}", id);
+				}
 				return Optional.ofNullable(obj);
 			}
 		}
@@ -300,7 +303,9 @@ public class StorageServiceImpl implements StorageService {
 		}
 		
 		try {
-			return Optional.of(Files.newInputStream(filePath));
+			final InputStream stream = Files.newInputStream(filePath);
+			LOGGER.info("Loaded stream with id {}", id);
+			return Optional.of(stream);
 		}
 		catch (final Exception e) {
 			LOGGER.error("Could not load stream from " + filePath.toString(), e);
@@ -364,7 +369,7 @@ public class StorageServiceImpl implements StorageService {
 					outputStream.close();
 					
 					addToIndexAndSave(id, name, path);
-					LOGGER.debug("Stored stream with id {} at path {}/{}", id, path, name);
+					LOGGER.info("Stored stream with id {} at path {}/{}", id, path, name);
 				}
 			});
 		}
