@@ -29,7 +29,7 @@ public final class ObjectSerialization {
 				.build();
 	}
 	
-	public byte[] serialize(final Object o, final boolean compress, final boolean base64, final boolean digest, final byte[] digestSalt, final Consumer<byte[]> digestConsumer) {
+	public static byte[] serialize(final Object o, final boolean compress, final boolean base64, final boolean digest, final byte[] digestSalt, final Consumer<byte[]> digestConsumer) {
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1 << 16);
 		OutputStream base64OutputStream = null;
 		ZstdOutputStream zstdOutputStream = null;
@@ -81,7 +81,7 @@ public final class ObjectSerialization {
 		return byteArrayOutputStream.toByteArray();
 	}
 	
-	public <T extends Object> T deserialize(final Class<T> clazz, final byte[] data, final boolean deserializeObjRefs, final boolean decompress, final boolean base64, final byte[] checkDigest, final byte[] digestSalt, final Consumer<Boolean> digestCheckConsumer) {
+	public static <T extends Object> T deserialize(final Class<T> clazz, final byte[] data, final boolean deserializeObjRefs, final boolean decompress, final boolean base64, final byte[] checkDigest, final byte[] digestSalt, final Consumer<Boolean> digestCheckConsumer) {
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
 		InputStream base64InputStream = null;
 		ZstdInputStream zstdInputStream = null;
