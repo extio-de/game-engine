@@ -33,10 +33,10 @@ public interface StorageService {
 	
 	List<StorageItemDescriptor> searchByPattern(List<String> basePath, String pattern, boolean recursive);
 	
-	UUID store(String name, List<String> path, Object obj);
+	UUID store(List<String> path, String name, Object obj);
 	
-	UUID storeStream(String name, List<String> path, InputStream inputStream);
+	UUID storeStream(List<String> path, String name, InputStream inputStream);
 	
-	StorageOutputStream storeStream(String name, List<String> path);
+	StorageOutputStream storeStream(List<String> path, String name);
 	
 }

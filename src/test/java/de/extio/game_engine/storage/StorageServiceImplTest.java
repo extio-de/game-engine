@@ -69,7 +69,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 123);
-		final UUID id = service.store("myfile.dat", List.of("folder", "subfolder"), data);
+		final UUID id = service.store(List.of("folder", "subfolder"), "myfile.dat", data);
 		
 		assertThat(id).isNotNull();
 		assertThat(Files.exists(StorageServiceImpl.DATA_LOCATION.resolve(id.toString()))).isTrue();
@@ -89,7 +89,7 @@ class StorageServiceImplTest {
 		
 		final String content = "Hello World";
 		final InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-		final UUID id = service.storeStream("mystream.txt", List.of("streams"), inputStream);
+		final UUID id = service.storeStream(List.of("streams"), "mystream.txt", inputStream);
 		
 		assertThat(id).isNotNull();
 		assertThat(Files.exists(StorageServiceImpl.DATA_LOCATION.resolve(id.toString()))).isTrue();
@@ -107,7 +107,7 @@ class StorageServiceImplTest {
 		
 		final String content = "Stream Content";
 		final InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-		final UUID id = service.storeStream("mystream.txt", List.of("streams"), inputStream);
+		final UUID id = service.storeStream(List.of("streams"), "mystream.txt", inputStream);
 		
 		final Optional<InputStream> loaded = service.loadStreamById(id);
 		assertThat(loaded).isPresent();
@@ -124,7 +124,7 @@ class StorageServiceImplTest {
 		
 		final String content = "Path Stream Content";
 		final InputStream inputStream = new ByteArrayInputStream(content.getBytes(StandardCharsets.UTF_8));
-		service.storeStream("pathstream.txt", List.of("path", "streams"), inputStream);
+		service.storeStream(List.of("path", "streams"), "pathstream.txt", inputStream);
 		
 		final Optional<InputStream> loaded = service.loadStreamByPath(List.of("path", "streams"), "pathstream.txt");
 		assertThat(loaded).isPresent();
@@ -139,7 +139,7 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		final StorageOutputStream storageOutput = service.storeStream("outstream.txt", List.of("output", "streams"));
+		final StorageOutputStream storageOutput = service.storeStream(List.of("output", "streams"), "outstream.txt");
 		assertThat(storageOutput.id()).isNotNull();
 		assertThat(storageOutput.outputStream()).isNotNull();
 		
@@ -162,7 +162,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final String content = "Output Stream Readback Content";
-		final StorageOutputStream storageOutput = service.storeStream("readback.txt", List.of("readback"));
+		final StorageOutputStream storageOutput = service.storeStream(List.of("readback"), "readback.txt");
 		try (OutputStream out = storageOutput.outputStream()) {
 			out.write(content.getBytes(StandardCharsets.UTF_8));
 		}
@@ -181,10 +181,10 @@ class StorageServiceImplTest {
 		final StorageServiceImpl service = new StorageServiceImpl();
 		
 		final TestData data1 = new TestData("first", 100);
-		final UUID id1 = service.store("myfile.dat", List.of("folder"), data1);
+		final UUID id1 = service.store(List.of("folder"), "myfile.dat", data1);
 		
 		final TestData data2 = new TestData("second", 200);
-		final UUID id2 = service.store("myfile.dat", List.of("folder"), data2);
+		final UUID id2 = service.store(List.of("folder"), "myfile.dat", data2);
 		
 		assertThat(id1).isEqualTo(id2);
 		
@@ -203,7 +203,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 123);
-		final UUID id = service.store("myfile.dat", List.of("folder"), data);
+		final UUID id = service.store(List.of("folder"), "myfile.dat", data);
 		
 		final Path filePath = StorageServiceImpl.DATA_LOCATION.resolve(id.toString());
 		assertThat(Files.exists(filePath)).isTrue();
@@ -231,7 +231,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 123);
-		final UUID id = service.store("myfile.dat", List.of("folder"), data);
+		final UUID id = service.store(List.of("folder"), "myfile.dat", data);
 		
 		final boolean deleted = service.deleteByPath(List.of("folder"), "myfile.dat");
 		assertThat(deleted).isTrue();
@@ -255,7 +255,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 123);
-		final UUID id = service.store("oldfile.dat", List.of("old", "path"), data);
+		final UUID id = service.store(List.of("old", "path"), "oldfile.dat", data);
 		
 		final boolean moved = service.moveById(id, List.of("new", "path"), "newfile.dat");
 		assertThat(moved).isTrue();
@@ -284,7 +284,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 123);
-		service.store("oldfile.dat", List.of("old"), data);
+		service.store(List.of("old"), "oldfile.dat", data);
 		
 		final boolean moved = service.moveByPath(List.of("old"), "oldfile.dat", List.of("new"), "newfile.dat");
 		assertThat(moved).isTrue();
@@ -300,7 +300,7 @@ class StorageServiceImplTest {
 		final StorageServiceImpl service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 456);
-		final UUID id = service.store("myfile.dat", List.of("folder"), data);
+		final UUID id = service.store(List.of("folder"), "myfile.dat", data);
 		
 		final Optional<TestData> loaded = service.loadById(TestData.class, id);
 		assertThat(loaded).isPresent();
@@ -323,7 +323,7 @@ class StorageServiceImplTest {
 		final StorageServiceImpl service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 789);
-		service.store("myfile.dat", List.of("folder", "sub"), data);
+		service.store(List.of("folder", "sub"), "myfile.dat", data);
 		
 		final Optional<TestData> loaded = service.loadByPath(TestData.class, List.of("folder", "sub"), "myfile.dat");
 		assertThat(loaded).isPresent();
@@ -337,7 +337,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 123);
-		final UUID id = service.store("myfile.dat", List.of("folder"), data);
+		final UUID id = service.store(List.of("folder"), "myfile.dat", data);
 		
 		final Optional<StorageItemDescriptor> descriptor = service.searchById(id);
 		assertThat(descriptor).isPresent();
@@ -351,7 +351,7 @@ class StorageServiceImplTest {
 		final StorageService service = new StorageServiceImpl();
 		
 		final TestData data = new TestData("test", 123);
-		final UUID id = service.store("myfile.dat", List.of("folder"), data);
+		final UUID id = service.store(List.of("folder"), "myfile.dat", data);
 		
 		final Optional<StorageItemDescriptor> descriptor = service.searchByPath(List.of("folder"), "myfile.dat");
 		assertThat(descriptor).isPresent();
@@ -363,9 +363,9 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		service.store("file1.txt", List.of("docs"), new TestData("a", 1));
-		service.store("file2.txt", List.of("docs"), new TestData("b", 2));
-		service.store("data.dat", List.of("docs"), new TestData("c", 3));
+		service.store(List.of("docs"), "file1.txt", new TestData("a", 1));
+		service.store(List.of("docs"), "file2.txt", new TestData("b", 2));
+		service.store(List.of("docs"), "data.dat", new TestData("c", 3));
 		
 		final List<StorageItemDescriptor> matches = service.searchByPattern(List.of("docs"), "*.txt", false);
 		assertThat(matches).hasSize(2);
@@ -377,9 +377,9 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		service.store("root.txt", List.of(), new TestData("a", 1));
-		service.store("sub1.txt", List.of("level1"), new TestData("b", 2));
-		service.store("sub2.txt", List.of("level1", "level2"), new TestData("c", 3));
+		service.store(List.of(), "root.txt", new TestData("a", 1));
+		service.store(List.of("level1"), "sub1.txt", new TestData("b", 2));
+		service.store(List.of("level1", "level2"), "sub2.txt", new TestData("c", 3));
 		
 		final List<StorageItemDescriptor> matches = service.searchByPattern(List.of(), "*.txt", true);
 		assertThat(matches).hasSize(3);
@@ -390,9 +390,9 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		service.store("file1.txt", List.of("docs"), new TestData("a", 1));
-		service.store("file2.txt", List.of("docs"), new TestData("b", 2));
-		service.store("other.txt", List.of("other"), new TestData("c", 3));
+		service.store(List.of("docs"), "file1.txt", new TestData("a", 1));
+		service.store(List.of("docs"), "file2.txt", new TestData("b", 2));
+		service.store(List.of("other"), "other.txt", new TestData("c", 3));
 		
 		final List<StorageItemDescriptor> items = service.listPath(List.of("docs"), false);
 		assertThat(items).hasSize(2);
@@ -404,9 +404,9 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		service.store("root.txt", List.of("docs"), new TestData("a", 1));
-		service.store("sub1.txt", List.of("docs", "subdir"), new TestData("b", 2));
-		service.store("sub2.txt", List.of("docs", "subdir", "deeper"), new TestData("c", 3));
+		service.store(List.of("docs"), "root.txt", new TestData("a", 1));
+		service.store(List.of("docs", "subdir"), "sub1.txt", new TestData("b", 2));
+		service.store(List.of("docs", "subdir", "deeper"), "sub2.txt", new TestData("c", 3));
 		
 		final List<StorageItemDescriptor> items = service.listPath(List.of("docs"), false);
 		assertThat(items).hasSize(1);
@@ -418,9 +418,9 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		service.store("root.txt", List.of("docs"), new TestData("a", 1));
-		service.store("sub1.txt", List.of("docs", "subdir"), new TestData("b", 2));
-		service.store("sub2.txt", List.of("docs", "subdir", "deeper"), new TestData("c", 3));
+		service.store(List.of("docs"), "root.txt", new TestData("a", 1));
+		service.store(List.of("docs", "subdir"), "sub1.txt", new TestData("b", 2));
+		service.store(List.of("docs", "subdir", "deeper"), "sub2.txt", new TestData("c", 3));
 		
 		final List<StorageItemDescriptor> items = service.listPath(List.of("docs"), true);
 		assertThat(items).hasSize(3);
@@ -432,10 +432,10 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		service.store("file1.txt", List.of(), new TestData("a", 1));
-		service.store("file2.txt", List.of("level1"), new TestData("b", 2));
-		service.store("file3.txt", List.of("level1", "level2"), new TestData("c", 3));
-		service.store("file4.txt", List.of("other"), new TestData("d", 4));
+		service.store(List.of(), "file1.txt", new TestData("a", 1));
+		service.store(List.of("level1"), "file2.txt", new TestData("b", 2));
+		service.store(List.of("level1", "level2"), "file3.txt", new TestData("c", 3));
+		service.store(List.of("other"), "file4.txt", new TestData("d", 4));
 		
 		final List<StorageItemDescriptor> items = service.listPath(List.of(), true);
 		assertThat(items).hasSize(4);
@@ -447,9 +447,9 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		service.store("file1.txt", List.of("docs"), new TestData("a", 1));
-		service.store("file2.txt", List.of("data"), new TestData("b", 2));
-		service.store("file3.txt", List.of("docs", "sub"), new TestData("c", 3));
+		service.store(List.of("docs"), "file1.txt", new TestData("a", 1));
+		service.store(List.of("data"), "file2.txt", new TestData("b", 2));
+		service.store(List.of("docs", "sub"), "file3.txt", new TestData("c", 3));
 		
 		final List<StorageItemDescriptor> items = service.listAll();
 		assertThat(items).hasSize(3);
@@ -470,7 +470,7 @@ class StorageServiceImplTest {
 		Files.deleteIfExists(StorageServiceImpl.INDEX_LOCATION);
 		final StorageService service = new StorageServiceImpl();
 		
-		final UUID id = service.store("file.txt", List.of("docs"), new TestData("test", 1));
+		final UUID id = service.store(List.of("docs"), "file.txt", new TestData("test", 1));
 		assertThat(service.listAll()).hasSize(1);
 		
 		service.deleteById(id);

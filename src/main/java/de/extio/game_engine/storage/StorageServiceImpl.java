@@ -135,7 +135,7 @@ public class StorageServiceImpl implements StorageService {
 	}
 	
 	@Override
-	public UUID store(final String name, final List<String> path, final Object obj) {
+	public UUID store(final List<String> path, final String name, final Object obj) {
 		Objects.requireNonNull(name, "name");
 		Objects.requireNonNull(obj, "obj");
 		
@@ -159,7 +159,7 @@ public class StorageServiceImpl implements StorageService {
 	}
 	
 	@Override
-	public UUID storeStream(final String name, final List<String> path, final InputStream inputStream) {
+	public UUID storeStream(final List<String> path, final String name, final InputStream inputStream) {
 		Objects.requireNonNull(name, "name");
 		Objects.requireNonNull(inputStream, "inputStream");
 		
@@ -321,7 +321,7 @@ public class StorageServiceImpl implements StorageService {
 	}
 	
 	@Override
-	public StorageOutputStream storeStream(final String name, final List<String> path) {
+	public StorageOutputStream storeStream(final List<String> path, final String name) {
 		Objects.requireNonNull(name, "name");
 		
 		final Optional<StorageItemDescriptor> existing = this.index.find(path, name);
