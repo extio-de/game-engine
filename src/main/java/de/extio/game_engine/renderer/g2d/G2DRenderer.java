@@ -70,6 +70,7 @@ public class G2DRenderer implements Renderer {
 		
 		System.setProperty("java.awt.headless", "false");
 		System.setProperty("sun.java2d.uiScale", "1");
+		System.setProperty("sun.java2d.opengl", "true");
 		System.setProperty("awt.nativeDoubleBuffering", "true");
 		System.setProperty("awt.useSystemAAFontSettings", "on");
 		System.setProperty("swing.aatext", "true");
@@ -86,6 +87,8 @@ public class G2DRenderer implements Renderer {
 			EventQueue.invokeAndWait(() -> {
 				// this invokeAndWait() call is also important to wait until applyVideoOptions() has been completed, which also puts events to AWT event queue
 				LOGGER.debug("Viewport initialized");
+				this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
+				this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_tooltip", G2DDrawControlTooltip.class));
 			});
 		}
 		catch (InvocationTargetException | InterruptedException e) {
@@ -148,7 +151,8 @@ public class G2DRenderer implements Renderer {
 					screenshotGraphics.setRenderingHints(G2DRenderingHintFactory.createDefault());
 				}
 				
-				this.addStaticRenderingBOs();
+				this.drawStatistics();
+				this.rendererData.getRendererWorkingSet().commit("G2DRenderer", true);
 				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs);
 				this.renderingBOs.sort((bo0, bo1) -> bo0.getLayer().compareTo(bo1.getLayer()));
 				
@@ -174,6 +178,8 @@ public class G2DRenderer implements Renderer {
 						}
 					}
 					
+					this.rendererData.getRendererWorkingSet().get("G2DRenderer", "G2DRenderer_tooltip").closeStatic();
+
 					//
 					// Rendering cycle END
 					//
@@ -207,13 +213,6 @@ public class G2DRenderer implements Renderer {
 			Thread.sleep(250l);
 			this.rendererData.getRendererControl().applyVideoOptions();
 		}
-	}
-	
-	private void addStaticRenderingBOs() {
-		this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
-		this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_control", G2DDrawControlTooltip.class));
-		this.drawStatistics();
-		this.rendererData.getRendererWorkingSet().commit("G2DRenderer", false);
 	}
 	
 	private void drawStatistics() {
