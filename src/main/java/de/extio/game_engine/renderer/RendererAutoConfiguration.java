@@ -7,11 +7,11 @@ import java.util.function.Consumer;
 
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
-import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.renderer.model.RenderingBo;
@@ -23,6 +23,7 @@ public class RendererAutoConfiguration {
 	
 	@SuppressWarnings("unchecked")
 	@Bean
+	@ConditionalOnMissingBean
 	RenderingBoPool renderingBoPool(final List<RenderingBo> renderingBoImplementations) {
 		final Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> mapping = new HashMap<>();
 		for (final var impl : renderingBoImplementations) {
