@@ -9,6 +9,7 @@ import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
+import de.extio.game_engine.storage.StorageService;
 
 public class RendererData {
 
@@ -29,16 +30,19 @@ public class RendererData {
 	private final KeycodeRegistry keycodeRegistry;
 
 	private final EventService eventService;
+
+	private final StorageService storageService;
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
 		this.renderingBoPool = renderingBoPool;
 		this.keycodeRegistry = keycodeRegistry;
 		this.eventService = eventService;
+		this.storageService = storageService;
 	}
 	
 	public ApplicationContext getApplicationContext() {
@@ -87,5 +91,9 @@ public class RendererData {
 	
 	public EventService getEventService() {
 		return this.eventService;
+	}
+
+	public StorageService getStorageService() {
+		return storageService;
 	}
 }

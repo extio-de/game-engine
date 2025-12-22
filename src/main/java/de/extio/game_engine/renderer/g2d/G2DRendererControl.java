@@ -3,6 +3,7 @@ package de.extio.game_engine.renderer.g2d;
 import java.awt.EventQueue;
 import java.awt.Toolkit;
 import java.lang.reflect.InvocationTargetException;
+import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class G2DRendererControl implements RendererControl {
 	
 	private double scaleFactor = 1.0;
 	
-	private double scaleFactorModifier = 1.0;
+	private volatile G2DRendererControlOptions options = new G2DRendererControlOptions(1.0);
 	
 	private boolean forceAutoScaling;
 	
@@ -51,6 +52,12 @@ public class G2DRendererControl implements RendererControl {
 		final Runnable run = () -> {
 			this.renderer.getWriteLock().lock();
 			try {
+				if (this.videoOptionsAppliedAt == 0)  {
+					this.rendererData.getStorageService()
+						.loadByPath(G2DRendererControlOptions.class, List.of("gameEngine"), "g2dRendererControlOptions")
+						.ifPresent(options -> this.options = options);
+				}
+
 				if (this.renderer.getMainFrame() != null) {
 					this.renderer.getMainFrame().unregisterFullScreenWindow();
 					this.renderer.reset();
@@ -89,7 +96,8 @@ public class G2DRendererControl implements RendererControl {
 				
 				this.updateViewPort(false, false);
 
-				// TODO: Save video options to user preferences
+				this.rendererData.getStorageService()
+					.store(List.of("gameEngine"), "videoOptions", this.rendererData.getVideoOptions());
 
 			}
 			finally {
@@ -133,12 +141,25 @@ public class G2DRendererControl implements RendererControl {
 	
 	@Override
 	public double getScaleFactorModifier() {
-		return this.scaleFactorModifier;
+		return this.options.scaleFactorModifier();
 	}
 	
 	@Override
 	public void setScaleFactorModifier(final double scaleFactorModifier) {
-		this.scaleFactorModifier = scaleFactorModifier;
+		if (scaleFactorModifier <= 0.1) {
+			throw new IllegalArgumentException("Scale factor modifier must be greater than 0.1");
+		}
+		if (scaleFactorModifier > 5.0) {
+			throw new IllegalArgumentException("Scale factor modifier must be less than 5.0");
+		}
+		if (scaleFactorModifier == this.options.scaleFactorModifier()) {
+			return;
+		}
+
+		this.options = new G2DRendererControlOptions(scaleFactorModifier);
+		this.rendererData.getStorageService()
+			.store(List.of("gameEngine"), "g2dRendererControlOptions", this.options);
+		
 		this.recalculate();
 	}
 	
@@ -225,13 +246,13 @@ public class G2DRendererControl implements RendererControl {
 		}
 		else {
 			if (fLow < 1.0 && fHigh < 1.0) {
-				factor = fLow * this.scaleFactorModifier;
+				factor = fLow * this.options.scaleFactorModifier();
 			}
 			else if (fLow > 1.0 && fHigh > 1.0) {
-				factor = fHigh * this.scaleFactorModifier;
+				factor = fHigh * this.options.scaleFactorModifier();
 			}
 			else {
-				factor = this.scaleFactorModifier;
+				factor = this.options.scaleFactorModifier();
 			}
 		}
 		this.scaleFactor = Math.min(SCALE_FACTOR_MAX, Math.max(SCALE_FACTOR_MIN, factor));
@@ -259,5 +280,8 @@ public class G2DRendererControl implements RendererControl {
 	@Override
 	public void setRendererData(final RendererData rendererData) {
 		this.rendererData = rendererData;
+	}
+
+	private static record G2DRendererControlOptions(double scaleFactorModifier) {
 	}
 }

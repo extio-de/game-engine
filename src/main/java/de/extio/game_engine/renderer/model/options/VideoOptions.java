@@ -10,6 +10,13 @@ public final class VideoOptions {
 	
 	private int frameRateTarget = 60;
 	
+	public void apply(final VideoOptions other) {
+		this.setVideoMode(other.getVideoMode());
+		this.setFullScreenNumber(other.getFullScreenNumber());
+		this.setScaleFactorModifier(other.getScaleFactorModifier());
+		this.setFrameRateTarget(other.getFrameRateTarget());
+	}
+	
 	public double getScaleFactorModifier() {
 		return this.scaleFactorModifier;
 	}
