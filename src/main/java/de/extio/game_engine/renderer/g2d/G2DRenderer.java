@@ -8,7 +8,9 @@ import java.awt.image.BufferedImage;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -40,6 +42,10 @@ public class G2DRenderer implements Renderer {
 	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
 	
 	private final RingBuffer<Integer> fpsHistory = new RingBuffer<>(90);
+	
+	private final Set<Class<? extends RenderingBo>> releasedBoClasses = new HashSet<>();
+
+	private final StringBuilder fpsStringBuilder = new StringBuilder(15);
 	
 	private volatile G2DMainFrame mainFrame;
 	
@@ -187,13 +193,13 @@ public class G2DRenderer implements Renderer {
 						screenGraphics.dispose();
 					}
 					
+					this.releasedBoClasses.clear();
 					for (final RenderingBo renderingBO : renderingBOs) {
+						if (this.releasedBoClasses.add(renderingBO.getClass()) && renderingBO instanceof final G2DAbstractRenderingBo g2dRenderingBo) {
+							g2dRenderingBo.closeStatic();
+						}
 						this.rendererData.getRenderingBoPool().release(renderingBO);
 					}
-					// TODO discover with marker interface
-					G2DDrawControl.closeStatic();
-					G2DDrawImage.closeStatic();
-					G2DDrawControlTooltip.closeStatic();
 				}
 				
 				if (takeScreenshot_) {
@@ -224,14 +230,14 @@ public class G2DRenderer implements Renderer {
 		
 		// FPS
 		
-		final var sb = new StringBuilder(15);
-		sb.append(this.fps);
-		sb.append("fps ");
-		sb.append(this.frameDur);
-		sb.append("ms");
+		fpsStringBuilder.setLength(0);
+		fpsStringBuilder.append(this.fps);
+		fpsStringBuilder.append("fps ");
+		fpsStringBuilder.append(this.frameDur);
+		fpsStringBuilder.append("ms");
 		
 		final var drawFont = this.rendererData.getRenderingBoPool().acquire(DrawFontRenderingBo.class)
-				.setText(sb.toString())
+				.setText(fpsStringBuilder.toString())
 				.setSize(14)
 				.setColor(RgbaColor.WHITE)
 				.setLayer(RenderingBoLayer.TOP)

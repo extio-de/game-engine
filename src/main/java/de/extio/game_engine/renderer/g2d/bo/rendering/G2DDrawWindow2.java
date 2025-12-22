@@ -90,7 +90,8 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 		this.awtColor = null;
 	}
 	
-	public static void closeStatic() {
+	@Override
+	public void closeStatic() {
 		final var it = CACHE.values().iterator();
 		while (it.hasNext()) {
 			final var entry = it.next();

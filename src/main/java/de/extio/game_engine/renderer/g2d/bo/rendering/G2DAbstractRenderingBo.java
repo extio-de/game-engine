@@ -17,4 +17,7 @@ public abstract class G2DAbstractRenderingBo extends AbstractRenderingBo {
 	
 	public abstract void render(Graphics2D graphics, double scaleFactor, boolean force);
 	
+	public void closeStatic() {
+		
+	}
 }

@@ -43,7 +43,8 @@ public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {
 		G2DDrawFont.renderText(graphics, scaleFactor, (int) ((TOOLTIP.position().getX() + 10) / scaleFactor), (int) ((TOOLTIP.position().getY() + 10) / scaleFactor), 14, TOOLTIP.text());
 	}
 	
-	public static void closeStatic() {
+	@Override
+	public void closeStatic() {
 		TOOLTIP = null;
 	}
 }

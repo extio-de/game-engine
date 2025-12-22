@@ -329,7 +329,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.tooltip = null;
 	}
 	
-	public static void closeStatic() {
+	@Override
+	public void closeStatic() {
 		final var it = CACHED_CONTROLS.values().iterator();
 		while (it.hasNext()) {
 			final var control = it.next();

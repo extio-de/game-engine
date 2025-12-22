@@ -11,6 +11,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
+
+
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
@@ -125,7 +127,8 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 		this.scaledY = 0;
 	}
 	
-	public static void closeStatic() {
+	@Override
+	public void closeStatic() {
 		final var it = IMAGE_CACHE.values().iterator();
 		while (it.hasNext()) {
 			final var cachedImage = it.next();
