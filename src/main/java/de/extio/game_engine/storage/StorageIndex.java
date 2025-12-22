@@ -18,8 +18,9 @@ import java.nio.file.PathMatcher;
 public class StorageIndex {
 	
 	private final Node root;
+	
 	private final Map<UUID, IndexedItem> byId;
-
+	
 	public StorageIndex() {
 		this.root = new Node();
 		this.byId = new HashMap<>();
@@ -31,6 +32,14 @@ public class StorageIndex {
 	
 	public boolean isEmpty() {
 		return this.byId.isEmpty();
+	}
+	
+	public List<StorageItemDescriptor> listAll() {
+		List<StorageItemDescriptor> result = new ArrayList<>(this.byId.size());
+		for (IndexedItem item : this.byId.values()) {
+			result.add(item.descriptor());
+		}
+		return result;
 	}
 	
 	public void clear() {
@@ -64,16 +73,29 @@ public class StorageIndex {
 		return Optional.ofNullable(node.itemsByNormalizedName.get(normalizedName)).map(IndexedItem::descriptor);
 	}
 	
-	public List<StorageItemDescriptor> list(final List<String> path) {
+	public List<StorageItemDescriptor> list(final List<String> path, final boolean recursive) {
 		final List<String> normalizedPath = this.normalizePath(path);
 		final Node node = this.getNode(normalizedPath);
 		if (node == null) {
 			return List.of();
 		}
-		if (node.itemsByNormalizedName.isEmpty()) {
-			return List.of();
+		if (!recursive) {
+			if (node.itemsByNormalizedName.isEmpty()) {
+				return List.of();
+			}
+			return node.itemsByNormalizedName.values().stream().map(IndexedItem::descriptor).toList();
 		}
-		return node.itemsByNormalizedName.values().stream().map(IndexedItem::descriptor).toList();
+		final List<StorageItemDescriptor> items = new ArrayList<>();
+		final Deque<Node> work = new ArrayDeque<>();
+		work.addLast(node);
+		while (!work.isEmpty()) {
+			final Node n = work.removeFirst();
+			for (final IndexedItem item : n.itemsByNormalizedName.values()) {
+				items.add(item.descriptor());
+			}
+			work.addAll(n.children.values());
+		}
+		return List.copyOf(items);
 	}
 	
 	public List<StorageItemDescriptor> findByFilenamePattern(final List<String> basePath, final String pattern, final boolean recursive) {
@@ -256,7 +278,9 @@ public class StorageIndex {
 	}
 	
 	private static final class Node {
+		
 		private final Map<String, Node> children;
+		
 		private final Map<String, IndexedItem> itemsByNormalizedName;
 		
 		private Node() {

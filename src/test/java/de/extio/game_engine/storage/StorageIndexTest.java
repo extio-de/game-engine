@@ -24,7 +24,7 @@ public class StorageIndexTest {
 	}
 	
 	@Test
-	void listReturnsItemsOnlyAtThatDirectory() {
+	void listNonRecursiveReturnsItemsOnlyAtThatDirectory() {
 		final StorageIndex index = new StorageIndex();
 		final StorageItemDescriptor rootItem = new StorageItemDescriptor(UUID.randomUUID(), "root", List.of());
 		final StorageItemDescriptor aItem = new StorageItemDescriptor(UUID.randomUUID(), "a1", List.of("a"));
@@ -32,10 +32,10 @@ public class StorageIndexTest {
 		index.add(rootItem);
 		index.add(aItem);
 		index.add(abItem);
-		assertThat(index.list(List.of())).containsExactlyInAnyOrder(rootItem);
-		assertThat(index.list(List.of("a"))).containsExactlyInAnyOrder(aItem);
-		assertThat(index.list(List.of("a", "b"))).containsExactlyInAnyOrder(abItem);
-		assertThat(index.list(List.of("missing"))).isEmpty();
+		assertThat(index.list(List.of(), false)).containsExactlyInAnyOrder(rootItem);
+		assertThat(index.list(List.of("a"), false)).containsExactlyInAnyOrder(aItem);
+		assertThat(index.list(List.of("a", "b"), false)).containsExactlyInAnyOrder(abItem);
+		assertThat(index.list(List.of("missing"), false)).isEmpty();
 	}
 	
 	@Test
@@ -45,7 +45,7 @@ public class StorageIndexTest {
 		index.add(descriptor);
 		assertThat(index.find(List.of("a", "b"), "x")).isPresent();
 		assertThat(index.find(List.of(" ", "A", "b "), "X")).isPresent();
-		assertThat(index.list(List.of("a", "b"))).hasSize(1);
+		assertThat(index.list(List.of("a", "b"), false)).hasSize(1);
 	}
 	
 	@Test
@@ -90,8 +90,8 @@ public class StorageIndexTest {
 		assertThat(index.remove(leaf.id())).isTrue();
 		assertThat(index.size()).isZero();
 		assertThat(index.find(List.of("a", "b"), "leaf")).isEmpty();
-		assertThat(index.list(List.of("a", "b"))).isEmpty();
-		assertThat(index.list(List.of("a"))).isEmpty();
+		assertThat(index.list(List.of("a", "b"), false)).isEmpty();
+		assertThat(index.list(List.of("a"), false)).isEmpty();
 	}
 	
 	@Test
@@ -133,5 +133,76 @@ public class StorageIndexTest {
 		index.add(outside);
 		final var matches = index.findByFilenamePattern(List.of("assets"), "glob:*.png", true);
 		assertThat(matches).containsExactlyInAnyOrder(inBase, inChild2);
+	}
+	
+	@Test
+	void listRecursiveReturnsAllItemsInDirectoryAndSubdirectories() {
+		final StorageIndex index = new StorageIndex();
+		final StorageItemDescriptor rootItem = new StorageItemDescriptor(UUID.randomUUID(), "root", List.of());
+		final StorageItemDescriptor aItem = new StorageItemDescriptor(UUID.randomUUID(), "a1", List.of("a"));
+		final StorageItemDescriptor abItem = new StorageItemDescriptor(UUID.randomUUID(), "ab1", List.of("a", "b"));
+		final StorageItemDescriptor abcItem = new StorageItemDescriptor(UUID.randomUUID(), "abc1", List.of("a", "b", "c"));
+		final StorageItemDescriptor otherItem = new StorageItemDescriptor(UUID.randomUUID(), "other", List.of("other"));
+		index.add(rootItem);
+		index.add(aItem);
+		index.add(abItem);
+		index.add(abcItem);
+		index.add(otherItem);
+		assertThat(index.list(List.of(), true)).containsExactlyInAnyOrder(rootItem, aItem, abItem, abcItem, otherItem);
+		assertThat(index.list(List.of("a"), true)).containsExactlyInAnyOrder(aItem, abItem, abcItem);
+		assertThat(index.list(List.of("a", "b"), true)).containsExactlyInAnyOrder(abItem, abcItem);
+		assertThat(index.list(List.of("a", "b", "c"), true)).containsExactlyInAnyOrder(abcItem);
+		assertThat(index.list(List.of("missing"), true)).isEmpty();
+	}
+	
+	@Test
+	void listRecursiveNonExistentPathReturnsEmpty() {
+		final StorageIndex index = new StorageIndex();
+		final StorageItemDescriptor item = new StorageItemDescriptor(UUID.randomUUID(), "file", List.of("a"));
+		index.add(item);
+		assertThat(index.list(List.of("nonexistent"), true)).isEmpty();
+	}
+	
+	@Test
+	void listRecursiveAndNonRecursiveAreConsistent() {
+		final StorageIndex index = new StorageIndex();
+		final StorageItemDescriptor aItem = new StorageItemDescriptor(UUID.randomUUID(), "a1", List.of("a"));
+		final StorageItemDescriptor abItem = new StorageItemDescriptor(UUID.randomUUID(), "ab1", List.of("a", "b"));
+		index.add(aItem);
+		index.add(abItem);
+		assertThat(index.list(List.of("a"), false)).containsExactly(aItem);
+		assertThat(index.list(List.of("a"), true)).containsExactlyInAnyOrder(aItem, abItem);
+	}
+	
+	@Test
+	void listAllReturnsAllItemsInIndex() {
+		final StorageIndex index = new StorageIndex();
+		final StorageItemDescriptor root = new StorageItemDescriptor(UUID.randomUUID(), "root", List.of());
+		final StorageItemDescriptor a = new StorageItemDescriptor(UUID.randomUUID(), "a", List.of("a"));
+		final StorageItemDescriptor ab = new StorageItemDescriptor(UUID.randomUUID(), "ab", List.of("a", "b"));
+		final StorageItemDescriptor other = new StorageItemDescriptor(UUID.randomUUID(), "other", List.of("x", "y"));
+		index.add(root);
+		index.add(a);
+		index.add(ab);
+		index.add(other);
+		assertThat(index.listAll()).containsExactlyInAnyOrder(root, a, ab, other);
+	}
+	
+	@Test
+	void listAllOnEmptyIndexReturnsEmpty() {
+		final StorageIndex index = new StorageIndex();
+		assertThat(index.listAll()).isEmpty();
+	}
+	
+	@Test
+	void listAllIsCopyOfInternalState() {
+		final StorageIndex index = new StorageIndex();
+		final StorageItemDescriptor item = new StorageItemDescriptor(UUID.randomUUID(), "file", List.of("a"));
+		index.add(item);
+		final var list1 = index.listAll();
+		index.add(new StorageItemDescriptor(UUID.randomUUID(), "file2", List.of("b")));
+		final var list2 = index.listAll();
+		assertThat(list1).hasSize(1);
+		assertThat(list2).hasSize(2);
 	}
 }

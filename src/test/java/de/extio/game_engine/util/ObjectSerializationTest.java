@@ -4,6 +4,7 @@ import org.junit.jupiter.api.Test;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Map;
 
@@ -119,6 +120,112 @@ public class ObjectSerializationTest {
 		
 		var serialized = ObjectSerialization.serialize(original, true, true, true, digestSalt, digest -> capturedDigest[0] = digest);
 		
+		assertNotNull(serialized);
+		assertNotNull(capturedDigest[0]);
+		assertTrue(new String(serialized).matches("[A-Za-z0-9+/=]+"));
+		
+		var digestCheckPassed = new boolean[1];
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, true, true, capturedDigest[0], digestSalt, result -> digestCheckPassed[0] = result);
+		
+		assertNotNull(deserialized);
+		assertTrue(digestCheckPassed[0]);
+		assertEquals(original.name, deserialized.name);
+		assertEquals(original.id, deserialized.id);
+		assertEquals(original.value, deserialized.value);
+	}
+	
+	@Test
+	public void testSerializeOutputStreamBasic() {
+		var original = new TestObject("OutputStreamTest", 42, 3.14, List.of("tag1", "tag2"), List.of(new TestObject2("key", true)), Map.of("attr", 1));
+		var outputStream = new ByteArrayOutputStream();
+		
+		ObjectSerialization.serialize(original, outputStream, false, false, false, null, digest -> {});
+		
+		var serialized = outputStream.toByteArray();
+		assertNotNull(serialized);
+		assertTrue(serialized.length > 0);
+		
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, false, null, null, result -> {});
+		
+		assertNotNull(deserialized);
+		assertEquals(original.name, deserialized.name);
+		assertEquals(original.id, deserialized.id);
+		assertEquals(original.value, deserialized.value);
+	}
+	
+	@Test
+	public void testSerializeOutputStreamWithCompression() {
+		var original = new TestObject("CompressedStream", 100, 2.71, List.of("a", "b", "c"), List.of(), Map.of());
+		var outputStream = new ByteArrayOutputStream();
+		
+		ObjectSerialization.serialize(original, outputStream, true, false, false, null, digest -> {});
+		
+		var serialized = outputStream.toByteArray();
+		assertNotNull(serialized);
+		assertTrue(serialized.length > 0);
+		
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, true, false, null, null, result -> {});
+		
+		assertNotNull(deserialized);
+		assertEquals(original.name, deserialized.name);
+		assertEquals(original.id, deserialized.id);
+		assertEquals(original.value, deserialized.value);
+	}
+	
+	@Test
+	public void testSerializeOutputStreamWithBase64() {
+		var original = new TestObject("Base64Stream", 200, 1.41, List.of(), List.of(), Map.of());
+		var outputStream = new ByteArrayOutputStream();
+		
+		ObjectSerialization.serialize(original, outputStream, false, true, false, null, digest -> {});
+		
+		var serialized = outputStream.toByteArray();
+		assertNotNull(serialized);
+		assertTrue(serialized.length > 0);
+		assertTrue(new String(serialized).matches("[A-Za-z0-9+/=]+"));
+		
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, true, null, null, result -> {});
+		
+		assertNotNull(deserialized);
+		assertEquals(original.name, deserialized.name);
+		assertEquals(original.id, deserialized.id);
+		assertEquals(original.value, deserialized.value);
+	}
+	
+	@Test
+	public void testSerializeOutputStreamWithDigest() {
+		var original = new TestObject("DigestedStream", 300, 0.5, List.of("x"), List.of(), Map.of());
+		var digestSalt = "salt".getBytes();
+		var capturedDigest = new byte[32][];
+		var outputStream = new ByteArrayOutputStream();
+		
+		ObjectSerialization.serialize(original, outputStream, false, false, true, digestSalt, digest -> capturedDigest[0] = digest);
+		
+		var serialized = outputStream.toByteArray();
+		assertNotNull(serialized);
+		assertNotNull(capturedDigest[0]);
+		assertTrue(capturedDigest[0].length == 32);
+		
+		var digestCheckPassed = new boolean[1];
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, false, capturedDigest[0], digestSalt, result -> digestCheckPassed[0] = result);
+		
+		assertNotNull(deserialized);
+		assertTrue(digestCheckPassed[0]);
+		assertEquals(original.name, deserialized.name);
+		assertEquals(original.id, deserialized.id);
+		assertEquals(original.value, deserialized.value);
+	}
+	
+	@Test
+	public void testSerializeOutputStreamWithAllOptions() {
+		var original = new TestObject("AllOptionsStream", 500, 9.99, List.of("all"), List.of(new TestObject2("a", false), new TestObject2("b", true)), Map.of("x", 1, "y", 2));
+		var digestSalt = "salt123".getBytes();
+		var capturedDigest = new byte[32][];
+		var outputStream = new ByteArrayOutputStream();
+		
+		ObjectSerialization.serialize(original, outputStream, true, true, true, digestSalt, digest -> capturedDigest[0] = digest);
+		
+		var serialized = outputStream.toByteArray();
 		assertNotNull(serialized);
 		assertNotNull(capturedDigest[0]);
 		assertTrue(new String(serialized).matches("[A-Za-z0-9+/=]+"));

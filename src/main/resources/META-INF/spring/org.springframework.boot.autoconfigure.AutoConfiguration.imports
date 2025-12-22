@@ -2,3 +2,4 @@ de.extio.game_engine.event.EventsAutoConfiguration
 de.extio.game_engine.keyboard.KeycodeAutoConfiguration
 de.extio.game_engine.renderer.RendererAutoConfiguration
 de.extio.game_engine.renderer.g2d.G2DAutoConfiguration
+de.extio.game_engine.storage.StorageServiceAutoConfiguration

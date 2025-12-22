@@ -1,17 +1,25 @@
 package de.extio.game_engine.storage;
 
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.UUID;
 
+import de.extio.game_engine.util.FastRandomUUID;
 import de.extio.game_engine.util.ObjectSerialization;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class StorageServiceImpl {
+public class StorageServiceImpl implements StorageService {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(StorageServiceImpl.class);
 	
@@ -83,7 +91,7 @@ public class StorageServiceImpl {
 			
 			final StorageItemDescriptor[] descriptors;
 			try (final var in = Files.newInputStream(INDEX_LOCATION)) {
-				descriptors = ObjectSerialization.deserialize(StorageItemDescriptor[].class, in, false, false, null, null, null);
+				descriptors = ObjectSerialization.deserialize(StorageItemDescriptor[].class, in, true, false, null, null, null);
 			}
 			if (descriptors == null || descriptors.length == 0) {
 				return;
@@ -101,6 +109,297 @@ public class StorageServiceImpl {
 		catch (final Exception e) {
 			LOGGER.error("Could not load index from " + INDEX_LOCATION.toString(), e);
 		}
+	}
+	
+	private void saveIndex() {
+		try {
+			final StorageItemDescriptor[] descriptors = this.index.listAll().toArray(StorageItemDescriptor[]::new);
+			try (var outputStream = Files.newOutputStream(INDEX_LOCATION)) {
+				ObjectSerialization.serialize(descriptors, outputStream, true, false, false, null, null);
+			}
+			LOGGER.debug("Saved {} items to index", descriptors.length);
+		}
+		catch (final Exception e) {
+			LOGGER.error("Could not save index to " + INDEX_LOCATION.toString(), e);
+		}
+	}
+	
+	private Path getFilePath(final UUID id) {
+		return DATA_LOCATION.resolve(id.toString());
+	}
+	
+	private void addToIndexAndSave(final UUID id, final String name, final List<String> path) {
+		final StorageItemDescriptor descriptor = new StorageItemDescriptor(id, name, path == null ? List.of() : path);
+		this.index.add(descriptor);
+		this.saveIndex();
+	}
+	
+	@Override
+	public UUID store(final String name, final List<String> path, final Object obj) {
+		Objects.requireNonNull(name, "name");
+		Objects.requireNonNull(obj, "obj");
+		
+		final Optional<StorageItemDescriptor> existing = this.index.find(path, name);
+		final UUID id = existing.map(StorageItemDescriptor::id).orElse(FastRandomUUID.create());
+		
+		final Path filePath = getFilePath(id);
+		try {
+			try (var outputStream = Files.newOutputStream(filePath)) {
+				ObjectSerialization.serialize(obj, outputStream, true, false, false, null, null);
+			}
+			
+			addToIndexAndSave(id, name, path);
+			LOGGER.debug("Stored object with id {} at path {}/{}", id, path, name);
+			return id;
+		}
+		catch (final Exception e) {
+			LOGGER.error("Could not store object at " + filePath.toString(), e);
+			throw new RuntimeException("Failed to store object", e);
+		}
+	}
+	
+	@Override
+	public UUID storeStream(final String name, final List<String> path, final InputStream inputStream) {
+		Objects.requireNonNull(name, "name");
+		Objects.requireNonNull(inputStream, "inputStream");
+		
+		final Optional<StorageItemDescriptor> existing = this.index.find(path, name);
+		final UUID id = existing.map(StorageItemDescriptor::id).orElse(FastRandomUUID.create());
+		
+		final Path filePath = getFilePath(id);
+		try {
+			Files.copy(inputStream, filePath, StandardCopyOption.REPLACE_EXISTING);
+			
+			addToIndexAndSave(id, name, path);
+			LOGGER.debug("Stored stream with id {} at path {}/{}", id, path, name);
+			return id;
+		}
+		catch (final Exception e) {
+			LOGGER.error("Could not store stream at " + filePath.toString(), e);
+			throw new RuntimeException("Failed to store stream", e);
+		}
+	}
+	
+	@Override
+	public boolean deleteById(final UUID id) {
+		Objects.requireNonNull(id, "id");
+		
+		final boolean removed = this.index.remove(id);
+		if (!removed) {
+			return false;
+		}
+		
+		final Path filePath = DATA_LOCATION.resolve(id.toString());
+		try {
+			Files.deleteIfExists(filePath);
+			this.saveIndex();
+			LOGGER.debug("Deleted object with id {}", id);
+			return true;
+		}
+		catch (final IOException e) {
+			LOGGER.error("Could not delete file " + filePath.toString(), e);
+			return false;
+		}
+	}
+	
+	@Override
+	public boolean deleteByPath(final List<String> path, final String name) {
+		Objects.requireNonNull(name, "name");
+		
+		final Optional<StorageItemDescriptor> descriptor = this.index.find(path, name);
+		if (descriptor.isEmpty()) {
+			return false;
+		}
+		
+		return this.deleteById(descriptor.get().id());
+	}
+	
+	@Override
+	public boolean moveById(final UUID id, final List<String> newPath, final String newName) {
+		Objects.requireNonNull(id, "id");
+		Objects.requireNonNull(newName, "newName");
+		
+		final Optional<StorageItemDescriptor> existing = this.index.getById(id);
+		if (existing.isEmpty()) {
+			return false;
+		}
+		
+		final StorageItemDescriptor newDescriptor = new StorageItemDescriptor(id, newName, newPath == null ? List.of() : newPath);
+		this.index.add(newDescriptor);
+		this.saveIndex();
+		
+		LOGGER.debug("Moved object with id {} to path {}/{}", id, newPath, newName);
+		return true;
+	}
+	
+	@Override
+	public boolean moveByPath(final List<String> oldPath, final String oldName, final List<String> newPath, final String newName) {
+		Objects.requireNonNull(oldName, "oldName");
+		Objects.requireNonNull(newName, "newName");
+		
+		final Optional<StorageItemDescriptor> descriptor = this.index.find(oldPath, oldName);
+		if (descriptor.isEmpty()) {
+			return false;
+		}
+		
+		return this.moveById(descriptor.get().id(), newPath, newName);
+	}
+	
+	@Override
+	public <T> Optional<T> loadById(final Class<T> clazz, final UUID id) {
+		Objects.requireNonNull(clazz, "clazz");
+		Objects.requireNonNull(id, "id");
+		
+		if (!this.index.getById(id).isPresent()) {
+			return Optional.empty();
+		}
+		
+		final Path filePath = getFilePath(id);
+		if (!Files.exists(filePath)) {
+			LOGGER.warn("Index references non-existent file for id {}", id);
+			return Optional.empty();
+		}
+		
+		try {
+			try (final var in = Files.newInputStream(filePath)) {
+				final T obj = ObjectSerialization.deserialize(clazz, in, true, false, null, null, null);
+				return Optional.ofNullable(obj);
+			}
+		}
+		catch (final Exception e) {
+			LOGGER.error("Could not load object from " + filePath.toString(), e);
+			return Optional.empty();
+		}
+	}
+	
+	@Override
+	public <T> Optional<T> loadByPath(final Class<T> clazz, final List<String> path, final String name) {
+		Objects.requireNonNull(clazz, "clazz");
+		Objects.requireNonNull(name, "name");
+		
+		final Optional<StorageItemDescriptor> descriptor = this.index.find(path, name);
+		if (descriptor.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return this.loadById(clazz, descriptor.get().id());
+	}
+	
+	@Override
+	public Optional<InputStream> loadStreamById(final UUID id) {
+		Objects.requireNonNull(id, "id");
+		
+		if (!this.index.getById(id).isPresent()) {
+			return Optional.empty();
+		}
+		
+		final Path filePath = getFilePath(id);
+		if (!Files.exists(filePath)) {
+			LOGGER.warn("Index references non-existent file for id {}", id);
+			return Optional.empty();
+		}
+		
+		try {
+			return Optional.of(Files.newInputStream(filePath));
+		}
+		catch (final Exception e) {
+			LOGGER.error("Could not load stream from " + filePath.toString(), e);
+			return Optional.empty();
+		}
+	}
+	
+	@Override
+	public Optional<InputStream> loadStreamByPath(final List<String> path, final String name) {
+		Objects.requireNonNull(name, "name");
+		
+		final Optional<StorageItemDescriptor> descriptor = this.index.find(path, name);
+		if (descriptor.isEmpty()) {
+			return Optional.empty();
+		}
+		
+		return this.loadStreamById(descriptor.get().id());
+	}
+	
+	@Override
+	public StorageOutputStream storeStream(final String name, final List<String> path) {
+		Objects.requireNonNull(name, "name");
+		
+		final Optional<StorageItemDescriptor> existing = this.index.find(path, name);
+		final UUID id = existing.map(StorageItemDescriptor::id).orElse(FastRandomUUID.create());
+		
+		final Path filePath = getFilePath(id);
+		try {
+			final OutputStream outputStream = Files.newOutputStream(filePath);
+			
+			return new StorageOutputStream(id, new OutputStream() {
+				
+				private boolean closed = false;
+				
+				@Override
+				public void write(int b) throws IOException {
+					outputStream.write(b);
+				}
+				
+				@Override
+				public void write(byte[] b) throws IOException {
+					outputStream.write(b);
+				}
+				
+				@Override
+				public void write(byte[] b, int off, int len) throws IOException {
+					outputStream.write(b, off, len);
+				}
+				
+				@Override
+				public void flush() throws IOException {
+					outputStream.flush();
+				}
+				
+				@Override
+				public void close() throws IOException {
+					if (closed) {
+						return;
+					}
+					closed = true;
+					outputStream.close();
+					
+					addToIndexAndSave(id, name, path);
+					LOGGER.debug("Stored stream with id {} at path {}/{}", id, path, name);
+				}
+			});
+		}
+		catch (final Exception e) {
+			LOGGER.error("Could not create output stream at " + filePath.toString(), e);
+			throw new RuntimeException("Failed to create output stream", e);
+		}
+	}
+	
+	@Override
+	public Optional<StorageItemDescriptor> searchById(final UUID id) {
+		Objects.requireNonNull(id, "id");
+		return this.index.getById(id);
+	}
+	
+	@Override
+	public Optional<StorageItemDescriptor> searchByPath(final List<String> path, final String name) {
+		Objects.requireNonNull(name, "name");
+		return this.index.find(path, name);
+	}
+	
+	@Override
+	public List<StorageItemDescriptor> searchByPattern(final List<String> basePath, final String pattern, final boolean recursive) {
+		Objects.requireNonNull(pattern, "pattern");
+		return this.index.findByFilenamePattern(basePath, pattern, recursive);
+	}
+	
+	@Override
+	public List<StorageItemDescriptor> listPath(final List<String> path, final boolean recursive) {
+		return this.index.list(path, recursive);
+	}
+	
+	@Override
+	public List<StorageItemDescriptor> listAll() {
+		return this.index.listAll();
 	}
 	
 }

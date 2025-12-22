@@ -31,11 +31,16 @@ public final class ObjectSerialization {
 	
 	public static byte[] serialize(final Object o, final boolean compress, final boolean base64, final boolean digest, final byte[] digestSalt, final Consumer<byte[]> digestConsumer) {
 		final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1 << 16);
+		serialize(o, byteArrayOutputStream, compress, base64, digest, digestSalt, digestConsumer);
+		return byteArrayOutputStream.toByteArray();
+	}
+	
+	public static void serialize(final Object o, final OutputStream outputStream, final boolean compress, final boolean base64, final boolean digest, final byte[] digestSalt, final Consumer<byte[]> digestConsumer) {
 		OutputStream base64OutputStream = null;
 		ZstdOutputStream zstdOutputStream = null;
 		DigestOutputStream digestOutputStream = null;
 		try {
-			OutputStream stream = byteArrayOutputStream;
+			OutputStream stream = outputStream;
 			if (base64) {
 				stream = base64OutputStream = Base64.getEncoder().wrap(stream);
 			}
@@ -77,13 +82,10 @@ public final class ObjectSerialization {
 				}
 			}
 		}
-		
-		return byteArrayOutputStream.toByteArray();
 	}
 	
 	public static <T extends Object> T deserialize(final Class<T> clazz, final byte[] data, final boolean decompress, final boolean base64, final byte[] checkDigest, final byte[] digestSalt, final Consumer<Boolean> digestCheckConsumer) {
-		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
-		return deserialize(clazz, byteArrayInputStream, decompress, base64, checkDigest, digestSalt, digestCheckConsumer);
+		return deserialize(clazz, new ByteArrayInputStream(data), decompress, base64, checkDigest, digestSalt, digestCheckConsumer);
 	}
 	
 	public static <T extends Object> T deserialize(final Class<T> clazz, final InputStream inputStream, final boolean decompress, final boolean base64, final byte[] checkDigest, final byte[] digestSalt, final Consumer<Boolean> digestCheckConsumer) {
