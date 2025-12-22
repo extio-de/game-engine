@@ -21,7 +21,7 @@ public class ObjectSerializationTest {
 		assertNotNull(serialized);
 		assertTrue(serialized.length > 0);
 		
-		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, false, false, null, null, result -> {
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, false, null, null, result -> {
 		});
 		
 		assertNotNull(deserialized);
@@ -40,7 +40,7 @@ public class ObjectSerializationTest {
 		assertNotNull(serialized);
 		assertTrue(serialized.length > 0);
 		
-		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, true, false, null, null, result -> {
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, true, false, null, null, result -> {
 		});
 		
 		assertNotNull(deserialized);
@@ -60,7 +60,7 @@ public class ObjectSerializationTest {
 		assertTrue(serialized.length > 0);
 		assertTrue(new String(serialized).matches("[A-Za-z0-9+/=]+"));
 		
-		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, false, true, null, null, result -> {
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, true, null, null, result -> {
 		});
 		
 		assertNotNull(deserialized);
@@ -82,7 +82,7 @@ public class ObjectSerializationTest {
 		assertTrue(capturedDigest[0].length == 32);
 		
 		var digestCheckPassed = new boolean[1];
-		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, false, false, capturedDigest[0], digestSalt, result -> digestCheckPassed[0] = result);
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, false, capturedDigest[0], digestSalt, result -> digestCheckPassed[0] = result);
 		
 		assertNotNull(deserialized);
 		assertTrue(digestCheckPassed[0]);
@@ -102,7 +102,7 @@ public class ObjectSerializationTest {
 		assertTrue(serialized.length > 0);
 		assertTrue(new String(serialized).matches("[A-Za-z0-9+/=]+"));
 		
-		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, true, true, null, null, result -> {
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, true, true, null, null, result -> {
 		});
 		
 		assertNotNull(deserialized);
@@ -124,7 +124,7 @@ public class ObjectSerializationTest {
 		assertTrue(new String(serialized).matches("[A-Za-z0-9+/=]+"));
 		
 		var digestCheckPassed = new boolean[1];
-		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, false, true, true, capturedDigest[0], digestSalt, result -> digestCheckPassed[0] = result);
+		var deserialized = ObjectSerialization.deserialize(TestObject.class, serialized, true, true, capturedDigest[0], digestSalt, result -> digestCheckPassed[0] = result);
 		
 		assertNotNull(deserialized);
 		assertTrue(digestCheckPassed[0]);

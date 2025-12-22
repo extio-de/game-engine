@@ -81,13 +81,17 @@ public final class ObjectSerialization {
 		return byteArrayOutputStream.toByteArray();
 	}
 	
-	public static <T extends Object> T deserialize(final Class<T> clazz, final byte[] data, final boolean deserializeObjRefs, final boolean decompress, final boolean base64, final byte[] checkDigest, final byte[] digestSalt, final Consumer<Boolean> digestCheckConsumer) {
+	public static <T extends Object> T deserialize(final Class<T> clazz, final byte[] data, final boolean decompress, final boolean base64, final byte[] checkDigest, final byte[] digestSalt, final Consumer<Boolean> digestCheckConsumer) {
 		final ByteArrayInputStream byteArrayInputStream = new ByteArrayInputStream(data);
+		return deserialize(clazz, byteArrayInputStream, decompress, base64, checkDigest, digestSalt, digestCheckConsumer);
+	}
+	
+	public static <T extends Object> T deserialize(final Class<T> clazz, final InputStream inputStream, final boolean decompress, final boolean base64, final byte[] checkDigest, final byte[] digestSalt, final Consumer<Boolean> digestCheckConsumer) {
 		InputStream base64InputStream = null;
 		ZstdInputStream zstdInputStream = null;
 		DigestInputStream digestInputStream = null;
 		try {
-			InputStream stream = byteArrayInputStream;
+			InputStream stream = inputStream;
 			if (base64) {
 				stream = base64InputStream = Base64.getDecoder().wrap(stream);
 			}
@@ -104,9 +108,10 @@ public final class ObjectSerialization {
 			throw new RuntimeException(e.getMessage(), e);
 		}
 		finally {
-			if (base64InputStream != null) {
+			if (digestInputStream != null) {
 				try {
-					base64InputStream.close();
+					digestInputStream.close();
+					digestCheckConsumer.accept(Arrays.equals(checkDigest, digestInputStream.getMessageDigest().digest(digestSalt)));
 				}
 				catch (final IOException e) {
 					throw new RuntimeException(e.getMessage(), e);
@@ -120,10 +125,17 @@ public final class ObjectSerialization {
 					throw new RuntimeException(e.getMessage(), e);
 				}
 			}
-			if (digestInputStream != null) {
+			if (base64InputStream != null) {
 				try {
-					digestInputStream.close();
-					digestCheckConsumer.accept(Arrays.equals(checkDigest, digestInputStream.getMessageDigest().digest(digestSalt)));
+					base64InputStream.close();
+				}
+				catch (final IOException e) {
+					throw new RuntimeException(e.getMessage(), e);
+				}
+			}
+			if (inputStream != null) {
+				try {
+					inputStream.close();
 				}
 				catch (final IOException e) {
 					throw new RuntimeException(e.getMessage(), e);
