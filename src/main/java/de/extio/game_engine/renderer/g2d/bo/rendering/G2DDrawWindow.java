@@ -2,14 +2,17 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 
 import java.awt.Graphics2D;
 
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
+@Conditional(G2DRendererCondition.class)
 @Component
 public class G2DDrawWindow extends G2DAbstractRenderingBo implements DrawWindowRenderingBo {
 	

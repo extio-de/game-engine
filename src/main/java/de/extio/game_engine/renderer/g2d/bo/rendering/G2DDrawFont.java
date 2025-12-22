@@ -8,8 +8,10 @@ import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
@@ -17,6 +19,7 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
+@Conditional(G2DRendererCondition.class)
 @Component
 public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRenderingBo {
 	

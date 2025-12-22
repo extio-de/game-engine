@@ -8,8 +8,10 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DButtonControlImpl;
@@ -27,6 +29,7 @@ import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
+@Conditional(G2DRendererCondition.class)
 @Component
 public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRenderingBo {
 	
