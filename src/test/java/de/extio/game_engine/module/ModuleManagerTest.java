@@ -1,12 +1,15 @@
 package de.extio.game_engine.module;
 
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.Mockito.mock;
 
 import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+
+import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
 public class ModuleManagerTest {
 	
@@ -25,7 +28,7 @@ public class ModuleManagerTest {
 		initialModules.add(this.testModule);
 		initialModules.add(this.testClientModule);
 		
-		this.moduleManager = new ModuleManagerImpl(initialModules);
+		this.moduleManager = new ModuleManagerImpl(initialModules, mock(RendererWorkingSet.class));
 		this.moduleManager.afterPropertiesSet();
 	}
 	
@@ -38,7 +41,7 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testAfterPropertiesSet_EmptyModules() throws Exception {
-		final ModuleManagerImpl emptyManager = new ModuleManagerImpl(List.of());
+		final ModuleManagerImpl emptyManager = new ModuleManagerImpl(List.of(), mock(RendererWorkingSet.class));
 		emptyManager.afterPropertiesSet();
 		
 		assertTrue(emptyManager.getModulesAll().isEmpty());
@@ -46,7 +49,7 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testAfterPropertiesSet_NullModules() throws Exception {
-		final ModuleManagerImpl nullManager = new ModuleManagerImpl(null);
+		final ModuleManagerImpl nullManager = new ModuleManagerImpl(null, mock(RendererWorkingSet.class));
 		nullManager.afterPropertiesSet();
 		
 		assertTrue(nullManager.getModulesAll().isEmpty());

@@ -10,6 +10,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.InitializingBean;
 
+import de.extio.game_engine.renderer.work.RendererWorkingSet;
+
 public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleManagerImpl.class);
@@ -17,6 +19,8 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	private final List<AbstractModule> modulesInitial;
 	
 	private final List<AbstractModule> modulesAll = new ArrayList<>();
+
+	private final RendererWorkingSet rendererWorkingSet;
 	
 	private List<AbstractModule> modulesAllView = List.of();
 	
@@ -32,8 +36,9 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
 	private final Deque<List<AbstractClientModule>> lastVisibleStates = new ArrayDeque<>();
 	
-	public ModuleManagerImpl(final List<AbstractModule> initialModules) {
+	public ModuleManagerImpl(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
 		this.modulesInitial = initialModules;
+		this.rendererWorkingSet = rendererWorkingSet;
 	}
 	
 	@Override
@@ -105,6 +110,9 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 			this.modulesAllView = List.copyOf(this.modulesAll);
 			
 			this.invokeSafe(module, m -> m.onUnload());
+			if (module instanceof final AbstractClientModule clientModule) {
+				this.rendererWorkingSet.clear(clientModule.getClass());
+			}
 			
 			LOGGER.debug("Unloaded module " + clazz.getName());
 		}
@@ -143,6 +151,9 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 								.map(m -> (AbstractClientModule) m)
 								.toList();
 						this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);
+						if (module instanceof final AbstractClientModule clientModule) {
+							this.rendererWorkingSet.clear(clientModule.getClass());
+						}
 						
 						LOGGER.debug("Deactivated " + clazz.getName());
 					}
@@ -199,9 +210,11 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 				final boolean doDisplay = display || clientModule.isAlwaysDisplay();
 				if (doDisplay && !curDisplayed) {
 					this.modulesDisplayed.add(clientModule);
+					clientModule.setDisplayed(true);
 					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onShow());
 				}
 				else if (!doDisplay && curDisplayed) {
+					clientModule.setDisplayed(false);
 					this.modulesDisplayed.removeIf(mod -> clazz.isAssignableFrom(mod.getClass()));
 					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onHide());
 				}

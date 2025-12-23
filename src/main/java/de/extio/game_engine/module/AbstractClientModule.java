@@ -11,6 +11,8 @@ public abstract class AbstractClientModule extends AbstractModule {
 	
 	final static int MODULE_PRIORITY_HIGH = 75;
 	
+	private boolean displayed;
+
 	public AbstractClientModule() {
 		
 	}
@@ -37,6 +39,14 @@ public abstract class AbstractClientModule extends AbstractModule {
 	
 	public void runUiPost() {
 		
+	}
+
+	public boolean isDisplayed() {
+		return this.displayed;
+	}
+
+	public void setDisplayed(final boolean displayed) {
+		this.displayed = displayed;
 	}
 	
 }
