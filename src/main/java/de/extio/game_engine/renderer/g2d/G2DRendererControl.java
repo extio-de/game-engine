@@ -10,6 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.model.event.WindowResizeEvent;
 import de.extio.game_engine.renderer.model.options.VideoOptions.VideoOptionsVideoMode;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
@@ -186,6 +187,7 @@ public class G2DRendererControl implements RendererControl {
 			try {
 				if (this.updateAbsoluteViewportPortDimension()) {
 					this.recalculate();
+					this.rendererData.getEventService().fire(new WindowResizeEvent());
 				}
 				final var mainFrame = this.renderer.getMainFrame();
 				if (mainFrame != null) {

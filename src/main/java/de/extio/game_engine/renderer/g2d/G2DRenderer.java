@@ -20,7 +20,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.module.AbstractClientModule;
-import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.Renderer;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
