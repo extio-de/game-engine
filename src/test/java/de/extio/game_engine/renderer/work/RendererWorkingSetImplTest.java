@@ -1,6 +1,7 @@
 package de.extio.game_engine.renderer.work;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertSame;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -78,7 +79,7 @@ public class RendererWorkingSetImplTest {
 		assertTrue(currentUncommitted.isEmpty());
 		
 		final List<RenderingBo> live = new ArrayList<>();
-		this.workingSet.getLiveSet(live);
+		this.workingSet.getLiveSet(live, null);
 		assertEquals(2, live.size());
 		assertTrue(live.containsAll(List.of(bo1, bo2)));
 	}
@@ -102,13 +103,13 @@ public class RendererWorkingSetImplTest {
 		assertEquals(Map.of("bo1", bo1, "bo2", bo2), currentUncommitted);
 		
 		final List<RenderingBo> live = new ArrayList<>();
-		this.workingSet.getLiveSet(live);
+		this.workingSet.getLiveSet(live, null);
 		assertEquals(2, live.size());
 		assertTrue(live.containsAll(List.of(bo1, bo2)));
 		
 		this.workingSet.add(TestModuleA.class, bo3);
 		final List<RenderingBo> liveAfterAdd = new ArrayList<>();
-		this.workingSet.getLiveSet(liveAfterAdd);
+		this.workingSet.getLiveSet(liveAfterAdd, null);
 		assertEquals(2, liveAfterAdd.size());
 		assertTrue(liveAfterAdd.containsAll(List.of(bo1, bo2)));
 	}
@@ -130,7 +131,7 @@ public class RendererWorkingSetImplTest {
 		this.workingSet.commit(TestModuleB.class, false);
 		
 		final List<RenderingBo> live = new ArrayList<>();
-		this.workingSet.getLiveSet(live);
+		this.workingSet.getLiveSet(live, null);
 		assertEquals(3, live.size());
 		assertTrue(live.containsAll(List.of(bo1, bo2, bo3)));
 	}
@@ -142,7 +143,7 @@ public class RendererWorkingSetImplTest {
 		assertTrue(returnedUncommitted.isEmpty());
 		
 		final List<RenderingBo> live = new ArrayList<>();
-		this.workingSet.getLiveSet(live);
+		this.workingSet.getLiveSet(live, null);
 		assertTrue(live.isEmpty());
 	}
 	
@@ -159,7 +160,7 @@ public class RendererWorkingSetImplTest {
 		
 		// Before clear
 		final List<RenderingBo> liveBefore = new ArrayList<>();
-		this.workingSet.getLiveSet(liveBefore);
+		this.workingSet.getLiveSet(liveBefore, null);
 		assertTrue(liveBefore.contains(bo1));
 		assertNotNull(this.workingSet.get(TestModuleA.class, "bo2"));
 		
@@ -167,7 +168,7 @@ public class RendererWorkingSetImplTest {
 		
 		// After clear
 		final List<RenderingBo> liveAfter = new ArrayList<>();
-		this.workingSet.getLiveSet(liveAfter);
+		this.workingSet.getLiveSet(liveAfter, null);
 		assertTrue(liveAfter.isEmpty());
 		
 		final var uncommittedAfter = this.workingSet.getUncommittedWork(TestModuleA.class);
@@ -189,7 +190,7 @@ public class RendererWorkingSetImplTest {
 		this.workingSet.clear(TestModuleC.class);
 		
 		final List<RenderingBo> live = new ArrayList<>();
-		this.workingSet.getLiveSet(live);
+		this.workingSet.getLiveSet(live, null);
 		assertEquals(1, live.size());
 		assertTrue(live.contains(bo1));
 	}
@@ -276,6 +277,34 @@ public class RendererWorkingSetImplTest {
 		final var uncommittedAfter = this.workingSet.getUncommittedWork(TestModuleA.class);
 		assertEquals(1, uncommittedAfter.size());
 		assertSame(bo1_replacement, uncommittedAfter.get("bo1"));
+	}
+
+	@Test
+	void getLiveSetFiltersOutNotDisplayedModules() {
+		final var boA1 = new TestBoA();
+		boA1.setId("boA1");
+		final var boB1 = new TestBoB();
+		boB1.setId("boB1");
+		final var boA2 = new TestBoA();
+		boA2.setId("boA2");
+		
+		this.workingSet.add(TestModuleA.class, boA1);
+		this.workingSet.add(TestModuleB.class, boB1);
+		this.workingSet.add(TestModuleA.class, boA2);
+		
+		this.workingSet.commit(TestModuleA.class, false);
+		this.workingSet.commit(TestModuleB.class, false);
+		
+		final List<RenderingBo> allLive = new ArrayList<>();
+		this.workingSet.getLiveSet(allLive, null);
+		assertEquals(3, allLive.size());
+		assertTrue(allLive.containsAll(List.of(boA1, boB1, boA2)));
+		
+		final List<RenderingBo> filteredLive = new ArrayList<>();
+		this.workingSet.getLiveSet(filteredLive, TestModuleA.class::equals);
+		assertEquals(2, filteredLive.size());
+		assertTrue(filteredLive.containsAll(List.of(boA1, boA2)));
+		assertFalse(filteredLive.contains(boB1));
 	}
 	
 	private static abstract class TestBoBase implements RenderingBo {

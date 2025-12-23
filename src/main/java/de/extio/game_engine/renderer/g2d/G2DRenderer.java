@@ -82,6 +82,10 @@ public class G2DRenderer implements Renderer {
 	public void show() {
 		try {
 			LOGGER.info("show()");
+
+			this.rendererData.getModuleManager().loadModule(G2DRendererModule.class);
+			this.rendererData.getModuleManager().changeActiveState(G2DRendererModule.class, true);
+			this.rendererData.getModuleManager().changeDisplayState(G2DRendererModule.class, true);
 			
 			EventQueue.invokeAndWait(() -> {
 				this.rendererData.getRendererControl().applyVideoOptions();
@@ -155,7 +159,7 @@ public class G2DRenderer implements Renderer {
 				
 				this.drawStatistics();
 				this.rendererData.getRendererWorkingSet().commit(G2DRendererModule.class, true);
-				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs);
+				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs, clientModuleClass -> this.rendererData.getModuleManager().isDisplayed(clientModuleClass));
 				this.renderingBOs.sort((bo0, bo1) -> bo0.getLayer().compareTo(bo1.getLayer()));
 				
 				Graphics2D screenGraphics = null;
@@ -337,6 +341,6 @@ public class G2DRenderer implements Renderer {
 		this.rendererData = rendererData;
 	}
 	
-	private static abstract class G2DRendererModule extends AbstractClientModule {
+	public static class G2DRendererModule extends AbstractClientModule {
 	}
 }

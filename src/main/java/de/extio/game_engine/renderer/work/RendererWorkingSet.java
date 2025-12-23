@@ -2,6 +2,7 @@ package de.extio.game_engine.renderer.work;
 
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.model.RenderingBo;
@@ -20,6 +21,6 @@ public interface RendererWorkingSet {
 	
 	void clear(Class<? extends AbstractClientModule> producer);
 
-	void getLiveSet(List<RenderingBo> combinedLiveSet);
+	void getLiveSet(List<RenderingBo> combinedLiveSet, Predicate<Class<? extends AbstractClientModule>> filter);
 	
 }

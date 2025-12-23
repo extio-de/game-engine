@@ -11,6 +11,7 @@ import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
+import java.util.function.Predicate;
 
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.model.RenderingBo;
@@ -90,8 +91,12 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	}
 
 	@Override
-	public void getLiveSet(final List<RenderingBo> combinedLiveSet) {
-		this.workingSet.values().forEach(rendererWork -> combinedLiveSet.addAll(rendererWork.live().values()));
+	public void getLiveSet(final List<RenderingBo> combinedLiveSet, final Predicate<Class<? extends AbstractClientModule>> filter) {
+		this.workingSet.forEach((producer, rendererWork) -> {
+			if (filter == null || filter.test(producer)) {
+				combinedLiveSet.addAll(rendererWork.live().values());
+			}
+		});
 	}
 	
 	private RendererWork getWorkingSetByProducer(final Class<? extends AbstractClientModule> producer) {

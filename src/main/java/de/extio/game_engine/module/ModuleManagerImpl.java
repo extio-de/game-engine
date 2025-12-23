@@ -239,7 +239,13 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
 	@Override
 	public boolean isDisplayed(final Class<? extends AbstractClientModule> clazz) {
-		return this.modulesDisplayed.stream().anyMatch(m -> clazz.isAssignableFrom(m.getClass()));
+		final var modules = this.modulesDisplayed;
+		for (int i = 0; i < modules.size(); i++) {
+			if (clazz.isAssignableFrom(this.modulesDisplayed.get(i).getClass())) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	@Override
