@@ -38,4 +38,6 @@ public interface ModuleManager {
 	
 	boolean isModal();
 	
+	List<AbstractModule> getSubscribersForCallback(ModuleExecutorCallbacks callback);
+
 }

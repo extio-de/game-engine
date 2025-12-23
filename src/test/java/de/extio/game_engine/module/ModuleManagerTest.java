@@ -408,6 +408,95 @@ public class ModuleManagerTest {
 		assertFalse(this.moduleManager.isModal());
 	}
 	
+	@Test
+	public void testGetSubscribersForCallback_NoSubscribers() {
+		final List<AbstractModule> subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		
+		assertTrue(subscribers.isEmpty());
+	}
+	
+	@Test
+	public void testGetSubscribersForCallback_WithSubscriber() {
+		this.moduleManager.loadModule(CallbackSubscriberModule.class);
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		
+		final List<AbstractModule> subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		
+		assertEquals(1, subscribers.size());
+		assertTrue(subscribers.stream().anyMatch(m -> m instanceof CallbackSubscriberModule));
+	}
+	
+	@Test
+	public void testGetSubscribersForCallback_MultipleCallbacks() {
+		this.moduleManager.loadModule(MultiCallbackSubscriberModule.class);
+		this.moduleManager.changeActiveState(MultiCallbackSubscriberModule.class, true);
+		
+		final List<AbstractModule> uiPreSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		final List<AbstractModule> runSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.RUN);
+		final List<AbstractModule> uiPostSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_POST);
+		
+		assertEquals(1, uiPreSubscribers.size());
+		assertEquals(1, runSubscribers.size());
+		assertEquals(1, uiPostSubscribers.size());
+		
+		assertTrue(uiPreSubscribers.get(0) instanceof MultiCallbackSubscriberModule);
+		assertTrue(runSubscribers.get(0) instanceof MultiCallbackSubscriberModule);
+		assertTrue(uiPostSubscribers.get(0) instanceof MultiCallbackSubscriberModule);
+	}
+	
+	@Test
+	public void testGetSubscribersForCallback_UnsubscribedCallbackEmpty() {
+		this.moduleManager.loadModule(CallbackSubscriberModule.class);
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		
+		final List<AbstractModule> runSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.RUN);
+		
+		assertTrue(runSubscribers.isEmpty());
+	}
+	
+	@Test
+	public void testGetSubscribersForCallback_RemovedOnDeactivate() {
+		this.moduleManager.loadModule(CallbackSubscriberModule.class);
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		
+		List<AbstractModule> subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		assertEquals(1, subscribers.size());
+		
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, false);
+		
+		subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		assertTrue(subscribers.isEmpty());
+	}
+	
+	@Test
+	public void testGetSubscribersForCallback_MultipleModules() {
+		this.moduleManager.loadModule(CallbackSubscriberModule.class);
+		this.moduleManager.loadModule(MultiCallbackSubscriberModule.class);
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		this.moduleManager.changeActiveState(MultiCallbackSubscriberModule.class, true);
+		
+		final List<AbstractModule> uiPreSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		
+		assertEquals(2, uiPreSubscribers.size());
+		assertTrue(uiPreSubscribers.stream().anyMatch(m -> m instanceof CallbackSubscriberModule));
+		assertTrue(uiPreSubscribers.stream().anyMatch(m -> m instanceof MultiCallbackSubscriberModule));
+	}
+	
+	@Test
+	public void testGetSubscribersForCallback_ReactivateModule() {
+		this.moduleManager.loadModule(CallbackSubscriberModule.class);
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, false);
+		
+		List<AbstractModule> subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		assertTrue(subscribers.isEmpty());
+		
+		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		
+		subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
+		assertEquals(1, subscribers.size());
+	}
+	
 	static class TestModule extends AbstractModule {
 		
 		boolean onLoadCalled = false;
@@ -500,6 +589,28 @@ public class ModuleManagerTest {
 		@Override
 		public int getPriority() {
 			return MODULE_PRIORITY_HIGH;
+		}
+		
+	}
+	
+	static class CallbackSubscriberModule extends AbstractModule {
+		
+		@Override
+		public java.util.List<ModuleExecutorCallbacks> executorCallbackSubscriptions() {
+			return java.util.List.of(ModuleExecutorCallbacks.UI_PRE);
+		}
+		
+	}
+	
+	static class MultiCallbackSubscriberModule extends AbstractModule {
+		
+		@Override
+		public java.util.List<ModuleExecutorCallbacks> executorCallbackSubscriptions() {
+			return java.util.List.of(
+				ModuleExecutorCallbacks.UI_PRE,
+				ModuleExecutorCallbacks.RUN,
+				ModuleExecutorCallbacks.UI_POST
+			);
 		}
 		
 	}

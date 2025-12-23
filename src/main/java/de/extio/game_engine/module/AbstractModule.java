@@ -1,5 +1,7 @@
 package de.extio.game_engine.module;
 
+import java.util.List;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -30,6 +32,9 @@ public abstract class AbstractModule {
 		
 	}
 	
+	public List<ModuleExecutorCallbacks> executorCallbackSubscriptions() {
+		return null;
+	}
 	
 	public void run() {
 		

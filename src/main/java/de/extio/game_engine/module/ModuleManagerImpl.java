@@ -1,9 +1,13 @@
 package de.extio.game_engine.module;
 
-import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.Deque;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.Stack;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -18,8 +22,8 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
 	private final List<AbstractModule> modulesInitial;
 	
-	private final List<AbstractModule> modulesAll = new ArrayList<>();
-
+	private final List<AbstractModule> modulesAll = Collections.synchronizedList(new ArrayList<>());
+	
 	private final RendererWorkingSet rendererWorkingSet;
 	
 	private List<AbstractModule> modulesAllView = List.of();
@@ -30,11 +34,13 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
 	private List<AbstractClientModule> modulesDisplayedClientModulesView = List.of();
 	
-	private final List<AbstractModule> modulesActive = new ArrayList<>();
+	private final List<AbstractModule> modulesActive = Collections.synchronizedList(new ArrayList<>());
 	
-	private final List<AbstractClientModule> modulesDisplayed = new ArrayList<>();
+	private final List<AbstractClientModule> modulesDisplayed = Collections.synchronizedList(new ArrayList<>());
 	
-	private final Deque<List<AbstractClientModule>> lastVisibleStates = new ArrayDeque<>();
+	private final Stack<List<AbstractClientModule>> lastVisibleStates = new Stack<>();
+	
+	private final Map<ModuleExecutorCallbacks, List<AbstractModule>> executorCallbackMap = Collections.synchronizedMap(new EnumMap<>(ModuleExecutorCallbacks.class));
 	
 	public ModuleManagerImpl(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
 		this.modulesInitial = initialModules;
@@ -46,10 +52,7 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 		if (this.modulesInitial == null || this.modulesInitial.isEmpty()) {
 			return;
 		}
-		this.modulesInitial.forEach(module -> this.invokeSafe(module, AbstractModule::onLoad));
-		this.modulesAll.addAll(this.modulesInitial);
-		this.sortModules(this.modulesAll);
-		this.modulesAllView = List.copyOf(this.modulesAll);
+		this.modulesInitial.forEach(this::load);
 		this.modulesInitial.clear();
 	}
 	
@@ -74,30 +77,41 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	}
 	
 	@Override
-	public void loadModule(final Class<? extends AbstractModule> clazz) {
-		if (this.modulesAll.stream().anyMatch(module -> clazz.isInstance(module))) {
-			LOGGER.debug("AbstractModule already loaded: " + clazz.getName());
-			return;
+	public synchronized void loadModule(final Class<? extends AbstractModule> clazz) {
+		synchronized (this.modulesAll) {
+			if (this.modulesAll.stream().anyMatch(module -> clazz.isInstance(module))) {
+				LOGGER.debug("AbstractModule already loaded: " + clazz.getName());
+				return;
+			}
 		}
 		
 		LOGGER.debug("Loading module " + clazz.getName());
 		
 		try {
 			final AbstractModule module = AbstractModule.class.cast(clazz.getDeclaredConstructor().newInstance());
-			this.invokeSafe(module, m -> m.onLoad());
-			this.modulesAll.add(module);
-			this.sortModules(this.modulesAll);
-			this.modulesAllView = List.copyOf(this.modulesAll);
+			this.load(module);
 		}
 		catch (final Exception e) {
 			LOGGER.error("Error loading module " + clazz.getName(), e);
 		}
 	}
 	
+	private void load(final AbstractModule module) {
+		this.invokeSafe(module, m -> m.onLoad());
+		this.modulesAll.add(module);
+		this.sortModules(this.modulesAll);
+		synchronized (this.modulesAll) {
+			this.modulesAllView = List.copyOf(this.modulesAll);
+		}
+	}
+	
 	@Override
-	public void unloadModule(final Class<? extends AbstractModule> clazz) {
+	public synchronized void unloadModule(final Class<? extends AbstractModule> clazz) {
 		try {
-			final AbstractModule module = this.modulesAll.stream().filter(mod -> clazz.isInstance(mod)).findAny().orElse(null);
+			AbstractModule module;
+			synchronized (this.modulesAll) {
+				module = this.modulesAll.stream().filter(mod -> clazz.isInstance(mod)).findAny().orElse(null);
+			}
 			
 			if (module == null) {
 				LOGGER.debug("AbstractModule not loaded: " + clazz.getName());
@@ -107,7 +121,9 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 			this.changeActiveState(clazz, false);
 			this.modulesAll.remove(module);
 			this.sortModules(this.modulesAll);
-			this.modulesAllView = List.copyOf(this.modulesAll);
+			synchronized (this.modulesAll) {
+				this.modulesAllView = List.copyOf(this.modulesAll);
+			}
 			
 			this.invokeSafe(module, m -> m.onUnload());
 			if (module instanceof final AbstractClientModule clientModule) {
@@ -133,7 +149,7 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	}
 	
 	@Override
-	public void changeActiveState(final Class<? extends AbstractModule> clazz, final boolean active) {
+	public synchronized void changeActiveState(final Class<? extends AbstractModule> clazz, final boolean active) {
 		this.modulesActiveView.stream()
 				.filter(module -> clazz.isAssignableFrom(module.getClass()))
 				.findAny()
@@ -145,39 +161,59 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 						this.invokeSafe(module, AbstractModule::onDeactivate);
 						this.modulesActive.remove(module);
 						this.sortModules(this.modulesActive);
-						this.modulesActiveView = List.copyOf(this.modulesActive);
-						this.modulesActiveClientModulesView = this.modulesActive.stream()
-								.filter(m -> m instanceof AbstractClientModule)
-								.map(m -> (AbstractClientModule) m)
-								.toList();
-						this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);
+						synchronized (this.modulesActive) {
+							this.modulesActiveView = List.copyOf(this.modulesActive);
+							this.modulesActiveClientModulesView = this.modulesActive.stream()
+									.filter(m -> m instanceof AbstractClientModule)
+									.map(m -> (AbstractClientModule) m)
+									.toList();
+						}
 						if (module instanceof final AbstractClientModule clientModule) {
 							this.rendererWorkingSet.clear(clientModule.getClass());
+						}
+						synchronized (this.executorCallbackMap) {
+							final var subscriptions = module.executorCallbackSubscriptions();
+							if (subscriptions != null) {
+								for (final var subscription : subscriptions) {
+									executorCallbackMap.computeIfAbsent(subscription, k -> Collections.synchronizedList(new ArrayList<>())).remove(module);
+								}
+							}
 						}
 						
 						LOGGER.debug("Deactivated " + clazz.getName());
 					}
 				}, () -> {
 					if (active) {
-						this.modulesAll.stream()
-								.filter(module -> clazz.isAssignableFrom(module.getClass()))
-								.findFirst()
-								.ifPresent(module -> {
-									this.invokeSafe(module, AbstractModule::onActivate);
-									if (module instanceof final AbstractClientModule clientModule && clientModule.isAlwaysDisplay()) {
-										this.changeDisplayState(clientModule.getClass(), true);
-									}
-									this.modulesActive.add(module);
-									this.sortModules(this.modulesActive);
-									this.modulesActiveView = List.copyOf(this.modulesActive);
-									this.modulesActiveClientModulesView = this.modulesActive.stream()
-											.filter(m -> m instanceof AbstractClientModule)
-											.map(m -> (AbstractClientModule) m)
-											.toList();
-									this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);
-									
-									LOGGER.debug("Activated " + clazz.getName());
-								});
+						synchronized (this.modulesAll) {
+							this.modulesAll.stream()
+									.filter(module -> clazz.isAssignableFrom(module.getClass()))
+									.findFirst()
+									.ifPresent(module -> {
+										this.invokeSafe(module, AbstractModule::onActivate);
+										if (module instanceof final AbstractClientModule clientModule && clientModule.isAlwaysDisplay()) {
+											this.changeDisplayState(clientModule.getClass(), true);
+										}
+										this.modulesActive.add(module);
+										this.sortModules(this.modulesActive);
+										synchronized (this.modulesActive) {
+											this.modulesActiveView = List.copyOf(this.modulesActive);
+											this.modulesActiveClientModulesView = this.modulesActive.stream()
+													.filter(m -> m instanceof AbstractClientModule)
+													.map(m -> (AbstractClientModule) m)
+													.toList();
+										}
+										synchronized (this.executorCallbackMap) {
+											final var subscriptions = module.executorCallbackSubscriptions();
+											if (subscriptions != null) {
+												for (final var subscription : subscriptions) {
+													executorCallbackMap.computeIfAbsent(subscription, k -> Collections.synchronizedList(new ArrayList<>())).add(module);
+												}
+											}
+										}
+										
+										LOGGER.debug("Activated " + clazz.getName());
+									});
+						}
 					}
 				});
 	}
@@ -202,25 +238,29 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	}
 	
 	@Override
-	public void changeDisplayState(final Class<? extends AbstractClientModule> clazz, final boolean display) {
-		for (final var module : this.modulesAll) {
-			if (module instanceof final AbstractClientModule clientModule && clazz.isAssignableFrom(module.getClass())) {
-				final boolean curDisplayed = this.modulesDisplayed.stream().anyMatch(mod -> clazz.isAssignableFrom(mod.getClass()));
-				
-				final boolean doDisplay = display || clientModule.isAlwaysDisplay();
-				if (doDisplay && !curDisplayed) {
-					this.modulesDisplayed.add(clientModule);
-					clientModule.setDisplayed(true);
-					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onShow());
+	public synchronized void changeDisplayState(final Class<? extends AbstractClientModule> clazz, final boolean display) {
+		synchronized (this.modulesAll) {
+			synchronized (this.modulesDisplayed) {
+				for (final var module : this.modulesAll) {
+					if (module instanceof final AbstractClientModule clientModule && clazz.isAssignableFrom(module.getClass())) {
+						final boolean curDisplayed = this.modulesDisplayed.stream().anyMatch(mod -> clazz.isAssignableFrom(mod.getClass()));
+						
+						final boolean doDisplay = display || clientModule.isAlwaysDisplay();
+						if (doDisplay && !curDisplayed) {
+							this.modulesDisplayed.add(clientModule);
+							clientModule.setDisplayed(true);
+							this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onShow());
+						}
+						else if (!doDisplay && curDisplayed) {
+							clientModule.setDisplayed(false);
+							this.modulesDisplayed.removeIf(mod -> clazz.isAssignableFrom(mod.getClass()));
+							this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onHide());
+						}
+						this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);
+						
+						break;
+					}
 				}
-				else if (!doDisplay && curDisplayed) {
-					clientModule.setDisplayed(false);
-					this.modulesDisplayed.removeIf(mod -> clazz.isAssignableFrom(mod.getClass()));
-					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onHide());
-				}
-				this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);
-				
-				break;
 			}
 		}
 	}
@@ -239,9 +279,9 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
 	@Override
 	public boolean isDisplayed(final Class<? extends AbstractClientModule> clazz) {
-		final var modules = this.modulesDisplayed;
+		final var modules = this.modulesDisplayedClientModulesView;
 		for (int i = 0; i < modules.size(); i++) {
-			if (clazz.isAssignableFrom(this.modulesDisplayed.get(i).getClass())) {
+			if (clazz.isAssignableFrom(modules.get(i).getClass())) {
 				return true;
 			}
 		}
@@ -252,7 +292,8 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	public void hideAll() {
 		this.lastVisibleStates.clear();
 		
-		for (final var module : List.copyOf(this.modulesDisplayed)) {
+		final var modules = this.modulesDisplayedClientModulesView;
+		for (final var module : modules) {
 			if ((module instanceof final AbstractClientModule clientModule) && !clientModule.isAlwaysDisplay()) {
 				this.changeDisplayState(clientModule.getClass(), false);
 			}
@@ -263,9 +304,10 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	@SafeVarargs
 	public final void hideExcept(final String... classNames) {
 		final List<AbstractClientModule> state = new ArrayList<>();
-		final var keep = new java.util.HashSet<>(java.util.Arrays.asList(classNames));
+		final var keep = new HashSet<>(Arrays.asList(classNames));
 		
-		for (final var module : List.copyOf(this.modulesDisplayed)) {
+		final var modules = this.modulesDisplayedClientModulesView;
+		for (final var module : modules) {
 			if (module instanceof final AbstractClientModule clientModule &&
 					!clientModule.isAlwaysDisplay() &&
 					!keep.contains(clientModule.getClass().getName())) {
@@ -285,14 +327,21 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 			return;
 		}
 		
-		for (final AbstractClientModule module : this.lastVisibleStates.pop()) {
-			this.changeDisplayState(module.getClass(), true);
+		synchronized (this.lastVisibleStates) {
+			for (final AbstractClientModule module : this.lastVisibleStates.pop()) {
+				this.changeDisplayState(module.getClass(), true);
+			}
 		}
 	}
 	
 	@Override
 	public boolean isModal() {
 		return !this.lastVisibleStates.isEmpty();
+	}
+	
+	@Override
+	public List<AbstractModule> getSubscribersForCallback(final ModuleExecutorCallbacks callback) {
+		return this.executorCallbackMap.getOrDefault(callback, List.of());
 	}
 	
 	private void invokeSafe(final AbstractModule module, final Consumer<AbstractModule> consumer) {

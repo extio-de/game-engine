@@ -20,18 +20,15 @@ public class ModuleExecutorImpl implements ModuleExecutor {
 	
 	@Override
 	public void execute() {
-
-		// TODO Subscriptions for modules to run only on certain conditions
-
-		this.runTasks(module -> () -> {
+		this.runTasks(ModuleExecutorCallbacks.UI_PRE, module -> () -> {
 			if (module instanceof final AbstractClientModule clientModule && this.moduleManager.getModulesDisplayedClientModules().contains(clientModule)) {
 				this.invokeSafe(clientModule, AbstractClientModule::runUiPre);
 			}
 		});
-		this.runTasks(module -> () -> {
+		this.runTasks(ModuleExecutorCallbacks.RUN, module -> () -> {
 			this.invokeSafe(module, AbstractModule::run);
 		});
-		this.runTasks(module -> () -> {
+		this.runTasks(ModuleExecutorCallbacks.UI_POST, module -> () -> {
 			if (module instanceof final AbstractClientModule clientModule && this.moduleManager.getModulesDisplayedClientModules().contains(clientModule)) {
 				this.invokeSafe(clientModule, AbstractClientModule::runUiPost);
 			}
@@ -47,12 +44,19 @@ public class ModuleExecutorImpl implements ModuleExecutor {
 		}
 	}
 	
-	private void runTasks(final Function<AbstractModule, Runnable> taskSupplier) {
+	private void runTasks(final ModuleExecutorCallbacks callbackType, final Function<AbstractModule, Runnable> taskSupplier) {
+		final var subscribers = this.moduleManager.getSubscribersForCallback(callbackType);
+		if (subscribers.isEmpty()) {
+			return;
+		}
+
 		try (var scope = StructuredTaskScope.open(Joiner.awaitAll())) {
-			for (final var module : this.moduleManager.getModulesActive()) {
-				final var task = taskSupplier.apply(module);
-				if (task != null) {
-					scope.fork(task);
+			synchronized (subscribers) {
+				for (final var module : subscribers) {
+					final var task = taskSupplier.apply(module);
+					if (task != null) {
+						scope.fork(task);
+					}
 				}
 			}
 			scope.join();
