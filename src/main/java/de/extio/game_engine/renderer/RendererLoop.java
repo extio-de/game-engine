@@ -40,7 +40,7 @@ public class RendererLoop implements Runnable {
 			while (!this.shutdown) {
 				try {
 					this.rendererData.nextFrame();
-					// TODO run modules here
+					this.rendererData.getModuleExecutor().execute();
 					this.rendererData.getRenderer().run();
 					exceptionCount = 0;
 				}

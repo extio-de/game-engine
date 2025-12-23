@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
+import de.extio.game_engine.module.ModuleExecutor;
 import de.extio.game_engine.module.ModuleManager;
 import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
@@ -39,10 +40,12 @@ public class RendererData {
 	private final RendererWorkingSet rendererWorkingSet;
 
 	private final ModuleManager moduleManager;
+
+	private final ModuleExecutor moduleExecutor;
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleManager moduleManager) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleManager moduleManager, final ModuleExecutor moduleExecutor) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
@@ -52,6 +55,7 @@ public class RendererData {
 		this.storageService = storageService;
 		this.rendererWorkingSet = rendererWorkingSet;
 		this.moduleManager = moduleManager;
+		this.moduleExecutor = moduleExecutor;
 	}
 	
 	public ApplicationContext getApplicationContext() {
@@ -112,5 +116,9 @@ public class RendererData {
 
 	public ModuleManager getModuleManager() {
 		return moduleManager;
+	}
+
+	public ModuleExecutor getModuleExecutor() {
+		return moduleExecutor;
 	}
 }
