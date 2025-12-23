@@ -18,6 +18,8 @@ public interface RendererWorkingSet {
 	
 	Map<String, RenderingBo> commit(Class<? extends AbstractClientModule> producer, boolean clone);
 	
+	void clear(Class<? extends AbstractClientModule> producer);
+
 	void getLiveSet(List<RenderingBo> combinedLiveSet);
 	
 }

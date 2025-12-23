@@ -147,6 +147,54 @@ public class RendererWorkingSetImplTest {
 	}
 	
 	@Test
+	void clearRemovesProducerAndReleasesWork() {
+		final var bo1 = new TestBoA();
+		bo1.setId("bo1");
+		final var bo2 = new TestBoB();
+		bo2.setId("bo2");
+		
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.commit(TestModuleA.class, false);
+		this.workingSet.add(TestModuleA.class, bo2);
+		
+		// Before clear
+		final List<RenderingBo> liveBefore = new ArrayList<>();
+		this.workingSet.getLiveSet(liveBefore);
+		assertTrue(liveBefore.contains(bo1));
+		assertNotNull(this.workingSet.get(TestModuleA.class, "bo2"));
+		
+		this.workingSet.clear(TestModuleA.class);
+		
+		// After clear
+		final List<RenderingBo> liveAfter = new ArrayList<>();
+		this.workingSet.getLiveSet(liveAfter);
+		assertTrue(liveAfter.isEmpty());
+		
+		final var uncommittedAfter = this.workingSet.getUncommittedWork(TestModuleA.class);
+		assertTrue(uncommittedAfter.isEmpty());
+		
+		verify(this.renderingBoPool, times(1)).release(bo1);
+		verify(this.renderingBoPool, times(1)).release(bo2);
+		assertEquals(1, bo1.closeStaticCalls());
+		assertEquals(1, bo2.closeStaticCalls());
+	}
+	
+	@Test
+	void clearOnUnknownProducerDoesNothing() {
+		final RenderingBo bo1 = mock(RenderingBo.class);
+		when(bo1.getId()).thenReturn("bo1");
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.commit(TestModuleA.class, false);
+		
+		this.workingSet.clear(TestModuleC.class);
+		
+		final List<RenderingBo> live = new ArrayList<>();
+		this.workingSet.getLiveSet(live);
+		assertEquals(1, live.size());
+		assertTrue(live.contains(bo1));
+	}
+	
+	@Test
 	void secondCommitReleasesPreviousLiveWorkAndCallsCloseStaticOncePerClass() {
 		final var bo1 = new TestBoA();
 		bo1.setId("bo1");

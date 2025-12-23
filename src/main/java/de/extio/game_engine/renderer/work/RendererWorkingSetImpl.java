@@ -74,21 +74,21 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		
 		final var previousWorkMap = previousWork.get();
 		if (previousWorkMap != null) {
-			final var releasedBoClasses = this.obtainSetFromPool();
-			for (final RenderingBo renderingBO : previousWorkMap.values()) {
-				if (releasedBoClasses.add(renderingBO.getClass())) {
-					renderingBO.closeStatic();
-				}
-				this.rendererBoPool.release(renderingBO);
-			}
-			
-			this.returnMapToPool(previousWorkMap);
-			this.returnSetToPool(releasedBoClasses);
+			this.releaseBoClasses(previousWorkMap);
 		}
 		
 		return rendererWork.next();
 	}
 	
+	@Override
+	public void clear(final Class<? extends AbstractClientModule> producer) {
+		final RendererWork rendererWork = this.workingSet.remove(producer);
+		if (rendererWork != null) {
+			this.releaseBoClasses(rendererWork.live());
+			this.releaseBoClasses(rendererWork.next());
+		}
+	}
+
 	@Override
 	public void getLiveSet(final List<RenderingBo> combinedLiveSet) {
 		this.workingSet.values().forEach(rendererWork -> combinedLiveSet.addAll(rendererWork.live().values()));
@@ -98,6 +98,23 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		return this.workingSet.computeIfAbsent(producer, k -> new RendererWork(this.obtainMapFromPool(), this.obtainMapFromPool()));
 	}
 	
+	private void releaseBoClasses(final Map<String, RenderingBo> work) {
+		if (work == null || work.isEmpty()) {
+			return;
+		}
+
+		final var releasedBoClasses = this.obtainSetFromPool();
+		for (final RenderingBo renderingBO : work.values()) {
+			if (releasedBoClasses.add(renderingBO.getClass())) {
+				renderingBO.closeStatic();
+			}
+			this.rendererBoPool.release(renderingBO);
+		}
+		
+		this.returnMapToPool(work);
+		this.returnSetToPool(releasedBoClasses);
+	}
+
 	private Map<String, RenderingBo> obtainMapFromPool() {
 		var map = this.mapsPool.poll();
 		if (map == null) {
