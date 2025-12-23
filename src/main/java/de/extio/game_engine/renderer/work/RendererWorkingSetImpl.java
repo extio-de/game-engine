@@ -12,11 +12,12 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicReference;
 
+import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.model.RenderingBo;
 
 public class RendererWorkingSetImpl implements RendererWorkingSet {
 	
-	private final ConcurrentMap<String, RendererWork> workingSet = new ConcurrentHashMap<>();
+	private final ConcurrentMap<Class<? extends AbstractClientModule>, RendererWork> workingSet = new ConcurrentHashMap<>();
 	
 	private final BlockingQueue<Map<String, RenderingBo>> mapsPool = new ArrayBlockingQueue<>(100);
 	
@@ -29,14 +30,14 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	}
 	
 	@Override
-	public void add(final String producer, final RenderingBo work) {
+	public void add(final Class<? extends AbstractClientModule> producer, final RenderingBo work) {
 		this.getWorkingSetByProducer(producer)
 				.next()
 				.put(work.getId(), work);
 	}
 	
 	@Override
-	public void add(final String producer, final List<RenderingBo> work) {
+	public void add(final Class<? extends AbstractClientModule> producer, final List<RenderingBo> work) {
 		final var nextMap = this.getWorkingSetByProducer(producer).next();
 		for (final RenderingBo bo : work) {
 			nextMap.put(bo.getId(), bo);
@@ -44,17 +45,17 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	}
 	
 	@Override
-	public Map<String, RenderingBo> getUncommittedWork(final String producer) {
+	public Map<String, RenderingBo> getUncommittedWork(final Class<? extends AbstractClientModule> producer) {
 		return this.getWorkingSetByProducer(producer).next();
 	}
 	
 	@Override
-	public RenderingBo get(final String producer, final String id) {
+	public RenderingBo get(final Class<? extends AbstractClientModule> producer, final String id) {
 		return this.getWorkingSetByProducer(producer).next().get(id);
 	}
 	
 	@Override
-	public Map<String, RenderingBo> commit(final String producer, final boolean clone) {
+	public Map<String, RenderingBo> commit(final Class<? extends AbstractClientModule> producer, final boolean clone) {
 		final AtomicReference<Map<String, RenderingBo>> previousWork = new AtomicReference<>();
 		final RendererWork rendererWork = this.workingSet.compute(producer, (k, v) -> {
 			if (v == null) {
@@ -93,7 +94,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		this.workingSet.values().forEach(rendererWork -> combinedLiveSet.addAll(rendererWork.live().values()));
 	}
 	
-	private RendererWork getWorkingSetByProducer(final String producer) {
+	private RendererWork getWorkingSetByProducer(final Class<? extends AbstractClientModule> producer) {
 		return this.workingSet.computeIfAbsent(producer, k -> new RendererWork(this.obtainMapFromPool(), this.obtainMapFromPool()));
 	}
 	

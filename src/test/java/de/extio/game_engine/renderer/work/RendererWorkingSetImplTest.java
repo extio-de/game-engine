@@ -13,6 +13,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
+import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
@@ -40,9 +41,9 @@ public class RendererWorkingSetImplTest {
 	void addSingleAddsToUncommittedWork() {
 		final RenderingBo bo1 = mock(RenderingBo.class);
 		when(bo1.getId()).thenReturn("bo1");
-		this.workingSet.add("producer", bo1);
+		this.workingSet.add(TestModuleA.class, bo1);
 		
-		final var uncommitted = this.workingSet.getUncommittedWork("producer");
+		final var uncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
 		assertNotNull(uncommitted);
 		assertEquals(Map.of("bo1", bo1), uncommitted);
 	}
@@ -54,9 +55,9 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add("producer", List.of(bo1, bo2));
+		this.workingSet.add(TestModuleA.class, List.of(bo1, bo2));
 		
-		final var uncommitted = this.workingSet.getUncommittedWork("producer");
+		final var uncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
 		assertEquals(Map.of("bo1", bo1, "bo2", bo2), uncommitted);
 	}
 	
@@ -67,11 +68,11 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add("producer", bo1);
-		this.workingSet.add("producer", bo2);
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.add(TestModuleA.class, bo2);
 		
-		final var returnedUncommitted = this.workingSet.commit("producer", false);
-		final var currentUncommitted = this.workingSet.getUncommittedWork("producer");
+		final var returnedUncommitted = this.workingSet.commit(TestModuleA.class, false);
+		final var currentUncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
 		
 		assertSame(currentUncommitted, returnedUncommitted);
 		assertTrue(currentUncommitted.isEmpty());
@@ -91,11 +92,11 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo3 = mock(RenderingBo.class);
 		when(bo3.getId()).thenReturn("bo3");
 		
-		this.workingSet.add("producer", bo1);
-		this.workingSet.add("producer", bo2);
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.add(TestModuleA.class, bo2);
 		
-		final var returnedUncommitted = this.workingSet.commit("producer", true);
-		final var currentUncommitted = this.workingSet.getUncommittedWork("producer");
+		final var returnedUncommitted = this.workingSet.commit(TestModuleA.class, true);
+		final var currentUncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
 		
 		assertSame(currentUncommitted, returnedUncommitted);
 		assertEquals(Map.of("bo1", bo1, "bo2", bo2), currentUncommitted);
@@ -105,7 +106,7 @@ public class RendererWorkingSetImplTest {
 		assertEquals(2, live.size());
 		assertTrue(live.containsAll(List.of(bo1, bo2)));
 		
-		this.workingSet.add("producer", bo3);
+		this.workingSet.add(TestModuleA.class, bo3);
 		final List<RenderingBo> liveAfterAdd = new ArrayList<>();
 		this.workingSet.getLiveSet(liveAfterAdd);
 		assertEquals(2, liveAfterAdd.size());
@@ -121,12 +122,12 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo3 = mock(RenderingBo.class);
 		when(bo3.getId()).thenReturn("bo3");
 		
-		this.workingSet.add("p1", bo1);
-		this.workingSet.add("p1", bo2);
-		this.workingSet.add("p2", bo3);
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.add(TestModuleA.class, bo2);
+		this.workingSet.add(TestModuleB.class, bo3);
 		
-		this.workingSet.commit("p1", false);
-		this.workingSet.commit("p2", false);
+		this.workingSet.commit(TestModuleA.class, false);
+		this.workingSet.commit(TestModuleB.class, false);
 		
 		final List<RenderingBo> live = new ArrayList<>();
 		this.workingSet.getLiveSet(live);
@@ -136,7 +137,7 @@ public class RendererWorkingSetImplTest {
 	
 	@Test
 	void commitOnUnknownProducerCreatesEmptyState() {
-		final var returnedUncommitted = this.workingSet.commit("unknown", false);
+		final var returnedUncommitted = this.workingSet.commit(TestModuleC.class, false);
 		assertNotNull(returnedUncommitted);
 		assertTrue(returnedUncommitted.isEmpty());
 		
@@ -152,14 +153,14 @@ public class RendererWorkingSetImplTest {
 		final var bo2 = new TestBoA();
 		bo2.setId("bo2");
 		
-		this.workingSet.add("producer", bo1);
-		this.workingSet.add("producer", bo2);
-		this.workingSet.commit("producer", false);
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.add(TestModuleA.class, bo2);
+		this.workingSet.commit(TestModuleA.class, false);
 		
 		final var bo3 = new TestBoB();
 		bo3.setId("bo3");
-		this.workingSet.add("producer", bo3);
-		this.workingSet.commit("producer", false);
+		this.workingSet.add(TestModuleA.class, bo3);
+		this.workingSet.commit(TestModuleA.class, false);
 		
 		verify(this.renderingBoPool, times(1)).release(bo1);
 		verify(this.renderingBoPool, times(1)).release(bo2);
@@ -177,12 +178,12 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add("producer", bo1);
-		this.workingSet.add("producer", bo2);
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.add(TestModuleA.class, bo2);
 		
-		final var retrieved1 = this.workingSet.get("producer", "bo1");
-		final var retrieved2 = this.workingSet.get("producer", "bo2");
-		final var notFound = this.workingSet.get("producer", "nonexistent");
+		final var retrieved1 = this.workingSet.get(TestModuleA.class, "bo1");
+		final var retrieved2 = this.workingSet.get(TestModuleA.class, "bo2");
+		final var notFound = this.workingSet.get(TestModuleA.class, "nonexistent");
 		
 		assertSame(bo1, retrieved1);
 		assertSame(bo2, retrieved2);
@@ -196,16 +197,16 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add("producer", bo1);
-		this.workingSet.add("producer", bo2);
-		final var committedWork = this.workingSet.commit("producer", false);
+		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.add(TestModuleA.class, bo2);
+		final var committedWork = this.workingSet.commit(TestModuleA.class, false);
 		
 		// After commit without clone, the uncommitted work should be empty
 		assertTrue(committedWork.isEmpty());
 		
 		// get() only retrieves from next set, not live set, so it returns null after commit
-		final var retrieved1 = this.workingSet.get("producer", "bo1");
-		final var retrieved2 = this.workingSet.get("producer", "bo2");
+		final var retrieved1 = this.workingSet.get(TestModuleA.class, "bo1");
+		final var retrieved2 = this.workingSet.get(TestModuleA.class, "bo2");
 		
 		assertTrue(retrieved1 == null);
 		assertTrue(retrieved2 == null);
@@ -218,13 +219,13 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo1_replacement = mock(RenderingBo.class);
 		when(bo1_replacement.getId()).thenReturn("bo1");
 		
-		this.workingSet.add("producer", bo1);
-		final var uncommittedBefore = this.workingSet.getUncommittedWork("producer");
+		this.workingSet.add(TestModuleA.class, bo1);
+		final var uncommittedBefore = this.workingSet.getUncommittedWork(TestModuleA.class);
 		assertEquals(1, uncommittedBefore.size());
 		assertSame(bo1, uncommittedBefore.get("bo1"));
 		
-		this.workingSet.add("producer", bo1_replacement);
-		final var uncommittedAfter = this.workingSet.getUncommittedWork("producer");
+		this.workingSet.add(TestModuleA.class, bo1_replacement);
+		final var uncommittedAfter = this.workingSet.getUncommittedWork(TestModuleA.class);
 		assertEquals(1, uncommittedAfter.size());
 		assertSame(bo1_replacement, uncommittedAfter.get("bo1"));
 	}
@@ -373,6 +374,18 @@ public class RendererWorkingSetImplTest {
 	}
 	
 	private static final class TestBoB extends TestBoBase {
+		
+	}
+	
+	private static final class TestModuleA extends AbstractClientModule {
+		
+	}
+	
+	private static final class TestModuleB extends AbstractClientModule {
+		
+	}
+	
+	private static final class TestModuleC extends AbstractClientModule {
 		
 	}
 }

@@ -19,6 +19,8 @@ import javax.imageio.ImageIO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.extio.game_engine.module.AbstractClientModule;
+import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.Renderer;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
@@ -87,8 +89,8 @@ public class G2DRenderer implements Renderer {
 			EventQueue.invokeAndWait(() -> {
 				// this invokeAndWait() call is also important to wait until applyVideoOptions() has been completed, which also puts events to AWT event queue
 				LOGGER.debug("Viewport initialized");
-				this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
-				this.rendererData.getRendererWorkingSet().add("G2DRenderer", this.rendererData.getRenderingBoPool().acquire("G2DRenderer_tooltip", G2DDrawControlTooltip.class));
+				this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
+				this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_tooltip", G2DDrawControlTooltip.class));
 			});
 		}
 		catch (InvocationTargetException | InterruptedException e) {
@@ -152,7 +154,7 @@ public class G2DRenderer implements Renderer {
 				}
 				
 				this.drawStatistics();
-				this.rendererData.getRendererWorkingSet().commit("G2DRenderer", true);
+				this.rendererData.getRendererWorkingSet().commit(G2DRendererModule.class, true);
 				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs);
 				this.renderingBOs.sort((bo0, bo1) -> bo0.getLayer().compareTo(bo1.getLayer()));
 				
@@ -178,8 +180,8 @@ public class G2DRenderer implements Renderer {
 						}
 					}
 					
-					this.rendererData.getRendererWorkingSet().get("G2DRenderer", "G2DRenderer_tooltip").closeStatic();
-
+					this.rendererData.getRendererWorkingSet().get(G2DRendererModule.class, "G2DRenderer_tooltip").closeStatic();
+					
 					//
 					// Rendering cycle END
 					//
@@ -234,14 +236,14 @@ public class G2DRenderer implements Renderer {
 				.setColor(RgbaColor.WHITE)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 35);
-		this.rendererData.getRendererWorkingSet().add("G2DRenderer", drawFont);
+		this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, drawFont);
 		
 		this.fpsHistory.add(Integer.valueOf((int) this.frameDur));
 		final var drawFpsHistory = this.rendererData.getRenderingBoPool().acquire("g2DRenderer_fpsHistory", G2DDrawFpsHistory.class)
 				.setHistory(this.fpsHistory)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 50);
-		this.rendererData.getRendererWorkingSet().add("G2DRenderer", drawFpsHistory);
+		this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, drawFpsHistory);
 	}
 	
 	private void frameCap() throws InterruptedException {
@@ -333,5 +335,8 @@ public class G2DRenderer implements Renderer {
 	@Override
 	public void setRendererData(final RendererData rendererData) {
 		this.rendererData = rendererData;
+	}
+	
+	private static abstract class G2DRendererModule extends AbstractClientModule {
 	}
 }
