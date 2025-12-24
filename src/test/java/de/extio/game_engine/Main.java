@@ -28,7 +28,7 @@ public class Main {
 		
 		final SpringApplicationBuilder builder = new SpringApplicationBuilder(Main.class);
 		builder.headless(false);
-		builder.properties("logging.level.de.extio=TRACE");
+		builder.properties("logging.level.de.extio=TRACE", "game-engine.renderer.title=Exo's Game Engine Demo");
 		builder.run(args);
 	}
 	
