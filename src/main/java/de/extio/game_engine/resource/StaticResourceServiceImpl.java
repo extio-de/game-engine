@@ -100,13 +100,6 @@ public class StaticResourceServiceImpl implements StaticResourceService {
 	}
 	
 	@Override
-	public <T> Optional<T> loadByPath(final Class<T> clazz, final StaticResource resource) {
-		Objects.requireNonNull(clazz, "clazz");
-		Objects.requireNonNull(resource, "resource");
-		return this.loadByPath(clazz, resource.pathSegments(), resource.resourceName());
-	}
-	
-	@Override
 	public Optional<InputStream> loadStreamByPath(final List<String> path, final String name) {
 		Objects.requireNonNull(name, "name");
 		
@@ -134,24 +127,12 @@ public class StaticResourceServiceImpl implements StaticResourceService {
 	}
 	
 	@Override
-	public Optional<InputStream> loadStreamByPath(final StaticResource resource) {
-		Objects.requireNonNull(resource, "resource");
-		return this.loadStreamByPath(resource.pathSegments(), resource.resourceName());
-	}
-	
-	@Override
 	public boolean exists(final List<String> path, final String name) {
 		Objects.requireNonNull(name, "name");
 		
 		final Path filePath = resolvePath(path, name);
 		
 		return Files.exists(filePath) && Files.isRegularFile(filePath);
-	}
-	
-	@Override
-	public boolean exists(final StaticResource resource) {
-		Objects.requireNonNull(resource, "resource");
-		return this.exists(resource.pathSegments(), resource.resourceName());
 	}
 	
 	@Override
