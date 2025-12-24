@@ -26,6 +26,8 @@ final class AudioPlayerMultiStream implements AudioPlayer {
 	private static final int MUSIC_FADING_MS = 1000;
 	
 	private final BlockingQueue<AudioData> queue = new LinkedBlockingQueue<>(20);
+
+	private final AudioControl audioControl;
 	
 	private volatile AudioData musicQueue;
 	
@@ -51,7 +53,8 @@ final class AudioPlayerMultiStream implements AudioPlayer {
 	
 	private long notStartedAudioCnt;
 	
-	public AudioPlayerMultiStream() {
+	public AudioPlayerMultiStream(AudioControl audioControl) {
+		this.audioControl = audioControl;
 	}
 	
 	@Override
@@ -288,6 +291,10 @@ final class AudioPlayerMultiStream implements AudioPlayer {
 				
 				if (++this.notStartedAudioCnt > 5) {
 					this.notStartedAudioCnt = 0;
+					var options =this.audioControl.getAudioOptions();
+					options.getSfxOptions().enable = false;
+					options.getMusicOptions().enable = false;
+					this.audioControl.applyAudioOptions(options);
 					this.exit = true;
 					LOGGER.error("Too many audio playback errors, shutting down audio player.");
 				}

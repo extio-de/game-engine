@@ -24,7 +24,9 @@ final class AudioStrategySoftwareMixing implements AudioStrategy {
 	
 	private final static int MUSIC_INITIAL_DELAY_MS = 1000;
 	
-	private final AudioOptions clientEngineData;
+	private final AudioControl audioControl;
+
+	private final AudioOptions audioOptions;
 	
 	private final AudioLoader audioLoader;
 	
@@ -32,7 +34,7 @@ final class AudioStrategySoftwareMixing implements AudioStrategy {
 	
 	private AudioThread audioPlayer;
 	
-	private final Set<StaticResource> sfxQueue = new LinkedHashSet<>();
+	private final Set<StaticResource> sfxQueue = Collections.synchronizedSet(new LinkedHashSet<>());
 	
 	private final List<StaticResource> musicFiles = new ArrayList<>();
 	
@@ -40,14 +42,15 @@ final class AudioStrategySoftwareMixing implements AudioStrategy {
 	
 	private long musicFirstQueued;
 	
-	public AudioStrategySoftwareMixing(final AudioOptions clientEngineData, final AudioLoader audioLoader) {
-		this.clientEngineData = clientEngineData;
+	public AudioStrategySoftwareMixing(final AudioControl audioControl, final AudioOptions audioOptions, final AudioLoader audioLoader) {
+		this.audioControl = audioControl;
+		this.audioOptions = audioOptions;
 		this.audioLoader = audioLoader;
 	}
 	
 	@Override
 	public void start() {
-		final var multiStreamPlayer = new AudioPlayerMultiStream();
+		final var multiStreamPlayer = new AudioPlayerMultiStream(this.audioControl);
 		final var multiStreamThread = Thread.ofPlatform()
 				.name("Audio MultiStream")
 				.daemon(true)
@@ -64,13 +67,13 @@ final class AudioStrategySoftwareMixing implements AudioStrategy {
 	@Override
 	public void run() {
 		if (this.audioPlayer.audioPlayer().isPlaying() || !this.sfxQueue.isEmpty() || !this.musicPlayQueue.isEmpty() || !this.musicFiles.isEmpty()) {
-			this.audioPlayer.audioPlayer().updateAudioOptions(this.clientEngineData.getSfxOptions());
-			this.audioPlayer.audioPlayer().updateMusicAudioOptions(this.clientEngineData.getMusicOptions());
+			this.audioPlayer.audioPlayer().updateAudioOptions(this.audioOptions.getSfxOptions());
+			this.audioPlayer.audioPlayer().updateMusicAudioOptions(this.audioOptions.getMusicOptions());
 		}
 		
 		// Music
 		
-		if (!this.clientEngineData.getMusicOptions().isEnable()) {
+		if (!this.audioOptions.getMusicOptions().isEnable()) {
 			if (this.audioPlayer.audioPlayer().isMusicPlaying()) {
 				this.audioPlayer.audioPlayer().setStopMusic(true);
 			}
@@ -94,13 +97,15 @@ final class AudioStrategySoftwareMixing implements AudioStrategy {
 		
 		// Sfx
 		
-		if (!this.sfxQueue.isEmpty()) {
-			final Iterator<StaticResource> it = this.sfxQueue.iterator();
-			while (it.hasNext()) {
-				final StaticResource nextFile = it.next();
-				this.audioLoader.getQueue().offer(new AudioLoaderRequest(nextFile, true, stream -> this.audioPlayer.audioPlayer().getQueue().offer(new AudioData(nextFile.resourceName(), stream))));
+		synchronized (this.sfxQueue) {
+			if (!this.sfxQueue.isEmpty()) {
+				final Iterator<StaticResource> it = this.sfxQueue.iterator();
+				while (it.hasNext()) {
+					final StaticResource nextFile = it.next();
+					this.audioLoader.getQueue().offer(new AudioLoaderRequest(nextFile, true, stream -> this.audioPlayer.audioPlayer().getQueue().offer(new AudioData(nextFile.resourceName(), stream))));
+					it.remove();
+				}
 			}
-			this.sfxQueue.clear();
 		}
 	}
 	
@@ -111,7 +116,7 @@ final class AudioStrategySoftwareMixing implements AudioStrategy {
 	
 	@Override
 	public void queueSfx(final Collection<StaticResource> audioFiles) {
-		if (!this.clientEngineData.getSfxOptions().isEnable()) {
+		if (!this.audioOptions.getSfxOptions().isEnable()) {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("Not queued audio file (audio disabled): " + audioFiles);
 			}
@@ -141,7 +146,7 @@ final class AudioStrategySoftwareMixing implements AudioStrategy {
 			}
 		}
 		
-	if (musicAudioFiles.equals(this.musicFiles)) {
+		if (musicAudioFiles.equals(this.musicFiles)) {
 			this.musicFirstQueued = System.currentTimeMillis();
 		}
 		

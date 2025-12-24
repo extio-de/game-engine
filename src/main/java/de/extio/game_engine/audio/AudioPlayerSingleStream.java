@@ -24,6 +24,8 @@ final class AudioPlayerSingleStream implements AudioPlayer {
 	
 	private final BlockingQueue<AudioData> queue = new LinkedBlockingQueue<>(5);
 	
+	private final AudioControl audioControl;
+
 	private volatile boolean stopAudio;
 	
 	private volatile boolean playing;
@@ -40,7 +42,8 @@ final class AudioPlayerSingleStream implements AudioPlayer {
 	
 	private int notStartedAudioCnt;
 	
-	public AudioPlayerSingleStream() {
+	public AudioPlayerSingleStream(AudioControl audioControl) {
+		this.audioControl = audioControl;
 	}
 	
 	@Override
@@ -124,6 +127,10 @@ final class AudioPlayerSingleStream implements AudioPlayer {
 				
 				if (++this.notStartedAudioCnt > 5) {
 					this.notStartedAudioCnt = 0;
+					var options =this.audioControl.getAudioOptions();
+					options.getSfxOptions().enable = false;
+					options.getMusicOptions().enable = false;
+					this.audioControl.applyAudioOptions(options);
 					this.exit = true;
 					LOGGER.error("Too many audio playback errors, shutting down audio player.");
 				}

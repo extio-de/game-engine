@@ -11,7 +11,7 @@ public final class AudioController implements AudioControl {
 	
 	private final StorageService storageService;
 
-	private AudioOptions audioOptions;
+	private final AudioOptions audioOptions; // Passed as reference to strategies
 	
 	private AudioStrategy audioStrategy;
 	
@@ -31,12 +31,12 @@ public final class AudioController implements AudioControl {
 	
 	public AudioController(final StaticResourceService resourceService, final StorageService storageService) {
 		this.storageService = storageService;
-		storageService.loadByPath(AudioOptions.class, List.of("audio"), "audioOptions").ifPresentOrElse(
+		this.audioOptions = new AudioOptions();
+		storageService.loadByPath(AudioOptions.class, List.of("gameEngine"), "audioOptions").ifPresentOrElse(
 				loadedOptions -> {
-					this.audioOptions = loadedOptions;
+					this.audioOptions.apply(loadedOptions);
 				},
 				() -> {
-					this.audioOptions = new AudioOptions();
 					this.storeAudioOptions();
 				});
 		
@@ -63,7 +63,7 @@ public final class AudioController implements AudioControl {
 	}
 
 	private void storeAudioOptions() {
-		this.storageService.store(List.of("audio"), "audioOptions", this.audioOptions);
+		this.storageService.store(List.of("gameEngine"), "audioOptions", this.audioOptions);
 	}
 	
 	public void run() {
@@ -91,11 +91,11 @@ public final class AudioController implements AudioControl {
 					.start(this.audioLoader);
 			
 			if (this.audioOptions.getSfxOptions().isSoftwareMixing()) {
-				this.audioStrategy = new AudioStrategySoftwareMixing(this.audioOptions, this.audioLoader);
+				this.audioStrategy = new AudioStrategySoftwareMixing(this, this.audioOptions, this.audioLoader);
 				this.useSoftwareMixing = true;
 			}
 			else {
-				this.audioStrategy = new AudioStrategyJavaMixer(this.audioOptions, this.audioLoader);
+				this.audioStrategy = new AudioStrategyJavaMixer(this, this.audioOptions, this.audioLoader);
 				this.useSoftwareMixing = false;
 			}
 			
