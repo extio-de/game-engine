@@ -1,13 +1,17 @@
 package de.extio.game_engine;
 
-import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.builder.SpringApplicationBuilder;
-import org.springframework.context.annotation.ComponentScan;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Condition;
+import org.springframework.context.annotation.ConditionContext;
+import org.springframework.context.annotation.Conditional;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.type.AnnotatedTypeMetadata;
+
+import de.extio.game_engine.demo.DemoModule;
 
 @SpringBootApplication
-@EnableAutoConfiguration
-@ComponentScan
 public class Main {
 	
 	public static void main(final String[] args) {
@@ -28,4 +32,22 @@ public class Main {
 		builder.run(args);
 	}
 	
+	@Configuration
+	@Conditional(de.extio.game_engine.Main.StandaloneConfig.StandaloneCondition.class)
+	static class StandaloneConfig {
+		
+		@Bean
+		DemoModule demoModule() {
+			return new DemoModule();
+		}
+		
+		static class StandaloneCondition implements Condition {
+			
+			@Override
+			public boolean matches(final ConditionContext context, final AnnotatedTypeMetadata metadata) {
+				final String env = context.getEnvironment().getProperty("game-engine.env");
+				return "standalone".equals(env);
+			}
+		}
+	}
 }

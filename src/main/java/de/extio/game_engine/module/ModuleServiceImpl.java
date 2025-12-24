@@ -85,8 +85,6 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 			}
 		}
 		
-		LOGGER.debug("Loading module " + clazz.getName());
-		
 		try {
 			final AbstractModule module = AbstractModule.class.cast(clazz.getDeclaredConstructor().newInstance());
 			this.load(module);
@@ -97,12 +95,14 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 	}
 	
 	private void load(final AbstractModule module) {
-		this.invokeSafe(module, m -> m.onLoad());
+		module.setModuleService(this);
 		this.modulesAll.add(module);
 		this.sortModules(this.modulesAll);
 		synchronized (this.modulesAll) {
 			this.modulesAllView = List.copyOf(this.modulesAll);
 		}
+		LOGGER.info("Loaded module " + module.getClass().getName());
+		this.invokeSafe(module, m -> m.onLoad());
 	}
 	
 	@Override
@@ -130,7 +130,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 				this.rendererWorkingSet.clear(clientModule.getClass());
 			}
 			
-			LOGGER.debug("Unloaded module " + clazz.getName());
+			LOGGER.info("Unloaded module " + clazz.getName());
 		}
 		catch (final Exception e) {
 			LOGGER.error("Error unloading module " + clazz.getName(), e);
@@ -158,15 +158,14 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 						if (module instanceof final AbstractClientModule clientModule) {
 							this.changeDisplayState(clientModule.getClass(), false);
 						}
-						this.invokeSafe(module, AbstractModule::onDeactivate);
 						this.modulesActive.remove(module);
 						this.sortModules(this.modulesActive);
 						synchronized (this.modulesActive) {
 							this.modulesActiveView = List.copyOf(this.modulesActive);
 							this.modulesActiveClientModulesView = this.modulesActive.stream()
-									.filter(m -> m instanceof AbstractClientModule)
-									.map(m -> (AbstractClientModule) m)
-									.toList();
+							.filter(m -> m instanceof AbstractClientModule)
+							.map(m -> (AbstractClientModule) m)
+							.toList();
 						}
 						if (module instanceof final AbstractClientModule clientModule) {
 							this.rendererWorkingSet.clear(clientModule.getClass());
@@ -179,8 +178,9 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 								}
 							}
 						}
+						this.invokeSafe(module, AbstractModule::onDeactivate);
 						
-						LOGGER.debug("Deactivated " + clazz.getName());
+						LOGGER.info("Deactivated " + clazz.getName());
 					}
 				}, () -> {
 					if (active) {
@@ -189,7 +189,6 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 									.filter(module -> clazz.isAssignableFrom(module.getClass()))
 									.findFirst()
 									.ifPresent(module -> {
-										this.invokeSafe(module, AbstractModule::onActivate);
 										if (module instanceof final AbstractClientModule clientModule && clientModule.isAlwaysDisplay()) {
 											this.changeDisplayState(clientModule.getClass(), true);
 										}
@@ -198,9 +197,9 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 										synchronized (this.modulesActive) {
 											this.modulesActiveView = List.copyOf(this.modulesActive);
 											this.modulesActiveClientModulesView = this.modulesActive.stream()
-													.filter(m -> m instanceof AbstractClientModule)
-													.map(m -> (AbstractClientModule) m)
-													.toList();
+											.filter(m -> m instanceof AbstractClientModule)
+											.map(m -> (AbstractClientModule) m)
+											.toList();
 										}
 										synchronized (this.executorCallbackMap) {
 											final var subscriptions = module.executorCallbackSubscriptions();
@@ -210,8 +209,9 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 												}
 											}
 										}
+										this.invokeSafe(module, AbstractModule::onActivate);
 										
-										LOGGER.debug("Activated " + clazz.getName());
+										LOGGER.info("Activated " + clazz.getName());
 									});
 						}
 					}
@@ -249,11 +249,13 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 						if (doDisplay && !curDisplayed) {
 							this.modulesDisplayed.add(clientModule);
 							clientModule.setDisplayed(true);
+							LOGGER.info("Displayed {}", clazz.getName());
 							this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onShow());
 						}
 						else if (!doDisplay && curDisplayed) {
 							clientModule.setDisplayed(false);
 							this.modulesDisplayed.removeIf(mod -> clazz.isAssignableFrom(mod.getClass()));
+							LOGGER.info("Hidden {}", clazz.getName());
 							this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onHide());
 						}
 						this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);

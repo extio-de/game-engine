@@ -15,7 +15,7 @@ public class ModuleServiceAutoConfiguration {
 	
 	@Bean
 	@ConditionalOnMissingBean
-	ModuleService moduleManager(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
+	ModuleService moduleService(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
 		return new ModuleServiceImpl(initialModules, rendererWorkingSet);
 	}
 	

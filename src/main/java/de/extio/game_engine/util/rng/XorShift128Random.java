@@ -6,7 +6,6 @@ import java.util.UUID;
 /**
  * Random implementation using the Xorshift+ (xorshift128plus) algorithm
  */
-@SuppressWarnings("serial")
 public final class XorShift128Random extends Random {
 	
 	private long state0;

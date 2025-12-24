@@ -12,10 +12,12 @@ public abstract class AbstractModule {
 	
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractModule.class);
 	
+	private ModuleService moduleService;
+	
 	public AbstractModule() {
 		
 	}
-
+	
 	public void onLoad() {
 		
 	}
@@ -39,7 +41,15 @@ public abstract class AbstractModule {
 	public void run() {
 		
 	}
-
+	
+	public ModuleService getModuleService() {
+		return moduleService;
+	}
+	
+	public void setModuleService(ModuleService moduleService) {
+		this.moduleService = moduleService;
+	}
+	
 	@Override
 	public String toString() {
 		return this.getClass().getSimpleName();
