@@ -1,43 +1,51 @@
-# Game Engine
+# Exo's Game Engine
 
 ## Purpose
 
-A modular, Spring Boot-based game engine framework designed for building 2D games with comprehensive support for rendering, audio, localization, event management, and persistent storage. The engine provides a flexible module system that allows games to be composed of reusable, lifecycle-managed components.
+A modular game engine framework for building complex 2D games with comprehensive support for rendering, audio, localization, event management, and persistent storage. The engine provides a flexible module system that allows games to be composed of reusable, lifecycle-managed components.
 
 ## Overview
 
-The game engine is built on Spring Boot 4.0 and Java 25, leveraging dependency injection and auto-configuration to provide a robust foundation for game development. It follows a modular architecture where game functionality is organized into modules that can be dynamically loaded, activated, and managed during runtime.
+Built on Spring Boot 4.0 and Java 25, the engine leverages dependency injection and auto-configuration to provide a robust, professional-grade foundation for game development. Game functionality is organized into modules that can be dynamically loaded, activated, and managed during runtime, enabling complex UI state management and flexible game logic implementations.
 
 ### Core Capabilities
 
-- **Module System**: Extensible module architecture with lifecycle management (load, unload, activate, deactivate)
-- **Rendering Engine**: 2D rendering system with customizable renderer implementations
-- **Audio System**: Multi-strategy audio playback with support for software mixing and Java mixer backends
-- **Event System**: Type-safe event bus for decoupled component communication
-- **Internationalization (i18n)**: YAML-based localization system with multi-language support
-- **Storage Service**: UUID and path-based persistent storage with ZSTD compression
-- **Resource Management**: Static resource loading and caching system
-- **Input Handling**: Keyboard event processing and management
-- **Steamworks Integration**: Built-in Steamworks API support for Steam platform features
-- **Spatial Systems**: 2D spatial calculations and utilities
+- **Module System**: Extensible module architecture with lifecycle management (load, unload, activate, deactivate) and display state control
+- **Rendering Engine**: 2D rendering system supporting both cycle-based and stateful rendering approaches, with pooled rendering objects
+- **Event System**: Concurrent, type-safe event bus using structured concurrency for decoupled component communication
+- **Storage Service**: UUID and path-based persistent storage with ZSTD compression and indexed lookups
+- **Resource Management**: Static resource loading from filesystem with deserialization and streaming support
+- **Internationalization (i18n)**: YAML-based localization system with integrated GUI editor
+- **Input Handling**: Rebindable key binding system with modifier support
+- **Audio System**: Multi-strategy audio playback (software mixing and Java mixer) with OGG Vorbis support
+- **Steamworks Integration**: Steam platform features including achievements, lobbies, rich presence, and workshop integration
+- **Spatial Systems**: 2D spatial calculations with multiple indexing strategies (QuadTree, GridIndex, etc.)
+- **Utilities**: Core functionality including YAML serialization, ring buffers, and UUID generation
+
+## Background
+
+Exo's Game Engine is derived from [Spacecraft Tactics](https://store.steampowered.com/app/2642080/Spacecraft_Tactics), a 2D turn-based tactical space game released on Steam in 2023. The engine extracts the core systems that powered Spacecraft Tactics' campaign, multiplayer modes, and built-in editors. Note that the engine does not include the Groovy-based mod system from Spacecraft Tactics. It focuses on the fundamental building blocks: modules, rendering, events, storage, and other core subsystems that can be used to build new games.
+
+The engine also serves as the foundation for **Exo's CYOA**, an LLM-driven choose-your-own-adventure game that combines the game engine's rendering, module, and UI systems with agentic AI flows to create interactive narrative experiences.
 
 ### Architecture
 
 The engine is structured around the following key subsystems:
 
 - `module/` - Module lifecycle and service management
-- `renderer/` - 2D rendering abstractions and implementations
+- `renderer/` - 2D rendering abstractions, working sets, and rendering object pooling
 - `audio/` - Audio playback strategies and control
-- `event/` - Event publishing and subscription
-- `i18n/` - Localization and language management
-- `storage/` - Data persistence and serialization
-- `resource/` - Static resource loading
-- `keyboard/` - Input event handling
+- `event/` - Concurrent event publishing and subscription
+- `i18n/` - Localization management and editing
+- `storage/` - Data persistence with compression and indexing
+- `resource/` - Static resource loading from filesystem
+- `keyboard/` - Key binding registry and input handling
 - `steamworks/` - Steam platform integration
-- `spatial2/` - 2D spatial utilities
+- `spatial2/` - 2D spatial utilities and indexing structures
 - `menu/` - Menu system components
+- `util/` - Core utilities for serialization, buffers, and RNG
 
-The engine uses Spring's auto-configuration mechanism to wire components together, making it easy to extend and customize behavior through standard Spring configuration patterns.
+The engine uses Spring's auto-configuration mechanism to wire components together, making it easy to extend and customize behavior through standard Spring configuration patterns. Each subsystem can be independently enabled/disabled via configuration properties, allowing developers to use only the components they need.
 
 ---
 
