@@ -125,11 +125,21 @@ Both approaches can be mixed within the same application, allowing each module t
 
 **Property**: `game-engine.renderer.enabled` (default: `true`)
 
-Requires a `Renderer` implementation bean to be provided (e.g., G2D renderer). The auto-configuration wires together all rendering components and creates a central `RendererData` object containing all necessary dependencies.
+The core rendering infrastructure is auto-configured by `RendererAutoConfiguration`, which wires together all rendering components and creates a central `RendererData` object containing all necessary dependencies.
+
+**G2D Renderer Implementation**
+
+**Configuration Class**: `G2DAutoConfiguration`
+
+**Properties**:
+- `game-engine.renderer.strategy` (default: `g2d`) - Must be set to "g2d" to enable
+- `game-engine.renderer.title` - Optional window title
+
+The `G2DAutoConfiguration` provides the default Java2D-based renderer implementation, which is enabled when the renderer strategy is set to "g2d" (the default).
 
 #### Exposed Spring Beans
-- **`Renderer`**: Main rendering interface (implementation must be provided)
-- **`RendererControl`**: Controls renderer settings like title, scale factor, and video options
+- **`Renderer`**: Main rendering interface (provided by G2DRenderer or custom implementation)
+- **`RendererControl`**: Controls renderer settings like title, scale factor, and video options (provided by G2DRendererControl or custom implementation)
 - **`RendererData`**: Central data object containing all renderer dependencies
 - **`RendererWorkingSet`**: Manages the current set of objects to be rendered
 - **`RenderingBoPool`**: Factory for creating rendering business objects
