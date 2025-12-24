@@ -5,3 +5,4 @@ de.extio.game_engine.renderer.g2d.G2DAutoConfiguration
 de.extio.game_engine.storage.StorageServiceAutoConfiguration
 de.extio.game_engine.module.ModuleManagerAutoConfiguration
 de.extio.game_engine.i18n.LocalizationAutoConfiguration
+de.extio.game_engine.resource.StaticResourceAutoConfiguration
