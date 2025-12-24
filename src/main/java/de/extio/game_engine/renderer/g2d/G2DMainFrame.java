@@ -22,6 +22,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.List;
 import java.util.Objects;
 
 import javax.imageio.ImageIO;
@@ -63,15 +64,15 @@ public class G2DMainFrame extends Frame {
 		this.setLayout(null);
 		this.setBackground(Color.BLACK);
 		
-		try (var in = this.getClass().getClassLoader().getResourceAsStream("icon.png")) {
-			if (in != null) {
+		this.rendererData.getStaticResourceService().loadStreamByPath(List.of("renderer"), "icon.png").ifPresent(stream -> {
+			try (var in = stream) {
 				final var icon = ImageIO.read(in);
 				this.setIconImage(icon);
 			}
-		}
-		catch (final IOException e) {
-			LOGGER.error(e.getMessage(), e);
-		}
+			catch (final IOException e) {
+				LOGGER.warn(e.getMessage(), e);
+			}
+		});
 		
 		this.addWindowListener(new WindowListener() {
 			

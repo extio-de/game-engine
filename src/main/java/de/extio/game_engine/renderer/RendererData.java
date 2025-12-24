@@ -13,6 +13,7 @@ import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
+import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.storage.StorageService;
 
 public class RendererData {
@@ -42,10 +43,12 @@ public class RendererData {
 	private final ModuleService moduleManager;
 
 	private final ModuleExecutor moduleExecutor;
+
+	private final StaticResourceService staticResourceService;
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleService moduleManager, final ModuleExecutor moduleExecutor) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleService moduleManager, final ModuleExecutor moduleExecutor, final StaticResourceService staticResourceService) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
@@ -56,6 +59,7 @@ public class RendererData {
 		this.rendererWorkingSet = rendererWorkingSet;
 		this.moduleManager = moduleManager;
 		this.moduleExecutor = moduleExecutor;
+		this.staticResourceService = staticResourceService;
 	}
 	
 	public ApplicationContext getApplicationContext() {
@@ -120,5 +124,9 @@ public class RendererData {
 
 	public ModuleExecutor getModuleExecutor() {
 		return moduleExecutor;
+	}
+
+	public StaticResourceService getStaticResourceService() {
+		return staticResourceService;
 	}
 }

@@ -162,6 +162,7 @@ public class G2DRendererControl implements RendererControl {
 			.store(List.of("gameEngine"), "g2dRendererControlOptions", this.options);
 		
 		this.recalculate();
+		this.rendererData.getEventService().fire(new WindowResizeEvent());
 	}
 	
 	@Override

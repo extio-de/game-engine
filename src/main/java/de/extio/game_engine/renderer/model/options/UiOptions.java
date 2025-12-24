@@ -1,10 +1,15 @@
 package de.extio.game_engine.renderer.model.options;
 
+import java.util.List;
+
+import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
 public final class UiOptions {
-		
+	
+	private boolean drawFps = true;
+	
 	private String backgroundResourceName0 = null;
 	
 	private boolean backgroundScrolling0;
@@ -15,11 +20,11 @@ public final class UiOptions {
 	
 	private boolean backgroundScrollingReverse1;
 	
-	private boolean drawFps = true;
-	
 	private CoordI2 backgroundOffset0 = MutableCoordI2.create();
 	
 	private CoordI2 backgroundOffset1 = MutableCoordI2.create();
+	
+	private StaticResource fontResource = new StaticResource(List.of("renderer"), "Inter_24pt-Regular.ttf");
 	
 	public UiOptions() {
 		if ("true".equals(System.getProperty("debug"))) {
@@ -91,4 +96,11 @@ public final class UiOptions {
 		this.backgroundOffset1 = backgroundOffset1;
 	}
 	
+	public StaticResource getFontResource() {
+		return fontResource;
+	}
+	
+	public void setFontResource(final StaticResource fontResource) {
+		this.fontResource = fontResource;
+	}
 }

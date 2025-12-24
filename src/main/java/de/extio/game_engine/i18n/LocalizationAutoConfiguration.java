@@ -1,5 +1,10 @@
 package de.extio.game_engine.i18n;
 
+import java.io.File;
+import java.net.URI;
+import java.nio.file.Path;
+import java.util.stream.StreamSupport;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
@@ -8,28 +13,33 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 
+import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.resource.StaticResourceService;
+
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.i18n.enabled", havingValue = "true", matchIfMissing = true)
 public class LocalizationAutoConfiguration {
-
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationServiceImpl.class);
-
+	
 	@Bean
 	@ConditionalOnMissingBean
-	LocalizationService localizationManager(@Value("${game-engine.i18n.load-on-start:true}") final boolean loadOnStart, @Value("${game-engine.i18n.resource:i18n.yaml}") final String resource) {
+	LocalizationService localizationManager(@Value("${game-engine.i18n.load-on-start:true}") final boolean loadOnStart, @Value("${game-engine.i18n.resource:i18n/i18n.yaml}") final String resource, final StaticResourceService staticResourceService) {
 		final var localizationManager = new LocalizationServiceImpl();
 		
 		if (loadOnStart) {
-			try (var resourceStream = LocalizationAutoConfiguration.class.getClassLoader().getResourceAsStream(resource)) {
-				if (resourceStream != null) {
-					localizationManager.load(resourceStream);
+			final var path = new File(resource).toPath();
+			final var staticResource = new StaticResource(path.getParent() != null ? StreamSupport.stream(path.getParent().spliterator(), false).map(Path::toString).toList() : null, path.getFileName().toString());
+			staticResourceService.loadStreamByPath(staticResource).ifPresent(stream -> {
+				try (stream) {
+					localizationManager.load(stream);
 				}
-			}
-			catch (final Exception exc) {
-				LOGGER.error("An exception occured while loading localizations from resource: " + resource, exc);
-			}
+				catch (final Exception e) {
+					LOGGER.error("An exception occured while loading localizations from resource: " + resource, e);
+				}
+			});
 		}
-
+		
 		return localizationManager;
 	}
 	

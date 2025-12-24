@@ -118,12 +118,12 @@ public class LocalizationEditor extends JFrame {
 			public void run() {
 				try {
 					final LocalizationEditor frame = new LocalizationEditor();
-					try (InputStream in = frame.getClass().getClassLoader().getResourceAsStream("icon.png")) {
-						final BufferedImage icon = ImageIO.read(in);
-						frame.setIconImage(icon);
-					}
-					catch (final Exception e) {
-					}
+					// try (InputStream in = frame.getClass().getClassLoader().getResourceAsStream("icon.png")) {
+					// 	final BufferedImage icon = ImageIO.read(in);
+					// 	frame.setIconImage(icon);
+					// }
+					// catch (final Exception e) {
+					// }
 					frame.setVisible(true);
 					
 					frame.localizationManagerImpl.reset();

@@ -15,6 +15,8 @@ import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
+import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
@@ -27,20 +29,25 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	
 	private final static int FONT_SIZE_DEFAULT = 14;
 	
-	private final static Font baseFont;
+	private static Font baseFont;
 	
 	static {
-		Font f;
-		try {
-			f = Font.createFont(Font.TRUETYPE_FONT, ClassLoader.getSystemClassLoader().getResourceAsStream("Roboto-Regular.ttf"));
-		}
-		catch (final Exception e) {
-			final Map<TextAttribute, Object> attributes = new HashMap<>();
-			attributes.put(TextAttribute.FAMILY, Font.SANS_SERIF);
-			attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_SEMIBOLD);
-			f = Font.getFont(attributes);
-		}
-		baseFont = f;
+		final Map<TextAttribute, Object> attributes = new HashMap<>();
+		attributes.put(TextAttribute.FAMILY, Font.SANS_SERIF);
+		attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_SEMIBOLD);
+		baseFont = Font.getFont(attributes);
+	}
+
+	public static void updateDefaultFont(final StaticResourceService staticResourceService, final StaticResource resource) {
+		staticResourceService.loadStreamByPath(resource).ifPresent(stream -> {
+			try (var in = stream) {
+				final var font = Font.createFont(Font.TRUETYPE_FONT, in);
+				G2DDrawFont.baseFont = font;
+			}
+			catch (final Exception e) {
+				LOGGER.warn(e.getMessage(), e);
+			}
+		});
 	}
 	
 	private String text;

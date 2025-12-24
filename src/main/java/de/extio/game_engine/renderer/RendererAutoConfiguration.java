@@ -3,9 +3,7 @@ package de.extio.game_engine.renderer;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.function.Consumer;
 
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -21,6 +19,8 @@ import de.extio.game_engine.renderer.work.RendererWorkingSet;
 import de.extio.game_engine.renderer.work.RendererWorkingSetImpl;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.renderer.work.RenderingBoPoolImpl;
+import de.extio.game_engine.resource.StaticResourceService;
+import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.storage.StorageService;
 
 @AutoConfiguration
@@ -59,9 +59,10 @@ public class RendererAutoConfiguration {
 			final StorageService storageService,
 			final RendererWorkingSet rendererWorkingSet,
 			final ModuleService moduleManager,
-			final ModuleExecutor moduleExecutor) {
+			final ModuleExecutor moduleExecutor,
+			final StaticResourceService staticResourceService) {
 		
-		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, keycodeRegistry, eventService, storageService, rendererWorkingSet, moduleManager, moduleExecutor);
+		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, keycodeRegistry, eventService, storageService, rendererWorkingSet, moduleManager, moduleExecutor, staticResourceService);
 		renderer.setRendererData(rendererData);
 		rendererControl.setRendererData(rendererData);
 		renderingBoPool.setRendererData(rendererData);

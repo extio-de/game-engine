@@ -2,6 +2,7 @@ package de.extio.game_engine.renderer.g2d;
 
 import java.awt.Color;
 import java.awt.EventQueue;
+import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -9,7 +10,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -22,8 +25,10 @@ import org.slf4j.LoggerFactory;
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.Renderer;
 import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.g2d.G2DRenderer.G2DRendererModule;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawBackground;
+import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFpsHistory;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
@@ -32,6 +37,7 @@ import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.TakeScreenshotEvent;
+import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.util.RingBuffer;
 
 public class G2DRenderer implements Renderer {
@@ -65,6 +71,8 @@ public class G2DRenderer implements Renderer {
 	private String title;
 	
 	private volatile boolean takeScreenshot;
+
+	private StaticResource previousDefaultFont = null;
 	
 	public G2DRenderer() {
 		LOGGER.info("ctor");
@@ -140,10 +148,14 @@ public class G2DRenderer implements Renderer {
 				}
 				
 				final var viewPortDimension = this.rendererData.getRendererControl().getAbsoluteViewportDimension();
-				
 				if (viewPortDimension.getX() < 10 || viewPortDimension.getY() < 10) {
 					// Some race condition happens rarely (mainly Windows 11) that window size is not initialized after entering full screen. Put a plaster on it...
 					throw new G2DRendererWindowNotInitializedException();
+				}
+
+				if (this.previousDefaultFont == null && this.rendererData.getUiOptions().getFontResource() != null && !this.rendererData.getUiOptions().getFontResource().equals(this.previousDefaultFont)) {
+					this.previousDefaultFont = this.rendererData.getUiOptions().getFontResource();
+					G2DDrawFont.updateDefaultFont(this.rendererData.getStaticResourceService(), this.rendererData.getUiOptions().getFontResource());
 				}
 				
 				BufferedImage screenshotImg = null;
