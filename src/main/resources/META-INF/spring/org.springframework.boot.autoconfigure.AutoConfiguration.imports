@@ -6,3 +6,4 @@ de.extio.game_engine.storage.StorageServiceAutoConfiguration
 de.extio.game_engine.module.ModuleServiceAutoConfiguration
 de.extio.game_engine.i18n.LocalizationAutoConfiguration
 de.extio.game_engine.resource.StaticResourceAutoConfiguration
+de.extio.game_engine.audio.AudioAutoConfiguration
