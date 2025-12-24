@@ -1,8 +1,6 @@
-package de.extio.game_engine.util;
+package de.extio.game_engine.util.rng;
 
 import java.util.UUID;
-
-import de.extio.game_engine.util.rng.ThreadLocalXorShift128Random;
 
 /**
  * Optimized factory to create a random UUID

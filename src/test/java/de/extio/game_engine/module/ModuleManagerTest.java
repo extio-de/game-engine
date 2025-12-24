@@ -13,7 +13,7 @@ import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
 public class ModuleManagerTest {
 	
-	private ModuleManagerImpl moduleManager;
+	private ModuleServiceImpl moduleManager;
 	
 	private TestModule testModule;
 	
@@ -28,7 +28,7 @@ public class ModuleManagerTest {
 		initialModules.add(this.testModule);
 		initialModules.add(this.testClientModule);
 		
-		this.moduleManager = new ModuleManagerImpl(initialModules, mock(RendererWorkingSet.class));
+		this.moduleManager = new ModuleServiceImpl(initialModules, mock(RendererWorkingSet.class));
 		this.moduleManager.afterPropertiesSet();
 	}
 	
@@ -41,7 +41,7 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testAfterPropertiesSet_EmptyModules() throws Exception {
-		final ModuleManagerImpl emptyManager = new ModuleManagerImpl(List.of(), mock(RendererWorkingSet.class));
+		final ModuleServiceImpl emptyManager = new ModuleServiceImpl(List.of(), mock(RendererWorkingSet.class));
 		emptyManager.afterPropertiesSet();
 		
 		assertTrue(emptyManager.getModulesAll().isEmpty());
@@ -49,7 +49,7 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testAfterPropertiesSet_NullModules() throws Exception {
-		final ModuleManagerImpl nullManager = new ModuleManagerImpl(null, mock(RendererWorkingSet.class));
+		final ModuleServiceImpl nullManager = new ModuleServiceImpl(null, mock(RendererWorkingSet.class));
 		nullManager.afterPropertiesSet();
 		
 		assertTrue(nullManager.getModulesAll().isEmpty());

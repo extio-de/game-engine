@@ -12,9 +12,9 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.util.ObjectSerialization;
 
-public class LocalizationManagerImpl implements LocalizationManager {
+public class LocalizationServiceImpl implements LocalizationService {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationManagerImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationServiceImpl.class);
 	
 	public final static String NOT_FOUND_PREFIX = "{i18n.";
 	

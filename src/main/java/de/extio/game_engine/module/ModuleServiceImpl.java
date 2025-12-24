@@ -16,9 +16,9 @@ import org.springframework.beans.factory.InitializingBean;
 
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
-public class ModuleManagerImpl implements InitializingBean, ModuleManager {
+public class ModuleServiceImpl implements InitializingBean, ModuleService {
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleManagerImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleServiceImpl.class);
 	
 	private final List<AbstractModule> modulesInitial;
 	
@@ -42,7 +42,7 @@ public class ModuleManagerImpl implements InitializingBean, ModuleManager {
 	
 	private final Map<ModuleExecutorCallbacks, List<AbstractModule>> executorCallbackMap = Collections.synchronizedMap(new EnumMap<>(ModuleExecutorCallbacks.class));
 	
-	public ModuleManagerImpl(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
+	public ModuleServiceImpl(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
 		this.modulesInitial = initialModules;
 		this.rendererWorkingSet = rendererWorkingSet;
 	}

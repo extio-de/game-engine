@@ -11,17 +11,17 @@ import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.module.enabled", havingValue = "true", matchIfMissing = true)
-public class ModuleManagerAutoConfiguration {
+public class ModuleServiceAutoConfiguration {
 	
 	@Bean
 	@ConditionalOnMissingBean
-	ModuleManager moduleManager(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
-		return new ModuleManagerImpl(initialModules, rendererWorkingSet);
+	ModuleService moduleManager(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
+		return new ModuleServiceImpl(initialModules, rendererWorkingSet);
 	}
 	
 	@Bean
 	@ConditionalOnMissingBean
-	ModuleExecutor moduleExecutor(final ModuleManager moduleManager) {
+	ModuleExecutor moduleExecutor(final ModuleService moduleManager) {
 		return new ModuleExecutorImpl(moduleManager);
 	}
 	

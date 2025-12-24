@@ -3,7 +3,7 @@ package de.extio.game_engine.i18n;
 import java.io.InputStream;
 import java.util.List;
 
-public interface LocalizationManager {
+public interface LocalizationService {
 	
 	void resetEntries();
 	

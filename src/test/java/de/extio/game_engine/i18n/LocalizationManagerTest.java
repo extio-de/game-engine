@@ -16,11 +16,11 @@ import org.junit.jupiter.api.Test;
 
 class LocalizationManagerTest {
 	
-	private LocalizationManager localizationManager;
+	private LocalizationService localizationManager;
 	
 	@BeforeEach
 	void setUp() {
-		this.localizationManager = new LocalizationManagerImpl();
+		this.localizationManager = new LocalizationServiceImpl();
 	}
 	
 	@Test
@@ -153,7 +153,7 @@ class LocalizationManagerTest {
 		
 		String result = this.localizationManager.translate(999);
 		
-		assertTrue(result.startsWith(LocalizationManagerImpl.NOT_FOUND_PREFIX));
+		assertTrue(result.startsWith(LocalizationServiceImpl.NOT_FOUND_PREFIX));
 	}
 	
 	@Test
@@ -192,7 +192,7 @@ class LocalizationManagerTest {
 		
 		String result = this.localizationManager.translate("unknown");
 		
-		assertTrue(result.startsWith(LocalizationManagerImpl.NOT_FOUND_PREFIX));
+		assertTrue(result.startsWith(LocalizationServiceImpl.NOT_FOUND_PREFIX));
 	}
 	
 	@Test

@@ -12,9 +12,9 @@ public class ModuleExecutorImpl implements ModuleExecutor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleExecutorImpl.class);
 	
-	private final ModuleManager moduleManager;
+	private final ModuleService moduleManager;
 	
-	public ModuleExecutorImpl(final ModuleManager moduleManager) {
+	public ModuleExecutorImpl(final ModuleService moduleManager) {
 		this.moduleManager = moduleManager;
 	}
 	

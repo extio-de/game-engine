@@ -4,6 +4,8 @@ import java.util.UUID;
 
 import org.junit.jupiter.api.Test;
 
+import de.extio.game_engine.util.rng.FastRandomUUID;
+
 public class FastRandomUUIDTest {
 	
 	@Test

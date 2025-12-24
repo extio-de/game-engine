@@ -12,12 +12,12 @@ import org.springframework.context.annotation.Bean;
 @ConditionalOnProperty(name = "game-engine.i18n.enabled", havingValue = "true", matchIfMissing = true)
 public class LocalizationAutoConfiguration {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationManagerImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(LocalizationServiceImpl.class);
 
 	@Bean
 	@ConditionalOnMissingBean
-	LocalizationManager localizationManager(@Value("${game-engine.i18n.load-on-start:true}") final boolean loadOnStart, @Value("${game-engine.i18n.resource:i18n.yaml}") final String resource) {
-		final var localizationManager = new LocalizationManagerImpl();
+	LocalizationService localizationManager(@Value("${game-engine.i18n.load-on-start:true}") final boolean loadOnStart, @Value("${game-engine.i18n.resource:i18n.yaml}") final String resource) {
+		final var localizationManager = new LocalizationServiceImpl();
 		
 		if (loadOnStart) {
 			try (var resourceStream = LocalizationAutoConfiguration.class.getClassLoader().getResourceAsStream(resource)) {

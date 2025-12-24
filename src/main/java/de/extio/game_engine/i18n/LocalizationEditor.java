@@ -49,7 +49,7 @@ import de.extio.game_engine.util.ObjectSerialization;
 @SuppressWarnings("serial")
 public class LocalizationEditor extends JFrame {
 	
-	private LocalizationManagerImpl localizationManagerImpl;
+	private LocalizationServiceImpl localizationManagerImpl;
 	
 	private String lastFileName;
 	
@@ -140,7 +140,7 @@ public class LocalizationEditor extends JFrame {
 	 * Create the frame.
 	 */
 	public LocalizationEditor() {
-		this.localizationManagerImpl = new LocalizationManagerImpl();
+		this.localizationManagerImpl = new LocalizationServiceImpl();
 		
 		this.setTitle("i18n Editor");
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

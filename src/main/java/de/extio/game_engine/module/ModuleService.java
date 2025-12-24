@@ -2,7 +2,7 @@ package de.extio.game_engine.module;
 
 import java.util.List;
 
-public interface ModuleManager {
+public interface ModuleService {
 	
 	void loadModule(Class<? extends AbstractModule> clazz);
 	

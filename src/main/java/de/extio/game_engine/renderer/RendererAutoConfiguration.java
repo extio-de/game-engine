@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Bean;
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.module.ModuleExecutor;
-import de.extio.game_engine.module.ModuleManager;
+import de.extio.game_engine.module.ModuleService;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 import de.extio.game_engine.renderer.work.RendererWorkingSetImpl;
@@ -58,7 +58,7 @@ public class RendererAutoConfiguration {
 			final EventService eventService,
 			final StorageService storageService,
 			final RendererWorkingSet rendererWorkingSet,
-			final ModuleManager moduleManager,
+			final ModuleService moduleManager,
 			final ModuleExecutor moduleExecutor) {
 		
 		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, keycodeRegistry, eventService, storageService, rendererWorkingSet, moduleManager, moduleExecutor);

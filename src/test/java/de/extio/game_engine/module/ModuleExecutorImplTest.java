@@ -14,7 +14,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 public class ModuleExecutorImplTest {
 
 	@Mock
-	private ModuleManager moduleManager;
+	private ModuleService moduleManager;
 
 	private ModuleExecutorImpl moduleExecutor;
 
