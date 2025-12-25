@@ -355,7 +355,7 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
-		public void closeStatic() {
+		public void staticCleanupAfterFrame() {
 		}
 
 		@Override
@@ -507,7 +507,7 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
-		public void closeStatic() {
+		public void staticCleanupAfterFrame() {
 		}
 
 		@Override
