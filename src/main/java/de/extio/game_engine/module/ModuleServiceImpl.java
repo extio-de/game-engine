@@ -97,7 +97,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 		synchronized (this.modulesAll) {
 			this.modulesAllView = List.copyOf(this.modulesAll);
 		}
-		LOGGER.info("Loaded module " + module.getClass().getName());
+		LOGGER.debug("Loaded module " + module.getClass().getName());
 		this.invokeSafe(module, m -> m.onLoad());
 	}
 	
@@ -124,7 +124,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 				this.rendererWorkingSet.clear(clientModule.getId());
 			}
 			
-			LOGGER.info("Unloaded module " + id);
+			LOGGER.debug("Unloaded module " + id);
 		}
 		catch (final Exception e) {
 			LOGGER.error("Error unloading module " + id, e);
@@ -163,7 +163,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 						}
 						this.invokeSafe(module, AbstractModule::onDeactivate);
 						
-						LOGGER.info("Deactivated " + id);
+						LOGGER.debug("Deactivated " + id);
 					}
 				}, () -> {
 					if (active) {
@@ -191,7 +191,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 							}
 							this.invokeSafe(module, AbstractModule::onActivate);
 							
-							LOGGER.info("Activated " + id);
+							LOGGER.debug("Activated " + id);
 						}
 					}
 				});
@@ -216,13 +216,13 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 				if (doDisplay && !curDisplayed) {
 					this.modulesDisplayed.add(clientModule);
 					clientModule.setDisplayed(true);
-					LOGGER.info("Displayed {}", id);
+					LOGGER.debug("Displayed {}", id);
 					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onShow());
 				}
 				else if (!doDisplay && curDisplayed) {
 					clientModule.setDisplayed(false);
 					this.modulesDisplayed.removeIf(mod -> mod.getId().equals(id));
-					LOGGER.info("Hidden {}", id);
+					LOGGER.debug("Hidden {}", id);
 					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onHide());
 				}
 				this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);
