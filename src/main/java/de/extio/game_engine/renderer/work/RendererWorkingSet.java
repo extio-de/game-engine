@@ -4,23 +4,22 @@ import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
 
-import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.model.RenderingBo;
 
 public interface RendererWorkingSet {
 	
-	void add(Class<? extends AbstractClientModule> producer, RenderingBo work);
+	void add(String producerId, RenderingBo work);
 	
-	void add(Class<? extends AbstractClientModule> producer, List<RenderingBo> work);
+	void add(String producerId, List<RenderingBo> work);
 
-	RenderingBo get(Class<? extends AbstractClientModule> producer, String id);
+	RenderingBo get(String producerId, String id);
 	
-	Map<String, RenderingBo> getUncommittedWork(Class<? extends AbstractClientModule> producer);
+	Map<String, RenderingBo> getUncommittedWork(String producerId);
 	
-	Map<String, RenderingBo> commit(Class<? extends AbstractClientModule> producer, boolean clone);
+	Map<String, RenderingBo> commit(String producerId, boolean clone);
 	
-	void clear(Class<? extends AbstractClientModule> producer);
+	void clear(String producerId);
 
-	void getLiveSet(List<RenderingBo> combinedLiveSet, Predicate<Class<? extends AbstractClientModule>> filter);
+	void getLiveSet(List<RenderingBo> combinedLiveSet, Predicate<String> filter);
 	
 }

@@ -56,6 +56,8 @@ public class G2DRenderer implements Renderer {
 	
 	private volatile G2DMainFrame mainFrame;
 	
+	private String rendererModuleId;
+	
 	private RendererData rendererData;
 	
 	private long fpsMeasurement;
@@ -71,7 +73,7 @@ public class G2DRenderer implements Renderer {
 	private String title;
 	
 	private volatile boolean takeScreenshot;
-
+	
 	private StaticResource previousDefaultFont = null;
 	
 	public G2DRenderer() {
@@ -89,10 +91,12 @@ public class G2DRenderer implements Renderer {
 	public void show() {
 		try {
 			LOGGER.info("show()");
-
-			this.rendererData.getModuleManager().loadModule(G2DRendererModule.class);
-			this.rendererData.getModuleManager().changeActiveState(G2DRendererModule.class, true);
-			this.rendererData.getModuleManager().changeDisplayState(G2DRendererModule.class, true);
+			
+			final var rendererModule = new G2DRendererModule();
+			this.rendererModuleId = rendererModule.getId();
+			this.rendererData.getModuleService().loadModule(rendererModule);
+			this.rendererData.getModuleService().changeActiveState(rendererModule.getId(), true);
+			this.rendererData.getModuleService().changeDisplayState(rendererModule.getId(), true);
 			
 			EventQueue.invokeAndWait(() -> {
 				this.rendererData.getRendererControl().applyVideoOptions();
@@ -100,8 +104,8 @@ public class G2DRenderer implements Renderer {
 			EventQueue.invokeAndWait(() -> {
 				// this invokeAndWait() call is also important to wait until applyVideoOptions() has been completed, which also puts events to AWT event queue
 				LOGGER.debug("Viewport initialized");
-				this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
-				this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_tooltip", G2DDrawControlTooltip.class));
+				this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
+				this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_tooltip", G2DDrawControlTooltip.class));
 			});
 		}
 		catch (InvocationTargetException | InterruptedException e) {
@@ -152,7 +156,7 @@ public class G2DRenderer implements Renderer {
 					// Some race condition happens rarely (mainly Windows 11) that window size is not initialized after entering full screen. Put a plaster on it...
 					throw new G2DRendererWindowNotInitializedException();
 				}
-
+				
 				if (this.previousDefaultFont == null && this.rendererData.getUiOptions().getFontResource() != null && !this.rendererData.getUiOptions().getFontResource().equals(this.previousDefaultFont)) {
 					this.previousDefaultFont = this.rendererData.getUiOptions().getFontResource();
 					G2DDrawFont.updateDefaultFont(this.rendererData.getStaticResourceService(), this.rendererData.getUiOptions().getFontResource());
@@ -169,8 +173,8 @@ public class G2DRenderer implements Renderer {
 				}
 				
 				this.drawStatistics();
-				this.rendererData.getRendererWorkingSet().commit(G2DRendererModule.class, true);
-				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs, clientModuleClass -> this.rendererData.getModuleManager().isDisplayed(clientModuleClass));
+				this.rendererData.getRendererWorkingSet().commit(this.rendererModuleId, true);
+				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs, this.rendererData.getModuleService()::isDisplayed);
 				this.renderingBOs.sort((bo0, bo1) -> bo0.getLayer().compareTo(bo1.getLayer()));
 				
 				Graphics2D screenGraphics = null;
@@ -195,7 +199,7 @@ public class G2DRenderer implements Renderer {
 						}
 					}
 					
-					this.rendererData.getRendererWorkingSet().get(G2DRendererModule.class, "G2DRenderer_tooltip").closeStatic();
+					this.rendererData.getRendererWorkingSet().get(this.rendererModuleId, "G2DRenderer_tooltip").closeStatic();
 					
 					//
 					// Rendering cycle END
@@ -251,14 +255,14 @@ public class G2DRenderer implements Renderer {
 				.setColor(RgbaColor.WHITE)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 35);
-		this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, drawFont);
+		this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, drawFont);
 		
 		this.fpsHistory.add(Integer.valueOf((int) this.frameDur));
 		final var drawFpsHistory = this.rendererData.getRenderingBoPool().acquire("g2DRenderer_fpsHistory", G2DDrawFpsHistory.class)
 				.setHistory(this.fpsHistory)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 50);
-		this.rendererData.getRendererWorkingSet().add(G2DRendererModule.class, drawFpsHistory);
+		this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, drawFpsHistory);
 	}
 	
 	private void frameCap() throws InterruptedException {

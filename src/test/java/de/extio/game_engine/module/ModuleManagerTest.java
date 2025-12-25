@@ -71,7 +71,8 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testLoadModule() {
-		this.moduleManager.loadModule(AlwaysDisplayModule.class);
+		final var newModule = new AlwaysDisplayModule();
+		this.moduleManager.loadModule(newModule);
 		
 		assertEquals(3, this.moduleManager.getModulesAll().size());
 		assertTrue(this.moduleManager.getModulesAll().stream().anyMatch(m -> m instanceof AlwaysDisplayModule));
@@ -81,14 +82,14 @@ public class ModuleManagerTest {
 	public void testLoadModule_AlreadyLoaded() {
 		final int initialSize = this.moduleManager.getModulesAll().size();
 		
-		this.moduleManager.loadModule(TestModule.class);
+		this.moduleManager.loadModule(this.testModule);
 		
 		assertEquals(initialSize, this.moduleManager.getModulesAll().size());
 	}
 	
 	@Test
 	public void testUnloadModule() {
-		this.moduleManager.unloadModule(TestModule.class);
+		this.moduleManager.unloadModule(this.testModule.getId());
 		
 		assertEquals(1, this.moduleManager.getModulesAll().size());
 		assertFalse(this.moduleManager.getModulesAll().contains(this.testModule));
@@ -99,17 +100,17 @@ public class ModuleManagerTest {
 	public void testUnloadModule_NotLoaded() {
 		final int initialSize = this.moduleManager.getModulesAll().size();
 		
-		this.moduleManager.unloadModule(AlwaysDisplayModule.class);
+		this.moduleManager.unloadModule("NonExistentModule");
 		
 		assertEquals(initialSize, this.moduleManager.getModulesAll().size());
 	}
 	
 	@Test
 	public void testUnloadModule_DeactivatesFirst() {
-		this.moduleManager.changeActiveState(TestModule.class, true);
+		this.moduleManager.changeActiveState(this.testModule.getId(), true);
 		assertTrue(this.moduleManager.getModulesActive().contains(this.testModule));
 		
-		this.moduleManager.unloadModule(TestModule.class);
+		this.moduleManager.unloadModule(this.testModule.getId());
 		
 		assertFalse(this.moduleManager.getModulesActive().contains(this.testModule));
 		assertTrue(this.testModule.onDeactivateCalled);
@@ -117,7 +118,7 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testChangeActiveState_Activate() {
-		this.moduleManager.changeActiveState(TestModule.class, true);
+		this.moduleManager.changeActiveState(this.testModule.getId(), true);
 		
 		assertTrue(this.moduleManager.getModulesActive().contains(this.testModule));
 		assertTrue(this.testModule.onActivateCalled);
@@ -125,10 +126,10 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testChangeActiveState_Deactivate() {
-		this.moduleManager.changeActiveState(TestModule.class, true);
+		this.moduleManager.changeActiveState(this.testModule.getId(), true);
 		this.testModule.onActivateCalled = false;
 		
-		this.moduleManager.changeActiveState(TestModule.class, false);
+		this.moduleManager.changeActiveState(this.testModule.getId(), false);
 		
 		assertFalse(this.moduleManager.getModulesActive().contains(this.testModule));
 		assertTrue(this.testModule.onDeactivateCalled);
@@ -136,42 +137,35 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testChangeActiveState_AlreadyActive() {
-		this.moduleManager.changeActiveState(TestModule.class, true);
+		this.moduleManager.changeActiveState(this.testModule.getId(), true);
 		this.testModule.onActivateCalled = false;
 		
-		this.moduleManager.changeActiveState(TestModule.class, true);
+		this.moduleManager.changeActiveState(this.testModule.getId(), true);
 		
 		assertFalse(this.testModule.onActivateCalled);
 	}
 	
 	@Test
 	public void testChangeActiveState_AlreadyInactive() {
-		this.moduleManager.changeActiveState(TestModule.class, false);
+		this.moduleManager.changeActiveState(this.testModule.getId(), false);
 		
 		assertFalse(this.testModule.onDeactivateCalled);
 	}
 	
 	@Test
-	public void testChangeActiveState_ByClassName() {
-		this.moduleManager.changeActiveState(TestModule.class.getName(), true);
-		
-		assertTrue(this.moduleManager.getModulesActive().contains(this.testModule));
-		assertTrue(this.testModule.onActivateCalled);
-	}
-	
-	@Test
 	public void testChangeActiveState_AlwaysDisplayModule() {
-		this.moduleManager.loadModule(AlwaysDisplayModule.class);
+		final var alwaysDisplayModule = new AlwaysDisplayModule();
+		this.moduleManager.loadModule(alwaysDisplayModule);
 		
-		this.moduleManager.changeActiveState(AlwaysDisplayModule.class, true);
+		this.moduleManager.changeActiveState(alwaysDisplayModule.getId(), true);
 		
-		assertTrue(this.moduleManager.isDisplayed(AlwaysDisplayModule.class));
+		assertTrue(this.moduleManager.isDisplayed(alwaysDisplayModule.getId()));
 	}
 	
 	@Test
 	public void testDeactivateAll() {
-		this.moduleManager.changeActiveState(TestModule.class, true);
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testModule.getId(), true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
 		
 		this.moduleManager.deactivateAll();
 		
@@ -182,34 +176,34 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testChangeDisplayState_Show() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
 		this.testClientModule.onShowCalled = false;
 		
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		
-		assertTrue(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertTrue(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 		assertTrue(this.testClientModule.onShowCalled);
 	}
 	
 	@Test
 	public void testChangeDisplayState_Hide() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		this.testClientModule.onHideCalled = false;
 		
-		this.moduleManager.changeDisplayState(TestClientModule.class, false);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), false);
 		
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 		assertTrue(this.testClientModule.onHideCalled);
 	}
 	
 	@Test
 	public void testChangeDisplayState_AlreadyShown() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		this.testClientModule.onShowCalled = false;
 		
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		
 		assertFalse(this.testClientModule.onShowCalled, "onShow should not be called when already shown");
 	}
@@ -218,111 +212,98 @@ public class ModuleManagerTest {
 	public void testChangeDisplayState_AlreadyHidden() {
 		this.testClientModule.onHideCalled = false;
 		
-		this.moduleManager.changeDisplayState(TestClientModule.class, false);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), false);
 		
 		assertFalse(this.testClientModule.onHideCalled, "onHide should not be called when already hidden");
 	}
 	
 	@Test
-	public void testChangeDisplayState_ByClassName() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.testClientModule.onShowCalled = false;
-		
-		this.moduleManager.changeDisplayState(TestClientModule.class.getName(), true);
-		
-		assertTrue(this.moduleManager.isDisplayed(TestClientModule.class));
-	}
-	
-	@Test
 	public void testChangeDisplayState_AlwaysDisplayModule() {
-		this.moduleManager.loadModule(AlwaysDisplayModule.class);
-		this.moduleManager.changeActiveState(AlwaysDisplayModule.class, true);
+		final var alwaysDisplayModule = new AlwaysDisplayModule();
+		this.moduleManager.loadModule(alwaysDisplayModule);
+		this.moduleManager.changeActiveState(alwaysDisplayModule.getId(), true);
 		
-		this.moduleManager.changeDisplayState(AlwaysDisplayModule.class, false);
+		this.moduleManager.changeDisplayState(alwaysDisplayModule.getId(), false);
 		
-		assertTrue(this.moduleManager.isDisplayed(AlwaysDisplayModule.class));
-	}
-	
-	@Test
-	public void testIsDisplayed_ByClassName() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
-		
-		assertTrue(this.moduleManager.isDisplayed(TestClientModule.class.getName()));
+		assertTrue(this.moduleManager.isDisplayed(alwaysDisplayModule.getId()));
 	}
 	
 	@Test
 	public void testHideAll() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		this.testClientModule.onHideCalled = false;
 		
 		this.moduleManager.hideAll();
 		
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 		assertTrue(this.testClientModule.onHideCalled);
 	}
 	
 	@Test
 	public void testHideAll_DoesNotHideAlwaysDisplay() {
-		this.moduleManager.loadModule(AlwaysDisplayModule.class);
-		this.moduleManager.changeActiveState(AlwaysDisplayModule.class, true);
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		final var alwaysDisplayModule = new AlwaysDisplayModule();
+		this.moduleManager.loadModule(alwaysDisplayModule);
+		this.moduleManager.changeActiveState(alwaysDisplayModule.getId(), true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		
 		this.moduleManager.hideAll();
 		
-		assertTrue(this.moduleManager.isDisplayed(AlwaysDisplayModule.class));
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertTrue(this.moduleManager.isDisplayed(alwaysDisplayModule.getId()));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 	}
 	
 	@Test
 	public void testHideExcept() {
-		this.moduleManager.loadModule(AlwaysDisplayModule.class);
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
-		this.moduleManager.changeActiveState(AlwaysDisplayModule.class, true);
+		final var alwaysDisplayModule = new AlwaysDisplayModule();
+		this.moduleManager.loadModule(alwaysDisplayModule);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
+		this.moduleManager.changeActiveState(alwaysDisplayModule.getId(), true);
 		this.testClientModule.onHideCalled = false;
 		
-		this.moduleManager.hideExcept(AlwaysDisplayModule.class.getName());
+		this.moduleManager.hideExcept(alwaysDisplayModule.getId());
 		
-		assertTrue(this.moduleManager.isDisplayed(AlwaysDisplayModule.class));
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertTrue(this.moduleManager.isDisplayed(alwaysDisplayModule.getId()));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 		assertTrue(this.testClientModule.onHideCalled);
 	}
 	
 	@Test
 	public void testHideExcept_MultipleExceptions() {
-		this.moduleManager.loadModule(AlwaysDisplayModule.class);
-		this.moduleManager.loadModule(HighPriorityModule.class);
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
-		this.moduleManager.changeActiveState(AlwaysDisplayModule.class, true);
-		this.moduleManager.changeActiveState(HighPriorityModule.class, true);
-		this.moduleManager.changeDisplayState(HighPriorityModule.class, true);
+		final var alwaysDisplayModule = new AlwaysDisplayModule();
+		final var highPriorityModule = new HighPriorityModule();
+		this.moduleManager.loadModule(alwaysDisplayModule);
+		this.moduleManager.loadModule(highPriorityModule);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
+		this.moduleManager.changeActiveState(alwaysDisplayModule.getId(), true);
+		this.moduleManager.changeActiveState(highPriorityModule.getId(), true);
+		this.moduleManager.changeDisplayState(highPriorityModule.getId(), true);
 		
 		this.moduleManager.hideExcept(
-				AlwaysDisplayModule.class.getName(),
-				HighPriorityModule.class.getName()
+				alwaysDisplayModule.getId(),
+				highPriorityModule.getId()
 		);
 		
-		assertTrue(this.moduleManager.isDisplayed(AlwaysDisplayModule.class));
-		assertTrue(this.moduleManager.isDisplayed(HighPriorityModule.class));
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertTrue(this.moduleManager.isDisplayed(alwaysDisplayModule.getId()));
+		assertTrue(this.moduleManager.isDisplayed(highPriorityModule.getId()));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 	}
 	
 	@Test
 	public void testRestoreVisibility() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		
 		this.moduleManager.hideExcept();
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 		this.testClientModule.onShowCalled = false;
 		
 		this.moduleManager.restoreVisibility();
 		
-		assertTrue(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertTrue(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 		assertTrue(this.testClientModule.onShowCalled);
 	}
 	
@@ -330,15 +311,15 @@ public class ModuleManagerTest {
 	public void testRestoreVisibility_NoState() {
 		this.moduleManager.restoreVisibility();
 		
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 	}
 	
 	@Test
 	public void testIsModal() {
 		assertFalse(this.moduleManager.isModal());
 		
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		this.moduleManager.hideExcept();
 		
 		assertTrue(this.moduleManager.isModal());
@@ -350,7 +331,8 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testModuleSorting_Priority() {
-		this.moduleManager.loadModule(HighPriorityModule.class);
+		final var highPriorityModule = new HighPriorityModule();
+		this.moduleManager.loadModule(highPriorityModule);
 		
 		final List<AbstractModule> modules = this.moduleManager.getModulesAll();
 		
@@ -385,20 +367,20 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testDeactivate_HidesDisplayedClientModule() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		this.testClientModule.onHideCalled = false;
 		
-		this.moduleManager.changeActiveState(TestClientModule.class, false);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), false);
 		
-		assertFalse(this.moduleManager.isDisplayed(TestClientModule.class));
+		assertFalse(this.moduleManager.isDisplayed(this.testClientModule.getId()));
 		assertTrue(this.testClientModule.onHideCalled);
 	}
 	
 	@Test
 	public void testDeactivateAll_ClearsVisibilityStack() {
-		this.moduleManager.changeActiveState(TestClientModule.class, true);
-		this.moduleManager.changeDisplayState(TestClientModule.class, true);
+		this.moduleManager.changeActiveState(this.testClientModule.getId(), true);
+		this.moduleManager.changeDisplayState(this.testClientModule.getId(), true);
 		this.moduleManager.hideExcept();
 		
 		assertTrue(this.moduleManager.isModal());
@@ -417,8 +399,9 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testGetSubscribersForCallback_WithSubscriber() {
-		this.moduleManager.loadModule(CallbackSubscriberModule.class);
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		final var callbackSubscriberModule = new CallbackSubscriberModule();
+		this.moduleManager.loadModule(callbackSubscriberModule);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), true);
 		
 		final List<AbstractModule> subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
 		
@@ -428,8 +411,9 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testGetSubscribersForCallback_MultipleCallbacks() {
-		this.moduleManager.loadModule(MultiCallbackSubscriberModule.class);
-		this.moduleManager.changeActiveState(MultiCallbackSubscriberModule.class, true);
+		final var multiCallbackSubscriberModule = new MultiCallbackSubscriberModule();
+		this.moduleManager.loadModule(multiCallbackSubscriberModule);
+		this.moduleManager.changeActiveState(multiCallbackSubscriberModule.getId(), true);
 		
 		final List<AbstractModule> uiPreSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
 		final List<AbstractModule> runSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.RUN);
@@ -446,8 +430,9 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testGetSubscribersForCallback_UnsubscribedCallbackEmpty() {
-		this.moduleManager.loadModule(CallbackSubscriberModule.class);
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		final var callbackSubscriberModule = new CallbackSubscriberModule();
+		this.moduleManager.loadModule(callbackSubscriberModule);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), true);
 		
 		final List<AbstractModule> runSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.RUN);
 		
@@ -456,13 +441,14 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testGetSubscribersForCallback_RemovedOnDeactivate() {
-		this.moduleManager.loadModule(CallbackSubscriberModule.class);
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		final var callbackSubscriberModule = new CallbackSubscriberModule();
+		this.moduleManager.loadModule(callbackSubscriberModule);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), true);
 		
 		List<AbstractModule> subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
 		assertEquals(1, subscribers.size());
 		
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, false);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), false);
 		
 		subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
 		assertTrue(subscribers.isEmpty());
@@ -470,10 +456,12 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testGetSubscribersForCallback_MultipleModules() {
-		this.moduleManager.loadModule(CallbackSubscriberModule.class);
-		this.moduleManager.loadModule(MultiCallbackSubscriberModule.class);
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
-		this.moduleManager.changeActiveState(MultiCallbackSubscriberModule.class, true);
+		final var callbackSubscriberModule = new CallbackSubscriberModule();
+		final var multiCallbackSubscriberModule = new MultiCallbackSubscriberModule();
+		this.moduleManager.loadModule(callbackSubscriberModule);
+		this.moduleManager.loadModule(multiCallbackSubscriberModule);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), true);
+		this.moduleManager.changeActiveState(multiCallbackSubscriberModule.getId(), true);
 		
 		final List<AbstractModule> uiPreSubscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
 		
@@ -484,14 +472,15 @@ public class ModuleManagerTest {
 	
 	@Test
 	public void testGetSubscribersForCallback_ReactivateModule() {
-		this.moduleManager.loadModule(CallbackSubscriberModule.class);
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, false);
+		final var callbackSubscriberModule = new CallbackSubscriberModule();
+		this.moduleManager.loadModule(callbackSubscriberModule);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), true);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), false);
 		
 		List<AbstractModule> subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
 		assertTrue(subscribers.isEmpty());
 		
-		this.moduleManager.changeActiveState(CallbackSubscriberModule.class, true);
+		this.moduleManager.changeActiveState(callbackSubscriberModule.getId(), true);
 		
 		subscribers = this.moduleManager.getSubscribersForCallback(ModuleExecutorCallbacks.UI_PRE);
 		assertEquals(1, subscribers.size());

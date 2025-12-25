@@ -4,9 +4,9 @@ import java.util.List;
 
 public interface ModuleService {
 	
-	void loadModule(Class<? extends AbstractModule> clazz);
+	void loadModule(AbstractModule module);
 	
-	void unloadModule(Class<? extends AbstractModule> clazz);
+	void unloadModule(String id);
 	
 	List<AbstractModule> getModulesAll();
 	
@@ -16,23 +16,17 @@ public interface ModuleService {
 	
 	List<AbstractClientModule> getModulesDisplayedClientModules();
 	
-	void changeActiveState(String className, boolean active);
-	
-	void changeActiveState(Class<? extends AbstractModule> clazz, boolean active);
+	void changeActiveState(String id, boolean active);
 	
 	void deactivateAll();
 	
-	void changeDisplayState(String className, boolean active);
+	void changeDisplayState(String id, boolean display);
 	
-	void changeDisplayState(Class<? extends AbstractClientModule> clazz, boolean display);
-	
-	boolean isDisplayed(String className);
-	
-	boolean isDisplayed(Class<? extends AbstractClientModule> clazz);
+	boolean isDisplayed(String id);
 	
 	void hideAll();
 	
-	void hideExcept(String... classNames);
+	void hideExcept(String... ids);
 	
 	void restoreVisibility();
 	

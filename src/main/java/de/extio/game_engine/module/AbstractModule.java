@@ -12,10 +12,16 @@ public abstract class AbstractModule {
 	
 	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractModule.class);
 	
+	protected String id = "Module_" + System.identityHashCode(this);
+	
 	private ModuleService moduleService;
 	
 	public AbstractModule() {
 		
+	}
+	
+	public String getId() {
+		return this.id;
 	}
 	
 	public void onLoad() {
@@ -46,7 +52,7 @@ public abstract class AbstractModule {
 		return moduleService;
 	}
 	
-	public void setModuleService(ModuleService moduleService) {
+	public void setModuleService(final ModuleService moduleService) {
 		this.moduleService = moduleService;
 	}
 	

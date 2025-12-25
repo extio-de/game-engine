@@ -32,19 +32,28 @@ public class RendererWorkingSetImplTest {
 	
 	private RenderingBoPool renderingBoPool;
 	
+	private TestModuleA moduleA;
+	
+	private TestModuleB moduleB;
+	
+	private TestModuleC moduleC;
+	
 	@BeforeEach
 	void setUp() {
 		this.renderingBoPool = mock(RenderingBoPool.class);
 		this.workingSet = new RendererWorkingSetImpl(this.renderingBoPool);
+		this.moduleA = new TestModuleA();
+		this.moduleB = new TestModuleB();
+		this.moduleC = new TestModuleC();
 	}
 	
 	@Test
 	void addSingleAddsToUncommittedWork() {
 		final RenderingBo bo1 = mock(RenderingBo.class);
 		when(bo1.getId()).thenReturn("bo1");
-		this.workingSet.add(TestModuleA.class, bo1);
+		this.workingSet.add(this.moduleA.getId(), bo1);
 		
-		final var uncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
+		final var uncommitted = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		assertNotNull(uncommitted);
 		assertEquals(Map.of("bo1", bo1), uncommitted);
 	}
@@ -56,9 +65,9 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add(TestModuleA.class, List.of(bo1, bo2));
+		this.workingSet.add(this.moduleA.getId(), List.of(bo1, bo2));
 		
-		final var uncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
+		final var uncommitted = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		assertEquals(Map.of("bo1", bo1, "bo2", bo2), uncommitted);
 	}
 	
@@ -69,11 +78,11 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.add(TestModuleA.class, bo2);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.add(this.moduleA.getId(), bo2);
 		
-		final var returnedUncommitted = this.workingSet.commit(TestModuleA.class, false);
-		final var currentUncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
+		final var returnedUncommitted = this.workingSet.commit(this.moduleA.getId(), false);
+		final var currentUncommitted = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		
 		assertSame(currentUncommitted, returnedUncommitted);
 		assertTrue(currentUncommitted.isEmpty());
@@ -93,11 +102,11 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo3 = mock(RenderingBo.class);
 		when(bo3.getId()).thenReturn("bo3");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.add(TestModuleA.class, bo2);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.add(this.moduleA.getId(), bo2);
 		
-		final var returnedUncommitted = this.workingSet.commit(TestModuleA.class, true);
-		final var currentUncommitted = this.workingSet.getUncommittedWork(TestModuleA.class);
+		final var returnedUncommitted = this.workingSet.commit(this.moduleA.getId(), true);
+		final var currentUncommitted = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		
 		assertSame(currentUncommitted, returnedUncommitted);
 		assertEquals(Map.of("bo1", bo1, "bo2", bo2), currentUncommitted);
@@ -107,7 +116,7 @@ public class RendererWorkingSetImplTest {
 		assertEquals(2, live.size());
 		assertTrue(live.containsAll(List.of(bo1, bo2)));
 		
-		this.workingSet.add(TestModuleA.class, bo3);
+		this.workingSet.add(this.moduleA.getId(), bo3);
 		final List<RenderingBo> liveAfterAdd = new ArrayList<>();
 		this.workingSet.getLiveSet(liveAfterAdd, null);
 		assertEquals(2, liveAfterAdd.size());
@@ -123,12 +132,12 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo3 = mock(RenderingBo.class);
 		when(bo3.getId()).thenReturn("bo3");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.add(TestModuleA.class, bo2);
-		this.workingSet.add(TestModuleB.class, bo3);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.add(this.moduleA.getId(), bo2);
+		this.workingSet.add(this.moduleB.getId(), bo3);
 		
-		this.workingSet.commit(TestModuleA.class, false);
-		this.workingSet.commit(TestModuleB.class, false);
+		this.workingSet.commit(this.moduleA.getId(), false);
+		this.workingSet.commit(this.moduleB.getId(), false);
 		
 		final List<RenderingBo> live = new ArrayList<>();
 		this.workingSet.getLiveSet(live, null);
@@ -138,7 +147,7 @@ public class RendererWorkingSetImplTest {
 	
 	@Test
 	void commitOnUnknownProducerCreatesEmptyState() {
-		final var returnedUncommitted = this.workingSet.commit(TestModuleC.class, false);
+		final var returnedUncommitted = this.workingSet.commit(this.moduleC.getId(), false);
 		assertNotNull(returnedUncommitted);
 		assertTrue(returnedUncommitted.isEmpty());
 		
@@ -154,24 +163,24 @@ public class RendererWorkingSetImplTest {
 		final var bo2 = new TestBoB();
 		bo2.setId("bo2");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.commit(TestModuleA.class, false);
-		this.workingSet.add(TestModuleA.class, bo2);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.commit(this.moduleA.getId(), false);
+		this.workingSet.add(this.moduleA.getId(), bo2);
 		
 		// Before clear
 		final List<RenderingBo> liveBefore = new ArrayList<>();
 		this.workingSet.getLiveSet(liveBefore, null);
 		assertTrue(liveBefore.contains(bo1));
-		assertNotNull(this.workingSet.get(TestModuleA.class, "bo2"));
+		assertNotNull(this.workingSet.get(this.moduleA.getId(), "bo2"));
 		
-		this.workingSet.clear(TestModuleA.class);
+		this.workingSet.clear(this.moduleA.getId());
 		
 		// After clear
 		final List<RenderingBo> liveAfter = new ArrayList<>();
 		this.workingSet.getLiveSet(liveAfter, null);
 		assertTrue(liveAfter.isEmpty());
 		
-		final var uncommittedAfter = this.workingSet.getUncommittedWork(TestModuleA.class);
+		final var uncommittedAfter = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		assertTrue(uncommittedAfter.isEmpty());
 		
 		verify(this.renderingBoPool, times(1)).release(bo1);
@@ -184,10 +193,10 @@ public class RendererWorkingSetImplTest {
 	void clearOnUnknownProducerDoesNothing() {
 		final RenderingBo bo1 = mock(RenderingBo.class);
 		when(bo1.getId()).thenReturn("bo1");
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.commit(TestModuleA.class, false);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.commit(this.moduleA.getId(), false);
 		
-		this.workingSet.clear(TestModuleC.class);
+		this.workingSet.clear(this.moduleC.getId());
 		
 		final List<RenderingBo> live = new ArrayList<>();
 		this.workingSet.getLiveSet(live, null);
@@ -202,14 +211,14 @@ public class RendererWorkingSetImplTest {
 		final var bo2 = new TestBoA();
 		bo2.setId("bo2");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.add(TestModuleA.class, bo2);
-		this.workingSet.commit(TestModuleA.class, false);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.add(this.moduleA.getId(), bo2);
+		this.workingSet.commit(this.moduleA.getId(), false);
 		
 		final var bo3 = new TestBoB();
 		bo3.setId("bo3");
-		this.workingSet.add(TestModuleA.class, bo3);
-		this.workingSet.commit(TestModuleA.class, false);
+		this.workingSet.add(this.moduleA.getId(), bo3);
+		this.workingSet.commit(this.moduleA.getId(), false);
 		
 		verify(this.renderingBoPool, times(1)).release(bo1);
 		verify(this.renderingBoPool, times(1)).release(bo2);
@@ -227,12 +236,12 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.add(TestModuleA.class, bo2);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.add(this.moduleA.getId(), bo2);
 		
-		final var retrieved1 = this.workingSet.get(TestModuleA.class, "bo1");
-		final var retrieved2 = this.workingSet.get(TestModuleA.class, "bo2");
-		final var notFound = this.workingSet.get(TestModuleA.class, "nonexistent");
+		final var retrieved1 = this.workingSet.get(this.moduleA.getId(), "bo1");
+		final var retrieved2 = this.workingSet.get(this.moduleA.getId(), "bo2");
+		final var notFound = this.workingSet.get(this.moduleA.getId(), "nonexistent");
 		
 		assertSame(bo1, retrieved1);
 		assertSame(bo2, retrieved2);
@@ -246,16 +255,16 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		this.workingSet.add(TestModuleA.class, bo2);
-		final var committedWork = this.workingSet.commit(TestModuleA.class, false);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		this.workingSet.add(this.moduleA.getId(), bo2);
+		final var committedWork = this.workingSet.commit(this.moduleA.getId(), false);
 		
 		// After commit without clone, the uncommitted work should be empty
 		assertTrue(committedWork.isEmpty());
 		
 		// get() only retrieves from next set, not live set, so it returns null after commit
-		final var retrieved1 = this.workingSet.get(TestModuleA.class, "bo1");
-		final var retrieved2 = this.workingSet.get(TestModuleA.class, "bo2");
+		final var retrieved1 = this.workingSet.get(this.moduleA.getId(), "bo1");
+		final var retrieved2 = this.workingSet.get(this.moduleA.getId(), "bo2");
 		
 		assertTrue(retrieved1 == null);
 		assertTrue(retrieved2 == null);
@@ -268,13 +277,13 @@ public class RendererWorkingSetImplTest {
 		final RenderingBo bo1_replacement = mock(RenderingBo.class);
 		when(bo1_replacement.getId()).thenReturn("bo1");
 		
-		this.workingSet.add(TestModuleA.class, bo1);
-		final var uncommittedBefore = this.workingSet.getUncommittedWork(TestModuleA.class);
+		this.workingSet.add(this.moduleA.getId(), bo1);
+		final var uncommittedBefore = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		assertEquals(1, uncommittedBefore.size());
 		assertSame(bo1, uncommittedBefore.get("bo1"));
 		
-		this.workingSet.add(TestModuleA.class, bo1_replacement);
-		final var uncommittedAfter = this.workingSet.getUncommittedWork(TestModuleA.class);
+		this.workingSet.add(this.moduleA.getId(), bo1_replacement);
+		final var uncommittedAfter = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		assertEquals(1, uncommittedAfter.size());
 		assertSame(bo1_replacement, uncommittedAfter.get("bo1"));
 	}
@@ -288,12 +297,12 @@ public class RendererWorkingSetImplTest {
 		final var boA2 = new TestBoA();
 		boA2.setId("boA2");
 		
-		this.workingSet.add(TestModuleA.class, boA1);
-		this.workingSet.add(TestModuleB.class, boB1);
-		this.workingSet.add(TestModuleA.class, boA2);
+		this.workingSet.add(this.moduleA.getId(), boA1);
+		this.workingSet.add(this.moduleB.getId(), boB1);
+		this.workingSet.add(this.moduleA.getId(), boA2);
 		
-		this.workingSet.commit(TestModuleA.class, false);
-		this.workingSet.commit(TestModuleB.class, false);
+		this.workingSet.commit(this.moduleA.getId(), false);
+		this.workingSet.commit(this.moduleB.getId(), false);
 		
 		final List<RenderingBo> allLive = new ArrayList<>();
 		this.workingSet.getLiveSet(allLive, null);
@@ -301,7 +310,7 @@ public class RendererWorkingSetImplTest {
 		assertTrue(allLive.containsAll(List.of(boA1, boB1, boA2)));
 		
 		final List<RenderingBo> filteredLive = new ArrayList<>();
-		this.workingSet.getLiveSet(filteredLive, TestModuleA.class::equals);
+		this.workingSet.getLiveSet(filteredLive, this.moduleA.getId()::equals);
 		assertEquals(2, filteredLive.size());
 		assertTrue(filteredLive.containsAll(List.of(boA1, boA2)));
 		assertFalse(filteredLive.contains(boB1));

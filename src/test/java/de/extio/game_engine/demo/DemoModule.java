@@ -15,8 +15,8 @@ public class DemoModule extends AbstractClientModule {
 
 	@Override
 	public void onLoad() {
-		this.getModuleService().changeActiveState(this.getClass(), true);
-		this.getModuleService().changeDisplayState(this.getClass(), true);
+		this.getModuleService().changeActiveState(this.getId(), true);
+		this.getModuleService().changeDisplayState(this.getId(), true);
 	}
 	
 	@Override

@@ -1,7 +1,6 @@
 package de.extio.game_engine.renderer;
 
 import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 import org.springframework.context.ApplicationContext;
 
@@ -40,7 +39,7 @@ public class RendererData {
 
 	private final RendererWorkingSet rendererWorkingSet;
 
-	private final ModuleService moduleManager;
+	private final ModuleService moduleService;
 
 	private final ModuleExecutor moduleExecutor;
 
@@ -48,7 +47,7 @@ public class RendererData {
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleService moduleManager, final ModuleExecutor moduleExecutor, final StaticResourceService staticResourceService) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleService moduleService, final ModuleExecutor moduleExecutor, final StaticResourceService staticResourceService) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
@@ -57,7 +56,7 @@ public class RendererData {
 		this.eventService = eventService;
 		this.storageService = storageService;
 		this.rendererWorkingSet = rendererWorkingSet;
-		this.moduleManager = moduleManager;
+		this.moduleService = moduleService;
 		this.moduleExecutor = moduleExecutor;
 		this.staticResourceService = staticResourceService;
 	}
@@ -118,8 +117,8 @@ public class RendererData {
 		return rendererWorkingSet;
 	}
 
-	public ModuleService getModuleManager() {
-		return moduleManager;
+	public ModuleService getModuleService() {
+		return moduleService;
 	}
 
 	public ModuleExecutor getModuleExecutor() {
