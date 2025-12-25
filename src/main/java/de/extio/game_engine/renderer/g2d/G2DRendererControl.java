@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.RendererData;
-import de.extio.game_engine.renderer.model.event.WindowResizeEvent;
+import de.extio.game_engine.renderer.model.event.ViewportResizeEvent;
 import de.extio.game_engine.renderer.model.options.VideoOptions.VideoOptionsVideoMode;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
@@ -162,7 +162,7 @@ public class G2DRendererControl implements RendererControl {
 			.store(List.of("gameEngine"), "g2dRendererControlOptions", this.options);
 		
 		this.recalculate();
-		this.rendererData.getEventService().fire(new WindowResizeEvent());
+		this.rendererData.getEventService().fire(new ViewportResizeEvent());
 	}
 	
 	@Override
@@ -188,7 +188,7 @@ public class G2DRendererControl implements RendererControl {
 			try {
 				if (this.updateAbsoluteViewportPortDimension()) {
 					this.recalculate();
-					this.rendererData.getEventService().fire(new WindowResizeEvent());
+					this.rendererData.getEventService().fire(new ViewportResizeEvent());
 				}
 				final var mainFrame = this.renderer.getMainFrame();
 				if (mainFrame != null) {
