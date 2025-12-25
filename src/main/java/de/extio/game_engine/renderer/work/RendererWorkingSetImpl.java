@@ -2,10 +2,8 @@ package de.extio.game_engine.renderer.work;
 
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -20,8 +18,6 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	private final ConcurrentMap<String, RendererWork> workingSet = new ConcurrentHashMap<>();
 	
 	private final BlockingQueue<Map<String, RenderingBo>> mapsPool = new ArrayBlockingQueue<>(100);
-	
-	private final BlockingQueue<Set<Class<? extends RenderingBo>>> setsPool = new ArrayBlockingQueue<>(100);
 	
 	private final RenderingBoPool rendererBoPool;
 	
@@ -98,17 +94,22 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 			previousLiveRef.set(v.live());
 			if (clone) {
 				final Map<String, RenderingBo> newNext = this.obtainMapFromPool();
-				newNext.putAll(v.next());
+				v.next().entrySet().forEach(e -> {
+					final RenderingBo copy = this.rendererBoPool.copy(e.getValue());
+					newNext.put(e.getKey(), copy);
+				});
 				return new RendererWork(v.next(), newNext);
 			}
 			else {
-				v.live().values().forEach(this.rendererBoPool::release);
 				return new RendererWork(v.next(), this.obtainMapFromPool());
 			}
 		});
 		
 		final var previousLiveSet = previousLiveRef.get();
 		if (previousLiveSet != null) {
+			if (clone) {
+				previousLiveSet.values().forEach(this.rendererBoPool::release);
+			}
 			this.returnMapToPool(previousLiveSet);
 		}
 		

@@ -98,10 +98,17 @@ public class RendererWorkingSetImplTest {
 	void commitWithCloneCopiesUncommittedIntoNewUncommitted() {
 		final RenderingBo bo1 = mock(RenderingBo.class);
 		when(bo1.getId()).thenReturn("bo1");
+		final RenderingBo bo1Copy = mock(RenderingBo.class);
+		when(bo1Copy.getId()).thenReturn("bo1");
 		final RenderingBo bo2 = mock(RenderingBo.class);
 		when(bo2.getId()).thenReturn("bo2");
+		final RenderingBo bo2Copy = mock(RenderingBo.class);
+		when(bo2Copy.getId()).thenReturn("bo2");
 		final RenderingBo bo3 = mock(RenderingBo.class);
 		when(bo3.getId()).thenReturn("bo3");
+		
+		when(this.renderingBoPool.copy(bo1)).thenReturn(bo1Copy);
+		when(this.renderingBoPool.copy(bo2)).thenReturn(bo2Copy);
 		
 		this.workingSet.put(this.moduleA.getId(), bo1);
 		this.workingSet.put(this.moduleA.getId(), bo2);
@@ -110,12 +117,15 @@ public class RendererWorkingSetImplTest {
 		final var currentUncommitted = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		
 		assertEquals(currentUncommitted, returnedUncommitted);
-		assertEquals(Map.of("bo1", bo1, "bo2", bo2), currentUncommitted);
+		assertEquals(Map.of("bo1", bo1Copy, "bo2", bo2Copy), currentUncommitted);
 		
 		final List<RenderingBo> live = new ArrayList<>();
 		this.workingSet.getLiveSet(live, null);
 		assertEquals(2, live.size());
 		assertTrue(live.containsAll(List.of(bo1, bo2)));
+		
+		verify(this.renderingBoPool, times(1)).copy(bo1);
+		verify(this.renderingBoPool, times(1)).copy(bo2);
 		
 		this.workingSet.put(this.moduleA.getId(), bo3);
 		final List<RenderingBo> liveAfterAdd = new ArrayList<>();
@@ -204,20 +214,31 @@ public class RendererWorkingSetImplTest {
 	}
 	
 	@Test
-	void secondCommitReleasesPreviousLiveWork() {
+	void secondCommitWithCloneReleasesPreviousLiveWork() {
 		final var bo1 = new TestBoA();
 		bo1.setId("bo1");
 		final var bo2 = new TestBoA();
 		bo2.setId("bo2");
+		final var bo1Copy = new TestBoA();
+		bo1Copy.setId("bo1");
+		final var bo2Copy = new TestBoA();
+		bo2Copy.setId("bo2");
+		
+		when(this.renderingBoPool.copy(bo1)).thenReturn(bo1Copy);
+		when(this.renderingBoPool.copy(bo2)).thenReturn(bo2Copy);
 		
 		this.workingSet.put(this.moduleA.getId(), bo1);
 		this.workingSet.put(this.moduleA.getId(), bo2);
-		this.workingSet.commit(this.moduleA.getId(), false);
+		this.workingSet.commit(this.moduleA.getId(), true);
 		
 		final var bo3 = new TestBoB();
 		bo3.setId("bo3");
+		final var bo3Copy = new TestBoB();
+		bo3Copy.setId("bo3");
+		when(this.renderingBoPool.copy(bo3)).thenReturn(bo3Copy);
+		
 		this.workingSet.put(this.moduleA.getId(), bo3);
-		this.workingSet.commit(this.moduleA.getId(), false);
+		this.workingSet.commit(this.moduleA.getId(), true);
 		
 		verify(this.renderingBoPool, times(1)).release(bo1);
 		verify(this.renderingBoPool, times(1)).release(bo2);
@@ -356,6 +377,10 @@ public class RendererWorkingSetImplTest {
 	private static abstract class TestBoBase implements RenderingBo {
 		
 		private String id;
+
+		private boolean applied;
+
+		private boolean closed;
 		
 		@Override
 		public void setId(final String id) {
@@ -480,9 +505,15 @@ public class RendererWorkingSetImplTest {
 		@Override
 		public void setRendererData(final RendererData RendererData) {
 		}
+
+		@Override
+		public void apply(RenderingBo other) {
+			this.applied = true;			
+		}
 		
 		@Override
 		public void close() {
+			this.closed = true;
 		}
 	}
 	
