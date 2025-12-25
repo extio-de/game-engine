@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
@@ -108,6 +109,17 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		}
 	}
 	
+	@Override
+	public void apply(final RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof final G2DDrawFont o) {
+			this.text = o.text;
+			this.size = o.size;
+			this.alignment = o.alignment;
+		}
+	}
+
 	@Override
 	public void close() throws Exception {
 		super.close();

@@ -227,6 +227,21 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	}
 
 	@Override
+	public void apply(final RenderingBo other) {
+		if (other instanceof final AbstractRenderingBo abstractRenderingBo) {
+			this.id = abstractRenderingBo.id;
+			this.color = abstractRenderingBo.color;
+			this.x = abstractRenderingBo.x;
+			this.y = abstractRenderingBo.y;
+			this.localX = abstractRenderingBo.localX;
+			this.localY = abstractRenderingBo.localY;
+			this.width = abstractRenderingBo.width;
+			this.height = abstractRenderingBo.height;
+			this.layer = abstractRenderingBo.layer;
+		}
+	}
+	
+	@Override
 	public void closeStatic() {
 		
 	}

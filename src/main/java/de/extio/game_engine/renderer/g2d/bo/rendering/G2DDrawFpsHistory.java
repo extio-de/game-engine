@@ -8,6 +8,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 
 @Conditional(G2DRendererCondition.class)
@@ -68,6 +69,15 @@ public class G2DDrawFpsHistory extends G2DAbstractRenderingBo {
 		}
 	}
 	
+	@Override
+	public void apply(final RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof final G2DDrawFpsHistory o) {
+			this.history = o.history;
+		}
+	}
+
 	@Override
 	public void close() throws Exception {
 		super.close();

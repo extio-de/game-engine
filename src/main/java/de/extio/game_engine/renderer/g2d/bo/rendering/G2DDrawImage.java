@@ -18,6 +18,7 @@ import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 
@@ -116,6 +117,19 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 		cachedImage.setUsed(true);
 	}
 	
+	@Override
+	public void apply(RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof final G2DDrawImage o) {
+			this.resourceName = o.resourceName;
+			this.transparency = o.transparency;
+			this.imageData = o.imageData;
+			this.scaledX = o.scaledX;
+			this.scaledY = o.scaledY;
+		}
+	}
+
 	@Override
 	public void close() throws Exception {
 		super.close();

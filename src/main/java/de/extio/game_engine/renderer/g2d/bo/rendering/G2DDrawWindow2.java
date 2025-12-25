@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
@@ -82,6 +83,17 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 		}
 	}
 	
+	@Override
+	public void apply(final RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof final G2DDrawWindow2 o) {
+			this.color = o.color;
+			this.thickBorder = o.thickBorder;
+			this.awtColor = o.awtColor;
+		}
+	}
+
 	@Override
 	public void close() throws Exception {
 		super.close();

@@ -20,6 +20,7 @@ import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
@@ -50,12 +51,39 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	
 	private final CoordI2 overflow = MutableCoordI2.create();
 	
-	private final List<Star> stars = new ArrayList<>();
+	private List<Star> stars;
 	
 	private CoordI2 starsViewport = ImmutableCoordI2.create();
 	
 	public G2DDrawBackground() {
 		super(RenderingBoLayer.BACKGROUND0);
+	}
+	
+	@Override
+	public void apply(RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof G2DDrawBackground o) {
+			this.bgrOffset.setXY(o.bgrOffset);
+			this.sourceOffset.setXY(o.sourceOffset);
+			this.destPosition.setXY(o.destPosition);
+			this.destPosition2.setXY(o.destPosition2);
+			this.overflow.setXY(o.overflow);
+			this.starsViewport = o.starsViewport;
+			this.stars = o.stars; // shallow copy for performance
+		}
+	}
+
+	@Override
+	public void close() throws Exception {
+		super.close();
+
+		this.bgrOffset.setXY(0, 0);
+		this.sourceOffset.setXY(0, 0);
+		this.destPosition.setXY(0, 0);
+		this.destPosition2.setXY(0, 0);
+		this.overflow.setXY(0, 0);
+		this.starsViewport = ImmutableCoordI2.create();
 	}
 	
 	@Override
@@ -207,10 +235,17 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	}
 	
 	private void generateStars(final CoordI2 viewPort) {
-		if (!viewPort.equals(this.starsViewport)) {
+		if (this.stars == null || !viewPort.equals(this.starsViewport)) {
+			if (this.stars == null) {
+				this.stars = new ArrayList<>();
+			}
+			else {
+				this.stars.clear();
+			}
+			
 			this.starsViewport = viewPort.toImmutableCoordI2();
 			final var rand = ThreadLocalXorShift128Random.current();
-			this.stars.clear();
+
 			for (var i = 0; i < 350; i++) {
 				this.stars.add(new Star(
 						ImmutableCoordI2.create(rand.nextInt(this.starsViewport.getX()), rand.nextInt(this.starsViewport.getY())),

@@ -107,6 +107,8 @@ public interface RenderingBo extends AutoCloseable {
 	 */
 	RenderingBo withPositionRelative(HasPosition2 position);
 
+	void apply(RenderingBo other);
+
 	void closeStatic();
 
 	void setRendererData(RendererData RendererData);

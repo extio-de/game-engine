@@ -7,6 +7,7 @@ import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
@@ -62,6 +63,15 @@ public class G2DDrawWindow extends G2DAbstractRenderingBo implements DrawWindowR
 		ComponentRenderingSupport.drawDecorativeBorderFilled(graphics, sx + strength, sy + strength, sw - strength * 2, sh - strength * 2, strength, cMain);
 	}
 	
+	@Override
+	public void apply(final RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof final G2DDrawWindow o) {
+			this.thickBorder = o.thickBorder;
+		}
+	}
+
 	@Override
 	public void close() throws Exception {
 		super.close();

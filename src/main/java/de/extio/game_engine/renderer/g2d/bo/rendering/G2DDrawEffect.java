@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
@@ -254,6 +255,23 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 		this.customInt0 = 0;
 		this.customDouble0 = 0.0;
 		this.customString0 = null;
+	}
+
+	@Override
+	public void apply(final RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof final G2DDrawEffect o) {
+			this.effect = o.effect;
+			if (o.relativeCoordinates != null) {
+				this.relativeCoordinates = List.copyOf(o.relativeCoordinates);
+			} else {
+				this.relativeCoordinates = null;
+			}
+			this.customInt0 = o.customInt0;
+			this.customDouble0 = o.customDouble0;
+			this.customString0 = o.customString0;
+		}
 	}
 	
 	@Override

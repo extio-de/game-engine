@@ -24,6 +24,7 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DTextfieldControlImpl2;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
+import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
@@ -308,6 +309,26 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			if (this.customData2 instanceof Boolean) {
 				((TextfieldControl) control).setReadonly((Boolean) this.customData2);
 			}
+		}
+	}
+
+	@Override
+	public void apply(final RenderingBo other) {
+		super.apply(other);
+
+		if (other instanceof final G2DDrawControl o) {
+			this.controlId = o.controlId;
+			this.clazz = o.clazz;
+			this.caption = o.caption;
+			this.controlGroup = o.controlGroup;
+			this.fontSize = o.fontSize;
+			this.customData = o.customData;
+			this.customData2 = o.customData2;
+			this.customData3 = o.customData3;
+			this.customData4 = o.customData4;
+			this.visible = o.visible;
+			this.enabled = o.enabled;
+			this.tooltip = o.tooltip;
 		}
 	}
 	
