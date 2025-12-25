@@ -1,4 +1,4 @@
-package de.extio.game_engine.renderer.container;
+package de.extio.game_engine.renderer.container.legacy;
 
 import java.util.List;
 import java.util.function.Predicate;
