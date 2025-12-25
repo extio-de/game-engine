@@ -103,7 +103,7 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 	}
 	
 	@Override
-	public void closeStatic() {
+	public void staticCleanupAfterFrame() {
 		final var it = CACHE.values().iterator();
 		while (it.hasNext()) {
 			final var entry = it.next();

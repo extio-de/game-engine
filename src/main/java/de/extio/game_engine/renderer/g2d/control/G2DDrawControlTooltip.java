@@ -44,7 +44,7 @@ public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {
 	}
 	
 	@Override
-	public void closeStatic() {
+	public void staticCleanupAfterFrame() {
 		TOOLTIP = null;
 	}
 }

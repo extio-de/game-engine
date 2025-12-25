@@ -41,6 +41,10 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	
 	private final static int[] BUILTIN_SCROLL_OFFSET_X = new int[2];
 	
+	private final static List<Star> STARS = new ArrayList<>();
+	
+	private static CoordI2 STARS_LAST_VIEWPORT = ImmutableCoordI2.create();
+	
 	private final CoordI2 bgrOffset = MutableCoordI2.create();
 	
 	private final CoordI2 sourceOffset = MutableCoordI2.create();
@@ -50,10 +54,6 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	private final CoordI2 destPosition2 = MutableCoordI2.create();
 	
 	private final CoordI2 overflow = MutableCoordI2.create();
-	
-	private List<Star> stars;
-	
-	private CoordI2 starsViewport = ImmutableCoordI2.create();
 	
 	public G2DDrawBackground() {
 		super(RenderingBoLayer.BACKGROUND0);
@@ -69,8 +69,6 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 			this.destPosition.setXY(o.destPosition);
 			this.destPosition2.setXY(o.destPosition2);
 			this.overflow.setXY(o.overflow);
-			this.starsViewport = o.starsViewport;
-			this.stars = o.stars; // shallow copy for performance
 		}
 	}
 
@@ -83,7 +81,6 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 		this.destPosition.setXY(0, 0);
 		this.destPosition2.setXY(0, 0);
 		this.overflow.setXY(0, 0);
-		this.starsViewport = ImmutableCoordI2.create();
 	}
 	
 	@Override
@@ -152,7 +149,7 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	private void drawStars(final Graphics2D graphics, final CoordI2 offset, final CoordI2 viewPort) {
 		this.generateStars(viewPort);
 		
-		for (final Star element : this.stars) {
+		for (final Star element : STARS) {
 			graphics.setColor(element.color.toAwtColor());
 			graphics.fillOval(
 					Math.floorMod(element.position.getX() - offset.getX(), viewPort.getX()),
@@ -235,20 +232,15 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	}
 	
 	private void generateStars(final CoordI2 viewPort) {
-		if (this.stars == null || !viewPort.equals(this.starsViewport)) {
-			if (this.stars == null) {
-				this.stars = new ArrayList<>();
-			}
-			else {
-				this.stars.clear();
-			}
+		if (STARS.isEmpty() || !viewPort.equals(STARS_LAST_VIEWPORT)) {
+			STARS.clear();
 			
-			this.starsViewport = viewPort.toImmutableCoordI2();
+			STARS_LAST_VIEWPORT = viewPort.toImmutableCoordI2();
 			final var rand = ThreadLocalXorShift128Random.current();
 
 			for (var i = 0; i < 350; i++) {
-				this.stars.add(new Star(
-						ImmutableCoordI2.create(rand.nextInt(this.starsViewport.getX()), rand.nextInt(this.starsViewport.getY())),
+				STARS.add(new Star(
+						ImmutableCoordI2.create(rand.nextInt(STARS_LAST_VIEWPORT.getX()), rand.nextInt(STARS_LAST_VIEWPORT.getY())),
 						ImmutableCoordI2.create(rand.nextInt(3) + 2, rand.nextInt(3) + 2),
 						new ImmutableRgbaColor(rand.nextInt(30) + 100, rand.nextInt(30) + 100, rand.nextInt(30) + 130)));
 			}

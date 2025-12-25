@@ -17,9 +17,9 @@ public class G2DDrawFpsHistory extends G2DAbstractRenderingBo {
 	
 	private Collection<Integer> history;
 	
-	private final int[] thresholds = new int[4];
+	private final static int[] thresholds = new int[4];
 	
-	private int thresholdsFrameRate;
+	private static int thresholdsFrameRate;
 	
 	public G2DDrawFpsHistory() {
 		super(RenderingBoLayer.TOP);
@@ -32,12 +32,12 @@ public class G2DDrawFpsHistory extends G2DAbstractRenderingBo {
 	
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
-		if (this.thresholdsFrameRate != this.rendererData.getRendererControl().getFrameRate()) {
-			this.thresholdsFrameRate = this.rendererData.getRendererControl().getFrameRate();
-			this.thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate() * 0.2);
-			this.thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate() * 0.75);
-			this.thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate() * 0.9);
-			this.thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate());
+		if (thresholdsFrameRate != this.rendererData.getRendererControl().getFrameRate()) {
+			thresholdsFrameRate = this.rendererData.getRendererControl().getFrameRate();
+			thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate() * 0.2);
+			thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate() * 0.75);
+			thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate() * 0.9);
+			thresholds[0] = (int) (1000.0 / this.rendererData.getRendererControl().getFrameRate());
 		}
 		
 		final var x = (int) (this.x * scaleFactor);
@@ -49,16 +49,16 @@ public class G2DDrawFpsHistory extends G2DAbstractRenderingBo {
 			}
 			final var val_ = Math.max(1, Math.min((int) (100 * scaleFactor), (int) (val.intValue() * scaleFactor)));
 			
-			if (val_ < this.thresholds[0]) {
+			if (val_ < thresholds[0]) {
 				graphics.setColor(Color.DARK_GRAY);
 			}
-			else if (val_ < this.thresholds[1]) {
+			else if (val_ < thresholds[1]) {
 				graphics.setColor(Color.GRAY);
 			}
-			else if (val_ < this.thresholds[2]) {
+			else if (val_ < thresholds[2]) {
 				graphics.setColor(Color.YELLOW);
 			}
-			else if (val_ < this.thresholds[3]) {
+			else if (val_ < thresholds[3]) {
 				graphics.setColor(Color.ORANGE);
 			}
 			else {

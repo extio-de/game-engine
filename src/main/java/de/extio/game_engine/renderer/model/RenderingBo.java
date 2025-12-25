@@ -109,7 +109,7 @@ public interface RenderingBo extends AutoCloseable {
 
 	void apply(RenderingBo other);
 
-	void closeStatic();
+	void staticCleanupAfterFrame();
 
 	void setRendererData(RendererData RendererData);
 

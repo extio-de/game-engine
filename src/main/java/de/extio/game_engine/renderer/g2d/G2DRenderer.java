@@ -202,7 +202,7 @@ public class G2DRenderer implements Renderer {
 					}
 					
 					for (final RenderingBo bo : usedRenderingBoTypes.values()) {
-						bo.closeStatic();
+						bo.staticCleanupAfterFrame();
 					}
 					
 					//

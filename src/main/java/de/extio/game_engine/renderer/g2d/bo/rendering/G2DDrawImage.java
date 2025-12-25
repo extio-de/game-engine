@@ -142,7 +142,7 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	}
 	
 	@Override
-	public void closeStatic() {
+	public void staticCleanupAfterFrame() {
 		final var it = IMAGE_CACHE.values().iterator();
 		while (it.hasNext()) {
 			final var cachedImage = it.next();

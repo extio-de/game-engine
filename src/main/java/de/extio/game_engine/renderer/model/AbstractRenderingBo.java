@@ -242,7 +242,7 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	}
 	
 	@Override
-	public void closeStatic() {
+	public void staticCleanupAfterFrame() {
 		
 	}
 	
