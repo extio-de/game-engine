@@ -30,14 +30,14 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	}
 	
 	@Override
-	public void add(final String producerId, final RenderingBo work) {
+	public void put(final String producerId, final RenderingBo work) {
 		this.getWorkingSetByProducer(producerId)
 				.next()
 				.put(work.getId(), work);
 	}
 	
 	@Override
-	public void add(final String producerId, final List<RenderingBo> work) {
+	public void put(final String producerId, final List<RenderingBo> work) {
 		final var nextMap = this.getWorkingSetByProducer(producerId).next();
 		for (final RenderingBo bo : work) {
 			nextMap.put(bo.getId(), bo);

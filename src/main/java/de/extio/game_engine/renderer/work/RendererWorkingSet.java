@@ -8,9 +8,9 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 
 public interface RendererWorkingSet {
 	
-	void add(String producerId, RenderingBo work);
+	void put(String producerId, RenderingBo work);
 	
-	void add(String producerId, List<RenderingBo> work);
+	void put(String producerId, List<RenderingBo> work);
 
 	RenderingBo get(String producerId, String id);
 	

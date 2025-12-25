@@ -104,8 +104,8 @@ public class G2DRenderer implements Renderer {
 			EventQueue.invokeAndWait(() -> {
 				// this invokeAndWait() call is also important to wait until applyVideoOptions() has been completed, which also puts events to AWT event queue
 				LOGGER.debug("Viewport initialized");
-				this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
-				this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_tooltip", G2DDrawControlTooltip.class));
+				this.rendererData.getRendererWorkingSet().put(this.rendererModuleId, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_background", G2DDrawBackground.class));
+				this.rendererData.getRendererWorkingSet().put(this.rendererModuleId, this.rendererData.getRenderingBoPool().acquire("G2DRenderer_tooltip", G2DDrawControlTooltip.class));
 			});
 		}
 		catch (InvocationTargetException | InterruptedException e) {
@@ -255,14 +255,14 @@ public class G2DRenderer implements Renderer {
 				.setColor(RgbaColor.WHITE)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 35);
-		this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, drawFont);
+		this.rendererData.getRendererWorkingSet().put(this.rendererModuleId, drawFont);
 		
 		this.fpsHistory.add(Integer.valueOf((int) this.frameDur));
 		final var drawFpsHistory = this.rendererData.getRenderingBoPool().acquire("g2DRenderer_fpsHistory", G2DDrawFpsHistory.class)
 				.setHistory(this.fpsHistory)
 				.setLayer(RenderingBoLayer.TOP)
 				.withPositionAbsoluteAnchorTopRight(100, 50);
-		this.rendererData.getRendererWorkingSet().add(this.rendererModuleId, drawFpsHistory);
+		this.rendererData.getRendererWorkingSet().put(this.rendererModuleId, drawFpsHistory);
 	}
 	
 	private void frameCap() throws InterruptedException {
