@@ -498,7 +498,7 @@ public class RendererWorkingSetImplTest {
 		}
 		
 		@Override
-		public void closeStatic() {
+		public void staticCleanupAfterFrame() {
 			
 		}
 
