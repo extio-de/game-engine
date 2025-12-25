@@ -91,6 +91,13 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 	}
 	
 	@Override
+	public <T extends RenderingBo> T copy(final T original) {
+		final T copy = this.acquire(original.getId(), (Class<T>) original.getClass());
+		copy.apply(original);
+		return copy;
+	}
+	
+	@Override
 	public synchronized void release(final RenderingBo obj) {
 		try {
 			obj.close();
