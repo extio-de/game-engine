@@ -1,10 +1,9 @@
 package de.extio.game_engine.module;
 
-import java.util.List;
-
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
@@ -15,8 +14,8 @@ public class ModuleServiceAutoConfiguration {
 	
 	@Bean
 	@ConditionalOnMissingBean
-	ModuleService moduleService(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
-		return new ModuleServiceImpl(initialModules, rendererWorkingSet);
+	ModuleService moduleService(final ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet) {
+		return new ModuleServiceImpl(applicationContext, rendererWorkingSet);
 	}
 	
 	@Bean

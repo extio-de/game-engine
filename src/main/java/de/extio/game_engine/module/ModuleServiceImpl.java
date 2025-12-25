@@ -13,16 +13,18 @@ import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.InitializingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
-public class ModuleServiceImpl implements InitializingBean, ModuleService {
+public class ModuleServiceImpl implements ModuleService, ApplicationListener<ContextRefreshedEvent> {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleServiceImpl.class);
 	
-	private final List<AbstractModule> modulesInitial;
-	
+	private final ApplicationContext applicationContext;
+
 	private final List<AbstractModule> modulesAll = Collections.synchronizedList(new ArrayList<>());
 	
 	private final Map<String, AbstractModule> modulesByIdMap = new ConcurrentHashMap<>();
@@ -45,18 +47,19 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 	
 	private final Map<ModuleExecutorCallbacks, List<AbstractModule>> executorCallbackMap = Collections.synchronizedMap(new EnumMap<>(ModuleExecutorCallbacks.class));
 	
-	public ModuleServiceImpl(final List<AbstractModule> initialModules, final RendererWorkingSet rendererWorkingSet) {
-		this.modulesInitial = initialModules;
+	public ModuleServiceImpl(ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet) {
+		this.applicationContext = applicationContext;
 		this.rendererWorkingSet = rendererWorkingSet;
 	}
+
 	
 	@Override
-	public void afterPropertiesSet() throws Exception {
-		if (this.modulesInitial == null || this.modulesInitial.isEmpty()) {
+	public void onApplicationEvent(ContextRefreshedEvent event) {
+		final var modulesInitial = this.applicationContext.getBeansOfType(AbstractModule.class, false, false);
+		if (modulesInitial == null || modulesInitial.isEmpty()) {
 			return;
 		}
-		this.modulesInitial.forEach(this::load);
-		this.modulesInitial.clear();
+		modulesInitial.values().forEach(this::load);
 	}
 	
 	@Override
@@ -97,7 +100,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 		synchronized (this.modulesAll) {
 			this.modulesAllView = List.copyOf(this.modulesAll);
 		}
-		LOGGER.debug("Loaded module " + module.getClass().getName());
+		LOGGER.debug("Loaded module {} {}", module.getClass().getName(), module.getId());
 		this.invokeSafe(module, m -> m.onLoad());
 	}
 	
@@ -124,7 +127,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 				this.rendererWorkingSet.clear(clientModule.getId());
 			}
 			
-			LOGGER.debug("Unloaded module " + id);
+			LOGGER.info("Unloaded module {}", id);
 		}
 		catch (final Exception e) {
 			LOGGER.error("Error unloading module " + id, e);
@@ -163,7 +166,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 						}
 						this.invokeSafe(module, AbstractModule::onDeactivate);
 						
-						LOGGER.debug("Deactivated " + id);
+						LOGGER.info("Deactivated {}", id);
 					}
 				}, () -> {
 					if (active) {
@@ -191,7 +194,7 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 							}
 							this.invokeSafe(module, AbstractModule::onActivate);
 							
-							LOGGER.debug("Activated " + id);
+							LOGGER.info("Activated {}", id);
 						}
 					}
 				});
@@ -216,13 +219,13 @@ public class ModuleServiceImpl implements InitializingBean, ModuleService {
 				if (doDisplay && !curDisplayed) {
 					this.modulesDisplayed.add(clientModule);
 					clientModule.setDisplayed(true);
-					LOGGER.debug("Displayed {}", id);
+					LOGGER.info("Displayed {}", id);
 					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onShow());
 				}
 				else if (!doDisplay && curDisplayed) {
 					clientModule.setDisplayed(false);
 					this.modulesDisplayed.removeIf(mod -> mod.getId().equals(id));
-					LOGGER.debug("Hidden {}", id);
+					LOGGER.info("Hidden {}", id);
 					this.invokeSafe(clientModule, m -> ((AbstractClientModule) m).onHide());
 				}
 				this.modulesDisplayedClientModulesView = List.copyOf(this.modulesDisplayed);

@@ -10,7 +10,7 @@ import org.slf4j.LoggerFactory;
  */
 public abstract class AbstractModule {
 	
-	protected static final Logger LOGGER = LoggerFactory.getLogger(AbstractModule.class);
+	protected final Logger LOGGER = LoggerFactory.getLogger(AbstractModule.class);
 	
 	protected String id = "Module_" + System.identityHashCode(this);
 	

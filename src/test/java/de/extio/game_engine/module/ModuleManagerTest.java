@@ -2,12 +2,16 @@ package de.extio.game_engine.module;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.event.ContextRefreshedEvent;
 
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
@@ -24,33 +28,37 @@ public class ModuleManagerTest {
 		this.testModule = new TestModule();
 		this.testClientModule = new TestClientModule();
 		
-		final List<AbstractModule> initialModules = new ArrayList<>();
-		initialModules.add(this.testModule);
-		initialModules.add(this.testClientModule);
+		final ApplicationContext ctx = mock(ApplicationContext.class);
+		when(ctx.getBeansOfType(AbstractModule.class, false, false))
+			.thenReturn(Map.of("testModule", this.testModule, "testClientModule", this.testClientModule));
 		
-		this.moduleManager = new ModuleServiceImpl(initialModules, mock(RendererWorkingSet.class));
-		this.moduleManager.afterPropertiesSet();
+		this.moduleManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class));
+		this.moduleManager.onApplicationEvent(new ContextRefreshedEvent(ctx));
 	}
 	
 	@Test
-	public void testAfterPropertiesSet() {
+	public void testOnApplicationEvent() {
 		assertEquals(2, this.moduleManager.getModulesAll().size());
 		assertTrue(this.testModule.onLoadCalled);
 		assertTrue(this.testClientModule.onLoadCalled);
 	}
 	
 	@Test
-	public void testAfterPropertiesSet_EmptyModules() throws Exception {
-		final ModuleServiceImpl emptyManager = new ModuleServiceImpl(List.of(), mock(RendererWorkingSet.class));
-		emptyManager.afterPropertiesSet();
+	public void testOnApplicationEvent_EmptyModules() throws Exception {
+		final ApplicationContext ctx = mock(ApplicationContext.class);
+		when(ctx.getBeansOfType(AbstractModule.class, false, false)).thenReturn(Map.of());
+		final ModuleServiceImpl emptyManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class));
+		emptyManager.onApplicationEvent(new ContextRefreshedEvent(ctx));
 		
 		assertTrue(emptyManager.getModulesAll().isEmpty());
 	}
 	
 	@Test
-	public void testAfterPropertiesSet_NullModules() throws Exception {
-		final ModuleServiceImpl nullManager = new ModuleServiceImpl(null, mock(RendererWorkingSet.class));
-		nullManager.afterPropertiesSet();
+	public void testOnApplicationEvent_NullModules() throws Exception {
+		final ApplicationContext ctx = mock(ApplicationContext.class);
+		when(ctx.getBeansOfType(AbstractModule.class, false, false)).thenReturn(null);
+		final ModuleServiceImpl nullManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class));
+		nullManager.onApplicationEvent(new ContextRefreshedEvent(ctx));
 		
 		assertTrue(nullManager.getModulesAll().isEmpty());
 	}
