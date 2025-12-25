@@ -101,17 +101,29 @@ Key features include automatic viewport scaling, configurable frame rates, refer
 
 **Rendering Workflow Example:**
 ```java
+// Create a module instance
+var myModule = new MyModule();
+
 // Acquire a rendering business object from the pool
-RectangleBo rectangle = renderingBoPool.acquire("myRect", RectangleBo.class);
+var rectangle = renderingBoPool.acquire("myRect", RectangleBo.class);
 rectangle.setPosition(100, 200);
 rectangle.setSize(50, 30);
 rectangle.setColor(Color.BLUE);
 
-// Add to the working set for your module
-rendererWorkingSet.add(MyModule.class, rectangle);
+// Add to the working set for your module (using module ID)
+rendererWorkingSet.put(myModule.getId(), rectangle);
 
 // Commit the working set when ready to render
-rendererWorkingSet.commit(MyModule.class, true);
+rendererWorkingSet.commit(myModule.getId(), true);
+
+// Later, for example when handling an event, retrieve and modify an existing rendering object
+var existingRect = rendererWorkingSet.get(myModule.getId(), "myRect");
+existingRect.setColor(Color.RED);
+existingRect.setPosition(150, 250);
+rendererWorkingSet.put(myModule.getId(), existingRect);
+
+// Commit again to apply the changes
+rendererWorkingSet.commit(myModule.getId(), true);
 ```
 
 The `RendererWorkingSet` supports two rendering paradigms:
