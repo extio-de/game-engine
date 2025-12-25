@@ -30,7 +30,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		final var previous = this.getWorkingSetByProducer(producerId)
 				.next()
 				.put(work.getId(), work);
-		if (previous != null) {
+		if (previous != null && previous != work) {
 			this.rendererBoPool.release(previous);
 		}
 	}
@@ -40,7 +40,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		final var nextMap = this.getWorkingSetByProducer(producerId).next();
 		for (final RenderingBo bo : work) {
 			final var previous = nextMap.put(bo.getId(), bo);
-			if (previous != null) {
+			if (previous != null && previous != bo) {
 				this.rendererBoPool.release(previous);
 			}
 		}
