@@ -14,10 +14,10 @@ import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
-
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
 import de.extio.game_engine.renderer.model.RenderingBo;
@@ -42,6 +42,8 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	private final static int[] BUILTIN_SCROLL_OFFSET_X = new int[2];
 	
 	private final static List<Star> STARS = new ArrayList<>();
+	
+	private final static List<Star> REFERENCE_STARS = new ArrayList<>();
 	
 	private static CoordI2 STARS_LAST_VIEWPORT = ImmutableCoordI2.create();
 	
@@ -232,18 +234,32 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	}
 	
 	private void generateStars(final CoordI2 viewPort) {
-		if (STARS.isEmpty() || !viewPort.equals(STARS_LAST_VIEWPORT)) {
-			STARS.clear();
-			
-			STARS_LAST_VIEWPORT = viewPort.toImmutableCoordI2();
+		if (REFERENCE_STARS.isEmpty()) {
 			final var rand = ThreadLocalXorShift128Random.current();
 
 			for (var i = 0; i < 350; i++) {
-				STARS.add(new Star(
-						ImmutableCoordI2.create(rand.nextInt(STARS_LAST_VIEWPORT.getX()), rand.nextInt(STARS_LAST_VIEWPORT.getY())),
-						ImmutableCoordI2.create(rand.nextInt(3) + 2, rand.nextInt(3) + 2),
-						new ImmutableRgbaColor(rand.nextInt(30) + 100, rand.nextInt(30) + 100, rand.nextInt(30) + 130)));
+				final var position = ImmutableCoordI2.create(rand.nextInt(RendererControl.REFERENCE_RESOLUTION.getX()), rand.nextInt(RendererControl.REFERENCE_RESOLUTION.getY()));
+				final var radius = ImmutableCoordI2.create(rand.nextInt(3) + 2, rand.nextInt(3) + 2);
+				final var color = new ImmutableRgbaColor(rand.nextInt(30) + 100, rand.nextInt(30) + 100, rand.nextInt(30) + 130);
+				
+				REFERENCE_STARS.add(new Star(position, radius, color));
+				STARS.add(new Star(position, radius, color));
 			}
+		}
+		
+		if (!viewPort.equals(STARS_LAST_VIEWPORT)) {
+			final double scaleX = (double) viewPort.getX() / RendererControl.REFERENCE_RESOLUTION.getX();
+			final double scaleY = (double) viewPort.getY() / RendererControl.REFERENCE_RESOLUTION.getY();
+
+			for (int i = 0; i < REFERENCE_STARS.size(); i++) {
+				final var refStar = REFERENCE_STARS.get(i);
+				final var star = STARS.get(i);
+				
+				star.position = ImmutableCoordI2.create(
+						(int) (refStar.position.getX() * scaleX),
+						(int) (refStar.position.getY() * scaleY));
+			}
+			STARS_LAST_VIEWPORT = viewPort.toImmutableCoordI2();
 		}
 	}
 	
