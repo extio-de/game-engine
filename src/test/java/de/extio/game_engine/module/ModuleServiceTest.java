@@ -4,7 +4,6 @@ import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -15,7 +14,7 @@ import org.springframework.context.event.ContextRefreshedEvent;
 
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
-public class ModuleManagerTest {
+public class ModuleServiceTest {
 	
 	private ModuleServiceImpl moduleManager;
 	
