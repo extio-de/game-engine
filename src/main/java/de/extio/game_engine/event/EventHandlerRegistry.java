@@ -10,7 +10,7 @@ public class EventHandlerRegistry {
 	
 	private final ConcurrentMap<Class<? extends Event>, List<EventConsumer>> handlers = new ConcurrentHashMap<>();
 	
-	public void register(final Class<? extends Event> eventClass, final String consumerId, final Consumer<Event> consumer) {
+	public <T extends Event> void register(final Class<T> eventClass, final String consumerId, final Consumer<T> consumer) {
 		final var eventConsumers = this.handlers.computeIfAbsent(eventClass, k -> new CopyOnWriteArrayList<>());
 		eventConsumers.removeIf(ec -> ec.id().equals(consumerId));
 		eventConsumers.add(new EventConsumer(consumerId, consumer));
@@ -27,6 +27,6 @@ public class EventHandlerRegistry {
 		return this.handlers.get(eventClass);
 	}
 	
-	record EventConsumer(String id, Consumer<Event> consumer) {
+	record EventConsumer(String id, Consumer<? extends Event> consumer) {
 	}
 }

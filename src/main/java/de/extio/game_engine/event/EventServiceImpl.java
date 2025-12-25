@@ -13,7 +13,7 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
-	public void register(final Class<? extends Event> eventClass, final String consumerId, final Consumer<Event> consumer) {
+	public <T extends Event> void register(final Class<T> eventClass, final String consumerId, final Consumer<T> consumer) {
 		this.registry.register(eventClass, consumerId, consumer);
 	}
 

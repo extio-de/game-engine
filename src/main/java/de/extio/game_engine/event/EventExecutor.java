@@ -10,6 +10,7 @@ import java.util.concurrent.StructuredTaskScope.FailedException;
 import java.util.concurrent.StructuredTaskScope.Joiner;
 import java.util.concurrent.StructuredTaskScope.Subtask;
 import java.util.concurrent.StructuredTaskScope.Subtask.State;
+import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -57,7 +58,7 @@ public class EventExecutor {
 				
 				case 1:
 					try {
-						consumers.getFirst().consumer().accept(event);
+						((Consumer<Event>) consumers.getFirst().consumer()).accept(event);
 					}
 					catch (final NoSuchElementException e) {
 						return;
@@ -72,7 +73,7 @@ public class EventExecutor {
 						tasks.clear();
 						for (final var consumer : consumers) {
 							tasks.add(scope.fork(() -> {
-								consumer.consumer().accept(event);
+								((Consumer<Event>) consumer.consumer()).accept(event);
 							}));
 						}
 						

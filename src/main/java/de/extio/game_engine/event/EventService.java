@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 
 public interface EventService {
 	
-	void register(Class<? extends Event> eventClass, String consumerId, Consumer<Event> consumer);
+	<T extends Event> void register(Class<T> eventClass, String consumerId, Consumer<T> consumer);
 	
 	void unregister(Class<? extends Event> eventClass, String consumerId);
 	
