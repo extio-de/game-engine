@@ -10,7 +10,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -85,8 +84,9 @@ public class RendererWorkingSetImplTest {
 		final var returnedUncommitted = this.workingSet.commit(this.moduleA.getId(), false);
 		final var currentUncommitted = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		
-		assertSame(currentUncommitted, returnedUncommitted);
+		assertTrue(returnedUncommitted.isEmpty());
 		assertTrue(currentUncommitted.isEmpty());
+		assertEquals(returnedUncommitted, currentUncommitted);
 		
 		final List<RenderingBo> live = new ArrayList<>();
 		this.workingSet.getLiveSet(live, null);
@@ -109,7 +109,7 @@ public class RendererWorkingSetImplTest {
 		final var returnedUncommitted = this.workingSet.commit(this.moduleA.getId(), true);
 		final var currentUncommitted = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		
-		assertSame(currentUncommitted, returnedUncommitted);
+		assertEquals(currentUncommitted, returnedUncommitted);
 		assertEquals(Map.of("bo1", bo1, "bo2", bo2), currentUncommitted);
 		
 		final List<RenderingBo> live = new ArrayList<>();
@@ -186,8 +186,6 @@ public class RendererWorkingSetImplTest {
 		
 		verify(this.renderingBoPool, times(1)).release(bo1);
 		verify(this.renderingBoPool, times(1)).release(bo2);
-		assertEquals(1, bo1.closeStaticCalls());
-		assertEquals(1, bo2.closeStaticCalls());
 	}
 	
 	@Test
@@ -206,7 +204,7 @@ public class RendererWorkingSetImplTest {
 	}
 	
 	@Test
-	void secondCommitReleasesPreviousLiveWorkAndCallsCloseStaticOncePerClass() {
+	void secondCommitReleasesPreviousLiveWork() {
 		final var bo1 = new TestBoA();
 		bo1.setId("bo1");
 		final var bo2 = new TestBoA();
@@ -223,11 +221,6 @@ public class RendererWorkingSetImplTest {
 		
 		verify(this.renderingBoPool, times(1)).release(bo1);
 		verify(this.renderingBoPool, times(1)).release(bo2);
-		
-		// closeStatic() is called exactly once per class, so one of bo1 or bo2 has it called
-		final int totalCloseStaticCallsForTestBoA = bo1.closeStaticCalls() + bo2.closeStaticCalls();
-		assertEquals(1, totalCloseStaticCallsForTestBoA);
-		assertEquals(0, bo3.closeStaticCalls());
 	}
 	
 	@Test
@@ -362,8 +355,6 @@ public class RendererWorkingSetImplTest {
 
 	private static abstract class TestBoBase implements RenderingBo {
 		
-		private final AtomicInteger closeStaticCalls = new AtomicInteger();
-		
 		private String id;
 		
 		@Override
@@ -483,13 +474,9 @@ public class RendererWorkingSetImplTest {
 		
 		@Override
 		public void closeStatic() {
-			this.closeStaticCalls.incrementAndGet();
+			
 		}
-		
-		public int closeStaticCalls() {
-			return this.closeStaticCalls.get();
-		}
-		
+
 		@Override
 		public void setRendererData(final RendererData RendererData) {
 		}

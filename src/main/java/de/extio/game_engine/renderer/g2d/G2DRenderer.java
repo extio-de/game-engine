@@ -2,7 +2,6 @@ package de.extio.game_engine.renderer.g2d;
 
 import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.Graphics2D;
 import java.awt.Toolkit;
 import java.awt.image.BufferedImage;
@@ -25,7 +24,6 @@ import org.slf4j.LoggerFactory;
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.Renderer;
 import de.extio.game_engine.renderer.RendererData;
-import de.extio.game_engine.renderer.g2d.G2DRenderer.G2DRendererModule;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawBackground;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
@@ -53,6 +51,8 @@ public class G2DRenderer implements Renderer {
 	private final ReentrantReadWriteLock rwLock = new ReentrantReadWriteLock(true);
 	
 	private final List<RenderingBo> renderingBOs = new ArrayList<>();
+	
+	private final Map<Class<? extends RenderingBo>, RenderingBo> usedRenderingBoTypes = new HashMap<>();
 	
 	private volatile G2DMainFrame mainFrame;
 	
@@ -190,8 +190,10 @@ public class G2DRenderer implements Renderer {
 					screenGraphics.setColor(Color.BLACK);
 					screenGraphics.fillRect(0, 0, viewPortDimension.getX(), viewPortDimension.getY());
 					
+					usedRenderingBoTypes.clear();
 					for (final RenderingBo renderingBO : this.renderingBOs) {
 						if (renderingBO instanceof final G2DAbstractRenderingBo g2dAbstractRenderingBo) {
+							usedRenderingBoTypes.putIfAbsent(g2dAbstractRenderingBo.getClass(), g2dAbstractRenderingBo);
 							g2dAbstractRenderingBo.render(screenGraphics, this.rendererData.getRendererControl().getScaleFactor(), false);
 							if (takeScreenshot_ && g2dAbstractRenderingBo.isScreenshotRelevant()) {
 								g2dAbstractRenderingBo.render(screenshotGraphics, this.rendererData.getRendererControl().getScaleFactor(), true);
@@ -199,7 +201,9 @@ public class G2DRenderer implements Renderer {
 						}
 					}
 					
-					this.rendererData.getRendererWorkingSet().get(this.rendererModuleId, "G2DRenderer_tooltip").closeStatic();
+					for (final RenderingBo bo : usedRenderingBoTypes.values()) {
+						bo.closeStatic();
+					}
 					
 					//
 					// Rendering cycle END

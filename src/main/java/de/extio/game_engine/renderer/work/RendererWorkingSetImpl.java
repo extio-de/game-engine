@@ -31,22 +31,38 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	
 	@Override
 	public void put(final String producerId, final RenderingBo work) {
-		this.getWorkingSetByProducer(producerId)
+		final var previous = this.getWorkingSetByProducer(producerId)
 				.next()
 				.put(work.getId(), work);
+		if (previous != null) {
+			this.rendererBoPool.release(previous);
+		}
 	}
 	
 	@Override
 	public void put(final String producerId, final List<RenderingBo> work) {
 		final var nextMap = this.getWorkingSetByProducer(producerId).next();
 		for (final RenderingBo bo : work) {
-			nextMap.put(bo.getId(), bo);
+			final var previous = nextMap.put(bo.getId(), bo);
+			if (previous != null) {
+				this.rendererBoPool.release(previous);
+			}
+		}
+	}
+	
+	@Override
+	public void remove(final String producerId, final String id) {
+		final var previous = this.getWorkingSetByProducer(producerId)
+				.next()
+				.remove(id);
+		if (previous != null) {
+			this.rendererBoPool.release(previous);
 		}
 	}
 	
 	@Override
 	public Map<String, RenderingBo> getUncommittedWork(final String producerId) {
-		return this.getWorkingSetByProducer(producerId).next();
+		return Map.copyOf(this.getWorkingSetByProducer(producerId).next());
 	}
 	
 	@Override
@@ -74,25 +90,26 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	
 	@Override
 	public Map<String, RenderingBo> commit(final String producerId, final boolean clone) {
-		final AtomicReference<Map<String, RenderingBo>> previousWork = new AtomicReference<>();
+		final AtomicReference<Map<String, RenderingBo>> previousLiveRef = new AtomicReference<>();
 		final RendererWork rendererWork = this.workingSet.compute(producerId, (k, v) -> {
 			if (v == null) {
 				return new RendererWork(this.obtainMapFromPool(), this.obtainMapFromPool());
 			}
-			previousWork.set(v.live());
+			previousLiveRef.set(v.live());
 			if (clone) {
 				final Map<String, RenderingBo> newNext = this.obtainMapFromPool();
 				newNext.putAll(v.next());
 				return new RendererWork(v.next(), newNext);
 			}
 			else {
+				v.live().values().forEach(this.rendererBoPool::release);
 				return new RendererWork(v.next(), this.obtainMapFromPool());
 			}
 		});
 		
-		final var previousWorkMap = previousWork.get();
-		if (previousWorkMap != null) {
-			this.releaseBoClasses(previousWorkMap);
+		final var previousLiveSet = previousLiveRef.get();
+		if (previousLiveSet != null) {
+			this.returnMapToPool(previousLiveSet);
 		}
 		
 		return rendererWork.next();
@@ -102,8 +119,8 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	public void clear(final String producerId) {
 		final RendererWork rendererWork = this.workingSet.remove(producerId);
 		if (rendererWork != null) {
-			this.releaseBoClasses(rendererWork.live());
-			this.releaseBoClasses(rendererWork.next());
+			rendererWork.live().values().forEach(this.rendererBoPool::release);
+			rendererWork.next().values().forEach(this.rendererBoPool::release);
 		}
 	}
 	
@@ -120,23 +137,6 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		return this.workingSet.computeIfAbsent(producerId, k -> new RendererWork(this.obtainMapFromPool(), this.obtainMapFromPool()));
 	}
 	
-	private void releaseBoClasses(final Map<String, RenderingBo> work) {
-		if (work == null || work.isEmpty()) {
-			return;
-		}
-		
-		final var releasedBoClasses = this.obtainSetFromPool();
-		for (final RenderingBo renderingBO : work.values()) {
-			if (releasedBoClasses.add(renderingBO.getClass())) {
-				renderingBO.closeStatic();
-			}
-			this.rendererBoPool.release(renderingBO);
-		}
-		
-		this.returnMapToPool(work);
-		this.returnSetToPool(releasedBoClasses);
-	}
-	
 	private Map<String, RenderingBo> obtainMapFromPool() {
 		var map = this.mapsPool.poll();
 		if (map == null) {
@@ -148,19 +148,6 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	private void returnMapToPool(final Map<String, RenderingBo> map) {
 		map.clear();
 		this.mapsPool.offer(map);
-	}
-	
-	private Set<Class<? extends RenderingBo>> obtainSetFromPool() {
-		var set = this.setsPool.poll();
-		if (set == null) {
-			set = new HashSet<>();
-		}
-		return set;
-	}
-	
-	private void returnSetToPool(final Set<Class<? extends RenderingBo>> set) {
-		set.clear();
-		this.setsPool.offer(set);
 	}
 	
 	private static record RendererWork(Map<String, RenderingBo> live, Map<String, RenderingBo> next) {

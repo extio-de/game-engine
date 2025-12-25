@@ -17,6 +17,8 @@ public interface RendererWorkingSet {
 	<T extends RenderingBo> T get(String producerId, String id, Class<T> type);
 
 	<T extends RenderingBo> T getOrAcquire(String producerId, String id, Class<T> type);
+
+	void remove(String producerId, String id);
 	
 	Map<String, RenderingBo> getUncommittedWork(String producerId);
 	
