@@ -55,6 +55,24 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	}
 	
 	@Override
+	public <T extends RenderingBo> T get(final String producerId, final String id, final Class<T> type) {
+		final RenderingBo bo = this.getWorkingSetByProducer(producerId).next().get(id);
+		if (bo == null) {
+			return null;
+		}
+		return type.cast(bo);
+	}
+	
+	@Override
+	public <T extends RenderingBo> T getOrAcquire(final String producerId, final String id, final Class<T> type) {
+		final var bo = this.get(producerId, id, type);
+		if (bo != null) {
+			return bo;
+		}
+		return this.rendererBoPool.acquire(id, type);
+	}
+	
+	@Override
 	public Map<String, RenderingBo> commit(final String producerId, final boolean clone) {
 		final AtomicReference<Map<String, RenderingBo>> previousWork = new AtomicReference<>();
 		final RendererWork rendererWork = this.workingSet.compute(producerId, (k, v) -> {
@@ -88,7 +106,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 			this.releaseBoClasses(rendererWork.next());
 		}
 	}
-
+	
 	@Override
 	public void getLiveSet(final List<RenderingBo> combinedLiveSet, final Predicate<String> filter) {
 		this.workingSet.forEach((producer, rendererWork) -> {
@@ -106,7 +124,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		if (work == null || work.isEmpty()) {
 			return;
 		}
-
+		
 		final var releasedBoClasses = this.obtainSetFromPool();
 		for (final RenderingBo renderingBO : work.values()) {
 			if (releasedBoClasses.add(renderingBO.getClass())) {
@@ -118,7 +136,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		this.returnMapToPool(work);
 		this.returnSetToPool(releasedBoClasses);
 	}
-
+	
 	private Map<String, RenderingBo> obtainMapFromPool() {
 		var map = this.mapsPool.poll();
 		if (map == null) {

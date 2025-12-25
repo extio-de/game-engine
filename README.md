@@ -120,7 +120,6 @@ rendererWorkingSet.commit(myModule.getId(), true);
 var existingRect = rendererWorkingSet.get(myModule.getId(), "myRect");
 existingRect.setColor(Color.RED);
 existingRect.setPosition(150, 250);
-rendererWorkingSet.put(myModule.getId(), existingRect);
 
 // Commit again to apply the changes
 rendererWorkingSet.commit(myModule.getId(), true);

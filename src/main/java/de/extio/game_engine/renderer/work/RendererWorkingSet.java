@@ -13,6 +13,10 @@ public interface RendererWorkingSet {
 	void put(String producerId, List<RenderingBo> work);
 
 	RenderingBo get(String producerId, String id);
+
+	<T extends RenderingBo> T get(String producerId, String id, Class<T> type);
+
+	<T extends RenderingBo> T getOrAcquire(String producerId, String id, Class<T> type);
 	
 	Map<String, RenderingBo> getUncommittedWork(String producerId);
 	
