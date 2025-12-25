@@ -20,7 +20,6 @@ import de.extio.game_engine.renderer.work.RendererWorkingSetImpl;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.renderer.work.RenderingBoPoolImpl;
 import de.extio.game_engine.resource.StaticResourceService;
-import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.storage.StorageService;
 
 @AutoConfiguration
@@ -73,5 +72,5 @@ public class RendererAutoConfiguration {
 	RendererLauncher rendererLauncher(final ApplicationContext applicationContext, final RendererData rendererData) {
 		return new RendererLauncher(applicationContext, rendererData);
 	}
-	
+
 }
