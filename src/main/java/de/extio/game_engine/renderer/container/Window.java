@@ -60,7 +60,7 @@ public class Window extends Container {
 			this.closeButtonName = this.id + "_CloseButton";
 			final var closeButtonBo = this.renderingBoPool.acquire(this.closeButtonName, ControlRenderingBo.class)
 					.setType(WindowCloseButtonControl.class)
-					.setCustomData(this.draggable)
+					.setCustomData(true)
 					.setEnabled(true)
 					.setVisible(true)
 					.withDimensionAbsolute(this.area.getDimension())
