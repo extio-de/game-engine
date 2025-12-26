@@ -16,7 +16,7 @@ import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButt
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
-import de.extio.game_engine.spatial2.WorldUtils2;
+import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordD2;
 import de.extio.game_engine.spatial2.model.CoordI2;
@@ -82,7 +82,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 		// return false;
 		synchronized (WINDOWS) {
 			for (final Window window : WINDOWS) {
-				if (WorldUtils2.intersects(window, area)) {
+				if (SpatialUtils2.intersects(window, area)) {
 					return true;
 				}
 			}
@@ -163,7 +163,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 	}
 	
 	public boolean intersects(final CoordI2 coord) {
-		return WorldUtils2.intersects(this.area.getPosition(), this.area.getDimension(), coord, ImmutableCoordI2.one());
+		return SpatialUtils2.intersects(this.area.getPosition(), this.area.getDimension(), coord, ImmutableCoordI2.one());
 	}
 	
 	public void render(final List<RenderingBo> renderingBo, final BiConsumer<List<RenderingBo>, RenderingBo> consumer) {
