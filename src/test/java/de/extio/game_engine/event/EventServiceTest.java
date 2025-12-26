@@ -108,6 +108,21 @@ class EventServiceTest {
 	}
 
 	@Test
+	void testUnregisterAll() throws InterruptedException {
+		this.eventService.register(TestEvent.class, "consumer1", event -> this.receivedEvents.add(event));
+		this.eventService.register(OtherTestEvent.class, "consumer1", event -> this.receivedEvents.add(event));
+
+		this.eventService.unregisterAll("consumer1");
+
+		this.eventService.fire(new TestEvent("test"));
+		this.eventService.fire(new OtherTestEvent("other"));
+
+		await().pollDelay(Duration.ofMillis(50))
+				.atMost(Duration.ofMillis(200))
+				.untilAsserted(() -> assertThat(this.receivedEvents).isEmpty());
+	}
+
+	@Test
 	void testConsumerReregistration() throws InterruptedException {
 		final var firstLatch = new CountDownLatch(1);
 		final var secondLatch = new CountDownLatch(1);

@@ -22,6 +22,12 @@ public class EventHandlerRegistry {
 			consumers.removeIf(ec -> ec.id().equals(consumerId));
 		}
 	}
+
+	public void unregisterAll(final String consumerId) {
+		for (final var consumers : this.handlers.values()) {
+			consumers.removeIf(ec -> ec.id().equals(consumerId));
+		}
+	}
 	
 	List<EventConsumer> getHandlers(final Class<? extends Event> eventClass) {
 		return this.handlers.get(eventClass);

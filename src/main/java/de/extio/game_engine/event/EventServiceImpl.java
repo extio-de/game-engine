@@ -23,6 +23,11 @@ public class EventServiceImpl implements EventService {
 	}
 
 	@Override
+	public void unregisterAll(final String consumerId) {
+		this.registry.unregisterAll(consumerId);
+	}
+
+	@Override
 	public void fire(final Event event) {
 		this.executor.submit(event);
 	}
