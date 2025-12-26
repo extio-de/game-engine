@@ -70,7 +70,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	
 	@Override
 	public void onDeactivate() {
-		this.eventService.unregister(ViewportResizeEvent.class, this.id);
+		
 	}
 	
 	protected void onViewportResize(final ViewportResizeEvent event) {

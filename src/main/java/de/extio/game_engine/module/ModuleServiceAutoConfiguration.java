@@ -6,6 +6,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 
+import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
 @AutoConfiguration
@@ -14,8 +15,8 @@ public class ModuleServiceAutoConfiguration {
 	
 	@Bean
 	@ConditionalOnMissingBean
-	ModuleService moduleService(final ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet) {
-		return new ModuleServiceImpl(applicationContext, rendererWorkingSet);
+	ModuleService moduleService(final ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet, final EventService eventService) {
+		return new ModuleServiceImpl(applicationContext, rendererWorkingSet, eventService);
 	}
 	
 	@Bean

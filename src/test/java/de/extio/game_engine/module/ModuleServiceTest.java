@@ -2,6 +2,7 @@ package de.extio.game_engine.module;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.List;
@@ -12,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.event.ContextRefreshedEvent;
 
+import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
 public class ModuleServiceTest {
@@ -22,16 +24,19 @@ public class ModuleServiceTest {
 	
 	private TestClientModule testClientModule;
 	
+	private EventService eventService;
+	
 	@BeforeEach
 	public void setUp() throws Exception {
 		this.testModule = new TestModule();
 		this.testClientModule = new TestClientModule();
+		this.eventService = mock(EventService.class);
 		
 		final ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBeansOfType(AbstractModule.class, false, false))
 			.thenReturn(Map.of("testModule", this.testModule, "testClientModule", this.testClientModule));
 		
-		this.moduleManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class));
+		this.moduleManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class), this.eventService);
 		this.moduleManager.onApplicationEvent(new ContextRefreshedEvent(ctx));
 	}
 	
@@ -46,7 +51,7 @@ public class ModuleServiceTest {
 	public void testOnApplicationEvent_EmptyModules() throws Exception {
 		final ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBeansOfType(AbstractModule.class, false, false)).thenReturn(Map.of());
-		final ModuleServiceImpl emptyManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class));
+		final ModuleServiceImpl emptyManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class), mock(EventService.class));
 		emptyManager.onApplicationEvent(new ContextRefreshedEvent(ctx));
 		
 		assertTrue(emptyManager.getModulesAll().isEmpty());
@@ -56,7 +61,7 @@ public class ModuleServiceTest {
 	public void testOnApplicationEvent_NullModules() throws Exception {
 		final ApplicationContext ctx = mock(ApplicationContext.class);
 		when(ctx.getBeansOfType(AbstractModule.class, false, false)).thenReturn(null);
-		final ModuleServiceImpl nullManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class));
+		final ModuleServiceImpl nullManager = new ModuleServiceImpl(ctx, mock(RendererWorkingSet.class), mock(EventService.class));
 		nullManager.onApplicationEvent(new ContextRefreshedEvent(ctx));
 		
 		assertTrue(nullManager.getModulesAll().isEmpty());
@@ -104,6 +109,13 @@ public class ModuleServiceTest {
 	}
 	
 	@Test
+	public void testUnloadModule_UnregistersEvents() {
+		this.moduleManager.unloadModule(this.testModule.getId());
+		
+		verify(this.eventService).unregisterAll(this.testModule.getId());
+	}
+	
+	@Test
 	public void testUnloadModule_NotLoaded() {
 		final int initialSize = this.moduleManager.getModulesAll().size();
 		
@@ -140,6 +152,14 @@ public class ModuleServiceTest {
 		
 		assertFalse(this.moduleManager.getModulesActive().contains(this.testModule));
 		assertTrue(this.testModule.onDeactivateCalled);
+	}
+	
+	@Test
+	public void testDeactivate_UnregistersEvents() {
+		this.moduleManager.changeActiveState(this.testModule.getId(), true);
+		this.moduleManager.changeActiveState(this.testModule.getId(), false);
+		
+		verify(this.eventService).unregisterAll(this.testModule.getId());
 	}
 	
 	@Test

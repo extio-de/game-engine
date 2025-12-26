@@ -17,6 +17,7 @@ import org.springframework.context.ApplicationContext;
 import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 
+import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 
 public class ModuleServiceImpl implements ModuleService, ApplicationListener<ContextRefreshedEvent> {
@@ -30,6 +31,8 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 	private final Map<String, AbstractModule> modulesByIdMap = new ConcurrentHashMap<>();
 	
 	private final RendererWorkingSet rendererWorkingSet;
+
+	private final EventService eventService;
 	
 	private List<AbstractModule> modulesAllView = List.of();
 	
@@ -47,9 +50,10 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 	
 	private final Map<ModuleExecutorCallbacks, List<AbstractModule>> executorCallbackMap = Collections.synchronizedMap(new EnumMap<>(ModuleExecutorCallbacks.class));
 	
-	public ModuleServiceImpl(ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet) {
+	public ModuleServiceImpl(ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet, final EventService eventService) {
 		this.applicationContext = applicationContext;
 		this.rendererWorkingSet = rendererWorkingSet;
+		this.eventService = eventService;
 	}
 
 	
@@ -123,6 +127,8 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 			}
 			
 			this.invokeSafe(module, m -> m.onUnload());
+			
+			this.eventService.unregisterAll(module.getId());
 			if (module instanceof final AbstractClientModule clientModule) {
 				this.rendererWorkingSet.clear(clientModule.getId());
 			}
@@ -153,6 +159,7 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 									.map(m -> (AbstractClientModule) m)
 									.toList();
 						}
+						this.eventService.unregisterAll(module.getId());
 						if (module instanceof final AbstractClientModule clientModule) {
 							this.rendererWorkingSet.clear(clientModule.getId());
 						}
@@ -164,6 +171,7 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 								}
 							}
 						}
+						
 						this.invokeSafe(module, AbstractModule::onDeactivate);
 						
 						LOGGER.info("Deactivated {}", id);
