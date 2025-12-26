@@ -17,10 +17,6 @@ public interface LocalizationService {
 	
 	String getCurrentLanguage();
 	
-	String translate(Integer id);
-	
-	String translate(Integer id, String defaultText);
-	
 	String translate(String id);
 	
 	String translate(String id, String defaultText);

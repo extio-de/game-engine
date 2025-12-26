@@ -1,7 +1,6 @@
 package de.extio.game_engine.i18n;
 
 import java.io.InputStream;
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -24,12 +23,9 @@ public class LocalizationServiceImpl implements LocalizationService {
 	
 	private String currentLanguageName;
 	
-	private final Map<Integer, String> intLookup = new HashMap<>();
-	
 	@Override
 	public void resetEntries() {
 		this.localizations.getLanguages().forEach((lang, mapping) -> mapping.clear());
-		this.intLookup.clear();
 	}
 	
 	@Override
@@ -37,7 +33,6 @@ public class LocalizationServiceImpl implements LocalizationService {
 		this.localizations = new Localizations();
 		this.currentLanguage = null;
 		this.currentLanguageName = null;
-		this.intLookup.clear();
 	}
 	
 	@Override
@@ -76,7 +71,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 			
 			this.localizations.setPrefix(localizations.getPrefix());
 			
-			this.intLookup.clear();
+			LOGGER.info("Loaded {} localizations for {} languages", localizations.getDescriptions().size(), localizations.getLanguages().size());
 		}
 		
 		if (this.currentLanguageName == null) {
@@ -93,7 +88,6 @@ public class LocalizationServiceImpl implements LocalizationService {
 		
 		this.currentLanguageName = lang;
 		this.currentLanguage = this.localizations.getLanguages().get(lang);
-		this.intLookup.clear();
 	}
 	
 	@Override
@@ -107,27 +101,6 @@ public class LocalizationServiceImpl implements LocalizationService {
 	@Override
 	public String getCurrentLanguage() {
 		return this.currentLanguageName;
-	}
-	
-	@Override
-	public String translate(final Integer id) {
-		String result = this.intLookup.get(id);
-		if (result != null) {
-			return result;
-		}
-		
-		result = this.translate(String.valueOf(id));
-		this.intLookup.put(id, result);
-		return result;
-	}
-	
-	@Override
-	public String translate(final Integer id, final String defaultText) {
-		String result = this.translate(id);
-		if (result.startsWith(NOT_FOUND_PREFIX)) {
-			result = defaultText;
-		}
-		return result;
 	}
 	
 	@Override
@@ -158,14 +131,11 @@ public class LocalizationServiceImpl implements LocalizationService {
 		if (!this.localizations.getLanguagesInfo().containsKey(lang)) {
 			this.localizations.getLanguagesInfo().put(lang, new Language(lang, lang));
 		}
-		
-		this.intLookup.clear();
 	}
 	
 	@Override
 	public void remove(final String id) {
 		this.localizations.getLanguages().forEach((k, v) -> v.remove(id));
-		this.intLookup.clear();
 	}
 	
 	@Override

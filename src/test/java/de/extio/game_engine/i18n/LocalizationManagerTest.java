@@ -131,45 +131,6 @@ class LocalizationManagerTest {
 	}
 	
 	@Test
-	void testTranslateWithIntegerId() {
-		Localizations localizations = this.localizationManager.getLocalizations();
-		Language english = new Language("English", "en");
-		localizations.getLanguagesInfo().put("en", english);
-		localizations.getLanguages().put("en", new LinkedHashMap<>(Map.of("1", "Hello")));
-		this.localizationManager.setLanguage("en");
-		
-		String result = this.localizationManager.translate(1);
-		
-		assertEquals("Hello", result);
-	}
-	
-	@Test
-	void testTranslateWithIntegerIdNotFound() {
-		Localizations localizations = this.localizationManager.getLocalizations();
-		Language english = new Language("English", "en");
-		localizations.getLanguagesInfo().put("en", english);
-		localizations.getLanguages().put("en", new LinkedHashMap<>());
-		this.localizationManager.setLanguage("en");
-		
-		String result = this.localizationManager.translate(999);
-		
-		assertTrue(result.startsWith(LocalizationServiceImpl.NOT_FOUND_PREFIX));
-	}
-	
-	@Test
-	void testTranslateWithIntegerIdAndDefault() {
-		Localizations localizations = this.localizationManager.getLocalizations();
-		Language english = new Language("English", "en");
-		localizations.getLanguagesInfo().put("en", english);
-		localizations.getLanguages().put("en", new LinkedHashMap<>());
-		this.localizationManager.setLanguage("en");
-		
-		String result = this.localizationManager.translate(999, "Default Text");
-		
-		assertEquals("Default Text", result);
-	}
-	
-	@Test
 	void testTranslateWithStringId() {
 		Localizations localizations = this.localizationManager.getLocalizations();
 		Language english = new Language("English", "en");
@@ -290,8 +251,8 @@ class LocalizationManagerTest {
 		localizations.getLanguages().put("en", new LinkedHashMap<>(Map.of("1", "Hello")));
 		this.localizationManager.setLanguage("en");
 		
-		String result1 = this.localizationManager.translate(1);
-		String result2 = this.localizationManager.translate(1);
+		String result1 = this.localizationManager.translate("1");
+		String result2 = this.localizationManager.translate("1");
 		
 		assertEquals("Hello", result1);
 		assertEquals("Hello", result2);
