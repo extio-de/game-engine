@@ -1,9 +1,13 @@
 package de.extio.game_engine.renderer.work;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayDeque;
+import java.util.Deque;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ArrayBlockingQueue;
+import java.util.concurrent.BlockingQueue;
 
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.model.RenderingBo;
@@ -13,6 +17,10 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 	public final Map<Class<? extends RenderingBo>, Class<? extends RenderingBo>> mapping;
 	
 	private final Map<Class<? extends RenderingBo>, Stack<RenderingBo>> pool = new HashMap<>();
+	
+	private final BlockingQueue<RenderingBo> returnQueue = new ArrayBlockingQueue<>(1000);
+	
+	private final Deque<RenderingBo> returnSink = new ArrayDeque<>(1000);
 	
 	private final LastMapping lastMapping = new LastMapping();
 	
@@ -98,28 +106,37 @@ public class RenderingBoPoolImpl implements RenderingBoPool {
 	}
 	
 	@Override
-	public synchronized void release(final RenderingBo obj) {
+	public void returnToPool(final RenderingBo obj) {
+		this.returnQueue.offer(obj);
+	}
+	
+	@Override
+	public synchronized void releasePending() {
 		try {
-			obj.close();
-			
-			final Class<? extends RenderingBo> clazz = obj.getClass();
-			Stack<RenderingBo> pooled;
-			
-			if (this.lastReverseMapping != null && this.lastReverseMapping.clazz == clazz) {
-				pooled = this.lastReverseMapping.pooled;
-			}
-			else {
-				pooled = this.pool.get(clazz);
-				if (pooled == null) {
-					pooled = new Stack<>();
-					this.pool.put(clazz, pooled);
+			this.returnQueue.drainTo(this.returnSink);
+			RenderingBo obj;
+			while ((obj = this.returnSink.poll()) != null) {
+				obj.close();
+				
+				final Class<? extends RenderingBo> clazz = obj.getClass();
+				Stack<RenderingBo> pooled;
+				
+				if (this.lastReverseMapping != null && this.lastReverseMapping.clazz == clazz) {
+					pooled = this.lastReverseMapping.pooled;
+				}
+				else {
+					pooled = this.pool.get(clazz);
+					if (pooled == null) {
+						pooled = new Stack<>();
+						this.pool.put(clazz, pooled);
+					}
+					
+					this.lastReverseMapping.clazz = clazz;
+					this.lastReverseMapping.pooled = pooled;
 				}
 				
-				this.lastReverseMapping.clazz = clazz;
-				this.lastReverseMapping.pooled = pooled;
+				pooled.push(obj);
 			}
-			
-			pooled.push(obj);
 		}
 		catch (final Exception e) {
 			throw new RuntimeException(e);

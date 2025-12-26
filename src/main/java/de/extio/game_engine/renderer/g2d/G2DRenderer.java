@@ -204,6 +204,8 @@ public class G2DRenderer implements Renderer {
 					for (final RenderingBo bo : usedRenderingBoTypes.values()) {
 						bo.staticCleanupAfterFrame();
 					}
+
+					this.rendererData.getRenderingBoPool().releasePending();
 					
 					//
 					// Rendering cycle END

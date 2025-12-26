@@ -26,9 +26,9 @@ public class G2DRendererControl implements RendererControl {
 	
 	private RendererData rendererData;
 	
-	private CoordI2 absoluteViewportDimension = ImmutableCoordI2.one();
+	private CoordI2 absoluteViewportDimension = RendererControl.REFERENCE_RESOLUTION;
 	
-	private CoordI2 effectiveViewportDimension = ImmutableCoordI2.one();
+	private CoordI2 effectiveViewportDimension = RendererControl.REFERENCE_RESOLUTION;
 	
 	private double scaleFactor = 1.0;
 	

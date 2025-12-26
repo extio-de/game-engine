@@ -194,8 +194,8 @@ public class RendererWorkingSetImplTest {
 		final var uncommittedAfter = this.workingSet.getUncommittedWork(this.moduleA.getId());
 		assertTrue(uncommittedAfter.isEmpty());
 		
-		verify(this.renderingBoPool, times(1)).release(bo1);
-		verify(this.renderingBoPool, times(1)).release(bo2);
+		verify(this.renderingBoPool, times(1)).returnToPool(bo1);
+		verify(this.renderingBoPool, times(1)).returnToPool(bo2);
 	}
 	
 	@Test
@@ -240,8 +240,8 @@ public class RendererWorkingSetImplTest {
 		this.workingSet.put(this.moduleA.getId(), bo3);
 		this.workingSet.commit(this.moduleA.getId(), true);
 		
-		verify(this.renderingBoPool, times(1)).release(bo1);
-		verify(this.renderingBoPool, times(1)).release(bo2);
+		verify(this.renderingBoPool, times(1)).returnToPool(bo1);
+		verify(this.renderingBoPool, times(1)).returnToPool(bo2);
 	}
 	
 	@Test

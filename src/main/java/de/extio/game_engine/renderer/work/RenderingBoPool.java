@@ -20,9 +20,14 @@ public interface RenderingBoPool {
 	<T extends RenderingBo> T copy(T original);
 
 	/**
-	 * Releases a rendering business object back to the pool. This is usually managed by the renderer.
+	 * Queues a rendering business object for return back to the pool. Renderer will release the BO after the current rendering cycle is complete.
 	 */
-	void release(RenderingBo obj);
+	void returnToPool(RenderingBo obj);
+	
+	/**
+	 * Releases all pending rendering business objects back to the pool. This is managed by the renderer.
+	 */
+	void releasePending();
 
 	void setRendererData(RendererData rendererData);
 }

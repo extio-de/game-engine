@@ -1,6 +1,7 @@
 package de.extio.game_engine.renderer.work;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
 import static org.junit.jupiter.api.Assertions.assertNotSame;
 import static org.junit.jupiter.api.Assertions.assertSame;
@@ -89,7 +90,8 @@ public class RenderingBoPoolImplTest {
 		assertEquals("id1", acquired1.getId());
 		assertEquals(0, acquired1.getCloseCallCount());
 
-		this.pool.release(acquired1);
+		this.pool.returnToPool(acquired1);
+		this.pool.releasePending();
 		assertEquals(1, acquired1.getCloseCallCount());
 
 		final TestRenderingBo acquired2 = this.pool.acquire("id2", TestRenderingBo.class);
@@ -106,10 +108,12 @@ public class RenderingBoPoolImplTest {
 		final TestRenderingBo bo = this.pool.acquire("id", TestRenderingBo.class);
 		assertEquals(0, bo.getCloseCallCount());
 		
-		this.pool.release(bo);
+		this.pool.returnToPool(bo);
+		this.pool.releasePending();
 		assertEquals(1, bo.getCloseCallCount());
 		
-		this.pool.release(bo);
+		this.pool.returnToPool(bo);
+		this.pool.releasePending();
 		assertEquals(2, bo.getCloseCallCount());
 	}
 
@@ -169,10 +173,12 @@ public class RenderingBoPoolImplTest {
 		assertEquals(0, second.getCloseCallCount());
 		assertNotSame(first, second);
 
-		this.pool.release(first);
+		this.pool.returnToPool(first);
+		this.pool.releasePending();
 		assertEquals(1, first.getCloseCallCount());
 		
-		this.pool.release(second);
+		this.pool.returnToPool(second);
+		this.pool.releasePending();
 		assertEquals(1, second.getCloseCallCount());
 
 		final TestRenderingBo reacquired = this.pool.acquire("id3", TestRenderingBo.class);
@@ -180,6 +186,66 @@ public class RenderingBoPoolImplTest {
 		assertNotNull(reacquired);
 		assertEquals("id3", reacquired.getId());
 		assertTrue(reacquired == first || reacquired == second);
+	}
+
+	@Test
+	void testReturnToPoolWithoutReleasePending() {
+		final TestRenderingBo first = this.pool.acquire("id1", TestRenderingBo.class);
+		final int id1 = System.identityHashCode(first);
+		assertEquals(0, first.getCloseCallCount());
+		
+		this.pool.returnToPool(first);
+		assertEquals(0, first.getCloseCallCount());
+		
+		final TestRenderingBo second = this.pool.acquire("id2", TestRenderingBo.class);
+		final int id2 = System.identityHashCode(second);
+		
+		assertNotSame(first, second);
+		assertNotEquals(id1, id2);
+		assertEquals("id2", second.getId());
+	}
+
+	@Test
+	void testBatchReturnToPoolThenReleasePending() {
+		final TestRenderingBo first = this.pool.acquire("id1", TestRenderingBo.class);
+		final TestRenderingBo second = this.pool.acquire("id2", TestRenderingBo.class);
+		final TestRenderingBo third = this.pool.acquire("id3", TestRenderingBo.class);
+		
+		assertEquals(0, first.getCloseCallCount());
+		assertEquals(0, second.getCloseCallCount());
+		assertEquals(0, third.getCloseCallCount());
+		
+		this.pool.returnToPool(first);
+		this.pool.returnToPool(second);
+		this.pool.returnToPool(third);
+		
+		assertEquals(0, first.getCloseCallCount());
+		assertEquals(0, second.getCloseCallCount());
+		assertEquals(0, third.getCloseCallCount());
+		
+		this.pool.releasePending();
+		
+		assertEquals(1, first.getCloseCallCount());
+		assertEquals(1, second.getCloseCallCount());
+		assertEquals(1, third.getCloseCallCount());
+		
+		final TestRenderingBo reacquired = this.pool.acquire("id4", TestRenderingBo.class);
+		assertTrue(reacquired == first || reacquired == second || reacquired == third);
+	}
+
+	@Test
+	void testMultipleReleasePendingCalls() {
+		final TestRenderingBo bo = this.pool.acquire("id1", TestRenderingBo.class);
+		this.pool.returnToPool(bo);
+		
+		this.pool.releasePending();
+		assertEquals(1, bo.getCloseCallCount());
+		
+		this.pool.releasePending();
+		assertEquals(1, bo.getCloseCallCount());
+		
+		this.pool.releasePending();
+		assertEquals(1, bo.getCloseCallCount());
 	}
 
 	@Test
@@ -192,7 +258,7 @@ public class RenderingBoPoolImplTest {
 				final TestRenderingBo bo = this.pool.acquire("id-" + i, TestRenderingBo.class);
 				assertNotNull(bo);
 				assertNotNull(bo.getId());
-				this.pool.release(bo);
+				this.pool.returnToPool(bo);
 				thread1Count[0]++;
 			}
 		});
@@ -202,7 +268,7 @@ public class RenderingBoPoolImplTest {
 				final TestRenderingBo bo = this.pool.acquire("id-" + i, TestRenderingBo.class);
 				assertNotNull(bo);
 				assertNotNull(bo.getId());
-				this.pool.release(bo);
+				this.pool.returnToPool(bo);
 				thread2Count[0]++;
 			}
 		});
@@ -215,6 +281,8 @@ public class RenderingBoPoolImplTest {
 
 		assertEquals(10, thread1Count[0]);
 		assertEquals(10, thread2Count[0]);
+		
+		this.pool.releasePending();
 		
 		final TestRenderingBo bo = this.pool.acquire("final-id", TestRenderingBo.class);
 		assertNotNull(bo);

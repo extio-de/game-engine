@@ -31,7 +31,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 				.next()
 				.put(work.getId(), work);
 		if (previous != null && previous != work) {
-			this.rendererBoPool.release(previous);
+			this.rendererBoPool.returnToPool(previous);
 		}
 	}
 	
@@ -41,7 +41,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		for (final RenderingBo bo : work) {
 			final var previous = nextMap.put(bo.getId(), bo);
 			if (previous != null && previous != bo) {
-				this.rendererBoPool.release(previous);
+				this.rendererBoPool.returnToPool(previous);
 			}
 		}
 	}
@@ -52,7 +52,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 				.next()
 				.remove(id);
 		if (previous != null) {
-			this.rendererBoPool.release(previous);
+			this.rendererBoPool.returnToPool(previous);
 		}
 	}
 	
@@ -108,7 +108,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		final var previousLiveSet = previousLiveRef.get();
 		if (previousLiveSet != null) {
 			if (clone) {
-				previousLiveSet.values().forEach(this.rendererBoPool::release);
+				previousLiveSet.values().forEach(this.rendererBoPool::returnToPool);
 			}
 			this.returnMapToPool(previousLiveSet);
 		}
@@ -119,7 +119,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	@Override
 	public void clearNext(final String producerId) {
 		final var next = this.getWorkingSetByProducer(producerId).next();
-		next.values().forEach(this.rendererBoPool::release);
+		next.values().forEach(this.rendererBoPool::returnToPool);
 		next.clear();
 	}
 
@@ -127,8 +127,8 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	public void clear(final String producerId) {
 		final RendererWork rendererWork = this.workingSet.remove(producerId);
 		if (rendererWork != null) {
-			rendererWork.live().values().forEach(this.rendererBoPool::release);
-			rendererWork.next().values().forEach(this.rendererBoPool::release);
+			rendererWork.live().values().forEach(this.rendererBoPool::returnToPool);
+			rendererWork.next().values().forEach(this.rendererBoPool::returnToPool);
 		}
 	}
 	
