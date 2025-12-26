@@ -9,8 +9,9 @@ import de.extio.game_engine.audio.AudioController;
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.container.Window;
-import de.extio.game_engine.renderer.model.RenderingBo;
+import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
+import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.resource.StaticResource;
@@ -35,38 +36,9 @@ public class DemoModule extends AbstractClientModule {
 		this.mainWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7));
 		this.mainWindow.setDraggable(true);
 
-		var bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_1", ControlRenderingBo.class)
-				.setCaption("Welcome to Exo's Game Engine Demo!")
-				.setFontSize(48)
-				.setType(LabelControl.class)
-				.setVisible(true)
-				.setEnabled(true)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 60)
-				.withPositionRelative(10, 100);
-		this.mainWindow.putRenderingBo(bo);
-		
 		this.getModuleService().changeActiveState(this.getId(), true);
 		this.getModuleService().changeDisplayState(this.getId(), true);
 	}
-
-	// private void displayMenuEntries(final List<RenderingBo> renderingBo) {
-	// 	int y = EngineFacade.instance().getRendererControl().getEffectiveViewportDimension().getY() / 2 - (this.SIZE + this.SPACING) * this.menuEntries.size() / 2;
-		
-	// 	for (final MenuEntry menuEntry : this.menuEntries) {
-	// 		final int fy = y;
-	// 		this.addRenderingBo(renderingBo, true, () -> EngineFacade.instance().getRenderingBoPool().acquire(ControlRenderingBo.class)
-	// 				.setId("Menu_Label_" + menuEntry.getId())
-	// 				.setCaption(menuEntry.getCaption())
-	// 				.setFontSize(this.SIZE)
-	// 				.setType(LabelControl.class)
-	// 				.setVisible(this.isDisplayed())
-	// 				.setEnabled(menuEntry.isActive())
-	// 				.withDimensionAbsolute(EngineFacade.instance().getRendererControl().getEffectiveViewportDimension().getX(), this.SIZE + this.SPACING)
-	// 				.withPositionAbsoluteAnchorTopLeft(0, fy));
-			
-	// 		y += this.SIZE + this.SPACING;
-	// 	}
-	// }
 
 	@Override
 	public void onUnload() {
@@ -75,6 +47,33 @@ public class DemoModule extends AbstractClientModule {
 
 	@Override
 	public void onActivate() {
+		var bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Welcome", ControlRenderingBo.class)
+				.setCaption("Welcome to Exo's Game Engine Demo!")
+				.setFontSize(48)
+				.setType(LabelControl.class)
+				.setVisible(true)
+				.setEnabled(true)
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 60)
+				.withPositionRelative(10, 100);
+		this.mainWindow.putRenderingBo(bo);
+
+		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Logo", DrawImageRenderingBo.class)
+				.setResource(new StaticResource(List.of("renderer"), "logo.png"))
+				.withDimensionAbsolute(256, 256)
+				.setLayer(RenderingBoLayer.UI0_0)
+				.withPositionRelative((this.mainWindow.getNormalizedDimension().getX() - 256) / 2, 200);
+		this.mainWindow.putRenderingBo(bo);
+
+		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Start", ControlRenderingBo.class)
+				.setCaption("Start")
+				.setFontSize(96)
+				.setType(LabelControl.class)
+				.setVisible(true)
+				.setEnabled(true)
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
+				.withPositionRelative(10, 600);
+		this.mainWindow.putRenderingBo(bo);		
+
 		this.getModuleService().changeActiveState(this.mainWindow.getId(), true);
 	}
 
