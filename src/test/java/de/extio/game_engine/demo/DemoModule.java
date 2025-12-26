@@ -50,6 +50,7 @@ public class DemoModule extends AbstractClientModule {
 		this.secondaryWindow.setNormalizedPosition(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(3));
 		this.secondaryWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2));
 		this.secondaryWindow.setDraggable(true);
+		this.secondaryWindow.setCloseButton(true);
 		
 		this.getModuleService().changeActiveState(this.getId(), true);
 		this.getModuleService().changeDisplayState(this.getId(), true);
