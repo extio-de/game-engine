@@ -44,6 +44,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	
 	protected final Area2 area = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
 	
+	// Normalized area relative to reference resolution, the actual area is aligned based on alignment settings. Scale factors are not considered/handled by the renderer control.
 	protected final Area2 normalizedArea = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
 	
 	protected boolean draggable;
@@ -165,7 +166,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 						foregroundContainer = container;
 						break;
 					}
-					if (SpatialUtils2.intersects(container.area.getPosition(), container.area.getDimension(), event.getCoord(), ImmutableCoordI2.one())) {
+					if (SpatialUtils2.intersects(container.area.getPosition(), container.area.getDimension(), event.getScaledCoord(), ImmutableCoordI2.one())) {
 						// TODO z-index handling
 						foregroundContainer = container;
 					}
@@ -178,12 +179,12 @@ public class Container extends AbstractClientModule implements InitializingBean 
 					this.LOGGER.debug("Started dragging container {}", this.id);
 				}
 				if (this.dragPrevPosition != null) {
-					final var delta = event.getCoord().substract(this.dragPrevPosition);
+					final var delta = event.getScaledCoord().substract(this.dragPrevPosition);
 					if (!ImmutableCoordI2.zero().equals(delta)) {
 						this.setNormalizedPosition(this.getNormalizedPosition().add(delta));
 					}
 				}
-				this.dragPrevPosition = event.getCoord();
+				this.dragPrevPosition = event.getScaledCoord();
 			}
 		}
 	}

@@ -11,8 +11,8 @@ public final class MouseClickEvent extends MouseEvent {
 	
 	private int button;
 	
-	public MouseClickEvent(final boolean pressed, final int modifiers, final int button, final CoordI2 coord) {
-		super(coord, modifiers);
+	public MouseClickEvent(final boolean pressed, final int modifiers, final int button, final CoordI2 rawCoord, final CoordI2 scaledCoord) {
+		super(rawCoord, scaledCoord, modifiers);
 		this.pressed = pressed;
 		this.button = button;
 	}

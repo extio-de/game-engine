@@ -5,9 +5,9 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 /**
  * Message sent by game client engine when mouse enters viewport 
  */
-public final class MouseEnterEvent extends MouseEvent {
+public final class MouseExitEvent extends MouseEvent {
 	
-	public MouseEnterEvent(final int modifiers, final CoordI2 rawCoord, final CoordI2 scaledCoord) {
+	public MouseExitEvent(final int modifiers, final CoordI2 rawCoord, final CoordI2 scaledCoord) {
 		super(rawCoord, scaledCoord, modifiers);
 	}
 	

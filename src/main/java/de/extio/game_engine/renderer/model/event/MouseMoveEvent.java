@@ -11,8 +11,8 @@ public final class MouseMoveEvent extends MouseEvent {
 	
 	private int button;
 	
-	public MouseMoveEvent(final boolean drag, final int modifiers, final CoordI2 coord, final int button) {
-		super(coord, modifiers);
+	public MouseMoveEvent(final boolean drag, final int modifiers, final int button, final CoordI2 rawCoord, final CoordI2 scaledCoord) {
+		super(rawCoord, scaledCoord, modifiers);
 		this.drag = drag;
 		this.button = button;
 	}

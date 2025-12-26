@@ -38,9 +38,12 @@ import de.extio.game_engine.renderer.g2d.control.G2DControlHasExclusiveKeyEvent;
 import de.extio.game_engine.renderer.model.event.KeyStrokeEvent;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
 import de.extio.game_engine.renderer.model.event.MouseEnterEvent;
+import de.extio.game_engine.renderer.model.event.MouseExitEvent;
+import de.extio.game_engine.renderer.model.event.MouseExitEvent;
 import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions.VideoOptionsVideoMode;
+import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class G2DMainFrame extends Frame {
@@ -143,7 +146,9 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseReleased(final MouseEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(false, G2DMainFrame.getModifiers(e), e.getButton(), ImmutableCoordI2.create(e.getX(), e.getY())));
+					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(false, G2DMainFrame.getModifiers(e), e.getButton(), rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -154,7 +159,9 @@ public class G2DMainFrame extends Frame {
 			public void mousePressed(final MouseEvent e) {
 				try {
 					G2DMainFrame.this.requestFocus();
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getButton(), ImmutableCoordI2.create(e.getX(), e.getY())));
+					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getButton(), rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -164,7 +171,9 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseExited(final MouseEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), null, 0));
+					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseExitEvent(G2DMainFrame.getModifiers(e), rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -174,7 +183,9 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseEntered(final MouseEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseEnterEvent(G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY())));
+					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseEnterEvent(G2DMainFrame.getModifiers(e), rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -194,7 +205,9 @@ public class G2DMainFrame extends Frame {
 				final var button = this.getButton(e);
 				
 				try {
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
+					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), button, rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
 					if ("Engine not started up yet".equals(exc.getMessage())) {
@@ -209,7 +222,9 @@ public class G2DMainFrame extends Frame {
 				final var button = this.getButton(e);
 				
 				try {
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(true, G2DMainFrame.getModifiers(e), ImmutableCoordI2.create(e.getX(), e.getY()), button));
+					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(true, G2DMainFrame.getModifiers(e), button, rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
 					if ("Engine not started up yet".equals(exc.getMessage())) {
@@ -239,7 +254,9 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseWheelMoved(final MouseWheelEvent e) {
 				try {
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getWheelRotation() == -1 ? 4 : 5, ImmutableCoordI2.create(e.getX(), e.getY())));
+					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
+					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getWheelRotation() == -1 ? 4 : 5, rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -451,5 +468,10 @@ public class G2DMainFrame extends Frame {
 		}
 		
 		return result;
+	}
+
+	private CoordI2 scaleCoord(final CoordI2 rawCoord) {
+		final var scaleFactor = ((G2DRendererControl) this.rendererData.getRendererControl()).getScaleFactor();
+		return ImmutableCoordI2.create((int) (rawCoord.getX() / scaleFactor), (int) (rawCoord.getY() / scaleFactor));
 	}
 }
