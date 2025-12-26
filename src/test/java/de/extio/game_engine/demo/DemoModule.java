@@ -7,6 +7,7 @@ import org.springframework.context.ApplicationContext;
 
 import de.extio.game_engine.audio.AudioController;
 import de.extio.game_engine.event.EventService;
+import de.extio.game_engine.i18n.LocalizationService;
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.container.Window;
@@ -34,6 +35,9 @@ public class DemoModule extends AbstractClientModule {
 	
 	@Autowired
 	private EventService eventService;
+
+	@Autowired
+	private LocalizationService localizationService;
 	
 	private Window mainWindow;
 	
@@ -110,7 +114,7 @@ public class DemoModule extends AbstractClientModule {
 	
 	private void setupMainWindow() {
 		var bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Welcome", ControlRenderingBo.class)
-				.setCaption("Welcome to Exo's Game Engine Demo!")
+				.setCaption(this.localizationService.translate("test-3"))
 				.setFontSize(48)
 				.setType(LabelControl.class)
 				.setVisible(true)
@@ -127,7 +131,7 @@ public class DemoModule extends AbstractClientModule {
 		this.mainWindow.putRenderingBo(bo);
 		
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Start", ControlRenderingBo.class)
-				.setCaption("Start")
+				.setCaption(this.localizationService.translate("test-4"))
 				.setFontSize(96)
 				.setType(LabelControl.class)
 				.setVisible(true)
@@ -139,7 +143,7 @@ public class DemoModule extends AbstractClientModule {
 	
 	private void setupSecondaryWindow() {
 		var bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Text", DrawFontRenderingBo.class)
-				.setText("This is a message\n\nbla bla bla...\n\nHave a nice day!")
+				.setText(this.localizationService.translate("test-5").replace("\\n", "\n"))
 				.setSize(32)
 				.setAlignment(HorizontalAlignment.CENTER)
 				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).substract(20).getX(), 40)
@@ -147,7 +151,7 @@ public class DemoModule extends AbstractClientModule {
 		this.secondaryWindow.putRenderingBo(bo);
 		
 		bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Button_Ok", ControlRenderingBo.class)
-				.setCaption("OK")
+				.setCaption(this.localizationService.translate("test-6"))
 				.setType(ButtonControl.class)
 				.setVisible(true)
 				.setEnabled(true)

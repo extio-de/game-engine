@@ -1,15 +1,27 @@
 ---
-curId: 2
+curId: 6
 descriptions:
   test-2: ""
   test-1: "aaa"
+  test-6: ""
+  test-5: ""
+  test-4: ""
+  test-3: ""
 languages:
   en:
     test-1: "hello"
     test-2: "world"
+    test-3: "Welcome to Exo's Game Engine Demo!"
+    test-4: "Start"
+    test-5: "This is a message\\n\\nbla bla bla...\\n\\nHave a nice day!"
+    test-6: "OK"
   de:
     test-1: "hallo"
     test-2: "welt"
+    test-3: "Willkommen zu Exo's Spieleengine Demo!"
+    test-4: "Start"
+    test-5: "Dies ist eine Nachricht\\n\\nbla bla bla...\\n\\nSchönen Tag noch!"
+    test-6: "Ok"
 languagesInfo:
   en:
     name: "English"
