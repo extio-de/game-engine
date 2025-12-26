@@ -19,8 +19,9 @@ import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
+// TODO: Unused for now, merge window implementations when implementing theme management
 @Conditional(G2DRendererCondition.class)
-@Component
+// @Component
 public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindowRenderingBo {
 	
 	private static final Map<Long, G2DWindowCacheEntry> CACHE = new HashMap<>();
