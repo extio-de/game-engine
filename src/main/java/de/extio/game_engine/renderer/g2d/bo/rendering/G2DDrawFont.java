@@ -87,25 +87,57 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		
 		graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
 		
-		switch (this.alignment) {
-			case LEFT:
-				renderText(graphics, scaleFactor, this.x, this.y, this.size, this.text);
-				break;
+		if (this.text.contains("\n")) {
+			final var lines = this.text.split("\n", -1);
+			final var lineHeight = getTextDimensions("M", graphics, this.size, 1.0).getY();
 			
-			case CENTER: {
-				final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
-				renderText(graphics, textDim, scaleFactor, (this.width - textDim.getX()) / 2 + this.x, this.y, this.size, this.text);
-				break;
+			for (int i = 0; i < lines.length; i++) {
+				final var line = lines[i];
+				final var yOffset = this.y + i * lineHeight;
+				
+				switch (this.alignment) {
+					case LEFT:
+						renderSingleLine(graphics, null, scaleFactor, this.x, yOffset, this.size, line);
+						break;
+					
+					case CENTER: {
+						final var textDim = G2DDrawFont.getTextDimensions(line, graphics, this.size, 1.0);
+						renderSingleLine(graphics, textDim, scaleFactor, (this.width - textDim.getX()) / 2 + this.x, yOffset, this.size, line);
+						break;
+					}
+					
+					case RIGHT: {
+						final var textDim = G2DDrawFont.getTextDimensions(line, graphics, this.size, 1.0);
+						renderSingleLine(graphics, textDim, scaleFactor, this.width - textDim.getX() + this.x, yOffset, this.size, line);
+						break;
+					}
+					
+					default:
+						break;
+				}
 			}
-			
-			case RIGHT: {
-				final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
-				renderText(graphics, textDim, scaleFactor, this.width - textDim.getX() + this.x, this.y, this.size, this.text);
-				break;
+		}
+		else {
+			switch (this.alignment) {
+				case LEFT:
+					renderSingleLine(graphics, null, scaleFactor, this.x, this.y, this.size, this.text);
+					break;
+				
+				case CENTER: {
+					final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
+					renderSingleLine(graphics, textDim, scaleFactor, (this.width - textDim.getX()) / 2 + this.x, this.y, this.size, this.text);
+					break;
+				}
+				
+				case RIGHT: {
+					final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
+					renderSingleLine(graphics, textDim, scaleFactor, this.width - textDim.getX() + this.x, this.y, this.size, this.text);
+					break;
+				}
+				
+				default:
+					break;
 			}
-			
-			default:
-				break;
 		}
 	}
 	
@@ -139,6 +171,24 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	}
 	
 	public static void renderText(final Graphics graphics, final CoordI2 textDim_, final double scaleFactor, final int x, final int y, final int size_, final String text) {
+		if (text == null) {
+			return;
+		}
+		
+		if (text.contains("\n")) {
+			final var lines = text.split("\n", -1);
+			final var lineHeight = getTextDimensions("M", graphics, size_, scaleFactor).getY();
+			
+			for (int i = 0; i < lines.length; i++) {
+				renderText(graphics, null, scaleFactor, x, y + i * lineHeight, size_, lines[i]);
+			}
+			return;
+		}
+		renderSingleLine(graphics, textDim_, scaleFactor, x, y, size_, text);
+	}
+	
+
+	private static void renderSingleLine(final Graphics graphics, final CoordI2 textDim_, final double scaleFactor, final int x, final int y, final int size_, final String text) {
 		if (text == null) {
 			return;
 		}
