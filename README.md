@@ -41,9 +41,23 @@ The engine is structured around the following key subsystems:
 
 The engine uses Spring's auto-configuration mechanism to wire components together, making it easy to extend and customize behavior through standard Spring configuration patterns. Each subsystem can be independently enabled/disabled via configuration properties, allowing developers to use only the components they need.
 
+### Demo Module
+
+The repository includes [DemoModule.java](src/test/java/de/extio/game_engine/demo/DemoModule.java), a complete example implementation demonstrating core engine features:
+
+- **Module Lifecycle**: Shows proper implementation of `onLoad()`, `onActivate()`, `onDeactivate()`, `onShow()`, `onHide()`, and `onUnload()` callbacks
+- **Window Management**: Creates and manages multiple draggable windows with different configurations
+- **Rendering**: Demonstrates rendering objects including labels, images, and buttons using the rendering pool
+- **Event Handling**: Registers UI control event handlers and responds to user interactions
+- **Audio Integration**: Plays background music and sound effects using the audio controller
+- **Localization**: Uses the i18n system for translating UI text
+- **Sub-module Management**: Shows how parent modules can manage child module lifecycle and display states
+
+The demo module serves as both a reference implementation and a starting point for building new game modules.
+
 ## Background
 
-Exo's Game Engine is derived from [Spacecraft Tactics](https://store.steampowered.com/app/2642080/Spacecraft_Tactics), a 2D turn-based tactical space game released on Steam in 2023. The engine extracts and modernizes the core systems that powered Spacecraft Tactics' UI, campaign, and built-in editors. The engine does not include Spacecraft Tactics' Groovy-based mod system or game-specific logic such as the composite/entity system or pathfinding. It focuses on the fundamental building blocks: modules, rendering, events, storage, and other core subsystems that can be used to build new games.
+Exo's Game Engine is derived from [Spacecraft Tactics](https://store.steampowered.com/app/2642080/Spacecraft_Tactics), a 2D turn-based tactical space game released on Steam in 2023. The engine extracts and modernizes the core systems that powered Spacecraft Tactics' UI, campaign, and built-in editors. The engine does not include Spacecraft Tactics' Groovy-based mod system or game-specific logic such as the composite/entity system or tileset rendering. It focuses on the fundamental building blocks: modules, extensible renderer, events, storage, and other core subsystems that can be used to build new games.
 
 The engine also serves as the foundation for **Exo's CYOA**, an LLM-driven choose-your-own-adventure game that combines the game engine's rendering, module, and UI systems with agentic AI flows to create interactive narrative experiences.
 
