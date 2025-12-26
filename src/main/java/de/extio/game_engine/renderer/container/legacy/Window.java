@@ -186,7 +186,6 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 		if (this.drawCloseButton) {
 			bo = this.renderingBoPool.acquire(this.name + "_Close", ControlRenderingBo.class)
 					.setType(WindowCloseButtonControl.class)
-					.setControlId(this.name + "_Close")
 					.setCustomData(this.draggable)
 					.setEnabled(true)
 					.setVisible(true)

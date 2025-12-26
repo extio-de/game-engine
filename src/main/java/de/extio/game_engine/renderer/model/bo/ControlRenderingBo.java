@@ -12,10 +12,6 @@ import de.extio.game_engine.resource.StaticResource;
  */
 public interface ControlRenderingBo extends RenderingBoHasDimension {
 	
-	ControlRenderingBo setControlId(String id);
-	
-	String getControlId();
-	
 	/**
 	 * Sets the type of the control. See class tree of BaseControl
 	 */

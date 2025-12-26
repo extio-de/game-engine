@@ -58,7 +58,6 @@ public class ScrollBar {
 		this.lastNumElements = numElements;
 		
 		final var bo = renderingBoPool.acquire(this.name + "_Slider", ControlRenderingBo.class)
-				.setControlId(this.name)
 				.setType(SliderControl.class)
 				.setCustomData(Boolean.FALSE)
 				.setCustomData2(Double.valueOf(1.0D - this.scrollPosition))
