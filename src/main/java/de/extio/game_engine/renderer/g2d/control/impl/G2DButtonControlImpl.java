@@ -9,12 +9,13 @@ import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
+import de.extio.game_engine.resource.StaticResource;
 
 public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonControl {
 	
 	protected CustomAbstractButton control;
 	
-	protected String iconResourceName;
+	protected StaticResource iconResource;
 	
 	private RgbaColor backgroundColor;
 	
@@ -80,7 +81,8 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 		this.control.setScaleFactor(this.scaleFactor);
 		this.control.setEnabled(this.enabled);
 		this.control.setVisible(this.visible);
-		this.control.setIconResourceName(this.iconResourceName);
+		this.control.setIconResource(this.iconResource);
+		this.control.setStaticResourceService(this.rendererData.getStaticResourceService());
 		if (this.backgroundColor == null) {
 			this.control.setBackgroundColor(null);
 		}
@@ -104,14 +106,14 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	}
 	
 	@Override
-	public void setIconResourceName(final String iconResourceName) {
-		this.modified |= !Objects.equals(this.iconResourceName, iconResourceName);
-		this.iconResourceName = iconResourceName;
+	public void setIconResource(final StaticResource iconResource) {
+		this.modified |= !Objects.equals(this.iconResource, iconResource);
+		this.iconResource = iconResource;
 	}
 	
 	@Override
-	public String getIconResourceName() {
-		return this.iconResourceName;
+	public StaticResource getIconResource() {
+		return this.iconResource;
 	}
 	
 	@Override

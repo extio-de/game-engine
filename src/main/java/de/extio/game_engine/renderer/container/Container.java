@@ -50,7 +50,6 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		this.rendererControl = rendererControl;
 		this.eventService = eventService;
 		this.rendererWorkingSet = rendererWorkingSet;
-		
 	}
 	
 	@Override

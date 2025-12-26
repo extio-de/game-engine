@@ -10,7 +10,7 @@ public final class UiOptions {
 	
 	private boolean drawFps = true;
 	
-	private String backgroundResourceName0 = null;
+	private StaticResource backgroundResource0 = null;
 	
 	private boolean backgroundScrolling0;
 	
@@ -40,12 +40,12 @@ public final class UiOptions {
 		this.drawFps = drawFps;
 	}
 	
-	public String getBackgroundResourceName0() {
-		return this.backgroundResourceName0;
+	public StaticResource getBackgroundResource0() {
+		return this.backgroundResource0;
 	}
 	
-	public void setBackgroundResourceName0(final String background0) {
-		this.backgroundResourceName0 = background0;
+	public void setBackgroundResource0(final StaticResource backgroundResource0) {
+		this.backgroundResource0 = backgroundResource0;
 	}
 	
 	public boolean isBackgroundScrolling0() {

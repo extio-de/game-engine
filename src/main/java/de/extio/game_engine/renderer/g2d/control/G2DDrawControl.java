@@ -28,6 +28,7 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
+import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 @Conditional(G2DRendererCondition.class)
@@ -245,8 +246,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			if (this.customData instanceof Boolean) {
 				((ToggleButtonControl) control).setToggled(((Boolean) this.customData).booleanValue());
 			}
-			if (this.customData2 instanceof String) {
-				((ButtonControl) control).setIconResourceName((String) this.customData2);
+			if (this.customData2 instanceof StaticResource) {
+				((ButtonControl) control).setIconResource((StaticResource) this.customData2);
 			}
 		}
 		else if (this.clazz == SwitchControl.class) {
@@ -254,8 +255,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			if (this.customData instanceof Boolean) {
 				((SwitchControl) control).setToggled(((Boolean) this.customData).booleanValue());
 			}
-			if (this.customData2 instanceof String) {
-				((ButtonControl) control).setIconResourceName((String) this.customData2);
+			if (this.customData2 instanceof StaticResource) {
+				((ButtonControl) control).setIconResource((StaticResource) this.customData2);
 			}
 			if (this.customData4 instanceof Boolean) {
 				((SwitchControl) control).setDrawBorder(((Boolean) this.customData4).booleanValue());
@@ -263,8 +264,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		}
 		else if (this.clazz == ButtonControl.class) {
 			((ButtonControl) control).setBackgroundColor(this.color);
-			if (this.customData2 instanceof String) {
-				((ButtonControl) control).setIconResourceName((String) this.customData2);
+			if (this.customData2 instanceof StaticResource) {
+				((ButtonControl) control).setIconResource((StaticResource) this.customData2);
 			}
 		}
 		else if (this.clazz == WindowCloseButtonControl.class) {

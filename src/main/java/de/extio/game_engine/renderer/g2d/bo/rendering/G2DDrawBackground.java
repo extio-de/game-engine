@@ -1,13 +1,10 @@
 package de.extio.game_engine.renderer.g2d.bo.rendering;
 
-import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -24,6 +21,7 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
@@ -37,7 +35,7 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	
 	private static BufferedImage BACKGROUND_BUFFEREDIMAGE;
 	
-	private static String BACKGROUND_KEY;
+	private static StaticResource BACKGROUND_KEY;
 	
 	private final static int[] BUILTIN_SCROLL_OFFSET_X = new int[2];
 	
@@ -62,10 +60,10 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	}
 	
 	@Override
-	public void apply(RenderingBo other) {
+	public void apply(final RenderingBo other) {
 		super.apply(other);
 
-		if (other instanceof G2DDrawBackground o) {
+		if (other instanceof final G2DDrawBackground o) {
 			this.bgrOffset.setXY(o.bgrOffset);
 			this.sourceOffset.setXY(o.sourceOffset);
 			this.destPosition.setXY(o.destPosition);
@@ -95,16 +93,16 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 		final var windowDim = ((G2DRendererControl) this.rendererData.getRendererControl()).getAbsoluteViewportDimension();
 		
 		this.scroll(0, this.rendererData.getUiOptions().isBackgroundScrolling0(), this.rendererData.getUiOptions().isBackgroundScrollingReverse0(), windowDim);
-		this.tileBackground(graphics, 0, this.rendererData.getUiOptions().getBackgroundResourceName0(),
+		this.tileBackground(graphics, 0, this.rendererData.getUiOptions().getBackgroundResource0(),
 				this.bgrOffset.setXY(this.rendererData.getUiOptions().getBackgroundOffset0()).add(BUILTIN_SCROLL_OFFSET_X[0], 0), windowDim);
 		
 		this.scroll(1, this.rendererData.getUiOptions().isBackgroundScrolling1(), this.rendererData.getUiOptions().isBackgroundScrollingReverse1(), windowDim);
 		this.drawStars(graphics, this.bgrOffset.setXY(this.rendererData.getUiOptions().getBackgroundOffset1()).add(BUILTIN_SCROLL_OFFSET_X[1], 0), windowDim);
 	}
 	
-	private void tileBackground(final Graphics2D graphics, final int index, final String backgroundName, final CoordI2 offset, final CoordI2 viewPort) {
-		if (!Objects.equals(backgroundName, G2DDrawBackground.BACKGROUND_KEY)) {
-			this.loadImage(graphics, index, backgroundName);
+	private void tileBackground(final Graphics2D graphics, final int index, final StaticResource backgroundResource, final CoordI2 offset, final CoordI2 viewPort) {
+		if (!Objects.equals(backgroundResource, G2DDrawBackground.BACKGROUND_KEY)) {
+			this.loadImage(graphics, index, backgroundResource);
 		}
 		if (G2DDrawBackground.BACKGROUND_IMAGE == null) {
 			return;
@@ -186,7 +184,8 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 		}
 	}
 	
-	private void loadImage(final Graphics2D graphics, final int index, final String backgroundName) {
+	@SuppressWarnings("resource")
+	private void loadImage(final Graphics2D graphics, final int index, final StaticResource backgroundResource) {
 		if (G2DDrawBackground.BACKGROUND_IMAGE != null) {
 			G2DDrawBackground.BACKGROUND_IMAGE.flush();
 			G2DDrawBackground.BACKGROUND_BUFFEREDIMAGE.flush();
@@ -196,18 +195,21 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 		G2DDrawBackground.BACKGROUND_KEY = null;
 		G2DDrawBackground.BUILTIN_SCROLL_OFFSET_X[index] = 0;
 		
-		if (backgroundName != null && !backgroundName.isEmpty()) {
-			try (InputStream stream = new FileInputStream(backgroundName)) {
-				if (stream != null) {
-					G2DDrawBackground.BACKGROUND_KEY = backgroundName;
-					
-					G2DDrawBackground.BACKGROUND_BUFFEREDIMAGE = ImageIO.read(stream);
-					
-					this.createVolatileBackgroundImage(graphics, index);
+		if (backgroundResource != null) {
+			final var in = this.rendererData.getStaticResourceService().loadStreamByPath(backgroundResource);
+			if (in.isPresent()) {
+				try (var stream = in.get()) {
+					if (stream != null) {
+						G2DDrawBackground.BACKGROUND_KEY = backgroundResource;
+						
+						G2DDrawBackground.BACKGROUND_BUFFEREDIMAGE = ImageIO.read(stream);
+						
+						this.createVolatileBackgroundImage(graphics, index);
+					}
 				}
-			}
-			catch (final IOException e) {
-				throw new RuntimeException(e);
+				catch (final IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 		}
 	}

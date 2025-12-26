@@ -9,12 +9,12 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
-import java.io.FileInputStream;
 import java.io.IOException;
-import java.io.InputStream;
 
 import javax.imageio.ImageIO;
 
+import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
@@ -41,13 +41,15 @@ public abstract class CustomAbstractButton extends Component {
 	
 	protected boolean dirty = true;
 	
-	protected String iconResourceName;
+	protected StaticResource iconResource;
 	
-	protected String loadedIconResourceName;
+	protected StaticResource loadedIconResource;
 	
 	protected BufferedImage icon;
 	
 	protected Color backgroundColor;
+	
+	protected StaticResourceService staticResourceService;
 	
 	protected CoordI2 lastMousePosition;
 	
@@ -86,8 +88,12 @@ public abstract class CustomAbstractButton extends Component {
 		this.dirty = dirty;
 	}
 	
-	public void setIconResourceName(final String iconResourceName) {
-		this.iconResourceName = iconResourceName;
+	public void setIconResource(final StaticResource iconResource) {
+		this.iconResource = iconResource;
+	}
+	
+	public void setStaticResourceService(final StaticResourceService staticResourceService) {
+		this.staticResourceService = staticResourceService;
 	}
 	
 	public void setBackgroundColor(final Color backgroundColor) {
@@ -180,20 +186,26 @@ public abstract class CustomAbstractButton extends Component {
 		this.flushIcon();
 	}
 	
+	@SuppressWarnings("resource")
 	protected void loadIcon() {
-		if (this.iconResourceName != null) {
-			this.loadedIconResourceName = this.iconResourceName;
+		if (this.iconResource != null && this.staticResourceService != null) {
+			this.loadedIconResource = this.iconResource;
 			this.flushIcon();
 			
-			try (InputStream stream = new FileInputStream(this.iconResourceName)) {
-				this.icon = ImageIO.read(stream);
-			}
-			catch (final IOException e) {
-				throw new RuntimeException(e);
+			final var in = this.staticResourceService.loadStreamByPath(this.iconResource);
+			if (in.isPresent()) {
+				try (var stream = in.get()) {
+					if (stream != null) {
+						this.icon = ImageIO.read(stream);
+					}
+				}
+				catch (final IOException e) {
+					throw new RuntimeException(e);
+				}
 			}
 			
 			if (this.icon == null) {
-				throw new RuntimeException("Resource not found: " + this.iconResourceName);
+				throw new RuntimeException("Resource not found: " + this.iconResource);
 			}
 		}
 	}

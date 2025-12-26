@@ -5,6 +5,7 @@ import java.util.List;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.model.RenderingBoHasDimension;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.resource.StaticResource;
 
 /**
  * This bo renders ui controls (buttons, ...)
@@ -125,9 +126,9 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 		
 		void setBackgroundColor(RgbaColor backgroundColor);
 		
-		void setIconResourceName(String iconResourceName);
+		void setIconResource(StaticResource iconResource);
 		
-		String getIconResourceName();
+		StaticResource getIconResource();
 		
 	}
 	

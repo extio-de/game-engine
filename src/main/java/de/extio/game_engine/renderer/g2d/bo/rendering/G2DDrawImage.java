@@ -4,14 +4,12 @@ import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.io.ByteArrayInputStream;
-import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.HashMap;
 import java.util.Map;
 
 import javax.imageio.ImageIO;
-
 
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
@@ -21,6 +19,7 @@ import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
+import de.extio.game_engine.resource.StaticResource;
 
 @Conditional(G2DRendererCondition.class)
 @Component
@@ -28,11 +27,13 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	
 	private static Map<String, CachedImage> IMAGE_CACHE = new HashMap<>();
 	
-	private String resourceName;
+	private StaticResource resource;
 	
 	private float transparency;
 	
 	private byte[] imageData;
+	
+	private String imageName;
 	
 	private int scaledX;
 	
@@ -45,8 +46,8 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	}
 	
 	@Override
-	public DrawImageRenderingBo setResourceName(final String resourceName) {
-		this.resourceName = resourceName;
+	public DrawImageRenderingBo setResource(final StaticResource resource) {
+		this.resource = resource;
 		return this;
 	}
 	
@@ -62,22 +63,32 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 		return this;
 	}
 	
+	@Override
+	public DrawImageRenderingBo setImageName(final String name) {
+		this.imageName = name;
+		return this;
+	}
+	
 	@SuppressWarnings("resource")
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
-		var cachedImage = IMAGE_CACHE.get(this.resourceName);
+		final var key = this.imageName != null && !this.imageName.isBlank() ? this.imageName : this.resource.toString();
+		var cachedImage = IMAGE_CACHE.get(key);
 		if (cachedImage == null) {
 			cachedImage = new CachedImage();
-			cachedImage.setName(this.resourceName);
+			cachedImage.setName(key);
 			
 			if (this.imageData == null) {
-				try (InputStream stream = new FileInputStream(this.resourceName)) {
-					if (stream != null) {
-						cachedImage.setImage(ImageIO.read(stream));
+				final var in = this.rendererData.getStaticResourceService().loadStreamByPath(this.resource);
+				if (in.isPresent()) {
+					try (var stream = in.get()) {
+						if (stream != null) {
+							cachedImage.setImage(ImageIO.read(stream));
+						}
 					}
-				}
-				catch (final IOException e) {
-					throw new RuntimeException(e);
+					catch (final IOException e) {
+						throw new RuntimeException(e);
+					}
 				}
 			}
 			else {
@@ -90,7 +101,7 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 				}
 			}
 			
-			IMAGE_CACHE.put(this.resourceName, cachedImage);
+			IMAGE_CACHE.put(key, cachedImage);
 			LOGGER.debug("Added image to cache: " + cachedImage.getName());
 		}
 		
@@ -118,25 +129,27 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	}
 	
 	@Override
-	public void apply(RenderingBo other) {
+	public void apply(final RenderingBo other) {
 		super.apply(other);
-
+		
 		if (other instanceof final G2DDrawImage o) {
-			this.resourceName = o.resourceName;
+			this.resource = o.resource;
 			this.transparency = o.transparency;
 			this.imageData = o.imageData;
+			this.imageName = o.imageName;
 			this.scaledX = o.scaledX;
 			this.scaledY = o.scaledY;
 		}
 	}
-
+	
 	@Override
 	public void close() throws Exception {
 		super.close();
 		
-		this.resourceName = null;
+		this.resource = null;
 		this.transparency = 1.0f;
 		this.imageData = null;
+		this.imageName = null;
 		this.scaledX = 0;
 		this.scaledY = 0;
 	}

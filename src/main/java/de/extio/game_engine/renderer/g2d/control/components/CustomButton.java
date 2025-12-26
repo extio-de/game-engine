@@ -63,7 +63,7 @@ public class CustomButton extends CustomAbstractButton {
 		g2d.setColor(Color.getHSBColor(h, s, b));
 		g2d.fillRect(2 + bgrStrength, 2 + bgrStrength, this.getWidth() - 5 - bgrStrength * 2, this.getHeight() - 5 - bgrStrength * 2);
 		
-		if (this.iconResourceName != null && (this.icon == null || !this.iconResourceName.equals(this.loadedIconResourceName))) {
+		if (this.iconResource != null && (this.icon == null || !this.iconResource.equals(this.loadedIconResource))) {
 			this.loadIcon();
 		}
 		if (this.icon != null) {
