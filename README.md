@@ -22,12 +22,6 @@ Built on Spring Boot 4.0 and Java 25, the engine leverages dependency injection 
 - **Spatial Systems**: 2D spatial calculations with multiple indexing strategies (QuadTree, GridIndex, etc.)
 - **Utilities**: Core functionality including YAML serialization, ring buffers, and UUID generation
 
-## Background
-
-Exo's Game Engine is derived from [Spacecraft Tactics](https://store.steampowered.com/app/2642080/Spacecraft_Tactics), a 2D turn-based tactical space game released on Steam in 2023. The engine extracts the core systems that powered Spacecraft Tactics' campaign, multiplayer modes, and built-in editors. Note that the engine does not include the Groovy-based mod system from Spacecraft Tactics. It focuses on the fundamental building blocks: modules, rendering, events, storage, and other core subsystems that can be used to build new games.
-
-The engine also serves as the foundation for **Exo's CYOA**, an LLM-driven choose-your-own-adventure game that combines the game engine's rendering, module, and UI systems with agentic AI flows to create interactive narrative experiences.
-
 ### Architecture
 
 The engine is structured around the following key subsystems:
@@ -46,6 +40,12 @@ The engine is structured around the following key subsystems:
 - `util/` - Core utilities for serialization, buffers, and RNG
 
 The engine uses Spring's auto-configuration mechanism to wire components together, making it easy to extend and customize behavior through standard Spring configuration patterns. Each subsystem can be independently enabled/disabled via configuration properties, allowing developers to use only the components they need.
+
+## Background
+
+Exo's Game Engine is derived from [Spacecraft Tactics](https://store.steampowered.com/app/2642080/Spacecraft_Tactics), a 2D turn-based tactical space game released on Steam in 2023. The engine extracts and modernizes the core systems that powered Spacecraft Tactics' UI, campaign, and built-in editors. The engine does not include Spacecraft Tactics' Groovy-based mod system or game-specific logic such as the composite/entity system or pathfinding. It focuses on the fundamental building blocks: modules, rendering, events, storage, and other core subsystems that can be used to build new games.
+
+The engine also serves as the foundation for **Exo's CYOA**, an LLM-driven choose-your-own-adventure game that combines the game engine's rendering, module, and UI systems with agentic AI flows to create interactive narrative experiences.
 
 ---
 
@@ -69,6 +69,118 @@ The module system auto-configures when any `AbstractModule` beans are present in
 - **`ModuleService`**: Main service for managing module lifecycle, activation states, and display states
 - **`ModuleExecutor`**: Executes module callbacks at specific points in the game loop
 
+#### Module Lifecycle and Automatic Cleanup
+
+The Module System implements a comprehensive lifecycle with four states: **load**, **activate**, **deactivate**, and **unload**. When modules transition out of active state or are unloaded, the system automatically performs cleanup operations to prevent resource leaks and stale registrations:
+
+#### Lifecycle Callbacks and State Transitions
+
+Modules implement lifecycle callbacks that are invoked during state transitions:
+
+**Core Lifecycle Methods (AbstractModule):**
+- **`onLoad()`**: Called once when the module is registered with the module service. Initialize dependencies, create sub-modules, and perform one-time setup.
+- **`onActivate()`**: Called when the module becomes active. Register event handlers, subscribe to execution callbacks, and initialize runtime state.
+- **`onDeactivate()`**: Called when the module becomes inactive. Clean up runtime state. Event handlers and renderer working sets are automatically cleared.
+- **`onUnload()`**: Called when the module is being removed. Perform final cleanup. The module is automatically deactivated first.
+
+**Additional Client Module Methods (AbstractClientModule):**
+- **`onShow()`**: Called when the module becomes visible in the UI. Start animations, play music, or create UI elements.
+- **`onHide()`**: Called when the module is hidden from the UI. Stop animations, pause music, or dispose resource-heavy UI elements (UI elements are not displayed automatically and can stay in the renderer working set).
+
+**Typical State Flow:**
+```
+Load → Activate → Show (client modules)
+     ↓           ↑
+     Unload ← Deactivate ← Hide (client modules)
+```
+
+**Example Module Implementation:**
+```java
+public class DemoModule extends AbstractClientModule {
+    @Autowired
+    private EventService eventService;
+    
+    @Autowired
+    private RenderingBoPool renderingBoPool;
+    
+    @Autowired
+    private AudioController audioController;
+    
+    private Window mainWindow;
+    
+    @Override
+    public void onLoad() {
+        // One-time initialization
+        this.mainWindow = applicationContext.getBean(Window.class);
+        this.mainWindow.setNormalizedPosition(...);
+        this.mainWindow.setNormalizedDimension(...);
+        
+        // Optionally activate and display immediately
+        this.getModuleService().changeActiveState(this.getId(), true);
+        this.getModuleService().changeDisplayState(this.getId(), true);
+    }
+    
+    @Override
+    public void onActivate() {
+        // Create rendering objects
+        var label = this.renderingBoPool.acquire("MyLabel", ControlRenderingBo.class)
+            .setCaption("Welcome!")
+            .setFontSize(48);
+        this.mainWindow.putRenderingBo(label);
+        
+        // Register event handlers (automatically cleaned up on deactivate)
+        this.eventService.register(UiControlEvent.class, this.getId(), this::onUiEvent);
+        
+        // Activate sub-modules if needed
+        this.getModuleService().changeActiveState(this.mainWindow.getId(), true);
+    }
+    
+    @Override
+    public void onDeactivate() {
+        // Deactivate sub-modules
+        this.getModuleService().changeActiveState(this.mainWindow.getId(), false);
+        // Note: Event handlers and renderer working set are automatically cleaned up
+    }
+    
+    @Override
+    public void onShow() {
+        // Show sub-module UI
+        this.getModuleService().changeDisplayState(this.mainWindow.getId(), true);
+        // Start music or animations
+        this.audioController.playMusic(...);
+    }
+    
+    @Override
+    public void onHide() {
+        // Hide sub-module UI
+        this.getModuleService().changeDisplayState(this.mainWindow.getId(), false);
+        // Stop music or animations
+        this.audioController.stopMusic();
+    }
+    
+    @Override
+    public void onUnload() {
+        // Clean up sub-modules
+        this.getModuleService().unloadModule(this.mainWindow.getId());
+    }
+}
+```
+
+**Automatic Cleanup on Deactivation:**
+- All event handlers registered by the module are automatically unregistered from the event system
+- For client modules (`AbstractClientModule`), the renderer working set is automatically cleared
+- Module's execution callback subscriptions are removed from the executor
+- The module's `onDeactivate()` lifecycle method is invoked
+
+**Automatic Cleanup on Unload:**
+- The module is first deactivated (if active), triggering all deactivation cleanup
+- All event handlers registered by the module are unregistered from the event system
+- For client modules, the renderer working set is cleared
+- The module's `onUnload()` lifecycle method is invoked
+- The module is removed from the module registry
+
+This automatic cleanup ensures that modules can be safely loaded, activated, deactivated, and unloaded during runtime without leaving behind orphaned event handlers or rendering objects. Modules don't need to manually unregister their event handlers or clear their rendering objects in their lifecycle callbacks - the system handles this automatically.
+
 ---
 
 ### Event System
@@ -89,6 +201,12 @@ Auto-configures the event system with no additional setup required.
 - **`EventService`**: Main interface for registering consumers and firing events
 - **`EventHandlerRegistry`**: Internal registry managing event handler mappings
 - **`EventExecutor`**: Handles event dispatch to registered consumers
+
+#### Integration with Module System
+
+The Event System integrates seamlessly with the Module System to provide automatic cleanup of event registrations. When a module is deactivated or unloaded, all event handlers registered by that module (identified by the module's ID) are automatically unregistered from the event system. This ensures that inactive or unloaded modules don't continue receiving events and prevents memory leaks from orphaned event handlers.
+
+Modules don't need to manually unregister their event handlers in their `onDeactivate()` or `onUnload()` lifecycle methods - the Module Service handles this cleanup automatically.
 
 ---
 
@@ -130,6 +248,12 @@ The `RendererWorkingSet` supports two rendering paradigms:
 - **Stateful/event-driven rendering**: Modules maintain their working set between frames and only update when state changes occur, optimizing performance for static or infrequently-changing UI elements
 
 Both approaches can be mixed within the same application, allowing each module to choose the most appropriate strategy for its needs.
+
+#### Integration with Module System
+
+The Renderer System integrates with the Module System to provide automatic cleanup of rendering objects. When a client module (`AbstractClientModule`) is deactivated or unloaded, its entire renderer working set is automatically cleared by the Module Service. This ensures that rendering objects associated with inactive or unloaded modules are not rendered and don't consume memory.
+
+Modules don't need to manually clear their rendering objects in their `onDeactivate()` or `onUnload()` lifecycle methods - the Module Service handles this cleanup automatically using `rendererWorkingSet.clear(moduleId)`.
 
 #### Setup / Autoconfiguration
 **Configuration Class**: `RendererAutoConfiguration`
