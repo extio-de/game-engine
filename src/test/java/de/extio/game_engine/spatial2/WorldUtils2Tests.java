@@ -80,10 +80,10 @@ public class WorldUtils2Tests {
 	public void testWorldUtils2PointsToArea() {
 		final CoordI2 point0 = ImmutableCoordI2.create(6, 8);
 		final CoordI2 point1 = ImmutableCoordI2.create(6, 9);
-		assertEquals(ImmutableCoordI2.create(6, 8), WorldUtils2.pointsToArea(point0, point1).getPosition());
-		assertEquals(ImmutableCoordI2.create(1, 2), WorldUtils2.pointsToArea(point0, point1).getDimension());
-		assertEquals(ImmutableCoordI2.create(6, 8), WorldUtils2.pointsToArea(point1, point0).getPosition());
-		assertEquals(ImmutableCoordI2.create(1, 2), WorldUtils2.pointsToArea(point1, point0).getDimension());
+		assertEquals(ImmutableCoordI2.create(6, 8), SpatialUtils2.pointsToArea(point0, point1).getPosition());
+		assertEquals(ImmutableCoordI2.create(1, 2), SpatialUtils2.pointsToArea(point0, point1).getDimension());
+		assertEquals(ImmutableCoordI2.create(6, 8), SpatialUtils2.pointsToArea(point1, point0).getPosition());
+		assertEquals(ImmutableCoordI2.create(1, 2), SpatialUtils2.pointsToArea(point1, point0).getDimension());
 	}
 	
 	@Test
@@ -97,20 +97,20 @@ public class WorldUtils2Tests {
 	public void testSector() {
 		final Area2 area = new Area2(ImmutableCoordI2.create(100, 100), ImmutableCoordI2.create(20, 20));
 		
-		assertEquals(Edge2.RIGHT, WorldUtils2.getSector(ImmutableCoordI2.create(120, 110), area));
-		assertEquals(Edge2.LEFT, WorldUtils2.getSector(ImmutableCoordI2.create(105, 110), area));
-		assertEquals(Edge2.TOP, WorldUtils2.getSector(ImmutableCoordI2.create(110, 100), area));
-		assertEquals(Edge2.BOTTOM, WorldUtils2.getSector(ImmutableCoordI2.create(110, 120), area));
+		assertEquals(Edge2.RIGHT, SpatialUtils2.getSector(ImmutableCoordI2.create(120, 110), area));
+		assertEquals(Edge2.LEFT, SpatialUtils2.getSector(ImmutableCoordI2.create(105, 110), area));
+		assertEquals(Edge2.TOP, SpatialUtils2.getSector(ImmutableCoordI2.create(110, 100), area));
+		assertEquals(Edge2.BOTTOM, SpatialUtils2.getSector(ImmutableCoordI2.create(110, 120), area));
 	}
 	
 	@Test
 	public void testPedalNaN() {
-		final CoordD2 result = WorldUtils2.getPedalOnLineSegmentAB(ImmutableCoordI2.create(-802, -905), ImmutableCoordI2.create(-805, -887), ImmutableCoordI2.create(-804, -893));
+		final CoordD2 result = SpatialUtils2.getPedalOnLineSegmentAB(ImmutableCoordI2.create(-802, -905), ImmutableCoordI2.create(-805, -887), ImmutableCoordI2.create(-804, -893));
 		assertNull(result);
 	}
 	
 	private void calcAngle(final CoordD2 v0, final CoordD2 v1) {
-		System.out.println(WorldUtils2.getVectorAngle(v0, v1) + " " + v0 + " " + v1);
+		System.out.println(SpatialUtils2.getVectorAngle(v0, v1) + " " + v0 + " " + v1);
 	}
 	
 }

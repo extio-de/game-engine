@@ -23,7 +23,7 @@ import de.extio.game_engine.util.rng.ThreadLocalXorShift128Random;
 /**
  * Library for geometric problems
  */
-public final class WorldUtils2 {
+public final class SpatialUtils2 {
 	
 	/**
 	 * The Pythagorean theorem

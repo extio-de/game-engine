@@ -1,6 +1,6 @@
 package de.extio.game_engine.spatial2.model;
 
-import de.extio.game_engine.spatial2.WorldUtils2;
+import de.extio.game_engine.spatial2.SpatialUtils2;
 
 /**
  * Helper to convert between mutable and immutable representations of tuples (coordinates and vectors)
@@ -59,7 +59,7 @@ public interface Coord2Conversion {
 			vNorm = (CoordD2) this;
 		}
 		
-		final var length = WorldUtils2.getDistance(vNorm);
+		final var length = SpatialUtils2.getDistance(vNorm);
 		if (length > 0.0) {
 			vNorm = vNorm.divide(length);
 		}

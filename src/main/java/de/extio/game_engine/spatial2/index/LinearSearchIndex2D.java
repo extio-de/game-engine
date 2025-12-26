@@ -6,7 +6,7 @@ import java.util.List;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 
-import de.extio.game_engine.spatial2.WorldUtils2;
+import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.SpatialIndex2Capable;
@@ -51,7 +51,7 @@ public final class LinearSearchIndex2D<T extends SpatialIndex2Capable> implement
 		for (var i = 0; i < this.objects.size(); i++) {
 			final var obj = this.objects.get(i);
 			
-			if (WorldUtils2.intersects(position, dimension, obj.getPosition(), obj.getDimension())) {
+			if (SpatialUtils2.intersects(position, dimension, obj.getPosition(), obj.getDimension())) {
 				if (filter == null || filter.test(obj)) {
 					if (result == null) {
 						result = new ArrayList<>(dimension.equals(ImmutableCoordI2.one()) ? RESULT_DIM_START : this.resultDim);
@@ -76,7 +76,7 @@ public final class LinearSearchIndex2D<T extends SpatialIndex2Capable> implement
 		for (var i = 0; i < this.objects.size(); i++) {
 			final var obj = this.objects.get(i);
 			
-			if (WorldUtils2.intersects(position, ImmutableCoordI2.one(), obj.getPosition(), obj.getDimension())) {
+			if (SpatialUtils2.intersects(position, ImmutableCoordI2.one(), obj.getPosition(), obj.getDimension())) {
 				if (filter == null || filter.test(obj)) {
 					return obj;
 				}
@@ -91,7 +91,7 @@ public final class LinearSearchIndex2D<T extends SpatialIndex2Capable> implement
 		for (var i = 0; i < this.objects.size(); i++) {
 			final var obj = this.objects.get(i);
 			
-			if (WorldUtils2.intersects(position, ImmutableCoordI2.one(), obj.getPosition(), obj.getDimension())) {
+			if (SpatialUtils2.intersects(position, ImmutableCoordI2.one(), obj.getPosition(), obj.getDimension())) {
 				if (filter == null || filter.test(obj)) {
 					consumer.accept(obj);
 				}

@@ -16,7 +16,7 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
-import de.extio.game_engine.spatial2.WorldUtils2;
+import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
@@ -65,7 +65,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				final var x1 = x0 + coordinates.get(0).getX();
 				final var y1 = y0 + coordinates.get(0).getY();
 				
-				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
 				if (this.cull(area)) {
 					break;
 				}
@@ -84,7 +84,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				final var x1 = x0 + coordinates.get(0).getX();
 				final var y1 = y0 + coordinates.get(0).getY();
 				
-				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
 				if (this.cull(area)) {
 					break;
 				}
@@ -168,7 +168,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				yn = xn * sin + yn * cos + y0;
 				xn = x;
 				
-				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create((int) xm, (int) ym), ImmutableCoordI2.create((int) xn, (int) yn));
+				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create((int) xm, (int) ym), ImmutableCoordI2.create((int) xn, (int) yn));
 				if (this.cull(area)) {
 					break;
 				}
@@ -190,7 +190,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				final var x2 = x0 + coordinates.get(1).getX();
 				final var y2 = y0 + coordinates.get(1).getY();
 				
-				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create(x2, y2));
+				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create(x2, y2));
 				if (this.cull(area)) {
 					break;
 				}
@@ -210,7 +210,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				final var x1 = x0 + coordinates.get(0).getX();
 				final var y1 = y0 + coordinates.get(0).getY();
 				
-				final var area = WorldUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
 				if (this.cull(area)) {
 					break;
 				}
@@ -243,7 +243,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 	
 	private boolean cull(final Area2 area) {
 		final Frame mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
-		return !WorldUtils2.intersects(area, new Area2(ImmutableCoordI2.zero(), MutableCoordI2.create(mainFrame.getWidth(), mainFrame.getHeight())));
+		return !SpatialUtils2.intersects(area, new Area2(ImmutableCoordI2.zero(), MutableCoordI2.create(mainFrame.getWidth(), mainFrame.getHeight())));
 	}
 	
 	@Override
