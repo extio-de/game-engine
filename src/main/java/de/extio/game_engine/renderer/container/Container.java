@@ -137,9 +137,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 			adjustedY = viewportDimension.getY() - dimension.getY();
 		}
 		
-		final var normalizedX = this.calculateNormalizedX(adjustedX);
-		final var normalizedY = this.calculateNormalizedY(adjustedY);
-		this.normalizedArea.getPosition().setXY(normalizedX, normalizedY);
+		this.normalizedArea.getPosition().setXY(adjustedX, adjustedY);
 		this.area.getPosition().setXY(adjustedX, adjustedY);
 		
 		this.LOGGER.debug("Adjusted container {} position to {},{} to remain visible in viewport", this.id, adjustedX, adjustedY);
@@ -156,22 +154,6 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		final int height = Math.max(0, y2 - y1);
 		
 		return width * height;
-	}
-	
-	protected int calculateNormalizedX(final int actualX) {
-		return switch (this.horizontalAlignment) {
-			case LEFT -> actualX;
-			case CENTER -> actualX - (this.rendererControl.getEffectiveViewportDimension().getX() - RendererControl.REFERENCE_RESOLUTION.getX()) / 2;
-			case RIGHT -> actualX - (this.rendererControl.getEffectiveViewportDimension().getX() - RendererControl.REFERENCE_RESOLUTION.getX());
-		};
-	}
-	
-	protected int calculateNormalizedY(final int actualY) {
-		return switch (this.verticalAlignment) {
-			case TOP -> actualY;
-			case CENTER -> actualY - (this.rendererControl.getEffectiveViewportDimension().getY() - RendererControl.REFERENCE_RESOLUTION.getY()) / 2;
-			case BOTTOM -> actualY - (this.rendererControl.getEffectiveViewportDimension().getY() - RendererControl.REFERENCE_RESOLUTION.getY());
-		};
 	}
 	
 	protected void onMouseMoveEvent(final MouseMoveEvent event) {
