@@ -19,7 +19,7 @@ import de.extio.game_engine.renderer.work.RenderingBoPool;
 public class Window extends Container {
 	
 	private boolean closeButton;
-
+	
 	private String closeButtonName = "";
 	
 	private Runnable onCloseAction;
@@ -27,13 +27,13 @@ public class Window extends Container {
 	public Window(final ModuleService moduleService, final RenderingBoPool renderingBoPool, final RendererControl rendererControl, final EventService eventService, final RendererWorkingSet rendererWorkingSet) {
 		super(moduleService, renderingBoPool, rendererControl, eventService, rendererWorkingSet);
 	}
-
+	
 	@Override
 	public void onActivate() {
 		if (this.closeButton) {
 			this.eventService.register(UiControlEvent.class, this.getId(), this::onCloseButtonControlEvent);
 		}
-
+		
 		super.onActivate();
 	}
 	
@@ -68,10 +68,10 @@ public class Window extends Container {
 					.setLayer(RenderingBoLayer.UI0_1);
 			this.rendererWorkingSet.put(this.id, closeButtonBo);
 		}
-
+		
 		super.draw();
 	}
-
+	
 	private void onCloseButtonControlEvent(final UiControlEvent event) {
 		if (this.closeButton && this.closeButtonName.equals(event.getId())) {
 			if (this.onCloseAction != null) {
@@ -93,11 +93,11 @@ public class Window extends Container {
 	public void setCloseButton(final boolean closeButton) {
 		this.closeButton = closeButton;
 	}
-
+	
 	public Runnable getOnCloseAction() {
 		return onCloseAction;
 	}
-
+	
 	/**
 	 * Sets the action to be performed when the close button is pressed.
 	 * If not set, the window module will simply be deactivated on close button press.

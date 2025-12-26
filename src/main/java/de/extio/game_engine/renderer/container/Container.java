@@ -31,7 +31,7 @@ import de.extio.game_engine.spatial2.model.MutableCoordI2;
 public class Container extends AbstractClientModule implements InitializingBean {
 	
 	protected final static List<Container> DISPLAYED_CONTAINERS = Collections.synchronizedList(new ArrayList<>());
-
+	
 	protected final ModuleService moduleService;
 	
 	protected final RenderingBoPool renderingBoPool;
@@ -49,7 +49,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	protected boolean draggable;
 	
 	protected boolean dragging;
-
+	
 	protected CoordI2 dragPrevPosition;
 	
 	protected HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
@@ -82,7 +82,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		DISPLAYED_CONTAINERS.add(this);
 		this.draw();
 	}
-
+	
 	@Override
 	public void onHide() {
 		DISPLAYED_CONTAINERS.remove(this);
@@ -94,7 +94,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		this.adjustIfOutsideViewport();
 		this.draw();
 	}
-
+	
 	private boolean adjustIfOutsideViewport() {
 		final var viewportDimension = this.rendererControl.getEffectiveViewportDimension();
 		final var position = this.area.getPosition();
@@ -113,21 +113,27 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		
 		if (position.getX() >= viewportDimension.getX()) {
 			adjustedX = viewportDimension.getX() - dimension.getX();
-		} else if (position.getX() + dimension.getX() <= 0) {
+		}
+		else if (position.getX() + dimension.getX() <= 0) {
 			adjustedX = 0;
-		} else if (position.getX() < 0) {
+		}
+		else if (position.getX() < 0) {
 			adjustedX = 0;
-		} else if (position.getX() + dimension.getX() > viewportDimension.getX()) {
+		}
+		else if (position.getX() + dimension.getX() > viewportDimension.getX()) {
 			adjustedX = viewportDimension.getX() - dimension.getX();
 		}
 		
 		if (position.getY() >= viewportDimension.getY()) {
 			adjustedY = viewportDimension.getY() - dimension.getY();
-		} else if (position.getY() + dimension.getY() <= 0) {
+		}
+		else if (position.getY() + dimension.getY() <= 0) {
 			adjustedY = 0;
-		} else if (position.getY() < 0) {
+		}
+		else if (position.getY() < 0) {
 			adjustedY = 0;
-		} else if (position.getY() + dimension.getY() > viewportDimension.getY()) {
+		}
+		else if (position.getY() + dimension.getY() > viewportDimension.getY()) {
 			adjustedY = viewportDimension.getY() - dimension.getY();
 		}
 		
@@ -135,7 +141,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		final var normalizedY = this.calculateNormalizedY(adjustedY);
 		this.normalizedArea.getPosition().setXY(normalizedX, normalizedY);
 		this.area.getPosition().setXY(adjustedX, adjustedY);
-
+		
 		this.LOGGER.debug("Adjusted container {} position to {},{} to remain visible in viewport", this.id, adjustedX, adjustedY);
 		return true;
 	}
@@ -167,7 +173,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 			case BOTTOM -> actualY - (this.rendererControl.getEffectiveViewportDimension().getY() - RendererControl.REFERENCE_RESOLUTION.getY());
 		};
 	}
-
+	
 	protected void onMouseMoveEvent(final MouseMoveEvent event) {
 		if (this.draggable && event.isDrag()) {
 			Container foregroundContainer = null;
@@ -191,7 +197,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 				}
 				if (this.dragPrevPosition != null) {
 					final var delta = event.getCoord().substract(this.dragPrevPosition);
-					if (! ImmutableCoordI2.zero().equals(delta)) {
+					if (!ImmutableCoordI2.zero().equals(delta)) {
 						this.setNormalizedPosition(this.getNormalizedPosition().add(delta));
 					}
 				}
@@ -199,9 +205,9 @@ public class Container extends AbstractClientModule implements InitializingBean 
 			}
 		}
 	}
-
+	
 	protected void onMouseClickEvent(final MouseClickEvent event) {
-		if (! event.isPressed() && this.dragging) {
+		if (!event.isPressed() && this.dragging) {
 			this.dragging = false;
 			this.dragPrevPosition = null;
 			if (this.adjustIfOutsideViewport()) {
