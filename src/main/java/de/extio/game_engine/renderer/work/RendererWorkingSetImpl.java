@@ -117,6 +117,13 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	}
 	
 	@Override
+	public void clearNext(final String producerId) {
+		final var next = this.getWorkingSetByProducer(producerId).next();
+		next.values().forEach(this.rendererBoPool::release);
+		next.clear();
+	}
+
+	@Override
 	public void clear(final String producerId) {
 		final RendererWork rendererWork = this.workingSet.remove(producerId);
 		if (rendererWork != null) {

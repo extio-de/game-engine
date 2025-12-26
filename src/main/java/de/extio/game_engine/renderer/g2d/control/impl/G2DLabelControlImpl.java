@@ -2,7 +2,7 @@ package de.extio.game_engine.renderer.g2d.control.impl;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomLabel;
-import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
+import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
@@ -15,7 +15,7 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 	
 	protected RgbaColor foregroundColor;
 	
-	protected DrawFontRenderingBoTextAlignment textAlignment;
+	protected HorizontalAlignment textAlignment;
 	
 	@Override
 	public RgbaColor getBackgroundColor() {
@@ -40,12 +40,12 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 	}
 	
 	@Override
-	public DrawFontRenderingBoTextAlignment getTextAlignment() {
+	public HorizontalAlignment getTextAlignment() {
 		return this.textAlignment;
 	}
 	
 	@Override
-	public void setTextAlignment(final DrawFontRenderingBoTextAlignment alignment) {
+	public void setTextAlignment(final HorizontalAlignment alignment) {
 		this.modified |= alignment != this.textAlignment;
 		this.textAlignment = alignment;
 	}

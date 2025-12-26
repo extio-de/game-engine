@@ -20,7 +20,7 @@ public class Window extends Container {
 	}
 	
 	@Override
-	protected void draw() {
+	public void draw() {
 		if (this.area.getDimension().getX() <= 0 || this.area.getDimension().getY() <= 0) {
 			return;
 		}

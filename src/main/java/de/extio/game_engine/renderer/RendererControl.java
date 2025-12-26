@@ -10,7 +10,7 @@ public interface RendererControl {
 	
 	public final static CoordI2 REFERENCE_RESOLUTION = ImmutableCoordI2.create(1920, 1080);
 	
-	public final static double SCALE_FACTOR_MIN = 2.0 / 3.0;
+	public final static double SCALE_FACTOR_MIN = 0.5;
 	
 	public final static double SCALE_FACTOR_MAX = 4.0;
 	

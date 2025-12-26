@@ -19,7 +19,8 @@ public class G2DRendererControl implements RendererControl {
 	
 	protected static final Logger LOGGER = LoggerFactory.getLogger(G2DRendererControl.class);
 	
-	private final static CoordI2 NO_SCALING_UPPER_LIMIT = ImmutableCoordI2.create(2560, 1440);
+	// private final static CoordI2 NO_SCALING_UPPER_LIMIT = ImmutableCoordI2.create(2560, 1440);
+	private final static CoordI2 NO_SCALING_UPPER_LIMIT = RendererControl.REFERENCE_RESOLUTION;
 	
 	private final G2DRenderer renderer;
 	

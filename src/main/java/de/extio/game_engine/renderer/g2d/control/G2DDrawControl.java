@@ -27,7 +27,7 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonContro
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
+import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 @Conditional(G2DRendererCondition.class)
@@ -236,8 +236,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			if (this.customData instanceof RgbaColor) {
 				((LabelControl) control).setBackgroundColor((RgbaColor) this.customData);
 			}
-			if (this.customData2 instanceof DrawFontRenderingBoTextAlignment) {
-				((LabelControl) control).setTextAlignment((DrawFontRenderingBoTextAlignment) this.customData2);
+			if (this.customData2 instanceof HorizontalAlignment) {
+				((LabelControl) control).setTextAlignment((HorizontalAlignment) this.customData2);
 			}
 		}
 		else if (this.clazz == ToggleButtonControl.class) {

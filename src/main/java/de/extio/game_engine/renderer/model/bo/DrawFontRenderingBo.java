@@ -11,6 +11,6 @@ public interface DrawFontRenderingBo extends RenderingBoHasDimension {
 	
 	DrawFontRenderingBo setSize(final int size);
 	
-	DrawFontRenderingBo setAlignment(DrawFontRenderingBoTextAlignment alignment);
+	DrawFontRenderingBo setAlignment(HorizontalAlignment alignment);
 	
 }

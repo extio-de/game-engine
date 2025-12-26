@@ -110,9 +110,9 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 		
 		void setForegroundColor(RgbaColor color);
 		
-		DrawFontRenderingBoTextAlignment getTextAlignment();
+		HorizontalAlignment getTextAlignment();
 		
-		void setTextAlignment(DrawFontRenderingBoTextAlignment alignment);
+		void setTextAlignment(HorizontalAlignment alignment);
 		
 	}
 	

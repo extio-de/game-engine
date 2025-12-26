@@ -11,7 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
+import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
@@ -38,7 +38,7 @@ public class CustomLabel extends Component {
 	
 	protected Color foregroundColor;
 	
-	private DrawFontRenderingBoTextAlignment textAlignment;
+	private HorizontalAlignment textAlignment;
 	
 	protected boolean dirty = true;
 	
@@ -72,11 +72,11 @@ public class CustomLabel extends Component {
 		this.foregroundColor = color;
 	}
 	
-	public DrawFontRenderingBoTextAlignment getTextAlignment() {
+	public HorizontalAlignment getTextAlignment() {
 		return this.textAlignment;
 	}
 	
-	public void setTextAlignment(final DrawFontRenderingBoTextAlignment textAlignment) {
+	public void setTextAlignment(final HorizontalAlignment textAlignment) {
 		this.textAlignment = textAlignment;
 	}
 	
@@ -183,7 +183,7 @@ public class CustomLabel extends Component {
 		b = Math.max(0.0f, Math.min(1.0f, b));
 		g2d.setColor(Color.getHSBColor(h, s, b));
 		
-		final var alignment = this.textAlignment == null ? DrawFontRenderingBoTextAlignment.CENTER : this.textAlignment;
+		final var alignment = this.textAlignment == null ? HorizontalAlignment.CENTER : this.textAlignment;
 		final var textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
 		switch (alignment) {
 			case LEFT: {

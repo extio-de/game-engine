@@ -24,6 +24,8 @@ public interface RendererWorkingSet {
 	
 	Map<String, RenderingBo> commit(String producerId, boolean clone);
 	
+	void clearNext(String producerId);
+
 	void clear(String producerId);
 
 	void getLiveSet(List<RenderingBo> combinedLiveSet, Predicate<String> filter);

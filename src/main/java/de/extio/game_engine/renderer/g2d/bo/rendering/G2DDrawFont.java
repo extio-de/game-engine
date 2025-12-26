@@ -15,7 +15,7 @@ import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBoTextAlignment;
+import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.spatial2.model.CoordI2;
@@ -55,7 +55,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	
 	private int size;
 	
-	private DrawFontRenderingBoTextAlignment alignment = DrawFontRenderingBoTextAlignment.LEFT;
+	private HorizontalAlignment alignment = HorizontalAlignment.LEFT;
 	
 	public G2DDrawFont() {
 		super(RenderingBoLayer.UI0_0);
@@ -74,7 +74,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	}
 	
 	@Override
-	public DrawFontRenderingBo setAlignment(final DrawFontRenderingBoTextAlignment alignment) {
+	public DrawFontRenderingBo setAlignment(final HorizontalAlignment alignment) {
 		this.alignment = alignment;
 		return this;
 	}
@@ -125,7 +125,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		super.close();
 		this.text = null;
 		this.size = 0;
-		this.alignment = DrawFontRenderingBoTextAlignment.LEFT;
+		this.alignment = HorizontalAlignment.LEFT;
 	}
 	
 	public static Font getFont(final double scaleFactor, final int size_) {
