@@ -6,6 +6,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import de.extio.game_engine.audio.AudioController;
+import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.container.Window;
@@ -13,6 +14,7 @@ import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
+import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.resource.StaticResource;
 
@@ -26,6 +28,9 @@ public class DemoModule extends AbstractClientModule {
 
 	@Autowired
 	private RenderingBoPool renderingBoPool;
+
+	@Autowired
+	private EventService eventService;
 
 	private Window mainWindow;
 
@@ -72,7 +77,9 @@ public class DemoModule extends AbstractClientModule {
 				.setEnabled(true)
 				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
 				.withPositionRelative(10, 600);
-		this.mainWindow.putRenderingBo(bo);		
+		this.mainWindow.putRenderingBo(bo);
+
+		this.eventService.register(UiControlEvent.class, this.getId(), this::onUiControlEvent);
 
 		this.getModuleService().changeActiveState(this.mainWindow.getId(), true);
 	}
@@ -85,13 +92,25 @@ public class DemoModule extends AbstractClientModule {
 	@Override
 	public void onShow() {
 		this.getModuleService().changeDisplayState(this.mainWindow.getId(), true);
-		// this.audioController.playMusic(null, List.of(new StaticResource(List.of("audio"), "race.ogg")), true);
+		this.audioController.playMusic(null, List.of(new StaticResource(List.of("audio"), "race.ogg")), true);
 	}
 
 	@Override
 	public void onHide() {
 		this.getModuleService().changeDisplayState(this.mainWindow.getId(), false);
 		this.audioController.stopMusic();
+	}
+
+	private void onUiControlEvent(final UiControlEvent event) {
+		switch (event.getId()) {
+			case "DemoModule_MainWindow_Label_Welcome" -> {
+				this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
+			}
+			
+			case "DemoModule_MainWindow_Label_Start" -> {
+				this.audioController.play(new StaticResource(List.of("audio"), "alert2.ogg"));
+			}
+		}
 	}
 
 }
