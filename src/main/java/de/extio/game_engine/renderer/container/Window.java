@@ -53,7 +53,7 @@ public class Window extends Container {
 				.setThickBorder(true)
 				.withDimensionAbsolute(this.area.getDimension())
 				.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
-				.setLayer(RenderingBoLayer.UI0_BGR);
+				.setLayer(RenderingBoLayer.UI_BGR);
 		this.rendererWorkingSet.put(this.id, windowFrame);
 		
 		if (this.closeButton) {
@@ -65,7 +65,7 @@ public class Window extends Container {
 					.setVisible(true)
 					.withDimensionAbsolute(this.area.getDimension())
 					.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
-					.setLayer(RenderingBoLayer.UI0_1);
+					.setLayer(RenderingBoLayer.UI1);
 			this.rendererWorkingSet.put(this.id, closeButtonBo);
 		}
 		

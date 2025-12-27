@@ -126,7 +126,7 @@ public class DemoModule extends AbstractClientModule {
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Logo", DrawImageRenderingBo.class)
 				.setResource(new StaticResource(List.of("renderer"), "logo.png"))
 				.withDimensionAbsolute(256, 256)
-				.setLayer(RenderingBoLayer.UI0_0)
+				.setLayer(RenderingBoLayer.UI0)
 				.withPositionRelative((this.mainWindow.getNormalizedDimension().getX() - 256) / 2, 200);
 		this.mainWindow.putRenderingBo(bo);
 		

@@ -196,7 +196,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 				bo.setLayer(RenderingBoLayer.values()[Math.min(this.renderingBoLayer.ordinal() + 2, RenderingBoLayer.values().length - 1)]);
 			}
 			else {
-				bo.setLayer(RenderingBoLayer.UI0_1);
+				bo.setLayer(RenderingBoLayer.UI1);
 			}
 			consumer.accept(renderingBo, bo);
 		}

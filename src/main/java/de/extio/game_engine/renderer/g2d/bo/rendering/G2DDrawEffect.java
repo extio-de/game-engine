@@ -37,7 +37,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 	private String customString0;
 	
 	public G2DDrawEffect() {
-		super(RenderingBoLayer.UI0_2);
+		super(RenderingBoLayer.UI2);
 	}
 	
 	@Override

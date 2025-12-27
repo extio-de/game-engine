@@ -30,7 +30,7 @@ public class ScrollBar {
 	
 	private int lastNumElements;
 	
-	private RenderingBoLayer layer = RenderingBoLayer.UI0_1;
+	private RenderingBoLayer layer = RenderingBoLayer.UI1;
 	
 	public ScrollBar(final String nameSuffix) {
 		this.name = "Scrollbar_" + nameSuffix;

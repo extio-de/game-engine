@@ -40,7 +40,7 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	private int scaledY;
 	
 	public G2DDrawImage() {
-		super(RenderingBoLayer.BACKGROUND1);
+		super(RenderingBoLayer.UI0);
 		
 		this.transparency = 1.0f;
 	}

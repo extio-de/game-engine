@@ -64,7 +64,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private String tooltip;
 	
 	public G2DDrawControl() {
-		super(RenderingBoLayer.UI0_0);
+		super(RenderingBoLayer.UI0);
 	}
 	
 	@Override

@@ -51,7 +51,7 @@ public class G2DDrawTest extends G2DAbstractRenderingBo implements DrawTestRende
 	}
 	
 	public G2DDrawTest() {
-		super(RenderingBoLayer.UI0_1);
+		super(RenderingBoLayer.UI1);
 	}
 	
 	@Override

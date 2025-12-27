@@ -424,7 +424,7 @@ public class RendererWorkingSetImplTest {
 		
 		@Override
 		public RenderingBoLayer getLayer() {
-			return RenderingBoLayer.UI0_0;
+			return RenderingBoLayer.UI0;
 		}
 		
 		@Override

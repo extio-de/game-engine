@@ -58,7 +58,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	private HorizontalAlignment alignment = HorizontalAlignment.LEFT;
 	
 	public G2DDrawFont() {
-		super(RenderingBoLayer.UI0_0);
+		super(RenderingBoLayer.UI0);
 	}
 	
 	@Override

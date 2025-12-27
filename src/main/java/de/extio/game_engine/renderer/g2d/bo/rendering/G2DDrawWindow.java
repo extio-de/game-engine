@@ -22,7 +22,7 @@ public class G2DDrawWindow extends G2DAbstractRenderingBo implements DrawWindowR
 	private boolean thickBorder;
 	
 	public G2DDrawWindow() {
-		super(RenderingBoLayer.UI0_BGR);
+		super(RenderingBoLayer.UI_BGR);
 		
 		this.color = COLOR_WINDOW;
 	}

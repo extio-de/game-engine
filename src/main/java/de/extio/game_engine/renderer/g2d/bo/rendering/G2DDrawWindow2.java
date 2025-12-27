@@ -37,7 +37,7 @@ public class G2DDrawWindow2 extends G2DAbstractRenderingBo implements DrawWindow
 	private Color awtColor;
 	
 	public G2DDrawWindow2() {
-		super(RenderingBoLayer.UI0_BGR);
+		super(RenderingBoLayer.UI_BGR);
 		
 		this.color = COLOR_WINDOW_BGR;
 	}
