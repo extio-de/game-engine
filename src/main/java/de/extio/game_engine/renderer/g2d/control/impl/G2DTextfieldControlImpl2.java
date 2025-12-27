@@ -136,9 +136,11 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		this.textComponent.setName(this.id);
 		this.initControl();
 		
+		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
 		if (this.multiLine) {
-			//			((G2DRenderer) this.RendererData.getRenderer()).getMainFrame().add(this.scrollPane);
-			((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().add(this.textComponent);
+			//			mainFrame.add(this.scrollPane);
+			mainFrame.add(this.textComponent);
+			this.updateAllComponentZOrder();
 			
 			this.scrollbar.setColor(RgbaColor.LIGHT_GRAY);
 			this.scrollbar.setHorizontal(false);
@@ -147,7 +149,8 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			this.scrollbar.build();
 		}
 		else {
-			((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().add(this.textComponent);
+			mainFrame.add(this.textComponent);
+			this.updateAllComponentZOrder();
 		}
 	}
 	
@@ -188,6 +191,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			else {
 				((CustomJTextField) this.textComponent).setDirty(false);
 			}
+			this.updateAllComponentZOrder();
 		}
 		
 		if (this.multiLine) {

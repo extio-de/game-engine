@@ -58,7 +58,9 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 		
 		this.createControl();
 		this.initControl();
-		((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().add(this.control);
+		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
+		mainFrame.add(this.control);
+		this.updateAllComponentZOrder();
 		
 		this.scrollbar.setColor(RgbaColor.LIGHT_GRAY);
 		this.scrollbar.setHorizontal(false);
@@ -78,7 +80,7 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			this.rebuildBufferedImage();
 			this.initControl();
 			this.control.setDirty(false);
-			
+			this.updateAllComponentZOrder();
 		}
 		this.control.paint(this.bufferedImageGraphics);
 		

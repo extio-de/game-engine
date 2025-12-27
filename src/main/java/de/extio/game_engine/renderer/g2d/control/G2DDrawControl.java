@@ -37,7 +37,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	private final static Logger LOGGER = LoggerFactory.getLogger(G2DDrawControl.class);
 	
-	private static Map<String, BaseControl> CACHED_CONTROLS = new HashMap<>();
+	public static Map<String, BaseControl> CACHED_CONTROLS = new HashMap<>();
 	
 	public static Map<String, List<BaseControl>> CONTROL_GROUPS = new HashMap<>();
 	
@@ -218,6 +218,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		control.setEnabled(this.enabled);
 		control.setCaption(this.caption);
 		control.setTooltip(this.tooltip);
+		control.setZIndex(this.zIndex);
+		control.setLayer(this.layer);
 		
 		if (this.clazz == LabelControl.class) {
 			((LabelControl) control).setForegroundColor(this.color);

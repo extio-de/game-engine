@@ -64,7 +64,9 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 			});
 		}
 		
-		((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().add(this.textComponent);
+		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
+		mainFrame.add(this.textComponent);
+		this.updateAllComponentZOrder();
 	}
 	
 	@Override
@@ -98,6 +100,7 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 			else {
 				((CustomTextField) this.textComponent).setDirty(false);
 			}
+			this.updateAllComponentZOrder();
 		}
 		
 		super.render();

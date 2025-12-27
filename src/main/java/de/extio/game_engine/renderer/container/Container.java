@@ -44,7 +44,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	
 	protected final Area2 area = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
 	
-	// Normalized area relative to reference resolution, the actual area is aligned based on alignment settings. Scale factors are not considered/handled by the renderer control.
+	// Normalized area of this container relative to reference resolution, the actual position is automatically aligned based on alignment settings (e.g. if the user uses ultra-wide monitors). Global scale factors are not considered/handled by the renderer control.
 	protected final Area2 normalizedArea = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
 	
 	protected boolean draggable;
@@ -56,6 +56,8 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	protected HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
 	
 	protected VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
+
+	protected short zIndex;
 	
 	public Container(final ModuleService moduleService, final RenderingBoPool renderingBoPool, final RendererControl rendererControl, final EventService eventService, final RendererWorkingSet rendererWorkingSet) {
 		this.moduleService = moduleService;
@@ -81,6 +83,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	@Override
 	public void onShow() {
 		DISPLAYED_CONTAINERS.add(this);
+		this.zIndexToTop();
 		this.draw();
 	}
 	
@@ -161,14 +164,17 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		if (this.draggable && event.isDrag()) {
 			Container foregroundContainer = null;
 			synchronized (DISPLAYED_CONTAINERS) {
+				short zIndexHighest = -1;
 				for (final var container : DISPLAYED_CONTAINERS) {
 					if (container.dragging) {
 						foregroundContainer = container;
 						break;
 					}
 					if (SpatialUtils2.intersects(container.area.getPosition(), container.area.getDimension(), event.getScaledCoord(), ImmutableCoordI2.one())) {
-						// TODO z-index handling
-						foregroundContainer = container;
+						if (container.zIndex > zIndexHighest) {
+							zIndexHighest = container.zIndex;
+							foregroundContainer = container;
+						}
 					}
 				}
 			}
@@ -206,7 +212,9 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	public void draw() {
 		final var uncommitted = this.rendererWorkingSet.getUncommittedWork(this.id);
 		for (final RenderingBo bo : uncommitted.values()) {
-			bo.withPositionAbsoluteAnchorTopLeft(this.area.getPosition()
+			bo
+				.setZIndex(this.zIndex)
+				.withPositionAbsoluteAnchorTopLeft(this.area.getPosition()
 					.toMutableCoordD2()
 					.add(bo.getLocalX(), bo.getLocalY())
 					.toImmutableCoordI2());
@@ -243,6 +251,9 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		this.draw();
 	}
 	
+	/**
+	 * Normalized position of this container relative to reference resolution, the actual position is automatically aligned based on alignment settings (e.g. if the user uses ultra-wide monitors). Global scale factors are not considered/handled by the renderer control.
+	 */
 	public CoordI2 getNormalizedPosition() {
 		return this.normalizedArea.getPosition().toImmutableCoordI2();
 	}
@@ -252,7 +263,28 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		this.area.getDimension().setXY(normalizedDimension);
 		this.draw();
 	}
+
+	private void zIndexToTop() {
+		if (! this.draggable) {
+			return;
+		}
+		
+		synchronized (DISPLAYED_CONTAINERS) {
+			for (final var container : DISPLAYED_CONTAINERS) {
+				if (container == this) {
+					continue;
+				}
+				if (container.getzIndex() > this.getzIndex()) {
+					container.setzIndex((short) (container.getzIndex() - 1));
+				}
+			}
+			this.setzIndex((short) (DISPLAYED_CONTAINERS.size() - 1));
+		}
+	}
 	
+	/**
+	 * Normalized position of this container relative to reference resolution. Global scale factors are not considered/handled by the renderer control.
+	 */
 	public CoordI2 getNormalizedDimension() {
 		return this.normalizedArea.getDimension().toImmutableCoordI2();
 	}
@@ -280,4 +312,13 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	public void setVerticalAlignment(final VerticalAlignment verticalAlignment) {
 		this.verticalAlignment = verticalAlignment;
 	}
+
+	public short getzIndex() {
+		return zIndex;
+	}
+	
+	public void setzIndex(final short zIndex) {
+		this.zIndex = zIndex;
+	}
+	
 }

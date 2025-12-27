@@ -56,7 +56,9 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 		
 		this.createControl();
 		this.initControl();
-		((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().add(this.control);
+		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
+		mainFrame.add(this.control);
+		this.updateAllComponentZOrder();
 	}
 	
 	@Override
@@ -74,6 +76,7 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 			this.rebuildBufferedImage();
 			this.control.paint(this.bufferedImageGraphics);
 			this.control.setDirty(false);
+			this.updateAllComponentZOrder();
 		}
 		if (this.tooltip != null) {
 			this.tooltipMousePosition = this.control.getLastMousePosition();

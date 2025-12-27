@@ -80,7 +80,9 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 		
 		this.createControl();
 		this.initControl();
-		((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().add(this.control);
+		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
+		mainFrame.add(this.control);
+		this.updateAllComponentZOrder();
 	}
 	
 	@Override
@@ -104,6 +106,7 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 			this.rebuildBufferedImage();
 			this.control.paint(this.bufferedImageGraphics);
 			this.control.setDirty(false);
+			this.updateAllComponentZOrder();
 		}
 		if (this.tooltip != null) {
 			this.tooltipMousePosition = this.control.getLastMousePosition();

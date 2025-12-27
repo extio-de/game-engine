@@ -27,7 +27,9 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 		
 		this.createControl();
 		this.initControl();
-		((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().add(this.control);
+		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
+		mainFrame.add(this.control);
+		this.updateAllComponentZOrder();
 	}
 	
 	@Override
@@ -44,6 +46,7 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 			this.rebuildBufferedImage();
 			this.control.paint(this.bufferedImageGraphics);
 			this.control.setDirty(false);
+			this.updateAllComponentZOrder();
 		}
 		else if (this.positionModified) {
 			this.control.setLocation(this.x, this.y);

@@ -263,11 +263,180 @@ The `RendererWorkingSet` supports two rendering paradigms:
 
 Both approaches can be mixed within the same application, allowing each module to choose the most appropriate strategy for its needs.
 
+#### UI Controls
+
+The renderer provides a comprehensive set of interactive UI controls that can be used to build game interfaces. Controls are created as `ControlRenderingBo` objects and support common UI elements with automatic event handling.
+
+**Available Control Types:**
+- **`ButtonControl`**: Standard clickable button
+- **`ToggleButtonControl`**: Button with on/off state
+- **`SwitchControl`**: Toggle switch with visual state
+- **`LabelControl`**: Non-interactive text display with optional background
+- **`TextfieldControl`**: Single-line or multi-line text input
+- **`SliderControl`**: Value slider with horizontal/vertical orientation
+- **`TableControl`**: Data table with scrolling support
+- **`WindowCloseButtonControl`**: Specialized close button for windows
+- **`TooltipControl`**: Hover tooltip display
+
+**Creating and Using Controls:**
+
+```java
+// Create a button control
+var button = renderingBoPool.acquire("myButton", ControlRenderingBo.class)
+    .setType(ButtonControl.class)
+    .setCaption("Click Me")
+    .setFontSize(16)
+    .setVisible(true)
+    .setEnabled(true)
+    .withPositionAbsoluteAnchorTopLeft(100, 50)
+    .withDimensionAbsolute(120, 40);
+
+// Add to working set
+rendererWorkingSet.put(moduleId, button);
+
+// Create a toggle button with custom state
+var toggle = renderingBoPool.acquire("myToggle", ControlRenderingBo.class)
+    .setType(ToggleButtonControl.class)
+    .setCaption("Toggle")
+    .setCustomData(Boolean.TRUE) // Initial toggled state
+    .withPositionAbsoluteAnchorTopLeft(250, 50)
+    .withDimensionAbsolute(100, 40);
+
+// Create a label with custom colors
+var label = renderingBoPool.acquire("myLabel", ControlRenderingBo.class)
+    .setType(LabelControl.class)
+    .setCaption("Status: Ready")
+    .setColor(RgbaColor.WHITE) // Foreground color
+    .setCustomData(RgbaColor.DARK_GRAY) // Background color
+    .setCustomData2(HorizontalAlignment.CENTER) // Text alignment
+    .withPositionAbsoluteAnchorTopLeft(100, 100)
+    .withDimensionAbsolute(200, 30);
+
+// Create a text field (multi-line)
+var textField = renderingBoPool.acquire("myTextField", ControlRenderingBo.class)
+    .setType(TextfieldControl.class)
+    .setCaption("Enter text here...")
+    .setCustomData(Boolean.TRUE) // Multi-line mode
+    .setCustomData2(Boolean.FALSE) // Not read-only
+    .withPositionAbsoluteAnchorTopLeft(100, 150)
+    .withDimensionAbsolute(300, 100);
+```
+
+**Handling Control Events:**
+
+Controls fire `UiControlEvent` instances when interacted with. Register event handlers to respond to user actions:
+
+```java
+// In your module's onActivate() method
+eventService.registerConsumer(
+    moduleId,
+    UiControlEvent.class,
+    event -> {
+        var controlId = event.getControlId();
+        var eventData = event.getData();
+        
+        switch (controlId) {
+            case "myButton" -> handleButtonClick();
+            case "myToggle" -> handleToggleChange((Boolean) eventData);
+            case "myTextField" -> handleTextChange((String) eventData);
+        }
+    }
+);
+```
+
+**Control Groups:**
+
+Controls can be organized into groups for coordinated behavior (e.g., radio button groups where only one can be selected):
+
+```java
+var option1 = renderingBoPool.acquire("option1", ControlRenderingBo.class)
+    .setType(ToggleButtonControl.class)
+    .setControlGroup("radioGroup")
+    .setCaption("Option 1");
+
+var option2 = renderingBoPool.acquire("option2", ControlRenderingBo.class)
+    .setType(ToggleButtonControl.class)
+    .setControlGroup("radioGroup")
+    .setCaption("Option 2");
+```
+
+When toggle buttons share a control group, only one can be active at a time - selecting one automatically deselects the others.
+
+**Custom Data Fields:**
+
+Controls support up to four custom data fields (`setCustomData()` through `setCustomData4()`) for control-specific configuration:
+- Toggle buttons: `customData` = initial state (Boolean)
+- Labels: `customData` = background color, `customData2` = text alignment
+- Text fields: `customData` = multi-line mode (Boolean), `customData2` = read-only flag
+- Sliders: `customData` = horizontal orientation, `customData2` = current value, `customData3` = secondary value
+- Tables: `customData` = data list, `customData2` = row count, `customData3` = version number
+
 #### Integration with Module System
 
 The Renderer System integrates with the Module System to provide automatic cleanup of rendering objects. When a client module (`AbstractClientModule`) is deactivated or unloaded, its entire renderer working set is automatically cleared by the Module Service. This ensures that rendering objects associated with inactive or unloaded modules are not rendered and don't consume memory.
 
 Modules don't need to manually clear their rendering objects in their `onDeactivate()` or `onUnload()` lifecycle methods - the Module Service handles this cleanup automatically using `rendererWorkingSet.clear(moduleId)`.
+
+#### Rendering Layers and Z-Index
+
+The rendering system uses a two-level ordering system to control the draw order of rendering objects and UI components:
+
+**Rendering Layers**
+
+All `RenderingBo` objects have a `layer` property that determines their primary rendering order. Objects are rendered from lowest layer value to highest layer value, with higher layers painted on top. The `RenderingBoLayer` class defines standard layer constants:
+
+- **Background Layers**: `BACKGROUND0` (100), `BACKGROUND1` (110), `BACKGROUND2` (120)
+- **Foreground Layers**: `FOREGROUND0` (1000) through `FOREGROUND6` (1600)
+- **UI Layers**: `UI_BGR` (2000), `UI0` (2100), `UI1` (2200), `UI2` (2300), `UI_TOP` (2499)
+- **Top Layer**: `TOP` (32000) - always rendered last
+
+**Z-Index for Fine-Grained Ordering**
+
+Within the UI layers (`UI_BGR` through `UI_TOP`), rendering objects can additionally specify a `zIndex` property for fine-grained ordering. The z-index allows multiple objects on the same layer to be ordered relative to each other:
+
+```java
+// Both labels are on UI0 layer, but label2 renders on top due to higher zIndex
+var label1 = pool.acquire("label1", LabelBo.class)
+    .setLayer(RenderingBoLayer.UI0)
+    .setZIndex((short) 0)
+    .setText("Behind");
+
+var label2 = pool.acquire("label2", LabelBo.class)
+    .setLayer(RenderingBoLayer.UI0)
+    .setZIndex((short) 10)
+    .setText("In Front");
+```
+
+**Effective Layer Calculation**
+
+For objects in UI layers, the effective rendering order is calculated as:
+```
+effectiveLayer = layer + (zIndex * ZINDEX_STEPS)
+where ZINDEX_STEPS = UI_TOP - UI_BGR + 1 = 500
+```
+
+This formula ensures that:
+- Objects with the same layer and zIndex render in the order they were added
+- Higher zIndex values always render on top of lower values within the same layer
+- **The zIndex must be less than 48** to prevent overlapping with different layer ranges
+
+**AWT Component Z-Order**
+
+For UI controls implemented as AWT/Swing components (buttons, labels, text fields, etc.), the z-index is synchronized with AWT's component z-order. When a control's zIndex or layer changes, the `G2DMainFrame.recalculateAllComponentZOrder()` method:
+
+1. Collects all components and their effective layers
+2. Sorts components by effective layer (ascending order)
+3. Applies the sorted z-order to all components using `Container.setComponentZOrder()`
+
+This ensures that AWT components respect the same layering rules as rendered objects, maintaining consistent visual stacking throughout the UI.
+
+**Best Practices**
+
+- Use layers for major UI groupings (backgrounds, game content, UI overlays)
+- Use zIndex for ordering within a specific layer (window stacking, overlapping controls)
+- Reserve `TOP` layer for critical always-on-top elements (tooltips, modal dialogs)
+- **Keep zIndex values below 48** - higher values will cause incorrect rendering order
+- For most use cases, zIndex values in the 0-20 range are sufficient
 
 #### Setup / Autoconfiguration
 **Configuration Class**: `RendererAutoConfiguration`

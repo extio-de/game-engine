@@ -11,8 +11,10 @@ import org.slf4j.LoggerFactory;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRenderingHintFactory;
+import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip.TooltipRecord;
+import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.CoordI2;
@@ -21,6 +23,8 @@ import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 public abstract class G2DBaseControlImpl implements BaseControl {
 	
 	protected final static Logger LOGGER = LoggerFactory.getLogger(G2DBaseControlImpl.class);
+	
+	private static final short ZINDEX_STEPS = RenderingBoLayer.UI_TOP - RenderingBoLayer.UI_BGR + 1;
 	
 	protected int x;
 	
@@ -59,6 +63,10 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	protected String tooltip;
 	
 	protected CoordI2 tooltipMousePosition;
+	
+	protected short zIndex;
+	
+	protected short layer;
 	
 	@Override
 	public BaseControl setInUse(final boolean inUse) {
@@ -167,6 +175,21 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 		return this;
 	}
 	
+	public G2DBaseControlImpl setZIndex(final short zIndex) {
+		this.modified |= this.zIndex != zIndex;
+		this.zIndex = zIndex;
+		return this;
+	}
+	
+	public short getZIndex() {
+		return this.zIndex;
+	}
+	
+	public G2DBaseControlImpl setLayer(final short layer) {
+		this.layer = layer;
+		return this;
+	}
+	
 	@Override
 	public void render() {
 		if (this.visible && this.bufferedImage != null) {
@@ -222,6 +245,47 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 			
 			G2DDrawControlTooltip.TOOLTIP = new TooltipRecord(ImmutableCoordI2.create(this.x + 10 + this.tooltipMousePosition.getX(), this.y + 10 + this.tooltipMousePosition.getY()), this.tooltip);
 		}
+	}
+	
+	protected int calculateComponentZOrder() {
+		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
+		final var componentCount = mainFrame.getComponentCount();
+		
+		if (componentCount == 0) {
+			return 0;
+		}
+		
+		final var myEffectiveLayer = this.getEffectiveLayer();
+		
+		int zOrder = 0;
+		for (int i = 0; i < componentCount; i++) {
+			final var component = mainFrame.getComponent(i);
+			final var componentName = component.getName();
+			if (componentName == null) {
+				continue;
+			}
+			
+			final var otherControl = G2DDrawControl.CACHED_CONTROLS.get(componentName);
+			if (otherControl != null && otherControl instanceof final G2DBaseControlImpl baseControl) {
+				final var otherEffectiveLayer = baseControl.getEffectiveLayer();
+				if (otherEffectiveLayer < myEffectiveLayer) {
+					zOrder++;
+				}
+			}
+		}
+		
+		return Math.min(zOrder, componentCount - 1);
+	}
+	
+	public int getEffectiveLayer() {
+		if (this.layer >= RenderingBoLayer.UI_BGR && this.layer <= RenderingBoLayer.UI_TOP) {
+			return this.layer + (this.zIndex * ZINDEX_STEPS);
+		}
+		return this.layer;
+	}
+	
+	protected void updateAllComponentZOrder() {
+		((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().recalculateAllComponentZOrder();
 	}
 	
 }

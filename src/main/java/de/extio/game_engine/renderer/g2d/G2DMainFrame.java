@@ -2,6 +2,7 @@ package de.extio.game_engine.renderer.g2d;
 
 import java.awt.AWTEvent;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Frame;
 import java.awt.Graphics;
@@ -22,6 +23,7 @@ import java.awt.event.MouseWheelListener;
 import java.awt.event.WindowEvent;
 import java.awt.event.WindowListener;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -35,10 +37,11 @@ import de.extio.game_engine.keyboard.KeyModifiers;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.control.G2DControlHasExclusiveKeyEvent;
+import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
 import de.extio.game_engine.renderer.model.event.KeyStrokeEvent;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
 import de.extio.game_engine.renderer.model.event.MouseEnterEvent;
-import de.extio.game_engine.renderer.model.event.MouseExitEvent;
 import de.extio.game_engine.renderer.model.event.MouseExitEvent;
 import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
@@ -474,4 +477,44 @@ public class G2DMainFrame extends Frame {
 		final var scaleFactor = ((G2DRendererControl) this.rendererData.getRendererControl()).getScaleFactor();
 		return ImmutableCoordI2.create((int) (rawCoord.getX() / scaleFactor), (int) (rawCoord.getY() / scaleFactor));
 	}
+	
+	private static final List<ComponentZOrderPair> COMPONENT_Z_ORDER_PAIRS = new ArrayList<>();
+
+	public void recalculateAllComponentZOrder() {
+		synchronized (getTreeLock()) {
+			try {
+				final var componentCount = this.getComponentCount();
+				if (componentCount == 0) {
+					return;
+				}
+				
+				for (int i = 0; i < componentCount; i++) {
+					final var component = this.getComponent(i);
+					final var componentName = component.getName();
+					if (componentName == null) {
+						continue;
+					}
+					
+					final var control = G2DDrawControl.CACHED_CONTROLS.get(componentName);
+					if (control != null && control instanceof G2DBaseControlImpl) {
+						final var baseControl = (G2DBaseControlImpl) control;
+						COMPONENT_Z_ORDER_PAIRS.add(new ComponentZOrderPair(component, baseControl.getEffectiveLayer()));
+					}
+				}
+				
+				COMPONENT_Z_ORDER_PAIRS.sort((a, b) -> Integer.compare(b.effectiveLayer, a.effectiveLayer));
+				
+				for (int i = 0; i < COMPONENT_Z_ORDER_PAIRS.size(); i++) {
+					this.setComponentZOrder(COMPONENT_Z_ORDER_PAIRS.get(i).component, i);
+				}
+			}
+			finally {
+				COMPONENT_Z_ORDER_PAIRS.clear();
+			}
+		}
+	}
+	
+	private static record ComponentZOrderPair (Component component, int effectiveLayer) {
+	}
+
 }
