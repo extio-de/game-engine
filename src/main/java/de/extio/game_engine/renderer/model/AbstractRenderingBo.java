@@ -33,6 +33,8 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	
 	private final short defaultLayer;
 	
+	protected short zIndex;
+	
 	public AbstractRenderingBo(final short layer) {
 		this.layer = layer;
 		this.defaultLayer = layer;
@@ -224,6 +226,7 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		this.width = 0;
 		this.height = 0;
 		this.layer = this.defaultLayer;
+		this.zIndex = 0;
 	}
 
 	@Override
@@ -238,6 +241,7 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 			this.width = abstractRenderingBo.width;
 			this.height = abstractRenderingBo.height;
 			this.layer = abstractRenderingBo.layer;
+			this.zIndex = abstractRenderingBo.zIndex;
 		}
 	}
 	
@@ -295,6 +299,17 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	@Override
 	public RenderingBo setLayer(final short layer) {
 		this.layer = layer;
+		return this;
+	}
+	
+	@Override
+	public short getZIndex() {
+		return this.zIndex;
+	}
+	
+	@Override
+	public RenderingBo setZIndex(final short zIndex) {
+		this.zIndex = zIndex;
 		return this;
 	}
 	

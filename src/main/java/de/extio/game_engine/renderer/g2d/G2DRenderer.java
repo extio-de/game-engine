@@ -43,6 +43,8 @@ public class G2DRenderer implements Renderer {
 	private static final Logger LOGGER = LoggerFactory.getLogger(G2DRenderer.class);
 	
 	private static final long SLEEP_PRECISION = TimeUnit.MILLISECONDS.toNanos(2);
+
+	private static final short ZINDEX_STEPS = RenderingBoLayer.UI_TOP - RenderingBoLayer.UI_BGR + 1;
 	
 	private final RingBuffer<Integer> fpsHistory = new RingBuffer<>(90);
 	
@@ -175,7 +177,7 @@ public class G2DRenderer implements Renderer {
 				this.drawStatistics();
 				this.rendererData.getRendererWorkingSet().commit(this.rendererModuleId, true);
 				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs, this.rendererData.getModuleService()::isDisplayed);
-				this.renderingBOs.sort((bo0, bo1) -> Short.compare(bo0.getLayer(), bo1.getLayer()));
+				this.renderingBOs.sort((bo0, bo1) -> Integer.compare(this.getEffectiveLayer(bo0), this.getEffectiveLayer(bo1)));
 				
 				Graphics2D screenGraphics = null;
 				try {
@@ -204,7 +206,7 @@ public class G2DRenderer implements Renderer {
 					for (final RenderingBo bo : usedRenderingBoTypes.values()) {
 						bo.staticCleanupAfterFrame();
 					}
-
+					
 					this.rendererData.getRenderingBoPool().releasePending();
 					
 					//
@@ -327,6 +329,14 @@ public class G2DRenderer implements Renderer {
 			screenshotGraphics.dispose();
 			screenshotImg.flush();
 		}
+	}
+	
+	private int getEffectiveLayer(final RenderingBo bo) {
+		final var layer = bo.getLayer();
+		if (layer >= RenderingBoLayer.UI_BGR && layer <= RenderingBoLayer.UI_TOP) {
+			return layer + (bo.getZIndex() * ZINDEX_STEPS);
+		}
+		return layer;
 	}
 	
 	public G2DMainFrame getMainFrame() {

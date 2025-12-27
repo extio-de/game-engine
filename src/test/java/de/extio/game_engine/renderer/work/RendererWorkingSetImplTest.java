@@ -426,6 +426,16 @@ public class RendererWorkingSetImplTest {
 		public short getLayer() {
 			return RenderingBoLayer.UI0;
 		}
+
+		@Override
+		public short getZIndex() {
+			return 0;
+		}
+
+		@Override
+		public RenderingBo setZIndex(short zIndex) {
+			return this;
+		}
 		
 		@Override
 		public RenderingBo withPositionAbsoluteAnchorTopLeft(final int x, final int y) {

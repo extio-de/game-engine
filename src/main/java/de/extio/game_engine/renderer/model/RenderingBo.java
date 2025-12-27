@@ -36,6 +36,16 @@ public interface RenderingBo extends AutoCloseable {
 	short getLayer();
 	
 	/**
+	 * Gets the z-index for fine-grained ordering within UI layers (UI_BGR to UI_TOP).
+	 */
+	short getZIndex();
+	
+	/**
+	 * Sets the z-index for fine-grained ordering within UI layers (UI_BGR to UI_TOP).
+	 */
+	RenderingBo setZIndex(short zIndex);
+	
+	/**
 	 * Positions this bo with an absolute position on the viewport. x0 y0 coordinates are at the top left. Call RendererControl#getEffectiveViewportDimension to get the absolute dimension of the viewport.
 	 */
 	RenderingBo withPositionAbsoluteAnchorTopLeft(int x, int y);

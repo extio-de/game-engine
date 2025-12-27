@@ -344,6 +344,16 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
+		public short getZIndex() {
+			return 0;
+		}
+
+		@Override
+		public RenderingBo setZIndex(short zIndex) {
+			return this;
+		}
+
+		@Override
 		public RenderingBo withPositionAbsoluteAnchorTopLeft(final int x, final int y) {
 			return this;
 		}
@@ -492,6 +502,16 @@ public class RenderingBoPoolImplTest {
 			return 0;
 		}
 
+		@Override
+		public short getZIndex() {
+			return 0;
+		}
+
+		@Override
+		public RenderingBo setZIndex(short zIndex) {
+			return this;
+		}
+		
 		@Override
 		public RenderingBo withPositionAbsoluteAnchorTopLeft(final int x, final int y) {
 			return this;
