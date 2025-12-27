@@ -30,12 +30,14 @@ import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFpsHistory;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.TakeScreenshotEvent;
 import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.util.RingBuffer;
 
 public class G2DRenderer implements Renderer {
@@ -77,6 +79,10 @@ public class G2DRenderer implements Renderer {
 	private volatile boolean takeScreenshot;
 	
 	private StaticResource previousDefaultFont = null;
+	
+	private G2DThemeManager themeManager;
+	
+	private StaticResourceService staticResourceService;
 	
 	public G2DRenderer() {
 		LOGGER.info("ctor");
@@ -365,6 +371,22 @@ public class G2DRenderer implements Renderer {
 	
 	public String getTitle() {
 		return this.title;
+	}
+	
+	public G2DThemeManager getThemeManager() {
+		return this.themeManager;
+	}
+	
+	public void setThemeManager(final G2DThemeManager themeManager) {
+		this.themeManager = themeManager;
+	}
+	
+	public StaticResourceService getStaticResourceService() {
+		return this.staticResourceService;
+	}
+	
+	public void setStaticResourceService(final StaticResourceService staticResourceService) {
+		this.staticResourceService = staticResourceService;
 	}
 	
 	@Override

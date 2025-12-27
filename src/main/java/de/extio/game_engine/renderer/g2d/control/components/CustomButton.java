@@ -6,17 +6,27 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 
 @SuppressWarnings("serial")
 public class CustomButton extends CustomAbstractButton {
 	
-	public CustomButton(final boolean toggle, final ActionListener listener) {
+	private final G2DThemeManager themeManager;
+	
+	public CustomButton(final boolean toggle, final ActionListener listener, final G2DThemeManager themeManager) {
 		super(toggle, listener);
+		this.themeManager = themeManager;
 	}
 	
 	@Override
 	public void paint(final Graphics g) {
+		if (this.themeManager == null) {
+			return;
+		}
+		
 		final var g2d = (Graphics2D) g;
+		final Theme theme = this.themeManager.getCurrentTheme();
 		
 		float h, s, b;
 		
@@ -24,24 +34,21 @@ public class CustomButton extends CustomAbstractButton {
 		final var bgrStrength = (this.getWidth() < 48 || this.getHeight() < 48) ? 0 : 2;
 		
 		if (this.backgroundColor == null) {
-			if ((this.state & STATE_TOGGLED) == 0) {
-				h = ComponentRenderingSupport.HSB_COMPONENT_BGR.h();
-				s = ComponentRenderingSupport.HSB_COMPONENT_BGR.s();
-				b = ComponentRenderingSupport.HSB_COMPONENT_BGR.b();
-			}
-			else {
-				h = ComponentRenderingSupport.HSB_COMPONENT_SELECTED_0.b();
-				s = ComponentRenderingSupport.HSB_COMPONENT_SELECTED_0.s();
-				b = ComponentRenderingSupport.HSB_COMPONENT_SELECTED_0.b();
-			}
+			// Use theme colors
+			final var baseColor = (this.state & STATE_TOGGLED) == 0 ? theme.getBackgroundNormal() : theme.getBackgroundSelected();
+			h = baseColor.getHue();
+			s = baseColor.getSaturation();
+			b = baseColor.getBrightness();
+			
 			if ((this.state & STATE_PRESSED) != 0) {
-				b += 0.40F;
+				b += theme.getPressedBrightnessAdjustment();
 			}
 			else if ((this.state & STATE_HOVERED) != 0) {
-				b += 0.25F;
+				b += theme.getHoverBrightnessAdjustment();
 			}
 		}
 		else {
+			// Use custom background color
 			final var hsb = new float[3];
 			Color.RGBtoHSB(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), hsb);
 			h = hsb[0];
@@ -54,12 +61,14 @@ public class CustomButton extends CustomAbstractButton {
 				b = 0.50F;
 			}
 			if ((this.state & STATE_PRESSED) != 0) {
-				b += 0.40F;
+				b += theme.getPressedBrightnessAdjustment();
 			}
 			else if ((this.state & STATE_HOVERED) != 0) {
-				b += 0.25F;
+				b += theme.getHoverBrightnessAdjustment();
 			}
 		}
+		
+		b = Math.max(0.0f, Math.min(1.0f, b));
 		g2d.setColor(Color.getHSBColor(h, s, b));
 		g2d.fillRect(2 + bgrStrength, 2 + bgrStrength, this.getWidth() - 5 - bgrStrength * 2, this.getHeight() - 5 - bgrStrength * 2);
 		
@@ -70,14 +79,15 @@ public class CustomButton extends CustomAbstractButton {
 			g2d.drawImage(this.icon, 4 + bgrStrength, 4 + bgrStrength, this.getWidth() - 4 - bgrStrength, this.getHeight() - 4 - bgrStrength, 0, 0, this.icon.getWidth(), this.icon.getHeight(), null);
 		}
 		else if (this.caption != null) {
+			// Text color based on state
 			if ((this.state & (STATE_HOVERED | STATE_TOGGLED)) != 0) {
 				g2d.setColor(Color.WHITE);
 			}
 			else if (this.isEnabled()) {
-				g2d.setColor(Color.LIGHT_GRAY);
+				g2d.setColor(theme.getTextNormal().toColor());
 			}
 			else {
-				g2d.setColor(Color.GRAY);
+				g2d.setColor(theme.getTextDisabled().toColor());
 			}
 			final var textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
 			G2DDrawFont.renderText(g2d,
@@ -89,10 +99,17 @@ public class CustomButton extends CustomAbstractButton {
 					this.caption);
 		}
 		
-		var color = (this.state & STATE_HOVERED) != 0 ? ComponentRenderingSupport.COLOR_COMPONENT_SELECTED_0 : ComponentRenderingSupport.COLOR_COMPONENT_BORDER0;
-		ComponentRenderingSupport.drawDecorativeBorder(g2d, 0, 0, this.getWidth() - 1, this.getHeight() - 1, borderStrength, color);
-		color = this.isEnabled() ? (this.state & STATE_HOVERED) != 0 ? ComponentRenderingSupport.COLOR_COMPONENT_SELECTED_1 : ComponentRenderingSupport.COLOR_COMPONENT_BORDER1 : ComponentRenderingSupport.COLOR_COMPONENT_BORDER1_DIS;
-		ComponentRenderingSupport.drawDecorativeBorder(g2d, borderStrength, borderStrength, this.getWidth() - 1 - 2 * borderStrength, this.getHeight() - 1 - 2 * borderStrength, borderStrength, color);
+		// Draw borders using theme colors and pattern renderer
+		var borderColor = (this.state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
+		final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
+		if (patternRenderer != null) {
+			patternRenderer.drawDecorativeBorder(g2d, 0, 0, this.getWidth() - 1, this.getHeight() - 1, borderStrength, borderColor);
+			
+			borderColor = this.isEnabled() ? 
+					(this.state & STATE_HOVERED) != 0 ? theme.getSelectionSecondary().toColor() : theme.getBorderInner().toColor() : 
+					theme.getBorderInnerDisabled().toColor();
+			patternRenderer.drawDecorativeBorder(g2d, borderStrength, borderStrength, this.getWidth() - 1 - 2 * borderStrength, this.getHeight() - 1 - 2 * borderStrength, borderStrength, borderColor);
+		}
 	}
 	
 }

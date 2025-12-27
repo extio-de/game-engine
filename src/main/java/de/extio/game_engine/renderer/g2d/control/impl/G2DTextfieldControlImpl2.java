@@ -9,9 +9,9 @@ import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
 import de.extio.game_engine.renderer.RendererData;
+import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.g2d.control.components.CustomJTextArea;
 import de.extio.game_engine.renderer.g2d.control.components.CustomJTextField;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
@@ -227,7 +227,14 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	}
 	
 	private void initControl() {
-		this.safeInvoke(() -> this.textComponent.setBackground(this.backgroundColor != null ? this.backgroundColor.toAwtColor() : ComponentRenderingSupport.COLOR_COMPONENT_BGR));
+		final ThemeManager themeManager = ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager();
+		final Color bgColor;
+		if (this.backgroundColor != null) {
+			bgColor = this.backgroundColor.toAwtColor();
+		} else {
+			bgColor = themeManager.getCurrentTheme().getBackgroundNormal().toColor();
+		}
+		this.safeInvoke(() -> this.textComponent.setBackground(bgColor));
 		this.safeInvoke(() -> this.textComponent.setForeground(Color.WHITE));
 		this.safeInvoke(() -> this.textComponent.setFont(G2DDrawFont.getFont(this.scaleFactor, this.fontSize)));
 		if (this.multiLine) {

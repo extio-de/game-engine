@@ -10,7 +10,9 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
+import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.renderer.g2d.theme.Theme;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
@@ -43,6 +45,8 @@ public class CustomLabel extends Component {
 	protected boolean dirty = true;
 	
 	private CoordI2 lastMousePosition;
+	
+	private final ThemeManager themeManager;
 	
 	public void setCaption(final String caption) {
 		this.caption = caption;
@@ -92,7 +96,8 @@ public class CustomLabel extends Component {
 		return this.lastMousePosition;
 	}
 	
-	public CustomLabel(final ActionListener listener) {
+	public CustomLabel(final ActionListener listener, final ThemeManager themeManager) {
+		this.themeManager = themeManager;
 		this.setIgnoreRepaint(true);
 		
 		this.addMouseListener(new MouseAdapter() {
@@ -146,7 +151,12 @@ public class CustomLabel extends Component {
 	
 	@Override
 	public void paint(final Graphics g) {
+		if (this.themeManager == null) {
+			return;
+		}
+		
 		final var g2d = (Graphics2D) g;
+		final Theme theme = this.themeManager.getCurrentTheme();
 		
 		if (this.backgroundColor != null) {
 			g2d.setColor(this.backgroundColor);
@@ -155,9 +165,9 @@ public class CustomLabel extends Component {
 		
 		float h, s, b;
 		if (this.foregroundColor == null) {
-			h = 0.0F;
-			s = 0.0F;
-			b = 0.80F;
+			h = theme.getTextNormal().getHue();
+			s = theme.getTextNormal().getSaturation();
+			b = theme.getTextNormal().getBrightness();
 		}
 		else {
 			final var hsb = Color.RGBtoHSB(this.foregroundColor.getRed(), this.foregroundColor.getGreen(), this.foregroundColor.getBlue(), null);
@@ -167,15 +177,17 @@ public class CustomLabel extends Component {
 		}
 		
 		if (!this.enabled) {
-			b -= 0.30F;
+			h = theme.getTextDisabled().getHue();
+			s = theme.getTextDisabled().getSaturation();
+			b = theme.getTextDisabled().getBrightness();
 		}
 		else if ((this.state & STATE_PRESSED) != 0) {
-			h = ComponentRenderingSupport.HSB_COMPONENT_SELECTED_0.b();
-			s = ComponentRenderingSupport.HSB_COMPONENT_SELECTED_0.s();
-			b = ComponentRenderingSupport.HSB_COMPONENT_SELECTED_0.b() + 0.4f;
+			h = theme.getSelectionPrimary().getHue();
+			s = theme.getSelectionPrimary().getSaturation();
+			b = theme.getSelectionPrimary().getBrightness() + theme.getPressedBrightnessAdjustment();
 		}
 		else if ((this.state & STATE_HOVERED) != 0) {
-			b += 0.15F;
+			b += theme.getHoverBrightnessAdjustment();
 		}
 		
 		h = Math.max(0.0f, Math.min(1.0f, h));

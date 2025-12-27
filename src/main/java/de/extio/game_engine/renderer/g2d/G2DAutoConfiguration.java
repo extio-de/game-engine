@@ -1,9 +1,21 @@
 package de.extio.game_engine.renderer.g2d;
 
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
+import de.extio.game_engine.renderer.g2d.theme.PatternRenderer;
+import de.extio.game_engine.renderer.g2d.theme.SpacecraftThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.g2d.theme.VintageThemeFactoryBean;
+import de.extio.game_engine.resource.StaticResourceService;
 
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.renderer.enabled", havingValue = "true", matchIfMissing = true)
@@ -11,15 +23,40 @@ import org.springframework.context.annotation.Bean;
 public class G2DAutoConfiguration {
 
 	@Bean
-	public G2DRenderer g2dRenderer(@Value("${game-engine.renderer.title:}") final String title) {
+	G2DRenderer g2dRenderer(
+			@Value("${game-engine.renderer.title:}") final String title,
+			final G2DThemeManager themeManager,
+			final StaticResourceService staticResourceService) {
 		final var renderer = new G2DRenderer();
 		renderer.setTitle(title);
+		renderer.setThemeManager(themeManager);
+		renderer.setStaticResourceService(staticResourceService);
+		themeManager.setG2dRenderer(renderer);
 		return renderer;
 	}
 	
 	@Bean
-	public G2DRendererControl g2dRendererControl(final G2DRenderer renderer) {
+	G2DRendererControl g2dRendererControl(final G2DRenderer renderer) {
 		return new G2DRendererControl(renderer);
+	}
+
+	@Bean
+	FactoryBean<Theme> spacecraftTheme() {
+		return new SpacecraftThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> vintageTheme() {
+		return new VintageThemeFactoryBean();
+	}
+
+	@Bean
+	G2DThemeManager g2dThemeManager(
+			final StaticResourceService staticResourceService,
+			final List<PatternRenderer> patternRendererList,
+			final Map<String, Theme> themes,
+			@Qualifier("spacecraftTheme") final Theme defaultTheme) {
+		return new G2DThemeManager(staticResourceService, patternRendererList, themes, defaultTheme);
 	}
 
 }

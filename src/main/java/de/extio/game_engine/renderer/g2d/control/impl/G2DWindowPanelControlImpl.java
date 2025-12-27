@@ -77,7 +77,7 @@ public class G2DWindowPanelControlImpl extends G2DBaseControlImpl implements Win
 	}
 	
 	protected void createControl() {
-		this.control = new CustomWindowPanel();
+		this.control = new CustomWindowPanel(((G2DRenderer) this.rendererData.getRenderer()).getThemeManager());
 		this.control.setName(this.id);
 	}
 	

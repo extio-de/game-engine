@@ -71,7 +71,7 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	}
 	
 	protected void createControl() {
-		this.control = new CustomButton(false, event -> this.performAction());
+		this.control = new CustomButton(false, event -> this.performAction(), ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager());
 		this.control.setName(this.id);
 	}
 	

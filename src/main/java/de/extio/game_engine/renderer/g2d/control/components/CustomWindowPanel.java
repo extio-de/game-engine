@@ -11,13 +11,11 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 import de.extio.game_engine.renderer.g2d.G2DMainFrame;
-import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
-import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class CustomWindowPanel extends Component {
-	
-	private static final RgbaColor COLOR_WINDOW = new ImmutableRgbaColor(ComponentRenderingSupport.COLOR_COMPONENT_BORDER1.getRed(), ComponentRenderingSupport.COLOR_COMPONENT_BORDER1.getGreen(), ComponentRenderingSupport.COLOR_COMPONENT_BORDER1.getBlue());
 	
 	protected boolean thickBorder;
 	
@@ -26,6 +24,8 @@ public class CustomWindowPanel extends Component {
 	protected double scaleFactor;
 	
 	protected boolean dirty = true;
+	
+	private final G2DThemeManager themeManager;
 	
 	public void setThickBorder(final boolean thickBorder) {
 		this.thickBorder = thickBorder;
@@ -47,7 +47,8 @@ public class CustomWindowPanel extends Component {
 		this.dirty = dirty;
 	}
 	
-	public CustomWindowPanel() {
+	public CustomWindowPanel(final G2DThemeManager themeManager) {
+		this.themeManager = themeManager;
 		this.setIgnoreRepaint(true);
 		
 		this.addMouseListener(new MouseAdapter() {
@@ -103,24 +104,26 @@ public class CustomWindowPanel extends Component {
 	
 	@Override
 	public void paint(final Graphics g) {
-		final var g2d = (Graphics2D) g;
-		
-		final var strength = Math.max(2, (int) (3 * this.scaleFactor));
-		final var effectiveColor = this.color != null ? this.color : COLOR_WINDOW.toAwtColor();
-		
-		final var cMain = effectiveColor;
-		final var rgbaDarker = new Color(effectiveColor.getRed() / 2, effectiveColor.getGreen() / 2, effectiveColor.getBlue() / 2);
-		
-		if (this.thickBorder) {
-			final var borderStrength = strength * 2;
-			g2d.setColor(cMain);
-			g2d.fillRect(strength * 2, strength * 2, this.getWidth() - strength * 4, borderStrength);
-			g2d.setColor(rgbaDarker);
-			g2d.fillRect(strength * 2, strength * 2 + borderStrength, this.getWidth() - strength * 4, strength);
+		if (this.themeManager == null) {
+			return;
 		}
 		
-		ComponentRenderingSupport.drawDecorativeBorder(g2d, 0, 0, this.getWidth(), this.getHeight(), strength, rgbaDarker);
-		ComponentRenderingSupport.drawDecorativeBorderFilled(g2d, strength, strength, this.getWidth() - strength * 2, this.getHeight() - strength * 2, strength, cMain);
+		final var g2d = (Graphics2D) g;
+		final Theme theme = this.themeManager.getCurrentTheme();
+		final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
+		
+		if (patternRenderer != null) {
+			patternRenderer.drawWindowPanel(g2d,
+					0,
+					0,
+					this.getWidth(),
+					this.getHeight(),
+					this.thickBorder,
+					theme.getBorderInner().toColor(),
+					theme.getBorderOuter().toColor(),
+					this.color != null ? this.color : theme.getWindowBackground().toColor(),
+					this.scaleFactor);
+		}
 	}
 	
 }

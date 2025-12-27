@@ -1,5 +1,6 @@
 package de.extio.game_engine.renderer.g2d.control.impl;
 
+import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomWindowCloseButton;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonControl;
 
@@ -11,7 +12,7 @@ public class G2DWindowCloseButtonControlImpl extends G2DButtonControlImpl implem
 	
 	@Override
 	protected void createControl() {
-		this.control = new CustomWindowCloseButton(false, event -> this.performAction());
+		this.control = new CustomWindowCloseButton(false, event -> this.performAction(), ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager());
 		this.control.setName(this.id);
 	}
 	

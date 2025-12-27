@@ -11,7 +11,7 @@ import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
-import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
+import de.extio.game_engine.renderer.g2d.theme.PatternRenderer;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
@@ -216,12 +216,20 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				}
 				
 				final var strength = this.customInt0 <= 0 ? 2 : this.customInt0;
+				final var effectColor = this.color == null ? Color.WHITE : this.color.toAwtColor();
 				
-				if (this.effect == DrawEffectRenderingBoEffects.DECORATIVE_BORDER) {
-					ComponentRenderingSupport.drawDecorativeBorder(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, this.color == null ? Color.WHITE : this.color.toAwtColor());
-				}
-				else {
-					ComponentRenderingSupport.drawDecorativeBorderFilled(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, this.color == null ? Color.WHITE : this.color.toAwtColor());
+				// Use PatternRenderer from ThemeManager
+				final var renderer = this.rendererData.getRenderer();
+				final G2DRenderer g2dRenderer = (G2DRenderer) renderer;
+				final var themeManager = g2dRenderer.getThemeManager();
+				final var theme = themeManager.getCurrentTheme();
+				final PatternRenderer patternRenderer = themeManager.getPatternRenderer(theme.getPatternRendererName());
+				if (patternRenderer != null) {
+					if (this.effect == DrawEffectRenderingBoEffects.DECORATIVE_BORDER) {
+						patternRenderer.drawDecorativeBorder(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor);
+					} else {
+						patternRenderer.drawDecorativeBorderFilled(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor, effectColor);
+					}
 				}
 				
 				break;

@@ -136,7 +136,7 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 			if (this.enabled) {
 				this.performAction();
 			}
-		});
+		}, ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager());
 		this.control.setName(this.id);
 	}
 	

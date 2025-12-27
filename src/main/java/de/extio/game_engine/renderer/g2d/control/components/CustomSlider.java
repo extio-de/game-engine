@@ -10,6 +10,8 @@ import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
+import de.extio.game_engine.renderer.ThemeManager;
+import de.extio.game_engine.renderer.g2d.theme.Theme;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
@@ -43,6 +45,8 @@ public class CustomSlider extends Component {
 	private ActionEvent lastActionEvent;
 	
 	private long lastActionEventReleased;
+	
+	private final ThemeManager themeManager;
 	
 	public void setScaleFactor(final double scaleFactor) {
 		this.scaleFactor = scaleFactor;
@@ -92,9 +96,10 @@ public class CustomSlider extends Component {
 		return this.lastMousePosition;
 	}
 	
-	public CustomSlider(final ActionListener listener) {
+	public CustomSlider(final ActionListener listener, final ThemeManager themeManager) {
 		this.setIgnoreRepaint(true);
 		this.actionListener = listener;
+		this.themeManager = themeManager;
 		
 		this.addMouseListener(new MouseAdapter() {
 			
@@ -168,78 +173,86 @@ public class CustomSlider extends Component {
 	
 	@Override
 	public void paint(final Graphics g) {
+		if (this.themeManager == null) {
+			return;
+		}
+		
 		final var g2d = (Graphics2D) g;
+		final Theme theme = this.themeManager.getCurrentTheme();
 		
 		float h, s, b;
 		if (this.color == null) {
-			h = 0.0F;
-			s = 0.0F;
-			b = 0.80F;
+			if (!this.enabled) {
+				h = theme.getTextDisabled().getHue();
+				s = theme.getTextDisabled().getSaturation();
+				b = theme.getTextDisabled().getBrightness();
+			}
+			else {
+				h = theme.getTextNormal().getHue();
+				s = theme.getTextNormal().getSaturation();
+				b = theme.getTextNormal().getBrightness();
+			}
 		}
 		else {
 			final var hsb = Color.RGBtoHSB(this.color.getRed(), this.color.getGreen(), this.color.getBlue(), null);
 			h = hsb[0];
 			s = hsb[1];
 			b = hsb[2];
-		}
-		if (!this.enabled) {
-			b -= 0.30F;
+			if (!this.enabled) {
+				b -= 0.30F;
+			}
 		}
 		
 		// Main line
 		if (this.horizontal) {
 			this.drawLine(g2d, h, s, b, 0, this.getHeight() / 2, this.getWidth(), this.getHeight() / 2, this.horizontal);
-		}
-		else {
-			this.drawLine(g2d, h, s, b, this.getWidth() / 2, 0, this.getWidth() / 2, this.getHeight(), this.horizontal);
-		}
-		
-		// Small lines
-		b -= 0.20F;
-		final var length = this.horizontal ? this.getWidth() : this.getHeight();
-		for (var i = 1; i < 10; i++) {
-			final var pos = (int) ((double) length / 10.0 * i);
-			if (this.horizontal) {
-				this.drawLine(g2d, h, s, b, pos, this.getHeight() / 4, pos, this.getHeight() / 4 * 3, !this.horizontal);
-			}
-			else {
-				this.drawLine(g2d, h, s, b, this.getWidth() / 4, pos, this.getWidth() / 4 * 3, pos, !this.horizontal);
-			}
-		}
-		b += 0.20F;
-		
-		// Pointer
-		if ((this.state & STATE_HOVERED) != 0 && this.lastMousePosition != null) {
-			try {
+			// Small lines
+			b -= 0.20F;
+			final var length = this.horizontal ? this.getWidth() : this.getHeight();
+			for (var i = 1; i < 10; i++) {
+				final var pos = (int) ((double) length / 10.0 * i);
 				if (this.horizontal) {
-					this.drawLine(g2d, h, s, b, this.lastMousePosition.getX(), 0, this.lastMousePosition.getX(), this.getHeight(), !this.horizontal);
+					this.drawLine(g2d, h, s, b, pos, this.getHeight() / 4, pos, this.getHeight() / 4 * 3, !this.horizontal);
 				}
 				else {
-					this.drawLine(g2d, h, s, b, 0, this.lastMousePosition.getY(), this.getWidth(), this.lastMousePosition.getY(), !this.horizontal);
+					this.drawLine(g2d, h, s, b, this.getWidth() / 4, pos, this.getWidth() / 4 * 3, pos, !this.horizontal);
 				}
 			}
-			catch (final NullPointerException exc) {
-				// AWT MouseAdapter can set this.lastMousePosition null at any time 
+			b += 0.20F;
+			
+			// Pointer
+			if ((this.state & STATE_HOVERED) != 0 && this.lastMousePosition != null) {
+				try {
+					if (this.horizontal) {
+						this.drawLine(g2d, h, s, b, this.lastMousePosition.getX(), 0, this.lastMousePosition.getX(), this.getHeight(), !this.horizontal);
+					}
+					else {
+						this.drawLine(g2d, h, s, b, 0, this.lastMousePosition.getY(), this.getWidth(), this.lastMousePosition.getY(), !this.horizontal);
+					}
+				}
+				catch (final NullPointerException exc) {
+					// AWT MouseAdapter can set this.lastMousePosition null at any time 
+				}
 			}
-		}
-		
-		// Value2
-		if (this.value2 != this.value) {
+			
+			// Value2
+			if (this.value2 != this.value) {
+				if (this.horizontal) {
+					this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value2), 0, (int) (this.getWidth() * this.value2), this.getHeight(), !this.horizontal);
+				}
+				else {
+					this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value2)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value2)), !this.horizontal);
+				}
+			}
+			
+			// Value
+			b += 0.15F;
 			if (this.horizontal) {
-				this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value2), 0, (int) (this.getWidth() * this.value2), this.getHeight(), !this.horizontal);
+				this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value), 0, (int) (this.getWidth() * this.value), this.getHeight(), !this.horizontal);
 			}
 			else {
-				this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value2)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value2)), !this.horizontal);
+				this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value)), !this.horizontal);
 			}
-		}
-		
-		// Value
-		b += 0.15F;
-		if (this.horizontal) {
-			this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value), 0, (int) (this.getWidth() * this.value), this.getHeight(), !this.horizontal);
-		}
-		else {
-			this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value)), !this.horizontal);
 		}
 	}
 	

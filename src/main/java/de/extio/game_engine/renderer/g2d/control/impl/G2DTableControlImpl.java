@@ -18,8 +18,8 @@ import javax.swing.table.DefaultTableCellRenderer;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.g2d.control.components.ComponentRenderingSupport;
 import de.extio.game_engine.renderer.g2d.control.components.CustomTable;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TableControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
@@ -167,7 +167,8 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			this.control.setFont(G2DDrawFont.getFont(this.scaleFactor, this.fontSize));
 			this.control.setRowHeight((int) (this.control.getFont().getSize2D() * 1.25));
 			
-			this.control.setBackground(ComponentRenderingSupport.COLOR_COMPONENT_BGR);
+			final G2DThemeManager themeManager = ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager();
+			this.control.setBackground(themeManager.getCurrentTheme().getBackgroundNormal().toColor());
 			this.control.setForeground(Color.WHITE);
 			
 			if (this.dataModified || this.scrollPositionModified) {
