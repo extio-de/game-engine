@@ -9,7 +9,7 @@ import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonControl;
-import de.extio.game_engine.renderer.model.bo.DrawWindowRenderingBo;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowPanelControl;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
@@ -49,13 +49,16 @@ public class Window extends Container {
 			return;
 		}
 		
-		final var windowFrame = this.rendererWorkingSet.getOrAcquire(this.id, "windowFrame", DrawWindowRenderingBo.class)
-				.setThickBorder(true)
+		final var windowPanel = this.renderingBoPool.acquire(this.id + "_WindowPanel", ControlRenderingBo.class)
+				.setType(WindowPanelControl.class)
+				.setCustomData(true)
+				.setEnabled(true)
+				.setVisible(true)
 				.withDimensionAbsolute(this.area.getDimension())
 				.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
 				.setZIndex(this.zIndex)
 				.setLayer(RenderingBoLayer.UI_BGR);
-		this.rendererWorkingSet.put(this.id, windowFrame);
+		this.rendererWorkingSet.put(this.id, windowPanel);
 		
 		if (this.closeButton) {
 			this.closeButtonName = this.id + "_CloseButton";
@@ -67,7 +70,7 @@ public class Window extends Container {
 					.withDimensionAbsolute(this.area.getDimension())
 					.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
 					.setZIndex(this.zIndex)
-					.setLayer(RenderingBoLayer.UI1);
+					.setLayer(RenderingBoLayer.UI_TOP);
 			this.rendererWorkingSet.put(this.id, closeButtonBo);
 		}
 		

@@ -24,6 +24,7 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DTextfieldControlImpl2;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowPanelControlImpl;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
@@ -156,6 +157,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			else if (this.clazz == WindowCloseButtonControl.class) {
 				control = new G2DWindowCloseButtonControlImpl();
 			}
+			else if (this.clazz == WindowPanelControl.class) {
+				control = new G2DWindowPanelControlImpl();
+			}
 			else if (this.clazz == SliderControl.class) {
 				control = new G2DSliderControlImpl();
 			}
@@ -261,6 +265,12 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			((ButtonControl) control).setBackgroundColor(this.color);
 			if (this.customData instanceof Boolean) {
 				((WindowCloseButtonControl) control).setThickBorder(((Boolean) this.customData).booleanValue());
+			}
+		}
+		else if (this.clazz == WindowPanelControl.class) {
+			((WindowPanelControl) control).setColor(this.color);
+			if (this.customData instanceof Boolean) {
+				((WindowPanelControl) control).setThickBorder(((Boolean) this.customData).booleanValue());
 			}
 		}
 		else if (this.clazz == SliderControl.class) {

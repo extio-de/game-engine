@@ -166,6 +166,21 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	}
 	
 	/**
+	 * Window panel (decorative container)
+	 */
+	public static interface WindowPanelControl extends BaseControl {
+		
+		boolean isThickBorder();
+		
+		void setThickBorder(boolean thickBorder);
+		
+		RgbaColor getColor();
+		
+		void setColor(RgbaColor color);
+		
+	}
+	
+	/**
 	 * Text field
 	 */
 	public static interface TextfieldControl extends BaseControl {

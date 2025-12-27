@@ -149,9 +149,7 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mouseReleased(final MouseEvent e) {
 				try {
-					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
-					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(false, G2DMainFrame.getModifiers(e), e.getButton(), rawCoord, scaleCoord));
+					G2DMainFrame.this.handleMouseReleased(e, ImmutableCoordI2.zero());
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -161,10 +159,7 @@ public class G2DMainFrame extends Frame {
 			@Override
 			public void mousePressed(final MouseEvent e) {
 				try {
-					G2DMainFrame.this.requestFocus();
-					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
-					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getButton(), rawCoord, scaleCoord));
+					G2DMainFrame.this.handleMousePressed(e, ImmutableCoordI2.zero());
 				}
 				catch (final Exception exc) {
 					LOGGER.warn(exc.getMessage());
@@ -175,7 +170,7 @@ public class G2DMainFrame extends Frame {
 			public void mouseExited(final MouseEvent e) {
 				try {
 					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
-					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);
 					G2DMainFrame.this.rendererData.getEventService().fire(new MouseExitEvent(G2DMainFrame.getModifiers(e), rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
@@ -187,7 +182,7 @@ public class G2DMainFrame extends Frame {
 			public void mouseEntered(final MouseEvent e) {
 				try {
 					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
-					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
+					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);
 					G2DMainFrame.this.rendererData.getEventService().fire(new MouseEnterEvent(G2DMainFrame.getModifiers(e), rawCoord, scaleCoord));
 				}
 				catch (final Exception exc) {
@@ -205,66 +200,23 @@ public class G2DMainFrame extends Frame {
 			
 			@Override
 			public void mouseMoved(final MouseEvent e) {
-				final var button = this.getButton(e);
-				
-				try {
-					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
-					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), button, rawCoord, scaleCoord));
-				}
-				catch (final Exception exc) {
-					if ("Engine not started up yet".equals(exc.getMessage())) {
-						return;
-					}
-					LOGGER.error(exc.getMessage(), exc);
-				}
+				G2DMainFrame.this.handleMouseMoved(e, ImmutableCoordI2.zero());
 			}
 			
 			@Override
 			public void mouseDragged(final MouseEvent e) {
-				final var button = this.getButton(e);
-				
-				try {
-					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
-					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseMoveEvent(true, G2DMainFrame.getModifiers(e), button, rawCoord, scaleCoord));
-				}
-				catch (final Exception exc) {
-					if ("Engine not started up yet".equals(exc.getMessage())) {
-						return;
-					}
-					LOGGER.error(exc.getMessage(), exc);
-				}
+				G2DMainFrame.this.handleMouseDragged(e, ImmutableCoordI2.zero());
 			}
 			
-			private int getButton(final MouseEvent e) {
-				var button = MouseEvent.NOBUTTON;
-				if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
-					button = MouseEvent.BUTTON1;
-				}
-				else if ((e.getModifiersEx() & InputEvent.BUTTON2_DOWN_MASK) != 0) {
-					button = MouseEvent.BUTTON2;
-				}
-				else if ((e.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK) != 0) {
-					button = MouseEvent.BUTTON3;
-				}
-				return button;
-			}
 		});
 		
 		this.addMouseWheelListener(new MouseWheelListener() {
 			
 			@Override
 			public void mouseWheelMoved(final MouseWheelEvent e) {
-				try {
-					final var rawCoord = ImmutableCoordI2.create(e.getX(), e.getY());
-					final var scaleCoord = G2DMainFrame.this.scaleCoord(rawCoord);					
-					G2DMainFrame.this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getWheelRotation() == -1 ? 4 : 5, rawCoord, scaleCoord));
-				}
-				catch (final Exception exc) {
-					LOGGER.warn(exc.getMessage());
-				}
+				G2DMainFrame.this.handleWheelMoved(e, ImmutableCoordI2.zero());
 			}
+			
 		});
 		
 		this.aWTEventListener = new AWTEventListener() {
@@ -454,6 +406,70 @@ public class G2DMainFrame extends Frame {
 		this.setSize((int) Math.min(bounds.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), (int) Math.min(bounds.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
 	}
 	
+	public void handleMouseReleased(final MouseEvent e, final CoordI2 offset) {
+		final var rawCoord = ImmutableCoordI2.create(e.getX() + offset.getX(), e.getY() + offset.getY());
+		final var scaleCoord = this.scaleCoord(rawCoord);
+		this.rendererData.getEventService().fire(new MouseClickEvent(false, G2DMainFrame.getModifiers(e), e.getButton(), rawCoord, scaleCoord));
+	}
+	
+	public void handleMousePressed(final MouseEvent e, final CoordI2 offset) {
+		this.requestFocus();
+		final var rawCoord = ImmutableCoordI2.create(e.getX() + offset.getX(), e.getY() + offset.getY());
+		final var scaleCoord = this.scaleCoord(rawCoord);
+		this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getButton(), rawCoord, scaleCoord));
+	}
+	
+	public void handleMouseMoved(final MouseEvent e, final CoordI2 offset) {
+		final var button = getMouseButton(e);
+		
+		try {
+			final var rawCoord = ImmutableCoordI2.create(e.getX() + offset.getX(), e.getY() + offset.getY());
+			final var scaleCoord = this.scaleCoord(rawCoord);
+			this.rendererData.getEventService().fire(new MouseMoveEvent(false, G2DMainFrame.getModifiers(e), button, rawCoord, scaleCoord));
+		}
+		catch (final Exception exc) {
+			LOGGER.warn(exc.getMessage(), exc);
+		}
+	}
+	
+	public void handleMouseDragged(final MouseEvent e, final CoordI2 offset) {
+		final var button = getMouseButton(e);
+		
+		try {
+			final var rawCoord = ImmutableCoordI2.create(e.getX() + offset.getX(), e.getY() + offset.getY());
+			final var scaleCoord = this.scaleCoord(rawCoord);
+			this.rendererData.getEventService().fire(new MouseMoveEvent(true, G2DMainFrame.getModifiers(e), button, rawCoord, scaleCoord));
+		}
+		catch (final Exception exc) {
+			LOGGER.warn(exc.getMessage(), exc);
+		}
+	}
+	
+	public void handleWheelMoved(final MouseWheelEvent e, final CoordI2 offset) {
+		try {
+			final var rawCoord = ImmutableCoordI2.create(e.getX() + offset.getX(), e.getY() + offset.getY());
+			final var scaleCoord = this.scaleCoord(rawCoord);
+			this.rendererData.getEventService().fire(new MouseClickEvent(true, G2DMainFrame.getModifiers(e), e.getWheelRotation() == -1 ? 4 : 5, rawCoord, scaleCoord));
+		}
+		catch (final Exception exc) {
+			LOGGER.warn(exc.getMessage());
+		}
+	}
+	
+	private static int getMouseButton(final MouseEvent e) {
+		var button = MouseEvent.NOBUTTON;
+		if ((e.getModifiersEx() & InputEvent.BUTTON1_DOWN_MASK) != 0) {
+			button = MouseEvent.BUTTON1;
+		}
+		else if ((e.getModifiersEx() & InputEvent.BUTTON2_DOWN_MASK) != 0) {
+			button = MouseEvent.BUTTON2;
+		}
+		else if ((e.getModifiersEx() & InputEvent.BUTTON3_DOWN_MASK) != 0) {
+			button = MouseEvent.BUTTON3;
+		}
+		return button;
+	}
+	
 	private static int getModifiers(final InputEvent event) {
 		var result = 0;
 		
@@ -472,14 +488,14 @@ public class G2DMainFrame extends Frame {
 		
 		return result;
 	}
-
+	
 	private CoordI2 scaleCoord(final CoordI2 rawCoord) {
 		final var scaleFactor = ((G2DRendererControl) this.rendererData.getRendererControl()).getScaleFactor();
 		return ImmutableCoordI2.create((int) (rawCoord.getX() / scaleFactor), (int) (rawCoord.getY() / scaleFactor));
 	}
 	
 	private static final List<ComponentZOrderPair> COMPONENT_Z_ORDER_PAIRS = new ArrayList<>();
-
+	
 	public void recalculateAllComponentZOrder() {
 		synchronized (getTreeLock()) {
 			try {
@@ -514,7 +530,7 @@ public class G2DMainFrame extends Frame {
 		}
 	}
 	
-	private static record ComponentZOrderPair (Component component, int effectiveLayer) {
+	private static record ComponentZOrderPair(Component component, int effectiveLayer) {
 	}
-
+	
 }
