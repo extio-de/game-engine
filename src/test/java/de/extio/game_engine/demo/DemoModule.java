@@ -115,6 +115,7 @@ public class DemoModule extends AbstractClientModule {
 	private void setupMainWindow() {
 		var bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Welcome", ControlRenderingBo.class)
 				.setCaption(this.localizationService.translate("test-3"))
+				.setTooltip(this.localizationService.translate("test-1"))
 				.setFontSize(48)
 				.setType(LabelControl.class)
 				.setVisible(true)
