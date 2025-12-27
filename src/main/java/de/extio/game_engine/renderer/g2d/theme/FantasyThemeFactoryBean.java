@@ -1,0 +1,36 @@
+package de.extio.game_engine.renderer.g2d.theme;
+
+import org.springframework.beans.factory.FactoryBean;
+
+public class FantasyThemeFactoryBean implements FactoryBean<Theme> {
+	
+	@Override
+	public Theme getObject() {
+		return Theme.builder()
+				.name("Fantasy")
+				.patternRendererName("fantasyPatternRenderer")
+				.borderOuter(new HSBColor(0.12f, 0.55f, 0.65f))
+				.borderInner(new HSBColor(0.14f, 0.35f, 0.92f))
+				.borderInnerDisabled(new HSBColor(0.12f, 0.25f, 0.25f))
+				.backgroundNormal(new HSBColor(0.32f, 0.70f, 0.12f))
+				.backgroundSelected(new HSBColor(0.13f, 0.80f, 0.75f))
+				.textNormal(new HSBColor(0.12f, 0.10f, 0.96f))
+				.textDisabled(new HSBColor(0.12f, 0.05f, 0.65f))
+				.selectionPrimary(new HSBColor(0.13f, 0.80f, 0.75f))
+				.selectionSecondary(new HSBColor(0.58f, 0.40f, 0.90f))
+				.windowBackground(new HSBColor(0.32f, 0.75f, 0.06f))
+				.hoverBrightnessAdjustment(0.18f)
+				.pressedBrightnessAdjustment(0.34f)
+				.build();
+	}
+	
+	@Override
+	public Class<?> getObjectType() {
+		return Theme.class;
+	}
+	
+	@Override
+	public boolean isSingleton() {
+		return true;
+	}
+}

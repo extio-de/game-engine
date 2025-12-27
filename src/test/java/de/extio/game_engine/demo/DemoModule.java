@@ -24,6 +24,7 @@ import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class DemoModule extends AbstractClientModule {
 	
@@ -48,7 +49,7 @@ public class DemoModule extends AbstractClientModule {
 	private Window mainWindow;
 	
 	private Window secondaryWindow;
-
+	
 	private Window themeSelectionWindow;
 
 	private final Map<String, String> themeSelectionByControlId = new HashMap<>();
@@ -56,19 +57,19 @@ public class DemoModule extends AbstractClientModule {
 	@Override
 	public void onLoad() {
 		this.mainWindow = this.applicationContext.getBean(Window.class);
-		this.mainWindow.setNormalizedPosition(RendererControl.REFERENCE_RESOLUTION.divide(9));
 		this.mainWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7));
+		this.mainWindow.setNormalizedPosition(centeredPosition(this.mainWindow.getNormalizedDimension()));
 		this.mainWindow.setDraggable(true);
 		
 		this.secondaryWindow = this.applicationContext.getBean(Window.class);
-		this.secondaryWindow.setNormalizedPosition(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(3));
 		this.secondaryWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2));
+		this.secondaryWindow.setNormalizedPosition(centeredPosition(this.secondaryWindow.getNormalizedDimension()));
 		this.secondaryWindow.setDraggable(true);
 		this.secondaryWindow.setCloseButton(true);
 		
 		this.themeSelectionWindow = this.applicationContext.getBean(Window.class);
-		this.themeSelectionWindow.setNormalizedPosition(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(3));
 		this.themeSelectionWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2));
+		this.themeSelectionWindow.setNormalizedPosition(centeredPosition(this.themeSelectionWindow.getNormalizedDimension()));
 		this.themeSelectionWindow.setDraggable(true);
 		this.themeSelectionWindow.setCloseButton(true);
 		
@@ -209,38 +210,50 @@ public class DemoModule extends AbstractClientModule {
 		final var title = themes.size() <= 1
 				? "Theme"
 				: "Select Theme";
+
+		final var paddingX = 20;
+		final var paddingBottom = 24;
+		final var columns = 2;
+		final var columnGap = 24;
+		final var buttonWidth = 340;
+		final var buttonHeight = 54;
+		final var headerHeight = 60;
+		final var currentHeight = 40;
+		final var startY = 150;
+		final var gapY = 14;
+		final var rows = (themes.size() + columns - 1) / columns;
+
+		final var desiredWidth = (paddingX * 2) + (columns * buttonWidth) + ((columns - 1) * columnGap);
+		final var desiredHeight = startY + (rows * buttonHeight) + (Math.max(0, rows - 1) * gapY) + paddingBottom;
+		this.themeSelectionWindow.setNormalizedDimension(ImmutableCoordI2.create(desiredWidth, desiredHeight));
+		this.themeSelectionWindow.setNormalizedPosition(centeredPosition(ImmutableCoordI2.create(desiredWidth, desiredHeight)));
 		
-		var bo = this.renderingBoPool.acquire("DemoModule_ThemeSelect_Label_Title", ControlRenderingBo.class)
-				.setCaption(title)
-				.setFontSize(42)
-				.setType(LabelControl.class)
-				.setVisible(true)
-				.setEnabled(true)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).substract(20).getX(), 60)
-				.withPositionRelative(10, 30);
+		var bo = this.renderingBoPool.acquire("DemoModule_ThemeSelect_Text_Title", DrawFontRenderingBo.class)
+				.setText(title)
+				.setSize(42)
+				.setAlignment(HorizontalAlignment.CENTER)
+				.withDimensionAbsolute(desiredWidth - (paddingX * 2), headerHeight)
+				.withPositionRelative(paddingX, 30);
 		this.themeSelectionWindow.putRenderingBo(bo);
 
 		final var currentTheme = this.themeManager.getCurrentTheme();
 		final var currentThemeName = currentTheme != null ? currentTheme.getName() : "";
-		bo = this.renderingBoPool.acquire("DemoModule_ThemeSelect_Label_Current", ControlRenderingBo.class)
-				.setCaption(currentThemeName.isBlank() ? "" : "Current: " + currentThemeName)
-				.setFontSize(24)
-				.setType(LabelControl.class)
-				.setVisible(true)
-				.setEnabled(true)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).substract(20).getX(), 40)
-				.withPositionRelative(10, 95);
+		bo = this.renderingBoPool.acquire("DemoModule_ThemeSelect_Text_Current", DrawFontRenderingBo.class)
+				.setText(currentThemeName.isBlank() ? "" : "Current: " + currentThemeName)
+				.setSize(24)
+				.setAlignment(HorizontalAlignment.CENTER)
+				.withDimensionAbsolute(desiredWidth - (paddingX * 2), currentHeight)
+				.withPositionRelative(paddingX, 95);
 		this.themeSelectionWindow.putRenderingBo(bo);
-
-		final var buttonWidth = 340;
-		final var buttonHeight = 54;
-		final var startY = 150;
-		final var gap = 14;
 		
 		for (var i = 0; i < themes.size(); i++) {
 			final var themeName = themes.get(i);
 			final var controlId = "DemoModule_ThemeSelect_Button_" + sanitizeThemeId(themeName);
 			this.themeSelectionByControlId.put(controlId, themeName);
+			final var column = i % columns;
+			final var row = i / columns;
+			final var x = paddingX + (column * (buttonWidth + columnGap));
+			final var y = startY + (row * (buttonHeight + gapY));
 
 			bo = this.renderingBoPool.acquire(controlId, ControlRenderingBo.class)
 					.setCaption(themeName)
@@ -249,11 +262,18 @@ public class DemoModule extends AbstractClientModule {
 					.setVisible(true)
 					.setEnabled(true)
 					.withDimensionAbsolute(buttonWidth, buttonHeight)
-					.withPositionRelative((RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).getX() - buttonWidth) / 2, startY + i * (buttonHeight + gap));
+					.withPositionRelative(x, y);
 			this.themeSelectionWindow.putRenderingBo(bo);
 		}
 
 		this.themeSelectionWindow.draw();
+	}
+
+	private static ImmutableCoordI2 centeredPosition(final de.extio.game_engine.spatial2.model.CoordI2 dimension) {
+		final var ref = RendererControl.REFERENCE_RESOLUTION;
+		final var x = Math.max(0, (ref.getX() - dimension.getX()) / 2);
+		final var y = Math.max(0, (ref.getY() - dimension.getY()) / 2);
+		return ImmutableCoordI2.create(x, y);
 	}
 
 	private static String sanitizeThemeId(final String themeName) {

@@ -12,8 +12,15 @@ import org.springframework.context.annotation.Bean;
 
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.g2d.theme.PatternRenderer;
+import de.extio.game_engine.renderer.g2d.theme.ContemporaryThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.DreamThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.FantasyThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.ModernThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.NeonThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.NoirThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.SpacecraftThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.g2d.theme.UrbanThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.VintageThemeFactoryBean;
 import de.extio.game_engine.resource.StaticResourceService;
 
@@ -48,6 +55,41 @@ public class G2DAutoConfiguration {
 	@Bean
 	FactoryBean<Theme> vintageTheme() {
 		return new VintageThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> modernTheme() {
+		return new ModernThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> contemporaryTheme() {
+		return new ContemporaryThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> urbanTheme() {
+		return new UrbanThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> dreamTheme() {
+		return new DreamThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> fantasyTheme() {
+		return new FantasyThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> noirTheme() {
+		return new NoirThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> neonTheme() {
+		return new NeonThemeFactoryBean();
 	}
 
 	@Bean
