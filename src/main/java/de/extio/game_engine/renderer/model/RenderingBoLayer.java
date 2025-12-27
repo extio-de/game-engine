@@ -18,10 +18,10 @@ public class RenderingBoLayer {
 	public static final short UI0 = 2100;
 	public static final short UI1 = 2200;
 	public static final short UI2 = 2300;
-	public static final short UI_TOP = 2999;
+	public static final short UI_TOP = 2499;
 	// Note: UI repeats layers per z-index up to TOP
 
-	public static final short TOP = 30000;
+	public static final short TOP = 32000;
 
 	private RenderingBoLayer() {
 	}
