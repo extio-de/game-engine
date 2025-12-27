@@ -31,9 +31,9 @@ public interface RenderingBo extends AutoCloseable {
 	/**
 	 * Sets the layer to render this bo on. Business objects are rendered layered on top of each other in the natural order of RenderingBoLayer enum fields. Objects on the same layer are rendered in the order of being added to <i>List<RenderingBo> renderingBo</i>.
 	 */
-	RenderingBo setLayer(RenderingBoLayer layer);
+	RenderingBo setLayer(short layer);
 	
-	RenderingBoLayer getLayer();
+	short getLayer();
 	
 	/**
 	 * Positions this bo with an absolute position on the viewport. x0 y0 coordinates are at the top left. Call RendererControl#getEffectiveViewportDimension to get the absolute dimension of the viewport.

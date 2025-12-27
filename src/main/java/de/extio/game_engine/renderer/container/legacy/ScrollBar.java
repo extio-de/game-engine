@@ -30,7 +30,7 @@ public class ScrollBar {
 	
 	private int lastNumElements;
 	
-	private RenderingBoLayer layer = RenderingBoLayer.UI1;
+	private short layer = RenderingBoLayer.UI1;
 	
 	public ScrollBar(final String nameSuffix) {
 		this.name = "Scrollbar_" + nameSuffix;
@@ -83,11 +83,11 @@ public class ScrollBar {
 		return this.name;
 	}
 	
-	public RenderingBoLayer getLayer() {
+	public short getLayer() {
 		return this.layer;
 	}
 	
-	public void setLayer(final RenderingBoLayer layer) {
+	public void setLayer(final short layer) {
 		this.layer = layer;
 	}
 	

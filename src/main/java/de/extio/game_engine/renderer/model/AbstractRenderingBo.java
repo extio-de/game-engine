@@ -29,11 +29,11 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	
 	protected int height;
 	
-	protected RenderingBoLayer layer;
+	protected short layer;
 	
-	private final RenderingBoLayer defaultLayer;
+	private final short defaultLayer;
 	
-	public AbstractRenderingBo(final RenderingBoLayer layer) {
+	public AbstractRenderingBo(final short layer) {
 		this.layer = layer;
 		this.defaultLayer = layer;
 	}
@@ -288,15 +288,13 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	}
 	
 	@Override
-	public RenderingBoLayer getLayer() {
+	public short getLayer() {
 		return this.layer;
 	}
 	
 	@Override
-	public RenderingBo setLayer(final RenderingBoLayer layer) {
-		if (layer != null) {
-			this.layer = layer;
-		}
+	public RenderingBo setLayer(final short layer) {
+		this.layer = layer;
 		return this;
 	}
 	

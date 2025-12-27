@@ -52,7 +52,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 	
 	private boolean drawCloseButton;
 	
-	private RenderingBoLayer renderingBoLayer;
+	private short renderingBoLayer;
 	
 	private CoordI2 lastEffectiveViewportDimension;
 	
@@ -178,7 +178,7 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 				.withDimensionAbsolute(this.area.getDimension())
 				.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
 				.setColor(this.color != null ? this.color : null);
-		if (this.renderingBoLayer != null) {
+		if (this.renderingBoLayer > 0) {
 			bo.setLayer(this.renderingBoLayer);
 		}
 		consumer.accept(renderingBo, bo);
@@ -192,8 +192,8 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 					.withDimensionAbsolute(this.area.getDimension())
 					.withPositionAbsoluteAnchorTopLeft(this.area.getPosition())
 					.setColor(this.color != null ? this.color : null);
-			if (this.renderingBoLayer != null) {
-				bo.setLayer(RenderingBoLayer.values()[Math.min(this.renderingBoLayer.ordinal() + 2, RenderingBoLayer.values().length - 1)]);
+			if (this.renderingBoLayer > 0) {
+				bo.setLayer((short) Math.min(this.renderingBoLayer + 20, RenderingBoLayer.TOP));
 			}
 			else {
 				bo.setLayer(RenderingBoLayer.UI1);
@@ -332,11 +332,11 @@ public class Window implements HasPositionAndDimension2, AutoCloseable {
 		this.draggable = draggable;
 	}
 	
-	public RenderingBoLayer getRenderingBoLayer() {
+	public short getRenderingBoLayer() {
 		return this.renderingBoLayer;
 	}
 	
-	public void setRenderingBoLayer(final RenderingBoLayer renderingBoLayer) {
+	public void setRenderingBoLayer(final short renderingBoLayer) {
 		this.renderingBoLayer = renderingBoLayer;
 	}
 	

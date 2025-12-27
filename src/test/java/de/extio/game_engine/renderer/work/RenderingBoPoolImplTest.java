@@ -334,13 +334,13 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
-		public RenderingBo setLayer(final RenderingBoLayer layer) {
+		public RenderingBo setLayer(final short layer) {
 			return this;
 		}
 
 		@Override
-		public RenderingBoLayer getLayer() {
-			return null;
+		public short getLayer() {
+			return 0;
 		}
 
 		@Override
@@ -483,13 +483,13 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
-		public RenderingBo setLayer(final RenderingBoLayer layer) {
+		public RenderingBo setLayer(final short layer) {
 			return this;
 		}
 
 		@Override
-		public RenderingBoLayer getLayer() {
-			return null;
+		public short getLayer() {
+			return 0;
 		}
 
 		@Override

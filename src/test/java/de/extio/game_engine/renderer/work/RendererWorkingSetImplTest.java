@@ -302,7 +302,7 @@ public class RendererWorkingSetImplTest {
 		assertEquals(1, uncommittedAfter.size());
 		assertSame(bo1_replacement, uncommittedAfter.get("bo1"));
 	}
-
+	
 	@Test
 	void getLiveSetFiltersOutNotDisplayedModules() {
 		final var boA1 = new TestBoA();
@@ -330,56 +330,56 @@ public class RendererWorkingSetImplTest {
 		assertTrue(filteredLive.containsAll(List.of(boA1, boA2)));
 		assertFalse(filteredLive.contains(boB1));
 	}
-
+	
 	@Test
 	void getWithTypeReturnsTypedInstanceAndNullForUnknown() {
 		final var boA = new TestBoA();
 		boA.setId("bo1");
 		this.workingSet.put(this.moduleA.getId(), boA);
-
+		
 		final var retrieved = this.workingSet.get(this.moduleA.getId(), "bo1", TestBoA.class);
 		assertSame(boA, retrieved);
-
+		
 		final var notFound = this.workingSet.get(this.moduleA.getId(), "nonexistent", TestBoA.class);
 		assertTrue(notFound == null);
 	}
-
+	
 	@Test
 	void getWithTypeThrowsClassCastForWrongType() {
 		final var boA = new TestBoA();
 		boA.setId("bo1");
 		this.workingSet.put(this.moduleA.getId(), boA);
-
+		
 		assertThrows(ClassCastException.class, () -> this.workingSet.get(this.moduleA.getId(), "bo1", TestBoB.class));
 	}
-
+	
 	@Test
 	void getOrAcquireReturnsUncommittedWhenPresent() {
 		final var boA = new TestBoA();
 		boA.setId("bo1");
 		this.workingSet.put(this.moduleA.getId(), boA);
-
+		
 		final var retrieved = this.workingSet.getOrAcquire(this.moduleA.getId(), "bo1", TestBoA.class);
 		assertSame(boA, retrieved);
 	}
-
+	
 	@Test
 	void getOrAcquireAcquiresFromPoolWhenMissing() {
 		final var pooledBo = new TestBoA();
 		pooledBo.setId("pooled");
 		when(this.renderingBoPool.acquire("pooled", TestBoA.class)).thenReturn(pooledBo);
-
+		
 		final var retrieved = this.workingSet.getOrAcquire(this.moduleA.getId(), "pooled", TestBoA.class);
 		assertSame(pooledBo, retrieved);
 		verify(this.renderingBoPool, times(1)).acquire("pooled", TestBoA.class);
 	}
-
+	
 	private static abstract class TestBoBase implements RenderingBo {
 		
 		private String id;
-
+		
 		private boolean applied;
-
+		
 		private boolean closed;
 		
 		@Override
@@ -418,12 +418,12 @@ public class RendererWorkingSetImplTest {
 		}
 		
 		@Override
-		public RenderingBo setLayer(final RenderingBoLayer layer) {
+		public RenderingBo setLayer(final short layer) {
 			return this;
 		}
 		
 		@Override
-		public RenderingBoLayer getLayer() {
+		public short getLayer() {
 			return RenderingBoLayer.UI0;
 		}
 		
@@ -501,14 +501,14 @@ public class RendererWorkingSetImplTest {
 		public void staticCleanupAfterFrame() {
 			
 		}
-
+		
 		@Override
 		public void setRendererData(final RendererData RendererData) {
 		}
-
+		
 		@Override
 		public void apply(RenderingBo other) {
-			this.applied = true;			
+			this.applied = true;
 		}
 		
 		@Override

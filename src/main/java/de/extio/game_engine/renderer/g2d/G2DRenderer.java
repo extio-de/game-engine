@@ -175,7 +175,7 @@ public class G2DRenderer implements Renderer {
 				this.drawStatistics();
 				this.rendererData.getRendererWorkingSet().commit(this.rendererModuleId, true);
 				this.rendererData.getRendererWorkingSet().getLiveSet(this.renderingBOs, this.rendererData.getModuleService()::isDisplayed);
-				this.renderingBOs.sort((bo0, bo1) -> bo0.getLayer().compareTo(bo1.getLayer()));
+				this.renderingBOs.sort((bo0, bo1) -> Short.compare(bo0.getLayer(), bo1.getLayer()));
 				
 				Graphics2D screenGraphics = null;
 				try {
