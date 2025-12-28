@@ -3,6 +3,8 @@ package de.extio.game_engine.renderer.g2d.theme;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import de.extio.game_engine.spatial2.model.CoordI2;
+
 /**
  * Interface for rendering common UI patterns like borders, backgrounds, shadows, etc.
  * Different implementations can provide different visual styles.
@@ -64,4 +66,13 @@ public interface PatternRenderer {
 	 * @param theme           Theme to use for colors
 	 */
 	void drawCloseButton(Graphics2D g2d, int width, int height, boolean enabled, int state, Color backgroundColor, double scaleFactor, Theme theme);
+
+	/**
+	 * Draws a background pattern for the UI on layer BACKGROUND1
+	 *
+	 * @param g2d      The graphics context
+	 * @param offset   Offset for pattern alignment
+	 * @param viewPort Viewport size
+	 */
+	void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort);
 }

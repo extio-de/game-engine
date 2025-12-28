@@ -2,11 +2,13 @@ package de.extio.game_engine.renderer.g2d.theme;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.spatial2.model.CoordI2;
 
 @Conditional(G2DRendererCondition.class)
 @Component
@@ -144,6 +146,42 @@ public class VintagePatternRenderer implements PatternRenderer {
 			
 			g2d.fillRect(centerX - crossSize / 2, centerY - crossThickness / 2, crossSize, crossThickness);
 			g2d.fillRect(centerX - crossThickness / 2, centerY - crossSize / 2, crossThickness, crossSize);
+		}
+	}
+
+	private java.awt.image.BufferedImage patternCache;
+
+	private java.awt.image.BufferedImage getPatternCache() {
+		if (this.patternCache == null) {
+			final int cellSize = 150;
+			this.patternCache = new BufferedImage(cellSize, cellSize, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+			final Graphics2D g2d = this.patternCache.createGraphics();
+			
+			g2d.setBackground(new Color(0, 0, 0, 0));
+			g2d.clearRect(0, 0, cellSize, cellSize);
+			
+			g2d.setColor(new Color(255, 255, 255, 35));
+			g2d.drawLine(10, 10, 20, 30);
+			g2d.drawLine(60, 50, 55, 70);
+			g2d.fillOval(80, 20, 2, 2);
+			
+			g2d.dispose();
+		}
+		return this.patternCache;
+	}
+
+	@Override
+	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
+		final var cache = this.getPatternCache();
+		final int cellSize = cache.getWidth();
+		
+		final int offX = Math.floorMod(offset.getX(), cellSize);
+		final int offY = Math.floorMod(offset.getY(), cellSize);
+		
+		for (int x = -cellSize; x < viewPort.getX() + cellSize; x += cellSize) {
+			for (int y = -cellSize; y < viewPort.getY() + cellSize; y += cellSize) {
+				g2d.drawImage(cache, x + offX, y + offY, null);
+			}
 		}
 	}
 }

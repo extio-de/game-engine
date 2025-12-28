@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.spatial2.model.CoordI2;
 
 @Conditional(G2DRendererCondition.class)
 @Component
@@ -109,5 +110,21 @@ public class UrbanPatternRenderer implements PatternRenderer {
 		
 		g2d.fillRect(centerX - crossSize / 2, centerY - t / 2, crossSize, t);
 		g2d.fillRect(centerX - t / 2, centerY - crossSize / 2, t, crossSize);
+	}
+
+	@Override
+	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
+		g2d.setColor(new Color(255, 255, 255, 35));
+		final int cellSize = 60;
+		final int offX = Math.floorMod(offset.getX(), cellSize);
+		final int offY = Math.floorMod(offset.getY(), cellSize);
+		
+		for (int x = -cellSize; x < viewPort.getX() + cellSize; x += cellSize) {
+			for (int y = -cellSize; y < viewPort.getY() + cellSize; y += cellSize) {
+				// Vertical streaks
+				g2d.fillRect(x + offX + 10, y + offY + 5, 2, 15);
+				g2d.fillRect(x + offX + 40, y + offY + 35, 2, 10);
+			}
+		}
 	}
 }

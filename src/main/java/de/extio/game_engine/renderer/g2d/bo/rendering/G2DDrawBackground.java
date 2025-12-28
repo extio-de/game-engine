@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
@@ -38,12 +39,6 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	private static StaticResource BACKGROUND_KEY;
 	
 	private final static int[] BUILTIN_SCROLL_OFFSET_X = new int[2];
-	
-	private final static List<Star> STARS = new ArrayList<>();
-	
-	private final static List<Star> REFERENCE_STARS = new ArrayList<>();
-	
-	private static CoordI2 STARS_LAST_VIEWPORT = ImmutableCoordI2.create();
 	
 	private final CoordI2 bgrOffset = MutableCoordI2.create();
 	
@@ -97,7 +92,7 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 				this.bgrOffset.setXY(this.rendererData.getUiOptions().getBackgroundOffset0()).add(BUILTIN_SCROLL_OFFSET_X[0], 0), windowDim);
 		
 		this.scroll(1, this.rendererData.getUiOptions().isBackgroundScrolling1(), this.rendererData.getUiOptions().isBackgroundScrollingReverse1(), windowDim);
-		this.drawStars(graphics, this.bgrOffset.setXY(this.rendererData.getUiOptions().getBackgroundOffset1()).add(BUILTIN_SCROLL_OFFSET_X[1], 0), windowDim);
+		((G2DThemeManager) this.rendererData.getThemeManager()).getCurrentPatternRenderer().drawBackgroundPattern(graphics, this.bgrOffset.setXY(this.rendererData.getUiOptions().getBackgroundOffset1()).add(BUILTIN_SCROLL_OFFSET_X[1], 0), windowDim);
 	}
 	
 	private void tileBackground(final Graphics2D graphics, final int index, final StaticResource backgroundResource, final CoordI2 offset, final CoordI2 viewPort) {
@@ -144,19 +139,6 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 				this.sourceOffset.setXY(Math.floorMod(offset.getX(), G2DDrawBackground.BACKGROUND_IMAGE.getWidth()), 0);
 			}
 		} while (this.destPosition.getY() < viewPort.getY());
-	}
-	
-	private void drawStars(final Graphics2D graphics, final CoordI2 offset, final CoordI2 viewPort) {
-		this.generateStars(viewPort);
-		
-		for (final Star element : STARS) {
-			graphics.setColor(element.color.toAwtColor());
-			graphics.fillOval(
-					Math.floorMod(element.position.getX() - offset.getX(), viewPort.getX()),
-					Math.floorMod(element.position.getY() - offset.getY(), viewPort.getY()),
-					element.radius.getX(),
-					element.radius.getY());
-		}
 	}
 	
 	private void scroll(final int index, final boolean scrolling, final boolean reverse, final CoordI2 viewPort) {
@@ -235,50 +217,4 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 		}
 	}
 	
-	private void generateStars(final CoordI2 viewPort) {
-		if (REFERENCE_STARS.isEmpty()) {
-			final var rand = ThreadLocalXorShift128Random.current();
-
-			for (var i = 0; i < 350; i++) {
-				final var position = ImmutableCoordI2.create(rand.nextInt(RendererControl.REFERENCE_RESOLUTION.getX()), rand.nextInt(RendererControl.REFERENCE_RESOLUTION.getY()));
-				final var radius = ImmutableCoordI2.create(rand.nextInt(3) + 2, rand.nextInt(3) + 2);
-				final var color = new ImmutableRgbaColor(rand.nextInt(30) + 100, rand.nextInt(30) + 100, rand.nextInt(30) + 130);
-				
-				REFERENCE_STARS.add(new Star(position, radius, color));
-				STARS.add(new Star(position, radius, color));
-			}
-		}
-		
-		if (!viewPort.equals(STARS_LAST_VIEWPORT)) {
-			final double scaleX = (double) viewPort.getX() / RendererControl.REFERENCE_RESOLUTION.getX();
-			final double scaleY = (double) viewPort.getY() / RendererControl.REFERENCE_RESOLUTION.getY();
-
-			for (int i = 0; i < REFERENCE_STARS.size(); i++) {
-				final var refStar = REFERENCE_STARS.get(i);
-				final var star = STARS.get(i);
-				
-				star.position = ImmutableCoordI2.create(
-						(int) (refStar.position.getX() * scaleX),
-						(int) (refStar.position.getY() * scaleY));
-			}
-			STARS_LAST_VIEWPORT = viewPort.toImmutableCoordI2();
-		}
-	}
-	
-	private static class Star {
-		
-		CoordI2 position;
-		
-		CoordI2 radius;
-		
-		RgbaColor color;
-		
-		Star(final CoordI2 position, final CoordI2 radius, final RgbaColor color) {
-			super();
-			this.position = position;
-			this.radius = radius;
-			this.color = color;
-		}
-		
-	}
 }

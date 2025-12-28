@@ -4,12 +4,14 @@ import java.awt.BasicStroke;
 import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.Stroke;
+import java.awt.image.BufferedImage;
 
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.spatial2.model.CoordI2;
 
 /**
  * Implementation of PatternRenderer that draws a technical "Blueprint" style with grids and measurement markers.
@@ -124,6 +126,43 @@ public class BlueprintPatternRenderer implements PatternRenderer {
 			g2.drawLine(x1, y1, x2, y2);
 			g2.drawLine(x1, y2, x2, y1);
 			g2.dispose();
+		}
+	}
+
+	private java.awt.image.BufferedImage patternCache;
+
+	private java.awt.image.BufferedImage getPatternCache() {
+		if (this.patternCache == null) {
+			final int gridSize = 50;
+			this.patternCache = new BufferedImage(gridSize, gridSize, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+			final Graphics2D g2d = this.patternCache.createGraphics();
+			
+			g2d.setBackground(new Color(0, 0, 0, 0));
+			g2d.clearRect(0, 0, gridSize, gridSize);
+			
+			g2d.setColor(new Color(255, 255, 255, 35));
+			g2d.setStroke(new BasicStroke(1f));
+			
+			g2d.drawLine(0, 0, 0, gridSize);
+			g2d.drawLine(0, 0, gridSize, 0);
+			
+			g2d.dispose();
+		}
+		return this.patternCache;
+	}
+
+	@Override
+	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
+		final var cache = this.getPatternCache();
+		final int gridSize = cache.getWidth();
+		
+		final int offX = Math.floorMod(offset.getX(), gridSize);
+		final int offY = Math.floorMod(offset.getY(), gridSize);
+		
+		for (int x = -gridSize; x <= viewPort.getX() + gridSize; x += gridSize) {
+			for (int y = -gridSize; y <= viewPort.getY() + gridSize; y += gridSize) {
+				g2d.drawImage(cache, x + offX, y + offY, null);
+			}
 		}
 	}
 }

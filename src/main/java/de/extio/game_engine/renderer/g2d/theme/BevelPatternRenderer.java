@@ -7,6 +7,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.spatial2.model.CoordI2;
 
 /**
  * Implementation of PatternRenderer that draws borders and panels in a classic "Bevel" style.
@@ -27,11 +28,12 @@ public class BevelPatternRenderer implements PatternRenderer {
 		if (hsb[2] < 0.5f) {
 			light = color.brighter();
 			dark = color;
-		} else {
+		}
+		else {
 			light = color;
 			dark = color.darker();
 		}
-			
+		
 		// Outer bevel (raised)
 		drawBevel(g2d, x, y, width, height, strength + 1, true, light, dark);
 	}
@@ -71,14 +73,16 @@ public class BevelPatternRenderer implements PatternRenderer {
 		
 		// Button bevel
 		int bevelStrength = (int) (2 * scaleFactor);
-		if (bevelStrength < 1) bevelStrength = 1;
+		if (bevelStrength < 1)
+			bevelStrength = 1;
 		
 		final Color highlight = theme.getBorderOuter().toColor();
 		final Color shadow = theme.getBorderInner().toColor();
 		
 		if (pressed) {
 			drawBevel(g2d, 0, 0, width, height, bevelStrength, false, highlight, shadow);
-		} else {
+		}
+		else {
 			drawBevel(g2d, 0, 0, width, height, bevelStrength, true, highlight, shadow);
 		}
 		
@@ -88,14 +92,14 @@ public class BevelPatternRenderer implements PatternRenderer {
 			final int offset = pressed ? 1 : 0;
 			
 			// Draw a simple X
-			final int padding = (int)(4 * scaleFactor);
+			final int padding = (int) (4 * scaleFactor);
 			final int x1 = padding + offset;
 			final int y1 = padding + offset;
 			final int x2 = width - padding + offset;
 			final int y2 = height - padding + offset;
 			
 			final Graphics2D g2 = (Graphics2D) g2d.create();
-			g2.setStroke(new java.awt.BasicStroke((float)(2 * scaleFactor)));
+			g2.setStroke(new java.awt.BasicStroke((float) (2 * scaleFactor)));
 			g2.drawLine(x1, y1, x2, y2);
 			g2.drawLine(x1, y2, x2, y1);
 			g2.dispose();
@@ -116,6 +120,20 @@ public class BevelPatternRenderer implements PatternRenderer {
 		for (int i = 0; i < strength; i++) {
 			g2d.drawLine(x + i, y + height - 1 - i, x + width - 1 - i, y + height - 1 - i); // Bottom
 			g2d.drawLine(x + width - 1 - i, y + i, x + width - 1 - i, y + height - 1 - i); // Right
+		}
+	}
+	
+	@Override
+	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
+		g2d.setColor(new Color(255, 255, 255, 35));
+		final int spacing = 20;
+		final int offX = Math.floorMod(offset.getX(), spacing);
+		final int offY = Math.floorMod(offset.getY(), spacing);
+		
+		for (int x = -spacing; x < viewPort.getX() + spacing; x += spacing) {
+			for (int y = -spacing; y < viewPort.getY() + spacing; y += spacing) {
+				g2d.fillRect(x + offX, y + offY, 2, 2);
+			}
 		}
 	}
 }

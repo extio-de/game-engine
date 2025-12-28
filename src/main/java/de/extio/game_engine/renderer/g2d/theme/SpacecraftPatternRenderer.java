@@ -2,13 +2,20 @@ package de.extio.game_engine.renderer.g2d.theme;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
+import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.spatial2.model.CoordI2;
+import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
+import de.extio.game_engine.util.rng.ThreadLocalXorShift128Random;
 
 /**
  * Default implementation of PatternRenderer that draws borders and panels in a decorative style.
@@ -18,6 +25,12 @@ import de.extio.game_engine.renderer.model.color.RgbaColor;
 @Component
 public class SpacecraftPatternRenderer implements PatternRenderer {
 	
+	private final static List<Star> STARS = new ArrayList<>();
+	
+	private final static List<Star> REFERENCE_STARS = new ArrayList<>();
+	
+	private static CoordI2 STARS_LAST_VIEWPORT = ImmutableCoordI2.create();
+
 	@Override
 	public void drawDecorativeBorder(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final Color color) {
 		final var strength2 = strength * 2;
@@ -98,5 +111,66 @@ public class SpacecraftPatternRenderer implements PatternRenderer {
 			final var textDim = G2DDrawFont.getTextDimensions("X", g2d, 16, scaleFactor);
 			G2DDrawFont.renderText(g2d, textDim, 1.0, ((width - textDim.getX()) / 2), ((height - textDim.getY()) / 2), (int) (16 * scaleFactor), "X");
 		}
+	}
+
+	@Override
+	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
+		this.generateStars(viewPort);
+		
+		for (final Star element : STARS) {
+			g2d.setColor(element.color.toAwtColor());
+			g2d.fillOval(
+					Math.floorMod(element.position.getX() - offset.getX(), viewPort.getX()),
+					Math.floorMod(element.position.getY() - offset.getY(), viewPort.getY()),
+					element.radius.getX(),
+					element.radius.getY());
+		}
+	}
+
+	private void generateStars(final CoordI2 viewPort) {
+		if (REFERENCE_STARS.isEmpty()) {
+			final var rand = ThreadLocalXorShift128Random.current();
+
+			for (var i = 0; i < 350; i++) {
+				final var position = ImmutableCoordI2.create(rand.nextInt(RendererControl.REFERENCE_RESOLUTION.getX()), rand.nextInt(RendererControl.REFERENCE_RESOLUTION.getY()));
+				final var radius = ImmutableCoordI2.create(rand.nextInt(3) + 2, rand.nextInt(3) + 2);
+				final var color = new ImmutableRgbaColor(rand.nextInt(30) + 100, rand.nextInt(30) + 100, rand.nextInt(30) + 130);
+				
+				REFERENCE_STARS.add(new Star(position, radius, color));
+				STARS.add(new Star(position, radius, color));
+			}
+		}
+		
+		if (!viewPort.equals(STARS_LAST_VIEWPORT)) {
+			final double scaleX = (double) viewPort.getX() / RendererControl.REFERENCE_RESOLUTION.getX();
+			final double scaleY = (double) viewPort.getY() / RendererControl.REFERENCE_RESOLUTION.getY();
+
+			for (int i = 0; i < REFERENCE_STARS.size(); i++) {
+				final var refStar = REFERENCE_STARS.get(i);
+				final var star = STARS.get(i);
+				
+				star.position = ImmutableCoordI2.create(
+						(int) (refStar.position.getX() * scaleX),
+						(int) (refStar.position.getY() * scaleY));
+			}
+			STARS_LAST_VIEWPORT = viewPort.toImmutableCoordI2();
+		}
+	}
+
+	private static class Star {
+		
+		CoordI2 position;
+		
+		CoordI2 radius;
+		
+		RgbaColor color;
+		
+		Star(final CoordI2 position, final CoordI2 radius, final RgbaColor color) {
+			super();
+			this.position = position;
+			this.radius = radius;
+			this.color = color;
+		}
+		
 	}
 }

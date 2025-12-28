@@ -2,12 +2,14 @@ package de.extio.game_engine.renderer.g2d.theme;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.spatial2.model.CoordI2;
 
 @Conditional(G2DRendererCondition.class)
 @Component
@@ -95,5 +97,43 @@ public class ModernPatternRenderer implements PatternRenderer {
 		final var fontSize = (int) (14 * scaleFactor);
 		final var textDim = G2DDrawFont.getTextDimensions("X", g2d, 14, scaleFactor);
 		G2DDrawFont.renderText(g2d, textDim, 1.0, ((width - textDim.getX()) / 2), ((height - textDim.getY()) / 2), fontSize, "X");
+	}
+
+	private java.awt.image.BufferedImage patternCache;
+
+	private java.awt.image.BufferedImage getPatternCache() {
+		if (this.patternCache == null) {
+			final int spacing = 60;
+			this.patternCache = new BufferedImage(spacing, spacing, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+			final Graphics2D g2d = this.patternCache.createGraphics();
+			
+			g2d.setBackground(new Color(0, 0, 0, 0));
+			g2d.clearRect(0, 0, spacing, spacing);
+			
+			g2d.setColor(new Color(255, 255, 255, 35));
+			final int len = 10;
+			final int cx = spacing / 2;
+			final int cy = spacing / 2;
+			g2d.drawLine(cx - len, cy, cx + len, cy);
+			g2d.drawLine(cx, cy - len, cx, cy + len);
+			
+			g2d.dispose();
+		}
+		return this.patternCache;
+	}
+
+	@Override
+	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
+		final var cache = this.getPatternCache();
+		final int spacing = cache.getWidth();
+		
+		final int offX = Math.floorMod(offset.getX(), spacing);
+		final int offY = Math.floorMod(offset.getY(), spacing);
+		
+		for (int x = -spacing; x < viewPort.getX() + spacing; x += spacing) {
+			for (int y = -spacing; y < viewPort.getY() + spacing; y += spacing) {
+				g2d.drawImage(cache, x + offX, y + offY, null);
+			}
+		}
 	}
 }

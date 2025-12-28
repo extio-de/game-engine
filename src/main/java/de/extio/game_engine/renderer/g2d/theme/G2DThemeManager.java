@@ -169,6 +169,7 @@ public class G2DThemeManager implements ThemeManager {
 				this.applyTheme(persistedTheme.get());
 				this.registerTheme(this.currentTheme);
 				LOGGER.info("Loaded last used theme: {}", this.currentTheme.getName());
+				return;
 			}
 
 			this.applyTheme(this.defaultTheme);
@@ -214,5 +215,9 @@ public class G2DThemeManager implements ThemeManager {
 
 	public PatternRenderer getPatternRenderer(final String rendererName) {
 		return this.patternRenderers.get(rendererName);
+	}
+
+	public PatternRenderer getCurrentPatternRenderer() {
+		return this.patternRenderers.get(this.currentTheme.getPatternRendererName());
 	}
 }
