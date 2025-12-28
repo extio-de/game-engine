@@ -231,6 +231,33 @@ The rendering system provides an abstraction layer for 2D graphics rendering. It
 
 Key features include automatic viewport scaling, configurable frame rates, reference resolution (1920x1080), and screenshot capabilities. The renderer integrates tightly with the module system to render module-specific UI elements.
 
+#### Setup / Autoconfiguration
+**Configuration Class**: `RendererAutoConfiguration`
+
+**Property**: `game-engine.renderer.enabled` (default: `true`)
+
+The core rendering infrastructure is auto-configured by `RendererAutoConfiguration`, which wires together all rendering components and creates a central `RendererData` object containing all necessary dependencies.
+
+**G2D Renderer Implementation**
+
+**Configuration Class**: `G2DAutoConfiguration`
+
+**Properties**:
+- `game-engine.renderer.strategy` (default: `g2d`) - Must be set to "g2d" to enable
+- `game-engine.renderer.title` - Optional window title
+
+The `G2DAutoConfiguration` provides the default Java2D-based renderer implementation, which is enabled when the renderer strategy is set to "g2d" (the default).
+
+- `game-engine.renderer.default-theme` (default: `urbanTheme`) - Default theme, see the ThemeManager section below.
+
+#### Exposed Spring Beans
+- **`Renderer`**: Main rendering interface (provided by G2DRenderer or custom implementation)
+- **`RendererControl`**: Controls renderer settings like title, scale factor, and video options (provided by G2DRendererControl or custom implementation)
+- **`RendererData`**: Central data object containing all renderer dependencies
+- **`RendererWorkingSet`**: Manages the current set of objects to be rendered
+- **`RenderingBoPool`**: Factory for creating rendering business objects
+- **`RendererLauncher`**: Handles renderer initialization and launch
+
 **Rendering Workflow Example:**
 ```java
 // Create a module instance
@@ -523,31 +550,6 @@ themeManager.loadThemeFromStaticResource(resource)
 ```
 
 Themes loaded from storage or static resources are automatically registered into the theme manager's in-memory list, so they show up in `getAvailableThemeNames()`.
-
-#### Setup / Autoconfiguration
-**Configuration Class**: `RendererAutoConfiguration`
-
-**Property**: `game-engine.renderer.enabled` (default: `true`)
-
-The core rendering infrastructure is auto-configured by `RendererAutoConfiguration`, which wires together all rendering components and creates a central `RendererData` object containing all necessary dependencies.
-
-**G2D Renderer Implementation**
-
-**Configuration Class**: `G2DAutoConfiguration`
-
-**Properties**:
-- `game-engine.renderer.strategy` (default: `g2d`) - Must be set to "g2d" to enable
-- `game-engine.renderer.title` - Optional window title
-
-The `G2DAutoConfiguration` provides the default Java2D-based renderer implementation, which is enabled when the renderer strategy is set to "g2d" (the default).
-
-#### Exposed Spring Beans
-- **`Renderer`**: Main rendering interface (provided by G2DRenderer or custom implementation)
-- **`RendererControl`**: Controls renderer settings like title, scale factor, and video options (provided by G2DRendererControl or custom implementation)
-- **`RendererData`**: Central data object containing all renderer dependencies
-- **`RendererWorkingSet`**: Manages the current set of objects to be rendered
-- **`RenderingBoPool`**: Factory for creating rendering business objects
-- **`RendererLauncher`**: Handles renderer initialization and launch
 
 ---
 
