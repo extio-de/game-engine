@@ -88,13 +88,13 @@ public class FantasyPatternRenderer implements PatternRenderer {
 		
 		final Color fg;
 		if (pressed) {
-			fg = theme.getTextNormal().toColor();
+			fg = theme.getSelectionSecondary().toColor();
 		}
 		else if (highlight) {
-			fg = Color.BLACK;
+			fg = theme.getTextNormal().toColor();
 		}
 		else {
-			fg = theme.getTextDisabled().toColor();
+			fg = theme.getTextNormal().toColor();
 		}
 		g2d.setColor(fg);
 		

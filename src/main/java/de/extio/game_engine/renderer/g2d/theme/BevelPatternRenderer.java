@@ -33,7 +33,7 @@ public class BevelPatternRenderer implements PatternRenderer {
 		}
 			
 		// Outer bevel (raised)
-		drawBevel(g2d, x, y, width, height, strength, true, light, dark);
+		drawBevel(g2d, x, y, width, height, strength + 1, true, light, dark);
 	}
 	
 	@Override

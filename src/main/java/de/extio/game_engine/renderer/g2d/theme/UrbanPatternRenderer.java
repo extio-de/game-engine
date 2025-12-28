@@ -43,7 +43,7 @@ public class UrbanPatternRenderer implements PatternRenderer {
 	public void drawDecorativeBorderFilled(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final Color borderColor, final Color backgroundColor) {
 		final var s = Math.max(1, strength);
 		g2d.setColor(backgroundColor);
-		g2d.fillRect(x + s, y + s, Math.max(0, width - s * 2), Math.max(0, height - s * 2));
+		g2d.fillRect(x - s, y - s, Math.max(0, width + s * 2), Math.max(0, height + s * 2));
 		this.drawDecorativeBorder(g2d, x, y, width, height, s, borderColor);
 	}
 	

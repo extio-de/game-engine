@@ -34,7 +34,7 @@ public class DreamPatternRenderer implements PatternRenderer {
 		final var arc = Math.max(6, s * 6);
 		
 		g2d.setColor(backgroundColor);
-		g2d.fillRoundRect(x + s, y + s, Math.max(0, width - s * 2), Math.max(0, height - s * 2), arc, arc);
+		g2d.fillRoundRect(x - s, y - s, Math.max(0, width + s * 2), Math.max(0, height + s * 2), arc, arc);
 		
 		this.drawDecorativeBorder(g2d, x, y, width, height, s, borderColor);
 	}
