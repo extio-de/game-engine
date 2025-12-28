@@ -109,6 +109,10 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 			this.control.setDirty(false);
 			this.updateAllComponentZOrder();
 		}
+		else if (this.positionModified) {
+			this.control.setLocation(this.x, this.y);
+			this.positionModified = false;
+		}
 		if (this.tooltip != null) {
 			this.tooltipMousePosition = this.control.getLastMousePosition();
 		}
@@ -143,6 +147,7 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 	
 	protected void initControl() {
 		this.control.setLocation(this.x, this.y);
+		this.positionModified = false;
 		this.control.setSize(this.width, this.height);
 		this.control.setScaleFactor(this.scaleFactor);
 		this.control.setColor(this.color != null ? this.color.toAwtColor() : null);

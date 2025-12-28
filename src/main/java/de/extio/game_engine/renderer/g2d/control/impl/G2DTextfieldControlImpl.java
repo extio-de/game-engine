@@ -103,6 +103,10 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 			}
 			this.updateAllComponentZOrder();
 		}
+		else if (this.positionModified) {
+			this.safeInvoke(() -> this.textComponent.setLocation(this.x, this.y));
+			this.positionModified = false;
+		}
 		
 		super.render();
 	}
@@ -126,6 +130,7 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 		this.safeInvoke(() -> this.textComponent.setBackground(bgColor));
 		this.safeInvoke(() -> this.textComponent.setForeground(fgColor));
 		this.safeInvoke(() -> this.textComponent.setLocation(this.x, this.y));
+		this.positionModified = false;
 		this.safeInvoke(() -> this.textComponent.setSize(this.width, this.height));
 		this.safeInvoke(() -> this.textComponent.setFont(G2DDrawFont.getFont(this.scaleFactor, this.fontSize)));
 		this.safeInvoke(() -> this.textComponent.setVisible(this.visible));

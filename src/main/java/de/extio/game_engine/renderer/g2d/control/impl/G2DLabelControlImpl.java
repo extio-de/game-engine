@@ -78,6 +78,10 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 			this.control.setDirty(false);
 			this.updateAllComponentZOrder();
 		}
+		else if (this.positionModified) {
+			this.control.setLocation(this.x, this.y);
+			this.positionModified = false;
+		}
 		if (this.tooltip != null) {
 			this.tooltipMousePosition = this.control.getLastMousePosition();
 		}
@@ -104,6 +108,7 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 	
 	protected void initControl() {
 		this.control.setLocation(this.x, this.y);
+		this.positionModified = false;
 		this.control.setSize(this.width, this.height);
 		this.control.setCaption(this.caption);
 		this.control.setFontSize(this.fontSize);

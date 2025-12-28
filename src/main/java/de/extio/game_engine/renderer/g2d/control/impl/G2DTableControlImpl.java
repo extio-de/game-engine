@@ -82,6 +82,10 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			this.control.setDirty(false);
 			this.updateAllComponentZOrder();
 		}
+		else if (this.positionModified) {
+			this.control.setLocation(this.x, this.y);
+			this.positionModified = false;
+		}
 		this.control.paint(this.bufferedImageGraphics);
 		
 		this.scrollbar.render();
@@ -160,6 +164,7 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 		this.control.setDrawGraphics(this.bufferedImageGraphics);
 		EventQueue.invokeLater(() -> {
 			this.control.setLocation(this.x, this.y);
+			this.positionModified = false;
 			//			this.control.setAutoResizeMode(JTable.AUTO_RESIZE_ALL_COLUMNS);
 			this.control.setSize(this.width - 30, this.height);
 			this.control.setEnabled(this.enabled);

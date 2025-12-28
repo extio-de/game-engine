@@ -61,6 +61,10 @@ public class G2DWindowPanelControlImpl extends G2DBaseControlImpl implements Win
 			this.control.setDirty(false);
 			this.updateAllComponentZOrder();
 		}
+		else if (this.positionModified) {
+			this.control.setLocation(this.x, this.y);
+			this.positionModified = false;
+		}
 		
 		super.render();
 	}
@@ -84,6 +88,7 @@ public class G2DWindowPanelControlImpl extends G2DBaseControlImpl implements Win
 	
 	protected void initControl() {
 		this.control.setLocation(this.x, this.y);
+		this.positionModified = false;
 		this.control.setSize(this.width, this.height);
 		this.control.setScaleFactor(this.scaleFactor);
 		this.control.setThickBorder(this.thickBorder);

@@ -194,6 +194,10 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			}
 			this.updateAllComponentZOrder();
 		}
+		else if (this.positionModified) {
+			this.safeInvoke(() -> this.textComponent.setLocation(this.x, this.y));
+			this.positionModified = false;
+		}
 		
 		if (this.multiLine) {
 			//			this.safeInvoke(() -> this.scrollPane.paint(this.bufferedImageGraphics));
@@ -243,6 +247,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			//			this.safeInvoke(() -> this.scrollPane.setLocation(this.x, this.y));
 			//			this.safeInvoke(() -> this.scrollPane.setSize(this.width, this.height));
 			this.safeInvoke(() -> this.textComponent.setLocation(this.x, this.y));
+			this.positionModified = false;
 			this.safeInvoke(() -> this.textComponent.setSize(this.width - 30, this.height));
 			this.safeInvoke(() -> this.textComponent.setEditable(false));
 			//			this.safeInvoke(() -> this.textComponent.setFocusable(false));

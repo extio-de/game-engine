@@ -48,8 +48,6 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	
 	protected double scaleFactor;
 	
-	protected boolean modified;
-	
 	protected String controlGroup;
 	
 	protected boolean visible;
@@ -67,6 +65,10 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	protected short zIndex;
 	
 	protected short layer;
+	
+	protected boolean modified;
+
+	protected boolean positionModified;
 	
 	@Override
 	public BaseControl setInUse(final boolean inUse) {
@@ -105,14 +107,14 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	
 	@Override
 	public BaseControl setX(final int x) {
-		this.modified |= this.x != x;
+		this.positionModified |= this.x != x;
 		this.x = x;
 		return this;
 	}
 	
 	@Override
 	public BaseControl setY(final int y) {
-		this.modified |= this.y != y;
+		this.positionModified |= this.y != y;
 		this.y = y;
 		return this;
 	}
@@ -200,12 +202,16 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 		if (this.modified) {
 			this.modified = false;
 		}
+		if (this.positionModified) {
+			this.positionModified = false;
+		}
 	}
 	
 	@Override
 	public void build() {
 		this.rebuildBufferedImage();
 		this.modified = false;
+		this.positionModified = false;
 		this.enabled = true;
 	}
 	

@@ -6,8 +6,6 @@ import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomAbstractButton;
 import de.extio.game_engine.renderer.g2d.control.components.CustomButton;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
-import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
-import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
@@ -20,8 +18,6 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	protected StaticResource iconResource;
 	
 	private RgbaColor backgroundColor;
-	
-	private boolean positionModified;
 	
 	@Override
 	public void build() {
@@ -94,20 +90,6 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 		else {
 			this.control.setBackgroundColor(this.backgroundColor.toAwtColor());
 		}
-	}
-	
-	@Override
-	public BaseControl setX(final int x) {
-		this.positionModified |= this.x != x;
-		this.x = x;
-		return this;
-	}
-	
-	@Override
-	public BaseControl setY(final int y) {
-		this.positionModified |= this.y != y;
-		this.y = y;
-		return this;
 	}
 	
 	@Override
