@@ -1,12 +1,20 @@
 package de.extio.game_engine.renderer;
 
 import java.util.List;
+import java.util.Optional;
 
+import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.renderer.g2d.theme.Theme;
 
 public interface ThemeManager {
 	
 	List<String> getAvailableThemeNames();
+	
+	Optional<Theme> loadThemeFromStorage(String themeName);
+	
+	void saveThemeToStorage(Theme theme);
+	
+	Optional<Theme> loadThemeFromStaticResource(StaticResource themeResource);
 
 	Theme getCurrentTheme();
 	

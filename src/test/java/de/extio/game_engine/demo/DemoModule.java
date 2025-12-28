@@ -26,7 +26,6 @@ import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
-import de.extio.game_engine.storage.StorageService;
 
 public class DemoModule extends AbstractClientModule {
 	
@@ -47,9 +46,6 @@ public class DemoModule extends AbstractClientModule {
 
 	@Autowired
 	private ThemeManager themeManager;
-	
-	@Autowired
-	private StorageService storageService;
 	
 	private Window mainWindow;
 	
@@ -93,12 +89,6 @@ public class DemoModule extends AbstractClientModule {
 	
 	@Override
 	public void onActivate() {
-		this.storageService.loadByPath(String.class, List.of("gameEngine"), "theme").ifPresent(themeName -> {
-			if (themeName != null && !themeName.isBlank()) {
-				this.themeManager.setCurrentTheme(themeName);
-			}
-		});
-		
 		final var audioOptions = this.audioController.getAudioOptions();
 		this.audioMuted = isAudioMuted(audioOptions);
 		
@@ -158,7 +148,6 @@ public class DemoModule extends AbstractClientModule {
 				if (themeName != null) {
 					this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
 					this.themeManager.setCurrentTheme(themeName);
-					this.storageService.store(List.of("gameEngine"), "theme", themeName);
 				}
 			}
 		}

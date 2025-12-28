@@ -1,5 +1,8 @@
 package de.extio.game_engine.renderer.g2d.theme;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represents a complete UI theme with all color definitions and pattern renderer.
  * Themes are element-based rather than component-based, allowing consistent styling across different components.
@@ -33,21 +36,54 @@ public class Theme {
 	private final float hoverBrightnessAdjustment;
 	private final float pressedBrightnessAdjustment;
 	
+	@JsonCreator
+	public Theme(
+			@JsonProperty("name") final String name,
+			@JsonProperty("patternRendererName") final String patternRendererName,
+			@JsonProperty("borderOuter") final HSBColor borderOuter,
+			@JsonProperty("borderInner") final HSBColor borderInner,
+			@JsonProperty("borderInnerDisabled") final HSBColor borderInnerDisabled,
+			@JsonProperty("backgroundNormal") final HSBColor backgroundNormal,
+			@JsonProperty("backgroundSelected") final HSBColor backgroundSelected,
+			@JsonProperty("textNormal") final HSBColor textNormal,
+			@JsonProperty("textDisabled") final HSBColor textDisabled,
+			@JsonProperty("selectionPrimary") final HSBColor selectionPrimary,
+			@JsonProperty("selectionSecondary") final HSBColor selectionSecondary,
+			@JsonProperty("windowBackground") final HSBColor windowBackground,
+			@JsonProperty("hoverBrightnessAdjustment") final float hoverBrightnessAdjustment,
+			@JsonProperty("pressedBrightnessAdjustment") final float pressedBrightnessAdjustment) {
+		this.name = name;
+		this.patternRendererName = patternRendererName;
+		this.borderOuter = borderOuter;
+		this.borderInner = borderInner;
+		this.borderInnerDisabled = borderInnerDisabled;
+		this.backgroundNormal = backgroundNormal;
+		this.backgroundSelected = backgroundSelected;
+		this.textNormal = textNormal;
+		this.textDisabled = textDisabled;
+		this.selectionPrimary = selectionPrimary;
+		this.selectionSecondary = selectionSecondary;
+		this.windowBackground = windowBackground;
+		this.hoverBrightnessAdjustment = hoverBrightnessAdjustment;
+		this.pressedBrightnessAdjustment = pressedBrightnessAdjustment;
+	}
+	
 	private Theme(final Builder builder) {
-		this.name = builder.name;
-		this.patternRendererName = builder.patternRendererName;
-		this.borderOuter = builder.borderOuter;
-		this.borderInner = builder.borderInner;
-		this.borderInnerDisabled = builder.borderInnerDisabled;
-		this.backgroundNormal = builder.backgroundNormal;
-		this.backgroundSelected = builder.backgroundSelected;
-		this.textNormal = builder.textNormal;
-		this.textDisabled = builder.textDisabled;
-		this.selectionPrimary = builder.selectionPrimary;
-		this.selectionSecondary = builder.selectionSecondary;
-		this.windowBackground = builder.windowBackground;
-		this.hoverBrightnessAdjustment = builder.hoverBrightnessAdjustment;
-		this.pressedBrightnessAdjustment = builder.pressedBrightnessAdjustment;
+		this(
+				builder.name,
+				builder.patternRendererName,
+				builder.borderOuter,
+				builder.borderInner,
+				builder.borderInnerDisabled,
+				builder.backgroundNormal,
+				builder.backgroundSelected,
+				builder.textNormal,
+				builder.textDisabled,
+				builder.selectionPrimary,
+				builder.selectionSecondary,
+				builder.windowBackground,
+				builder.hoverBrightnessAdjustment,
+				builder.pressedBrightnessAdjustment);
 	}
 	
 	public String getName() {

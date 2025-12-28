@@ -5,7 +5,6 @@ import java.util.Map;
 
 import org.springframework.beans.factory.FactoryBean;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.boot.autoconfigure.AutoConfiguration;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -26,6 +25,7 @@ import de.extio.game_engine.renderer.g2d.theme.Theme;
 import de.extio.game_engine.renderer.g2d.theme.UrbanThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.VintageThemeFactoryBean;
 import de.extio.game_engine.resource.StaticResourceService;
+import de.extio.game_engine.storage.StorageService;
 
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.renderer.enabled", havingValue = "true", matchIfMissing = true)
@@ -113,10 +113,11 @@ public class G2DAutoConfiguration {
 	@Bean
 	G2DThemeManager g2dThemeManager(
 			final StaticResourceService staticResourceService,
+			final StorageService storageService,
 			final List<PatternRenderer> patternRendererList,
 			final Map<String, Theme> themes,
-			@Qualifier("spacecraftTheme") final Theme defaultTheme) {
-		return new G2DThemeManager(staticResourceService, patternRendererList, themes, defaultTheme);
+			@Value("${game-engine.renderer.default-theme:urbanTheme}") final String defaultThemeName) {
+		return new G2DThemeManager(staticResourceService, storageService, patternRendererList, themes, defaultThemeName);
 	}
 
 }

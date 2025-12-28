@@ -3,6 +3,9 @@ package de.extio.game_engine.renderer.g2d.theme;
 import java.awt.Color;
 import java.util.Objects;
 
+import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonProperty;
+
 /**
  * Represents a color in HSB (Hue, Saturation, Brightness) color space.
  * This allows for easier runtime color manipulation (e.g., brightening on hover).
@@ -20,7 +23,11 @@ public final class HSBColor {
 	 * @param saturation Saturation component (0.0 to 1.0)
 	 * @param brightness Brightness component (0.0 to 1.0)
 	 */
-	public HSBColor(final float hue, final float saturation, final float brightness) {
+	@JsonCreator
+	public HSBColor(
+			@JsonProperty("hue") final float hue,
+			@JsonProperty("saturation") final float saturation,
+			@JsonProperty("brightness") final float brightness) {
 		this.hue = clamp(hue);
 		this.saturation = clamp(saturation);
 		this.brightness = clamp(brightness);
