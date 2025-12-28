@@ -244,7 +244,6 @@ public class DemoModule extends AbstractClientModule {
 	
 	private void setupSecondaryWindow() {
 		this.secondaryWindow.clearRenderingBos();
-		this.themeSelectionByControlId.clear();
 		
 		var bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Text", DrawFontRenderingBo.class)
 				.setText(this.localizationService.translate("test-5").replace("\\n", "\n"))
