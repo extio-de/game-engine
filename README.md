@@ -257,6 +257,7 @@ The `G2DAutoConfiguration` provides the default Java2D-based renderer implementa
 - **`RendererWorkingSet`**: Manages the current set of objects to be rendered
 - **`RenderingBoPool`**: Factory for creating rendering business objects
 - **`RendererLauncher`**: Handles renderer initialization and launch
+- **`ThemeManager`**: Manages themes
 
 **Rendering Workflow Example:**
 ```java
