@@ -69,12 +69,14 @@ public class DemoModule extends AbstractClientModule {
 		this.secondaryWindow.setNormalizedPosition(centeredPosition(this.secondaryWindow.getNormalizedDimension()));
 		this.secondaryWindow.setDraggable(true);
 		this.secondaryWindow.setCloseButton(true);
+		this.secondaryWindow.setParent(this.mainWindow);
 		
 		this.themeSelectionWindow = this.applicationContext.getBean(Window.class);
 		this.themeSelectionWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2));
 		this.themeSelectionWindow.setNormalizedPosition(centeredPosition(this.themeSelectionWindow.getNormalizedDimension()));
 		this.themeSelectionWindow.setDraggable(true);
 		this.themeSelectionWindow.setCloseButton(true);
+		this.themeSelectionWindow.setParent(this.mainWindow);
 		
 		this.getModuleService().changeActiveState(this.getId(), true);
 		this.getModuleService().changeDisplayState(this.getId(), true);

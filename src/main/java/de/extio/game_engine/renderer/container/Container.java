@@ -2,7 +2,11 @@ package de.extio.game_engine.renderer.container;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
+import java.util.IdentityHashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
 import org.springframework.context.annotation.Scope;
@@ -59,6 +63,10 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	protected VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
 	
 	protected short zIndex;
+	
+	protected Container parent;
+	
+	protected Set<Container> children = new HashSet<>();
 	
 	public Container(final ModuleService moduleService, final RenderingBoPool renderingBoPool, final RendererControl rendererControl, final EventService eventService, final RendererWorkingSet rendererWorkingSet) {
 		this.moduleService = moduleService;
@@ -284,22 +292,136 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		}
 		
 		synchronized (DISPLAYED_CONTAINERS) {
-			for (final var container : DISPLAYED_CONTAINERS) {
-				if (container == this) {
-					continue;
-				}
-				if (container.getzIndex() > this.getzIndex()) {
-					final var newZIndex = (short) (container.getzIndex() - 1);
-					if (container.getzIndex() != newZIndex) {
-						container.setzIndex(newZIndex);
-						container.draw();
-					}
+			final List<Container> path = this.getPathToRoot(this);
+			final Container root = path.get(0);
+			final Set<Container> pathSet = new HashSet<>(path);
+			
+			final Set<Container> displayed = new HashSet<>(DISPLAYED_CONTAINERS);
+			
+			final List<Container> others = new ArrayList<>();
+			for (final Container c : DISPLAYED_CONTAINERS) {
+				if (!isDescendantOrSelf(root, c)) {
+					others.add(c);
 				}
 			}
-			final var newZIndex = (short) (DISPLAYED_CONTAINERS.size() - 1);
-			if (this.getzIndex() != newZIndex) {
-				this.setzIndex(newZIndex);
-				this.draw();
+			others.sort((c1, c2) -> Short.compare(c1.getzIndex(), c2.getzIndex()));
+			
+			final Map<Container, Short> subtreeMinDisplayedZIndex = new IdentityHashMap<>();
+			final Map<Container, Boolean> subtreeHasDisplayed = new IdentityHashMap<>();
+			this.computeSubtreeInfo(root, displayed, subtreeMinDisplayedZIndex, subtreeHasDisplayed, new HashSet<>());
+			
+			final List<Container> hierarchyDisplayed = new ArrayList<>();
+			if (Boolean.TRUE.equals(subtreeHasDisplayed.get(root))) {
+				this.flattenDisplayedSubtree(root, displayed, pathSet, subtreeMinDisplayedZIndex, subtreeHasDisplayed, hierarchyDisplayed, new HashSet<>());
+			}
+			
+			short z = 0;
+			for (final Container c : others) {
+				if (c.getzIndex() != z) {
+					c.setzIndex(z);
+					c.draw();
+				}
+				z++;
+			}
+			for (final Container c : hierarchyDisplayed) {
+				if (c.getzIndex() != z) {
+					c.setzIndex(z);
+					c.draw();
+				}
+				z++;
+			}
+		}
+	}
+	
+	private List<Container> getPathToRoot(final Container container) {
+		final List<Container> path = new ArrayList<>();
+		Container current = container;
+		while (current != null) {
+			path.add(0, current);
+			current = current.parent;
+		}
+		return path;
+	}
+	
+	private boolean isDescendantOrSelf(final Container root, final Container c) {
+		Container curr = c;
+		while (curr != null) {
+			if (curr == root) {
+				return true;
+			}
+			curr = curr.parent;
+		}
+		return false;
+	}
+	
+	private void computeSubtreeInfo(final Container node, final Set<Container> displayedNodes, final Map<Container, Short> subtreeMinDisplayedZIndex, final Map<Container, Boolean> subtreeHasDisplayed, final Set<Container> visited) {
+		if (!visited.add(node)) {
+			return;
+		}
+		
+		short minZ = displayedNodes.contains(node) ? node.getzIndex() : Short.MAX_VALUE;
+		boolean hasDisplayed = displayedNodes.contains(node);
+		
+		for (final Container child : node.children) {
+			this.computeSubtreeInfo(child, displayedNodes, subtreeMinDisplayedZIndex, subtreeHasDisplayed, visited);
+			if (Boolean.TRUE.equals(subtreeHasDisplayed.get(child))) {
+				hasDisplayed = true;
+				final Short childMin = subtreeMinDisplayedZIndex.get(child);
+				if (childMin != null && childMin < minZ) {
+					minZ = childMin;
+				}
+			}
+		}
+		
+		subtreeHasDisplayed.put(node, hasDisplayed);
+		if (hasDisplayed) {
+			subtreeMinDisplayedZIndex.put(node, minZ);
+		}
+	}
+	
+	private void flattenDisplayedSubtree(final Container node, final Set<Container> displayedNodes, final Set<Container> pathSet, final Map<Container, Short> subtreeMinDisplayedZIndex, final Map<Container, Boolean> subtreeHasDisplayed, final List<Container> result, final Set<Container> visited) {
+		if (!visited.add(node)) {
+			return;
+		}
+		if (!Boolean.TRUE.equals(subtreeHasDisplayed.get(node))) {
+			return;
+		}
+		
+		if (displayedNodes.contains(node)) {
+			result.add(node);
+		}
+		
+		final List<Container> childrenSorted = new ArrayList<>(node.children);
+		childrenSorted.sort((c1, c2) -> {
+			final boolean c1OnPath = pathSet.contains(c1);
+			final boolean c2OnPath = pathSet.contains(c2);
+			if (c1OnPath != c2OnPath) {
+				return c1OnPath ? 1 : -1;
+			}
+			final short c1Key = subtreeMinDisplayedZIndex.getOrDefault(c1, Short.MAX_VALUE);
+			final short c2Key = subtreeMinDisplayedZIndex.getOrDefault(c2, Short.MAX_VALUE);
+			final int cmp = Short.compare(c1Key, c2Key);
+			if (cmp != 0) {
+				return cmp;
+			}
+			return Integer.compare(System.identityHashCode(c1), System.identityHashCode(c2));
+		});
+		
+		for (final Container child : childrenSorted) {
+			if (Boolean.TRUE.equals(subtreeHasDisplayed.get(child))) {
+				this.flattenDisplayedSubtree(child, displayedNodes, pathSet, subtreeMinDisplayedZIndex, subtreeHasDisplayed, result, visited);
+			}
+		}
+	}
+	
+	public void setParent(final Container parent) {
+		synchronized (DISPLAYED_CONTAINERS) {
+			if (this.parent != null) {
+				this.parent.children.remove(this);
+			}
+			this.parent = parent;
+			if (parent != null) {
+				parent.children.add(this);
 			}
 		}
 	}
