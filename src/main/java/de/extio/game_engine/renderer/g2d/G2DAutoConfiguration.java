@@ -14,6 +14,7 @@ import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.g2d.theme.PatternRenderer;
 import de.extio.game_engine.renderer.g2d.theme.BevelDarkThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.BevelLightThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.BlueprintThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.ContemporaryThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.DreamThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.FantasyThemeFactoryBean;
@@ -102,6 +103,11 @@ public class G2DAutoConfiguration {
 	@Bean
 	FactoryBean<Theme> bevelDarkTheme() {
 		return new BevelDarkThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> blueprintTheme() {
+		return new BlueprintThemeFactoryBean();
 	}
 
 	@Bean
