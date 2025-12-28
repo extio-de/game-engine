@@ -16,6 +16,7 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.renderer.model.bo.VerticalAlignment;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
+import de.extio.game_engine.renderer.model.event.MouseEvent;
 import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
 import de.extio.game_engine.renderer.model.event.ViewportResizeEvent;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
@@ -56,7 +57,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	protected HorizontalAlignment horizontalAlignment = HorizontalAlignment.CENTER;
 	
 	protected VerticalAlignment verticalAlignment = VerticalAlignment.CENTER;
-
+	
 	protected short zIndex;
 	
 	public Container(final ModuleService moduleService, final RenderingBoPool renderingBoPool, final RendererControl rendererControl, final EventService eventService, final RendererWorkingSet rendererWorkingSet) {
@@ -162,26 +163,12 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	
 	protected void onMouseMoveEvent(final MouseMoveEvent event) {
 		if (this.draggable && event.isDrag()) {
-			Container foregroundContainer = null;
-			synchronized (DISPLAYED_CONTAINERS) {
-				short zIndexHighest = -1;
-				for (final var container : DISPLAYED_CONTAINERS) {
-					if (container.dragging) {
-						foregroundContainer = container;
-						break;
-					}
-					if (SpatialUtils2.intersects(container.area.getPosition(), container.area.getDimension(), event.getScaledCoord(), ImmutableCoordI2.one())) {
-						if (container.zIndex > zIndexHighest) {
-							zIndexHighest = container.zIndex;
-							foregroundContainer = container;
-						}
-					}
-				}
-			}
-			if (foregroundContainer == this) {
+			final Container containerUnderCursor = getContainerUnderCursor(event);
+			if (containerUnderCursor == this) {
 				if (!this.dragging) {
 					this.dragging = true;
 					this.dragPrevPosition = null;
+					this.zIndexToTop();
 					this.LOGGER.debug("Started dragging container {}", this.id);
 				}
 				if (this.dragPrevPosition != null) {
@@ -196,6 +183,13 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	}
 	
 	protected void onMouseClickEvent(final MouseClickEvent event) {
+		final Container containerUnderCursor = this.getContainerUnderCursor(event);
+		if (containerUnderCursor == this) {
+			if (event.isPressed() && !this.dragging) {
+				this.zIndexToTop();
+			}
+		}
+		
 		if (!event.isPressed() && this.dragging) {
 			this.dragging = false;
 			this.dragPrevPosition = null;
@@ -213,11 +207,11 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		final var uncommitted = this.rendererWorkingSet.getUncommittedWork(this.id);
 		for (final RenderingBo bo : uncommitted.values()) {
 			bo
-				.setZIndex(this.zIndex)
-				.withPositionAbsoluteAnchorTopLeft(this.area.getPosition()
-					.toMutableCoordD2()
-					.add(bo.getLocalX(), bo.getLocalY())
-					.toImmutableCoordI2());
+					.setZIndex(this.zIndex)
+					.withPositionAbsoluteAnchorTopLeft(this.area.getPosition()
+							.toMutableCoordD2()
+							.add(bo.getLocalX(), bo.getLocalY())
+							.toImmutableCoordI2());
 			this.rendererWorkingSet.put(this.id, bo);
 		}
 		
@@ -263,9 +257,29 @@ public class Container extends AbstractClientModule implements InitializingBean 
 		this.area.getDimension().setXY(normalizedDimension);
 		this.draw();
 	}
-
+	
+	private Container getContainerUnderCursor(final MouseEvent event) {
+		Container containerUnderCursor = null;
+		synchronized (DISPLAYED_CONTAINERS) {
+			short zIndexHighest = -1;
+			for (final var container : DISPLAYED_CONTAINERS) {
+				if (container.dragging) {
+					containerUnderCursor = container;
+					break;
+				}
+				if (SpatialUtils2.intersects(container.area.getPosition(), container.area.getDimension(), event.getScaledCoord(), ImmutableCoordI2.one())) {
+					if (container.zIndex > zIndexHighest) {
+						zIndexHighest = container.zIndex;
+						containerUnderCursor = container;
+					}
+				}
+			}
+		}
+		return containerUnderCursor;
+	}
+	
 	private void zIndexToTop() {
-		if (! this.draggable) {
+		if (!this.draggable) {
 			return;
 		}
 		
@@ -275,10 +289,18 @@ public class Container extends AbstractClientModule implements InitializingBean 
 					continue;
 				}
 				if (container.getzIndex() > this.getzIndex()) {
-					container.setzIndex((short) (container.getzIndex() - 1));
+					final var newZIndex = (short) (container.getzIndex() - 1);
+					if (container.getzIndex() != newZIndex) {
+						container.setzIndex(newZIndex);
+						container.draw();
+					}
 				}
 			}
-			this.setzIndex((short) (DISPLAYED_CONTAINERS.size() - 1));
+			final var newZIndex = (short) (DISPLAYED_CONTAINERS.size() - 1);
+			if (this.getzIndex() != newZIndex) {
+				this.setzIndex(newZIndex);
+				this.draw();
+			}
 		}
 	}
 	
@@ -312,7 +334,7 @@ public class Container extends AbstractClientModule implements InitializingBean 
 	public void setVerticalAlignment(final VerticalAlignment verticalAlignment) {
 		this.verticalAlignment = verticalAlignment;
 	}
-
+	
 	public short getzIndex() {
 		return zIndex;
 	}
