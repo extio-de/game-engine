@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
 
 import de.extio.game_engine.audio.AudioController;
+import de.extio.game_engine.audio.AudioOptions;
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.i18n.LocalizationService;
 import de.extio.game_engine.module.AbstractClientModule;
@@ -25,6 +26,7 @@ import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
+import de.extio.game_engine.storage.StorageService;
 
 public class DemoModule extends AbstractClientModule {
 	
@@ -46,6 +48,9 @@ public class DemoModule extends AbstractClientModule {
 	@Autowired
 	private ThemeManager themeManager;
 	
+	@Autowired
+	private StorageService storageService;
+	
 	private Window mainWindow;
 	
 	private Window secondaryWindow;
@@ -53,6 +58,8 @@ public class DemoModule extends AbstractClientModule {
 	private Window themeSelectionWindow;
 
 	private final Map<String, String> themeSelectionByControlId = new HashMap<>();
+	
+	private boolean audioMuted;
 	
 	@Override
 	public void onLoad() {
@@ -86,10 +93,14 @@ public class DemoModule extends AbstractClientModule {
 	
 	@Override
 	public void onActivate() {
+		this.storageService.loadByPath(String.class, List.of("gameEngine"), "theme").ifPresent(themeName -> {
+			if (themeName != null && !themeName.isBlank()) {
+				this.themeManager.setCurrentTheme(themeName);
+			}
+		});
+		
 		final var audioOptions = this.audioController.getAudioOptions();
-		audioOptions.getMusicOptions().setVolume(0.8f);
-		audioOptions.getSfxOptions().setVolume(1.0f);
-		this.audioController.applyAudioOptions(audioOptions);
+		this.audioMuted = isAudioMuted(audioOptions);
 		
 		this.setupMainWindow();
 		this.getModuleService().changeActiveState(this.mainWindow.getId(), true);
@@ -119,6 +130,10 @@ public class DemoModule extends AbstractClientModule {
 	
 	private void onUiControlEvent(final UiControlEvent event) {
 		switch (event.getId()) {
+			case "DemoModule_MainWindow_Button_Audio" -> {
+				this.toggleAudioMuted();
+			}
+			
 			case "DemoModule_MainWindow_Label_Welcome" -> {
 				this.audioController.play(new StaticResource(List.of("audio"), "contact0.ogg"));
 				this.setupSecondaryWindow();
@@ -143,7 +158,7 @@ public class DemoModule extends AbstractClientModule {
 				if (themeName != null) {
 					this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
 					this.themeManager.setCurrentTheme(themeName);
-					// this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
+					this.storageService.store(List.of("gameEngine"), "theme", themeName);
 				}
 			}
 		}
@@ -161,6 +176,21 @@ public class DemoModule extends AbstractClientModule {
 				.withPositionRelative(10, 100);
 		this.mainWindow.putRenderingBo(bo);
 		
+		final var buttonX = Math.max(0, this.mainWindow.getNormalizedDimension().getX() - 64 - 21);
+		final var buttonY = 20;
+		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_Audio", ControlRenderingBo.class)
+				.setCaption("")
+				.setType(ButtonControl.class)
+				.setTooltip(this.localizationService.translate("test-7"))
+				.setVisible(true)
+				.setEnabled(true)
+				.setCustomData2(new StaticResource(List.of("gfx"), "settings.png"))
+				.withDimensionAbsolute(64, 64)
+				.withPositionRelative(buttonX, buttonY);
+		this.mainWindow.putRenderingBo(bo);
+		
+		this.updateAudioButtonOverlay();
+		
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Logo", DrawImageRenderingBo.class)
 				.setResource(new StaticResource(List.of("renderer"), "logo.png"))
 				.withDimensionAbsolute(256, 256)
@@ -177,6 +207,48 @@ public class DemoModule extends AbstractClientModule {
 				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
 				.withPositionRelative(10, 600);
 		this.mainWindow.putRenderingBo(bo);
+	}
+	
+	private void toggleAudioMuted() {
+		final var audioOptions = this.audioController.getAudioOptions();
+		final var muted = isAudioMuted(audioOptions);
+		
+		if (muted) {
+			audioOptions.getMusicOptions().setVolume(0.8);
+			audioOptions.getSfxOptions().setVolume(1.0);
+		}
+		else {
+			audioOptions.getMusicOptions().setVolume(0.0);
+			audioOptions.getSfxOptions().setVolume(0.0);
+		}
+		
+		this.audioController.applyAudioOptions(audioOptions);
+		this.audioMuted = !muted;
+		this.updateAudioButtonOverlay();
+	}
+	
+	private void updateAudioButtonOverlay() {
+		if (!this.audioMuted) {
+			this.mainWindow.removeRenderingBo("DemoModule_MainWindow_Button_Audio_Overlay");
+			this.mainWindow.draw();
+			return;
+		}
+
+		final var buttonX = Math.max(0, this.mainWindow.getNormalizedDimension().getX() - 64 - 21);
+		final var buttonY = 20;
+		final DrawImageRenderingBo overlayBo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_Audio_Overlay", DrawImageRenderingBo.class);
+		overlayBo.setResource(new StaticResource(List.of("gfx"), "decline.png"));
+		overlayBo.withDimensionAbsolute(64, 64);
+		overlayBo.setLayer(RenderingBoLayer.UI1);
+		overlayBo.withPositionRelative(buttonX, buttonY);
+		this.mainWindow.putRenderingBo(overlayBo);
+		this.mainWindow.draw();
+	}
+	
+	private static boolean isAudioMuted(final AudioOptions audioOptions) {
+		final var music = audioOptions.getMusicOptions().getVolume();
+		final var sfx = audioOptions.getSfxOptions().getVolume();
+		return music <= 0.000_001 && sfx <= 0.000_001;
 	}
 	
 	private void setupSecondaryWindow() {
@@ -233,7 +305,7 @@ public class DemoModule extends AbstractClientModule {
 				.setSize(42)
 				.setAlignment(HorizontalAlignment.CENTER)
 				.withDimensionAbsolute(desiredWidth - (paddingX * 2), headerHeight)
-				.withPositionRelative(paddingX, 30);
+				.withPositionRelative(paddingX, 40);
 		this.themeSelectionWindow.putRenderingBo(bo);
 
 		final var currentTheme = this.themeManager.getCurrentTheme();
