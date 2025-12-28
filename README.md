@@ -438,6 +438,92 @@ This ensures that AWT components respect the same layering rules as rendered obj
 - **Keep zIndex values below 48** - higher values will cause incorrect rendering order
 - For most use cases, zIndex values in the 0-20 range are sufficient
 
+#### Theme System
+
+The G2D renderer supports UI theming via `ThemeManager` (implemented by `G2DThemeManager`). Themes affect how controls and UI decorations are rendered.
+
+**Levels of theme customization**
+
+In practice, games typically use one of these approaches (from simplest to most flexible):
+
+1. **Use a predefined theme**: pick one of the built-in theme beans (see below) and set `game-engine.renderer.default-theme` (or switch at runtime via `setCurrentTheme(String)`).
+2. **Provide your own `Theme` instance**: construct a `Theme` object (for example via the `Theme.builder()` API) and activate it via `themeManager.setCurrentTheme(theme)`.
+3. **Implement your own `PatternRenderer`**: for deeper visual changes beyond theme parameters, provide a custom `PatternRenderer` implementation as a Spring bean; `G2DThemeManager` discovers all `PatternRenderer` beans and makes them available to the renderer.
+
+**Built-in themes**
+
+`G2DAutoConfiguration` registers a set of built-in themes as Spring beans. The renderer starts with a default theme chosen by bean name.
+
+Built-in theme bean names:
+
+- `bevelDarkTheme`
+- `bevelLightTheme`
+- `blueprintTheme`
+- `contemporaryTheme`
+- `dreamTheme`
+- `fantasyTheme`
+- `modernTheme`
+- `neonTheme`
+- `noirTheme`
+- `spacecraftTheme`
+- `urbanTheme`
+- `vintageTheme`
+
+**Configure the default theme**
+
+- Property: `game-engine.renderer.default-theme` (default: `urbanTheme`)
+- Value: the Spring bean name of the theme
+
+Example (`application.properties`):
+
+```properties
+game-engine.renderer.default-theme=neonTheme
+```
+
+**Switch the current theme**
+
+You can switch themes either by a known bean name (fast path) or by the theme's `Theme.name` (case-insensitive match):
+
+```java
+// By bean name (e.g. "urbanTheme")
+themeManager.setCurrentTheme("urbanTheme");
+
+// Or by Theme.name (if it differs)
+themeManager.setCurrentTheme("Urban");
+
+// Or directly
+themeManager.setCurrentTheme(myTheme);
+```
+
+When the theme changes, the G2D renderer is reset so the new theme takes effect immediately.
+
+**Last-used theme persistence**
+
+`G2DThemeManager` automatically persists the last selected theme (as a full `Theme` object) via `StorageService` and restores it on startup.
+
+- Storage path: `['gameEngine', 'themes']`
+- Storage name: `lastTheme`
+
+If persistence fails or no saved theme exists, the manager falls back to the configured default theme.
+
+**Loading and saving themes**
+
+`ThemeManager` exposes explicit theme I/O helpers:
+
+- `saveThemeToStorage(Theme theme)` stores a theme using `theme.getName()` as the storage name (under the same `['gameEngine','themes']` path).
+- `loadThemeFromStorage(String themeName)` loads a previously saved theme by that name.
+- `loadThemeFromStaticResource(StaticResource resource)` loads a theme from the static `data/` directory via `StaticResourceService`.
+
+Example (load from static resources and activate):
+
+```java
+var resource = new StaticResource(List.of("themes"), "myTheme.yaml");
+themeManager.loadThemeFromStaticResource(resource)
+    .ifPresent(themeManager::setCurrentTheme);
+```
+
+Themes loaded from storage or static resources are automatically registered into the theme manager's in-memory list, so they show up in `getAvailableThemeNames()`.
+
 #### Setup / Autoconfiguration
 **Configuration Class**: `RendererAutoConfiguration`
 
