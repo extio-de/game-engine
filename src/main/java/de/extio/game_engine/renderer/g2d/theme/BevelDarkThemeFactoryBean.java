@@ -8,6 +8,7 @@ public class BevelDarkThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Bevel Dark")
+				.font("Roboto-Regular.ttf")
 				.patternRendererName("bevelPatternRenderer")
 				// Highlight (Light Grey)
 				.borderOuter(new HSBColor(0.0f, 0.0f, 0.6f)) 

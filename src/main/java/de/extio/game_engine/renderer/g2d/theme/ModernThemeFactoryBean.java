@@ -8,6 +8,7 @@ public class ModernThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Modern")
+				.font("Inter_24pt-Regular.ttf")
 				.patternRendererName("modernPatternRenderer")
 				.borderOuter(new HSBColor(0.58f, 0.08f, 0.82f))
 				.borderInner(new HSBColor(0.58f, 0.10f, 0.92f))

@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.model.event.ViewportResizeEvent;
+import de.extio.game_engine.renderer.model.options.UiOptions;
+import de.extio.game_engine.renderer.model.options.VideoOptions;
 import de.extio.game_engine.renderer.model.options.VideoOptions.VideoOptionsVideoMode;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
@@ -286,6 +288,16 @@ public class G2DRendererControl implements RendererControl {
 		this.rendererData = rendererData;
 	}
 
+	@Override
+	public UiOptions getUiOptions() {
+		return this.rendererData.getUiOptions();
+	}
+
+	@Override
+	public VideoOptions getVideoOptions() {
+		return this.rendererData.getVideoOptions();
+	}
+	
 	private static record G2DRendererControlOptions(double scaleFactorModifier) {
 	}
 }

@@ -8,6 +8,7 @@ public class UrbanThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Urban")
+				.font("Geist-Regular.ttf")
 				.patternRendererName("metroPatternRenderer")
 				.borderOuter(new HSBColor(0.58f, 0.08f, 0.30f))
 				.borderInner(new HSBColor(0.58f, 0.06f, 0.72f))

@@ -165,7 +165,7 @@ public class G2DRenderer implements Renderer {
 					throw new G2DRendererWindowNotInitializedException();
 				}
 				
-				if (this.previousDefaultFont == null && this.rendererData.getUiOptions().getFontResource() != null && !this.rendererData.getUiOptions().getFontResource().equals(this.previousDefaultFont)) {
+				if (this.previousDefaultFont == null || (this.rendererData.getUiOptions().getFontResource() != null && !this.rendererData.getUiOptions().getFontResource().equals(this.previousDefaultFont))) {
 					this.previousDefaultFont = this.rendererData.getUiOptions().getFontResource();
 					G2DDrawFont.updateDefaultFont(this.rendererData.getStaticResourceService(), this.rendererData.getUiOptions().getFontResource());
 				}

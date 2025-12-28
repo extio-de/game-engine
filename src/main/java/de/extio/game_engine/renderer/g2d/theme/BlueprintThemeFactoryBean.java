@@ -8,6 +8,7 @@ public class BlueprintThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Blueprint")
+				.font("Inter_24pt-Regular.ttf")
 				.patternRendererName("blueprintPatternRenderer")
 				// Highlight/Border (White/Cyan)
 				.borderOuter(new HSBColor(0.5f, 0.0f, 1.0f)) 

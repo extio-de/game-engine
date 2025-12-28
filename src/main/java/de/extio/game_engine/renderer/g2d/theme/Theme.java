@@ -11,7 +11,8 @@ public class Theme {
 	
 	private final String name;
 	private final String patternRendererName;
-	
+	private final String font;
+
 	// Element colors - Borders
 	private final HSBColor borderOuter;
 	private final HSBColor borderInner;
@@ -40,6 +41,7 @@ public class Theme {
 	public Theme(
 			@JsonProperty("name") final String name,
 			@JsonProperty("patternRendererName") final String patternRendererName,
+			@JsonProperty("font") final String font,
 			@JsonProperty("borderOuter") final HSBColor borderOuter,
 			@JsonProperty("borderInner") final HSBColor borderInner,
 			@JsonProperty("borderInnerDisabled") final HSBColor borderInnerDisabled,
@@ -54,6 +56,7 @@ public class Theme {
 			@JsonProperty("pressedBrightnessAdjustment") final float pressedBrightnessAdjustment) {
 		this.name = name;
 		this.patternRendererName = patternRendererName;
+		this.font = font;
 		this.borderOuter = borderOuter;
 		this.borderInner = borderInner;
 		this.borderInnerDisabled = borderInnerDisabled;
@@ -72,6 +75,7 @@ public class Theme {
 		this(
 				builder.name,
 				builder.patternRendererName,
+				builder.font,
 				builder.borderOuter,
 				builder.borderInner,
 				builder.borderInnerDisabled,
@@ -92,6 +96,10 @@ public class Theme {
 	
 	public String getPatternRendererName() {
 		return this.patternRendererName;
+	}
+	
+	public String getFont() {
+		return this.font;
 	}
 	
 	public HSBColor getBorderOuter() {
@@ -149,6 +157,7 @@ public class Theme {
 	public static class Builder {
 		private String name;
 		private String patternRendererName;
+		private String font;
 		private HSBColor borderOuter;
 		private HSBColor borderInner;
 		private HSBColor borderInnerDisabled;
@@ -169,6 +178,11 @@ public class Theme {
 		
 		public Builder patternRendererName(final String patternRendererName) {
 			this.patternRendererName = patternRendererName;
+			return this;
+		}
+		
+		public Builder font(final String font) {
+			this.font = font;
 			return this;
 		}
 		

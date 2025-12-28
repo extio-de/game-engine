@@ -8,6 +8,7 @@ public class ContemporaryThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Contemporary")
+				.font("Lato-Regular.ttf")
 				.patternRendererName("modernPatternRenderer")
 				.borderOuter(new HSBColor(0.88f, 0.12f, 0.75f))
 				.borderInner(new HSBColor(0.88f, 0.10f, 0.92f))

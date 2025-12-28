@@ -8,6 +8,7 @@ public class SpacecraftThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Spacecraft")
+				.font("Roboto-Regular.ttf")
 				.patternRendererName("spacecraftPatternRenderer")
 				.borderOuter(new HSBColor(0.71f, 0.12f, 0.50f))
 				.borderInner(new HSBColor(0.71f, 0.12f, 0.80f))

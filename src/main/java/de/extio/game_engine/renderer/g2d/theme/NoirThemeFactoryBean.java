@@ -8,6 +8,7 @@ public class NoirThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Noir")
+				.font("Lora-Regular.ttf")
 				.patternRendererName("urbanPatternRenderer")
 				.borderOuter(new HSBColor(0.00f, 0.00f, 0.18f))
 				.borderInner(new HSBColor(0.00f, 0.00f, 0.45f))

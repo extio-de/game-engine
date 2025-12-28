@@ -8,6 +8,7 @@ public class DreamThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Dream")
+				.font("Lora-Regular.ttf")
 				.patternRendererName("dreamPatternRenderer")
 				.borderOuter(new HSBColor(0.74f, 0.22f, 0.80f))
 				.borderInner(new HSBColor(0.83f, 0.18f, 0.95f))

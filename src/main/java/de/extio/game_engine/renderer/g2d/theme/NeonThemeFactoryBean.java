@@ -8,6 +8,7 @@ public class NeonThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Neon")
+				.font("Geist-Regular.ttf")
 				.patternRendererName("dreamPatternRenderer")
 				.borderOuter(new HSBColor(0.83f, 0.80f, 0.95f))
 				.borderInner(new HSBColor(0.52f, 0.85f, 0.92f))

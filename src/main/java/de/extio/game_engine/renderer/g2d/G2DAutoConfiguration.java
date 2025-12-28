@@ -31,6 +31,16 @@ import de.extio.game_engine.storage.StorageService;
 @ConditionalOnProperty(name = "game-engine.renderer.enabled", havingValue = "true", matchIfMissing = true)
 @ConditionalOnProperty(name = "game-engine.renderer.strategy", havingValue = "g2d", matchIfMissing = true)
 public class G2DAutoConfiguration {
+	
+	@Bean
+	G2DThemeManager g2dThemeManager(
+			final StaticResourceService staticResourceService,
+			final StorageService storageService,
+			final List<PatternRenderer> patternRendererList,
+			final Map<String, Theme> themes,
+			@Value("${game-engine.renderer.default-theme:urbanTheme}") final String defaultThemeName) {
+		return new G2DThemeManager(staticResourceService, storageService, patternRendererList, themes, defaultThemeName);
+	}
 
 	@Bean
 	G2DRenderer g2dRenderer(
@@ -46,8 +56,10 @@ public class G2DAutoConfiguration {
 	}
 	
 	@Bean
-	G2DRendererControl g2dRendererControl(final G2DRenderer renderer) {
-		return new G2DRendererControl(renderer);
+	G2DRendererControl g2dRendererControl(final G2DRenderer renderer, final G2DThemeManager themeManager) {
+		var control = new G2DRendererControl(renderer);
+		themeManager.setG2dRendererControl(control);
+		return control;
 	}
 
 	@Bean
@@ -108,16 +120,6 @@ public class G2DAutoConfiguration {
 	@Bean
 	FactoryBean<Theme> blueprintTheme() {
 		return new BlueprintThemeFactoryBean();
-	}
-
-	@Bean
-	G2DThemeManager g2dThemeManager(
-			final StaticResourceService staticResourceService,
-			final StorageService storageService,
-			final List<PatternRenderer> patternRendererList,
-			final Map<String, Theme> themes,
-			@Value("${game-engine.renderer.default-theme:urbanTheme}") final String defaultThemeName) {
-		return new G2DThemeManager(staticResourceService, storageService, patternRendererList, themes, defaultThemeName);
 	}
 
 }

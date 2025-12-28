@@ -13,6 +13,7 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
+import de.extio.game_engine.renderer.g2d.G2DRendererControl;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.storage.StorageService;
@@ -25,6 +26,7 @@ public class G2DThemeManager implements ThemeManager {
 	private static final String THEME_STORAGE_NAME = "lastTheme";
 	
 	private G2DRenderer g2dRenderer;
+	private G2DRendererControl g2dRendererControl;
 
 	private final StaticResourceService staticResourceService;
 	private final StorageService storageService;
@@ -52,33 +54,6 @@ public class G2DThemeManager implements ThemeManager {
 		
 		LOGGER.info("G2DThemeManager initialized with {} pattern renderers: {}", this.patternRenderers.size(), this.patternRenderers.keySet());
 		LOGGER.info("G2DThemeManager initialized with {} themes: {}", this.themes.size(), this.themes.keySet());
-		this.currentTheme = this.defaultTheme;
-		this.loadLastUsedTheme();
-	}
-	
-	private void registerTheme(final Theme theme) {
-		if (theme == null || theme.getName() == null || theme.getName().isBlank()) {
-			return;
-		}
-		this.themes.put(theme.getName(), theme);
-	}
-	
-	private void loadLastUsedTheme() {
-		if (this.storageService == null) {
-			return;
-		}
-		try {
-			final Optional<Theme> persistedTheme = this.storageService.loadByPath(Theme.class, THEME_STORAGE_PATH, THEME_STORAGE_NAME);
-			if (persistedTheme.isPresent()) {
-				this.currentTheme = persistedTheme.get();
-				this.registerTheme(this.currentTheme);
-				LOGGER.info("Loaded last used theme: {}", this.currentTheme.getName());
-				return;
-			}
-		}
-		catch (final Exception e) {
-			LOGGER.warn("Could not load last used theme. Using default.", e);
-		}
 	}
 	
 	@Override
@@ -131,7 +106,8 @@ public class G2DThemeManager implements ThemeManager {
 	@Override
 	public void setCurrentTheme(final String themeName) {
 		if (themeName == null || themeName.isBlank()) {
-			throw new IllegalArgumentException("themeName cannot be null/blank");
+			this.applyLastUsedOrDefault();
+			return;
 		}
 
 		final var direct = this.themes.get(themeName);
@@ -151,45 +127,26 @@ public class G2DThemeManager implements ThemeManager {
 
 		this.setCurrentTheme(this.loadTheme(themeName));
 	}
-
+	
+	@Override
+	public void setCurrentTheme(final Theme theme) {
+		if (theme == null) {
+			this.applyLastUsedOrDefault();
+			return;
+		}
+		
+		this.applyTheme(theme);
+		this.registerTheme(theme);
+		LOGGER.info("Theme switched to: {}", theme.getName());
+		this.persistLastUsedTheme(theme);
+	}
+	
 	@Override
 	public Theme getCurrentTheme() {
 		return this.currentTheme;
 	}
 	
-	public PatternRenderer getPatternRenderer(final String rendererName) {
-		return this.patternRenderers.get(rendererName);
-	}
-	
-	@Override
-	public void setCurrentTheme(final Theme theme) {
-		if (theme == null) {
-			throw new IllegalArgumentException("Theme cannot be null");
-		}
-		
-		this.currentTheme = theme;
-		this.registerTheme(theme);
-		LOGGER.info("Theme switched to: {}", theme.getName());
-		this.persistLastUsedTheme(theme);
-
-		if (this.g2dRenderer != null) {
-			this.g2dRenderer.reset();
-		}
-	}
-	
-	private void persistLastUsedTheme(final Theme theme) {
-		if (this.storageService == null) {
-			return;
-		}
-		try {
-			this.storageService.store(THEME_STORAGE_PATH, THEME_STORAGE_NAME, theme);
-		}
-		catch (final Exception e) {
-			LOGGER.warn("Could not persist last used theme", e);
-		}
-	}
-	
-	public Theme loadTheme(final String themeName) {
+	private Theme loadTheme(final String themeName) {
 		try {
 			final Optional<Theme> fromStorage = this.loadThemeFromStorage(themeName);
 			if (fromStorage.isPresent()) {
@@ -205,7 +162,57 @@ public class G2DThemeManager implements ThemeManager {
 		return this.defaultTheme;
 	}
 
+	private void applyLastUsedOrDefault() {
+		try {
+			final Optional<Theme> persistedTheme = this.storageService.loadByPath(Theme.class, THEME_STORAGE_PATH, THEME_STORAGE_NAME);
+			if (persistedTheme.isPresent()) {
+				this.applyTheme(persistedTheme.get());
+				this.registerTheme(this.currentTheme);
+				LOGGER.info("Loaded last used theme: {}", this.currentTheme.getName());
+			}
+
+			this.applyTheme(this.defaultTheme);
+			LOGGER.info("Loaded default theme: {}", this.currentTheme.getName());
+		}
+		catch (final Exception e) {
+			LOGGER.warn("Could not load last used theme. Using default.", e);
+		}
+	}
+
+	private void applyTheme(Theme theme) {
+		this.currentTheme = theme;
+		this.g2dRendererControl.getUiOptions().setFontResource(new StaticResource(List.of("renderer"), this.currentTheme.getFont()));
+		this.g2dRenderer.reset();
+	}
+
+	private void registerTheme(final Theme theme) {
+		if (theme == null || theme.getName() == null || theme.getName().isBlank()) {
+			return;
+		}
+		this.themes.put(theme.getName(), theme);
+	}
+	
+	private void persistLastUsedTheme(final Theme theme) {
+		if (this.storageService == null) {
+			return;
+		}
+		try {
+			this.storageService.store(THEME_STORAGE_PATH, THEME_STORAGE_NAME, theme);
+		}
+		catch (final Exception e) {
+			LOGGER.warn("Could not persist last used theme", e);
+		}
+	}
+
 	public void setG2dRenderer(final G2DRenderer g2dRenderer) {
 		this.g2dRenderer = g2dRenderer;
+	}
+
+	public void setG2dRendererControl(G2DRendererControl g2dRendererControl) {
+		this.g2dRendererControl = g2dRendererControl;
+	}
+
+	public PatternRenderer getPatternRenderer(final String rendererName) {
+		return this.patternRenderers.get(rendererName);
 	}
 }

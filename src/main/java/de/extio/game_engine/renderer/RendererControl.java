@@ -1,5 +1,7 @@
 package de.extio.game_engine.renderer;
 
+import de.extio.game_engine.renderer.model.options.UiOptions;
+import de.extio.game_engine.renderer.model.options.VideoOptions;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
@@ -16,9 +18,13 @@ public interface RendererControl {
 	
 	void setTitle(String title);
 	
+	VideoOptions getVideoOptions();
+
 	void applyVideoOptions();
 	
 	long getVideoOptionsAppliedAt();
+
+	UiOptions getUiOptions();
 	
 	CoordI2 getAbsoluteViewportDimension();
 	

@@ -8,6 +8,8 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.keyboard.KeyModifiers;
 import de.extio.game_engine.keyboard.KeycodeRegistration;
+import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.g2d.theme.Theme;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
 
 public class RendererLoop implements Runnable {
@@ -32,8 +34,11 @@ public class RendererLoop implements Runnable {
 			this.rendererData.getStorageService()
 					.loadByPath(VideoOptions.class, List.of("gameEngine"), "videoOptions")
 					.ifPresent(options -> this.rendererData.getVideoOptions().apply(options));
-			
+
+					
 			this.rendererData.getRenderer().show();
+			
+			this.rendererData.getThemeManager().setCurrentTheme((Theme)null);
 			
 			LOGGER.info("Renderer loop started");
 			int exceptionCount = 0;
