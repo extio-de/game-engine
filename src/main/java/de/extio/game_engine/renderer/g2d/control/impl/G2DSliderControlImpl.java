@@ -4,6 +4,7 @@ import java.util.function.Consumer;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomSlider;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
@@ -136,7 +137,7 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 			if (this.enabled) {
 				this.performAction();
 			}
-		}, ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager());
+		}, (G2DThemeManager) this.rendererData.getThemeManager());
 		this.control.setName(this.id);
 	}
 	

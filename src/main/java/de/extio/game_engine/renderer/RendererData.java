@@ -44,10 +44,12 @@ public class RendererData {
 	private final ModuleExecutor moduleExecutor;
 
 	private final StaticResourceService staticResourceService;
+
+	private final ThemeManager themeManager;
 	
 	private RendererLoop rendererLoop;
 	
-	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleService moduleService, final ModuleExecutor moduleExecutor, final StaticResourceService staticResourceService) {
+	public RendererData(final ApplicationContext applicationContext, final Renderer renderer, final RendererControl rendererControl, final RenderingBoPool renderingBoPool, final KeycodeRegistry keycodeRegistry, final EventService eventService, final StorageService storageService, final RendererWorkingSet rendererWorkingSet, final ModuleService moduleService, final ModuleExecutor moduleExecutor, final StaticResourceService staticResourceService, final ThemeManager themeManager) {
 		this.applicationContext = applicationContext;
 		this.renderer = renderer;
 		this.rendererControl = rendererControl;
@@ -59,6 +61,7 @@ public class RendererData {
 		this.moduleService = moduleService;
 		this.moduleExecutor = moduleExecutor;
 		this.staticResourceService = staticResourceService;
+		this.themeManager = themeManager;
 	}
 	
 	public ApplicationContext getApplicationContext() {
@@ -128,4 +131,9 @@ public class RendererData {
 	public StaticResourceService getStaticResourceService() {
 		return staticResourceService;
 	}
+	
+	public ThemeManager getThemeManager() {
+		return themeManager;
+	}
+
 }

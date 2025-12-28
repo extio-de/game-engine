@@ -80,8 +80,11 @@ public class CustomButton extends CustomAbstractButton {
 		}
 		else if (this.caption != null) {
 			// Text color based on state
-			if ((this.state & (STATE_HOVERED | STATE_TOGGLED)) != 0) {
-				g2d.setColor(Color.WHITE);
+			if ((this.state & STATE_HOVERED) != 0) {
+				g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
+			}
+			else if ((this.state & STATE_TOGGLED) != 0) {
+				g2d.setColor(theme.getSelectionPrimary().toColor());
 			}
 			else if (this.isEnabled()) {
 				g2d.setColor(theme.getTextNormal().toColor());

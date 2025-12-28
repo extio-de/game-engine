@@ -12,6 +12,7 @@ import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
@@ -85,7 +86,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 			return;
 		}
 		
-		graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
+		graphics.setColor(this.color == null ? this.rendererData.getThemeManager().getCurrentTheme().getTextNormal().toColor() : this.color.toAwtColor());
 		
 		if (this.text.contains("\n")) {
 			final var lines = this.text.split("\n", -1);

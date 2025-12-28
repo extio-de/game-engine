@@ -167,9 +167,9 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 			this.control.setFont(G2DDrawFont.getFont(this.scaleFactor, this.fontSize));
 			this.control.setRowHeight((int) (this.control.getFont().getSize2D() * 1.25));
 			
-			final G2DThemeManager themeManager = ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager();
+			final G2DThemeManager themeManager = (G2DThemeManager) this.rendererData.getThemeManager();
 			this.control.setBackground(themeManager.getCurrentTheme().getBackgroundNormal().toColor());
-			this.control.setForeground(Color.WHITE);
+			this.control.setForeground(themeManager.getCurrentTheme().getTextNormal().toColor());
 			
 			if (this.dataModified || this.scrollPositionModified) {
 				//			LOGGER.debug("Table data modified " + this.id);

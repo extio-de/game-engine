@@ -59,9 +59,10 @@ public class RendererAutoConfiguration {
 			final RendererWorkingSet rendererWorkingSet,
 			final ModuleService moduleManager,
 			final ModuleExecutor moduleExecutor,
-			final StaticResourceService staticResourceService) {
+			final StaticResourceService staticResourceService,
+			final ThemeManager themeManager) {
 		
-		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, keycodeRegistry, eventService, storageService, rendererWorkingSet, moduleManager, moduleExecutor, staticResourceService);
+		final var rendererData = new RendererData(applicationContext, renderer, rendererControl, renderingBoPool, keycodeRegistry, eventService, storageService, rendererWorkingSet, moduleManager, moduleExecutor, staticResourceService, themeManager);
 		renderer.setRendererData(rendererData);
 		rendererControl.setRendererData(rendererData);
 		renderingBoPool.setRendererData(rendererData);

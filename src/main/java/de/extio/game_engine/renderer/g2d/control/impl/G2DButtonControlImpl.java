@@ -5,6 +5,8 @@ import java.util.Objects;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomAbstractButton;
 import de.extio.game_engine.renderer.g2d.control.components.CustomButton;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
@@ -71,7 +73,7 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	}
 	
 	protected void createControl() {
-		this.control = new CustomButton(false, event -> this.performAction(), ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager());
+		this.control = new CustomButton(false, event -> this.performAction(), (G2DThemeManager) this.rendererData.getThemeManager());
 		this.control.setName(this.id);
 	}
 	

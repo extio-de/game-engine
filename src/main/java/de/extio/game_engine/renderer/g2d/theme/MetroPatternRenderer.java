@@ -10,13 +10,17 @@ import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 
 @Conditional(G2DRendererCondition.class)
 @Component
-public class FantasyPatternRenderer implements PatternRenderer {
+public class MetroPatternRenderer implements PatternRenderer {
 	
 	@Override
 	public void drawDecorativeBorder(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final Color color) {
+		drawDecorativeBordersMain(g2d, x, y, width, height, strength, true, color);
+	}
+
+	private void drawDecorativeBordersMain(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final boolean drawJunction, final Color color) {
 		final var s = Math.max(1, strength);
-		final var s2 = s * 2;
-		final var s3 = s * 3;
+		final var junction = Math.max(1, s / 2);
+		final var station = Math.max(5, s * 3);
 		
 		g2d.setColor(color);
 		
@@ -25,16 +29,25 @@ public class FantasyPatternRenderer implements PatternRenderer {
 		g2d.fillRect(x, y, s, height);
 		g2d.fillRect(x + width - s, y, s, height);
 		
-		g2d.fillRect(x + s2, y + s2, width - s3 * 2, s);
-		g2d.fillRect(x + s2, y + height - s2 - s, width - s3 * 2, s);
-		g2d.fillRect(x + s2, y + s2, s, height - s3 * 2);
-		g2d.fillRect(x + width - s2 - s, y + s2, s, height - s3 * 2);
+		final var inset = s * 2;
+		final var x1 = x + inset;
+		final var y1 = y + inset;
+		final var x2 = x + width - inset;
+		final var y2 = y + height - inset;
 		
-		final var tri = Math.max(6, s * 4);
-		g2d.fillPolygon(new int[] { x + s, x + tri, x + s }, new int[] { y + s, y + s, y + tri }, 3);
-		g2d.fillPolygon(new int[] { x + width - s, x + width - tri, x + width - s }, new int[] { y + s, y + s, y + tri }, 3);
-		g2d.fillPolygon(new int[] { x + s, x + tri, x + s }, new int[] { y + height - s, y + height - s, y + height - tri }, 3);
-		g2d.fillPolygon(new int[] { x + width - s, x + width - tri, x + width - s }, new int[] { y + height - s, y + height - s, y + height - tri }, 3);
+		if (drawJunction && x2 > x1 && y2 > y1) {
+			g2d.fillRect(x1, y1, Math.max(0, x2 - x1), junction);
+			g2d.fillRect(x1, y2 - junction, Math.max(0, x2 - x1), junction);
+			g2d.fillRect(x1, y1, junction, Math.max(0, y2 - y1));
+			g2d.fillRect(x2 - junction, y1, junction, Math.max(0, y2 - y1));
+		}
+		
+		if (drawJunction) {
+			g2d.fillOval(x + s, y + s, station, station);
+			g2d.fillOval(x + width - s - station, y + s, station, station);
+			g2d.fillOval(x + s, y + height - s - station, station, station);
+			g2d.fillOval(x + width - s - station, y + height - s - station, station, station);
+		}
 	}
 	
 	@Override
@@ -47,13 +60,13 @@ public class FantasyPatternRenderer implements PatternRenderer {
 	
 	@Override
 	public void drawWindowPanel(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean thickBorder, final Color innerBorderColor, final Color outerBorderColor, final Color backgroundColor, final double scaleFactor) {
-		// final var s = Math.max((thickBorder ? 3 : 2), (int) ((thickBorder ? 5 : 3) * scaleFactor));
-		final var s = Math.max(2, (int) (3 * scaleFactor));
+		final var s = Math.max((thickBorder ? 4 : 2), (int) ((thickBorder ? 6 : 3) * scaleFactor));
 		final var s2 = s * 2;
 		
 		final var bg = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 175);
-		this.drawDecorativeBorderFilled(g2d, x + s, y + s, width - s2, height - s2, s, innerBorderColor, bg);
-		this.drawDecorativeBorder(g2d, x, y, width, height, s, outerBorderColor);
+		
+		this.drawDecorativeBorderFilled(g2d, x, y, width, height, s, innerBorderColor, bg);
+		this.drawDecorativeBordersMain(g2d, x + s, y + s, width - s2, height - s2, s, false, outerBorderColor);
 	}
 	
 	@Override
@@ -80,28 +93,19 @@ public class FantasyPatternRenderer implements PatternRenderer {
 		g2d.fillRect(0, 0, width, height);
 		
 		final var s = Math.max(1, (int) (2 * scaleFactor));
-		this.drawDecorativeBorder(g2d, 0, 0, width, height, s, theme.getBorderOuter().toColor());
+		this.drawDecorativeBordersMain(g2d, 0, 0, width, height, s, false, theme.getBorderOuter().toColor());
 		
 		if (!enabled) {
 			return;
 		}
 		
-		final Color fg;
-		if (pressed) {
-			fg = theme.getTextNormal().toColor();
-		}
-		else if (highlight) {
-			fg = Color.BLACK;
-		}
-		else {
-			fg = theme.getTextDisabled().toColor();
-		}
-		g2d.setColor(fg);
-		
+		final var t = Math.max(1, (int) (2 * scaleFactor));
 		final var crossSize = Math.min(width, height) / 2;
 		final var centerX = width / 2;
 		final var centerY = height / 2;
-		final var t = Math.max(1, (int) (2 * scaleFactor));
+		
+		final Color fg = pressed || highlight ? Color.BLACK : theme.getTextNormal().toColor();
+		g2d.setColor(fg);
 		g2d.fillRect(centerX - crossSize / 2, centerY - t / 2, crossSize, t);
 		g2d.fillRect(centerX - t / 2, centerY - crossSize / 2, t, crossSize);
 	}

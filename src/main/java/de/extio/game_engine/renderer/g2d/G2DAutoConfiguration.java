@@ -12,6 +12,8 @@ import org.springframework.context.annotation.Bean;
 
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.g2d.theme.PatternRenderer;
+import de.extio.game_engine.renderer.g2d.theme.BevelDarkThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.BevelLightThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.ContemporaryThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.DreamThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.FantasyThemeFactoryBean;
@@ -90,6 +92,16 @@ public class G2DAutoConfiguration {
 	@Bean
 	FactoryBean<Theme> neonTheme() {
 		return new NeonThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> bevelLightTheme() {
+		return new BevelLightThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> bevelDarkTheme() {
+		return new BevelDarkThemeFactoryBean();
 	}
 
 	@Bean

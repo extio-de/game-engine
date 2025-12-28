@@ -98,7 +98,7 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 	}
 	
 	protected void createControl() {
-		this.control = new CustomLabel(event -> this.performAction(), ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager());
+		this.control = new CustomLabel(event -> this.performAction(), this.rendererData.getThemeManager());
 		this.control.setName(this.id);
 	}
 	

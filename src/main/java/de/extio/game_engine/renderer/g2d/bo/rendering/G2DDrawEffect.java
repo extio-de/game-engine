@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.g2d.theme.PatternRenderer;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
@@ -219,9 +220,7 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				final var effectColor = this.color == null ? Color.WHITE : this.color.toAwtColor();
 				
 				// Use PatternRenderer from ThemeManager
-				final var renderer = this.rendererData.getRenderer();
-				final G2DRenderer g2dRenderer = (G2DRenderer) renderer;
-				final var themeManager = g2dRenderer.getThemeManager();
+				final var themeManager = (G2DThemeManager) this.rendererData.getThemeManager();
 				final var theme = themeManager.getCurrentTheme();
 				final PatternRenderer patternRenderer = themeManager.getPatternRenderer(theme.getPatternRendererName());
 				if (patternRenderer != null) {

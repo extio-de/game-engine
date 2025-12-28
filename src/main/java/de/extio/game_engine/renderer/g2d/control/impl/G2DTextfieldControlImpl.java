@@ -11,6 +11,7 @@ import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.components.CustomTextArea;
 import de.extio.game_engine.renderer.g2d.control.components.CustomTextField;
+import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldControl;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
@@ -119,10 +120,11 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 	}
 	
 	private void initTextField() {
-		final ThemeManager themeManager = ((G2DRenderer) this.rendererData.getRenderer()).getThemeManager();
+		final ThemeManager themeManager = (G2DThemeManager) this.rendererData.getThemeManager();
 		final Color bgColor = themeManager.getCurrentTheme().getBackgroundNormal().toColor();
+		final Color fgColor = themeManager.getCurrentTheme().getTextNormal().toColor();
 		this.safeInvoke(() -> this.textComponent.setBackground(bgColor));
-		this.safeInvoke(() -> this.textComponent.setForeground(Color.WHITE));
+		this.safeInvoke(() -> this.textComponent.setForeground(fgColor));
 		this.safeInvoke(() -> this.textComponent.setLocation(this.x, this.y));
 		this.safeInvoke(() -> this.textComponent.setSize(this.width, this.height));
 		this.safeInvoke(() -> this.textComponent.setFont(G2DDrawFont.getFont(this.scaleFactor, this.fontSize)));

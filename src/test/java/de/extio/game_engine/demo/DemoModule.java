@@ -87,8 +87,8 @@ public class DemoModule extends AbstractClientModule {
 	@Override
 	public void onActivate() {
 		final var audioOptions = this.audioController.getAudioOptions();
-		audioOptions.getMusicOptions().setVolume(0.0f);
-		audioOptions.getSfxOptions().setVolume(0.0f);
+		audioOptions.getMusicOptions().setVolume(0.8f);
+		audioOptions.getSfxOptions().setVolume(1.0f);
 		this.audioController.applyAudioOptions(audioOptions);
 		
 		this.setupMainWindow();
@@ -120,30 +120,30 @@ public class DemoModule extends AbstractClientModule {
 	private void onUiControlEvent(final UiControlEvent event) {
 		switch (event.getId()) {
 			case "DemoModule_MainWindow_Label_Welcome" -> {
-				this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
+				this.audioController.play(new StaticResource(List.of("audio"), "contact0.ogg"));
 				this.setupSecondaryWindow();
 				this.getModuleService().changeActiveState(this.secondaryWindow.getId(), true);
 				this.getModuleService().changeDisplayState(this.secondaryWindow.getId(), true);
 			}
 			
 			case "DemoModule_MainWindow_Label_Start" -> {
-				this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
+				this.audioController.play(new StaticResource(List.of("audio"), "contact0.ogg"));
 				this.setupThemeSelectionWindow();
 				this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), true);
 				this.getModuleService().changeDisplayState(this.themeSelectionWindow.getId(), true);
 			}
 
 			case "DemoModule_SecondaryWindow_Button_Ok" -> {
-				this.audioController.play(new StaticResource(List.of("audio"), "alert2.ogg"));
+				this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
 				this.getModuleService().changeActiveState(this.secondaryWindow.getId(), false);
 			}
 
 			default -> {
 				final var themeName = this.themeSelectionByControlId.get(event.getId());
 				if (themeName != null) {
-					this.audioController.play(new StaticResource(List.of("audio"), "alert2.ogg"));
+					this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
 					this.themeManager.setCurrentTheme(themeName);
-					this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
+					// this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
 				}
 			}
 		}

@@ -373,10 +373,6 @@ public class G2DRenderer implements Renderer {
 		return this.title;
 	}
 	
-	public G2DThemeManager getThemeManager() {
-		return this.themeManager;
-	}
-	
 	public void setThemeManager(final G2DThemeManager themeManager) {
 		this.themeManager = themeManager;
 	}
