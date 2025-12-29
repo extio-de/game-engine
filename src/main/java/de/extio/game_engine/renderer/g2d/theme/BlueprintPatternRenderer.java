@@ -197,6 +197,18 @@ public class BlueprintPatternRenderer implements PatternRenderer {
 		g2d.setColor(bgColor);
 		g2d.fillRect(x, y, width, height);
 		
+		// Add blueprint-style grid overlay for larger buttons
+		if (width > 40 && height > 40) {
+			g2d.setColor(new Color(255, 255, 255, 25));
+			final int gridSpacing = 8;
+			for (int gx = x + gridSpacing; gx < x + width; gx += gridSpacing) {
+				g2d.drawLine(gx, y + 2, gx, y + height - 2);
+			}
+			for (int gy = y + gridSpacing; gy < y + height; gy += gridSpacing) {
+				g2d.drawLine(x + 2, gy, x + width - 2, gy);
+			}
+		}
+		
 		final var borderStrength = Math.max(1, (int) (2 * scaleFactor));
 		final var borderColor = (state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : 
 				enabled ? theme.getBorderOuter().toColor() : theme.getBorderInnerDisabled().toColor();
