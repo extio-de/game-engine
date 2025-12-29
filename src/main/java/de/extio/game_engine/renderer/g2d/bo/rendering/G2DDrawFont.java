@@ -3,6 +3,7 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
@@ -17,6 +18,8 @@ import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.resource.StaticResourceService;
+import de.extio.game_engine.spatial2.SpatialUtils2;
+import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
@@ -37,7 +40,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_SEMIBOLD);
 		baseFont = Font.getFont(attributes);
 	}
-
+	
 	public static void updateDefaultFont(final StaticResourceService staticResourceService, final StaticResource resource) {
 		staticResourceService.loadStreamByPath(resource).ifPresent(stream -> {
 			try (var in = stream) {
@@ -86,10 +89,35 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		
 		graphics.setColor(this.color == null ? this.rendererData.getThemeManager().getCurrentTheme().getTextNormal().toColor() : this.color.toAwtColor());
 		
-		if (this.text.contains("\n")) {
-			final var lines = this.text.split("\n", -1);
-			final var lineHeight = getTextDimensions("M", graphics, this.size, 1.0).getY();
-			
+		final var lines = this.text.contains("\n") ? this.text.split("\n", -1) : new String[] { this.text };
+		final var lineHeight = getTextDimensions("M", graphics, this.size, 1.0).getY();
+		final CoordI2[] lineDims = new CoordI2[lines.length];
+		int maxLineWidth = 0;
+		for (int i = 0; i < lines.length; i++) {
+			lineDims[i] = G2DDrawFont.getTextDimensions(lines[i], graphics, this.size, 1.0);
+			if (lineDims[i].getX() > maxLineWidth) {
+				maxLineWidth = lineDims[i].getX();
+			}
+		}
+		
+		Shape oldClip = null;
+		Area2 intersection = null;
+		if (visibleAreaX != 0 || visibleAreaY != 0 || visibleAreaWidth != 0 || visibleAreaHeight != 0) {
+			final int blockX = (int) (this.x * scaleFactor);
+			final int blockY = (int) (this.y * scaleFactor);
+			final int blockW = this.width > 0 ? (int) (this.width * scaleFactor) : (int) Math.round(maxLineWidth * scaleFactor);
+			final int blockH = (int) Math.round(lineHeight * lines.length * scaleFactor);
+			final var controlArea = new Area2(ImmutableCoordI2.create(blockX, blockY), ImmutableCoordI2.create(blockW, blockH));
+			final var visibleArea = new Area2(ImmutableCoordI2.create((int) (this.visibleAreaX * scaleFactor), (int) (this.visibleAreaY * scaleFactor)), ImmutableCoordI2.create((int) (this.visibleAreaWidth * scaleFactor), (int) (this.visibleAreaHeight * scaleFactor)));
+			intersection = SpatialUtils2.intersectAreas(controlArea, visibleArea);
+			if (intersection == null) {
+				return;
+			}
+			oldClip = graphics.getClip();
+			graphics.setClip(intersection.getPosition().getX(), intersection.getPosition().getY(), intersection.getDimension().getX(), intersection.getDimension().getY());
+		}
+		
+		try {
 			for (int i = 0; i < lines.length; i++) {
 				final var line = lines[i];
 				final var yOffset = this.y + i * lineHeight;
@@ -100,13 +128,13 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 						break;
 					
 					case CENTER: {
-						final var textDim = G2DDrawFont.getTextDimensions(line, graphics, this.size, 1.0);
+						final var textDim = lineDims[i];
 						renderSingleLine(graphics, textDim, scaleFactor, (this.width - textDim.getX()) / 2 + this.x, yOffset, this.size, line);
 						break;
 					}
 					
 					case RIGHT: {
-						final var textDim = G2DDrawFont.getTextDimensions(line, graphics, this.size, 1.0);
+						final var textDim = lineDims[i];
 						renderSingleLine(graphics, textDim, scaleFactor, this.width - textDim.getX() + this.x, yOffset, this.size, line);
 						break;
 					}
@@ -116,41 +144,22 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 				}
 			}
 		}
-		else {
-			switch (this.alignment) {
-				case LEFT:
-					renderSingleLine(graphics, null, scaleFactor, this.x, this.y, this.size, this.text);
-					break;
-				
-				case CENTER: {
-					final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
-					renderSingleLine(graphics, textDim, scaleFactor, (this.width - textDim.getX()) / 2 + this.x, this.y, this.size, this.text);
-					break;
-				}
-				
-				case RIGHT: {
-					final var textDim = G2DDrawFont.getTextDimensions(this.text, graphics, this.size, 1.0);
-					renderSingleLine(graphics, textDim, scaleFactor, this.width - textDim.getX() + this.x, this.y, this.size, this.text);
-					break;
-				}
-				
-				default:
-					break;
-			}
+		finally {
+			graphics.setClip(oldClip);
 		}
 	}
 	
 	@Override
 	public void apply(final RenderingBo other) {
 		super.apply(other);
-
+		
 		if (other instanceof final G2DDrawFont o) {
 			this.text = o.text;
 			this.size = o.size;
 			this.alignment = o.alignment;
 		}
 	}
-
+	
 	@Override
 	public void close() throws Exception {
 		super.close();
@@ -186,7 +195,6 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		renderSingleLine(graphics, textDim_, scaleFactor, x, y, size_, text);
 	}
 	
-
 	private static void renderSingleLine(final Graphics graphics, final CoordI2 textDim_, final double scaleFactor, final int x, final int y, final int size_, final String text) {
 		if (text == null) {
 			return;
