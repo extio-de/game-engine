@@ -187,9 +187,14 @@ public class CustomLabel extends Component {
 			b = theme.getSelectionPrimary().getBrightness() + theme.getPressedBrightnessAdjustment();
 		}
 		else if ((this.state & STATE_HOVERED) != 0) {
-			b += theme.getHoverBrightnessAdjustment();
-			if (theme.getTextNormal().getBrightness() < 0.3f) {
+			if (theme.getTextNormal().getBrightness() > 0.85f) {
+				b -= theme.getHoverBrightnessAdjustment();
+			}
+			else {
 				b += theme.getHoverBrightnessAdjustment();
+				if (theme.getTextNormal().getBrightness() < 0.3f) {
+					b += theme.getHoverBrightnessAdjustment();
+				}
 			}
 		}
 		
