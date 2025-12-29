@@ -407,7 +407,6 @@ public class DemoModule extends AbstractClientModule {
 				.setRelativeCoordinates(List.of(ImmutableCoordI2.create(64, 64)))
 				.setEffect(DrawEffectRenderingBoEffects.DECORATIVE_BORDER_FILLED)
 				.setCustomInt0(4)
-				.setColor(RgbaColor.GRAY)
 				.setLayer(RenderingBoLayer.UI0)
 				.withPositionRelative(350, y);
 			this.scrollArea.putRenderingBo(bo);	
