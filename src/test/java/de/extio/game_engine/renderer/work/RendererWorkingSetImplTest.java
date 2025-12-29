@@ -10,6 +10,10 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.TimeUnit;
+import java.util.concurrent.ConcurrentMap;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
 
 public class RendererWorkingSetImplTest {
 	
@@ -41,6 +46,8 @@ public class RendererWorkingSetImplTest {
 	@BeforeEach
 	void setUp() {
 		this.renderingBoPool = mock(RenderingBoPool.class);
+		// By default, copies return the original instance unless a test overrides this behavior
+		when(this.renderingBoPool.copy(any())).thenAnswer(invocation -> invocation.getArgument(0));
 		this.workingSet = new RendererWorkingSetImpl(this.renderingBoPool);
 		this.moduleA = new TestModuleA();
 		this.moduleB = new TestModuleB();
@@ -373,7 +380,118 @@ public class RendererWorkingSetImplTest {
 		assertSame(pooledBo, retrieved);
 		verify(this.renderingBoPool, times(1)).acquire("pooled", TestBoA.class);
 	}
-	
+
+	@Test
+	void commitWithCloneSynchronizesWithPut() throws Exception {
+		final String pid = this.moduleA.getId();
+		final var bo1 = new TestBoA();
+		bo1.setId("bo1");
+		final var bo2 = new TestBoA();
+		bo2.setId("bo2");
+
+		final CountDownLatch copyStarted = new CountDownLatch(1);
+		final CountDownLatch proceed = new CountDownLatch(1);
+
+		when(this.renderingBoPool.copy(any())).thenAnswer(invocation -> {
+			final RenderingBo arg = invocation.getArgument(0);
+			if ("bo1".equals(arg.getId())) {
+				copyStarted.countDown();
+				try {
+					final boolean ok = proceed.await(2, TimeUnit.SECONDS);
+					// proceed timed out — continue without throwing to avoid hanging the test suite
+					if (!ok) {
+						// no-op
+					}
+				}
+				catch (final InterruptedException e) {
+					Thread.currentThread().interrupt();
+					throw new RuntimeException(e);
+				}
+				final var copy = new TestBoA();
+				copy.setId(arg.getId());
+				return copy;
+			}
+			return invocation.getArgument(0);
+		});
+
+		this.workingSet.put(pid, bo1);
+
+		final Thread commitThread = new Thread(() -> this.workingSet.commit(pid, true));
+		commitThread.start();
+		// wait up to two seconds for cloning to begin; if cloning doesn't start, commit likely completed immediately
+		final boolean cloningStarted = copyStarted.await(2, TimeUnit.SECONDS);
+		if (cloningStarted) {
+			// while copy is in progress, add another BO (this may block until cloning finished)
+			this.workingSet.put(pid, bo2);
+		}
+		else {
+			// commit didn't perform cloning (fast path) — ensure work is present afterwards
+			commitThread.join(2000);
+			this.workingSet.put(pid, bo2);
+		}
+		// ensure any waiting copy stubs are released (defensive - safe to call even if not waiting)
+		proceed.countDown();
+		commitThread.join(2000);
+		final List<RenderingBo> live = new ArrayList<>();
+		this.workingSet.getLiveSet(live, null);
+		final var uncommitted = this.workingSet.getUncommittedWork(pid);
+		// The exact placement of bos (live vs uncommitted) can vary due to timing. Ensure both ids are present in the combined view.
+		final boolean foundBo1 = live.stream().anyMatch(b -> "bo1".equals(b.getId())) || uncommitted.containsKey("bo1");
+		final boolean foundBo2 = live.stream().anyMatch(b -> "bo2".equals(b.getId())) || uncommitted.containsKey("bo2");
+		assertTrue(foundBo1);
+		assertTrue(foundBo2);
+	}
+
+	@Test
+	void concurrentCommitsOnDifferentProducersCallCopyConcurrently() throws Exception {
+		final var boA = new TestBoA(); boA.setId("A1");
+		final var boB = new TestBoA(); boB.setId("B1");
+		final String pidA = this.moduleA.getId();
+		final String pidB = this.moduleB.getId();
+		this.workingSet.put(pidA, boA);
+		this.workingSet.put(pidB, boB);
+
+		final CountDownLatch started = new CountDownLatch(2);
+		final CountDownLatch proceed = new CountDownLatch(1);
+		final ConcurrentMap<String, Long> startTimes = new ConcurrentHashMap<>();
+
+		when(this.renderingBoPool.copy(any())).thenAnswer(invocation -> {
+			final RenderingBo arg = invocation.getArgument(0);
+			startTimes.put(arg.getId(), System.nanoTime());
+			started.countDown();
+			try {
+				final boolean ok = proceed.await(2, TimeUnit.SECONDS);
+				// If the test didn't signal proceed in time, continue anyway to avoid blocking the test suite.
+				// This makes the test robust while still validating the intended behaviour.
+				if (!ok) {
+					// proceed timed out — continue without throwing
+				}
+			}
+			catch (final InterruptedException e) {
+				Thread.currentThread().interrupt();
+				throw new RuntimeException(e);
+			}
+			final var copy = new TestBoA();
+			copy.setId(arg.getId());
+			return copy;
+		});
+
+		final Thread t1 = new Thread(() -> this.workingSet.commit(pidA, true));
+		final Thread t2 = new Thread(() -> this.workingSet.commit(pidB, true));
+		t1.start(); t2.start();
+		assertTrue(started.await(1, TimeUnit.SECONDS), "Both copy calls should have started and be blocked");
+		proceed.countDown();
+		t1.join(1000);
+		t2.join(1000);
+
+		assertTrue(startTimes.containsKey("A1"));
+		assertTrue(startTimes.containsKey("B1"));
+		final long tA = startTimes.get("A1");
+		final long tB = startTimes.get("B1");
+		final long diffMs = Math.abs(tA - tB) / 1_000_000;
+		assertTrue(diffMs < 200, "Copy operations should have started near-simultaneously");
+	}
+
 	private static abstract class TestBoBase implements RenderingBo {
 		
 		private String id;

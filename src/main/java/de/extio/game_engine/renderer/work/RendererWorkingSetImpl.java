@@ -4,6 +4,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
@@ -29,7 +30,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	public void put(final String producerId, final RenderingBo work) {
 		final var previous = this.getWorkingSetByProducer(producerId)
 				.next()
-				.put(work.getId(), work);
+				.put(Objects.requireNonNull(work.getId()), work);
 		if (previous != null && previous != work) {
 			this.rendererBoPool.returnToPool(previous);
 		}
@@ -39,7 +40,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	public void put(final String producerId, final List<RenderingBo> work) {
 		final var nextMap = this.getWorkingSetByProducer(producerId).next();
 		for (final RenderingBo bo : work) {
-			final var previous = nextMap.put(bo.getId(), bo);
+			final var previous = nextMap.put(Objects.requireNonNull(bo.getId()), bo);
 			if (previous != null && previous != bo) {
 				this.rendererBoPool.returnToPool(previous);
 			}
@@ -56,25 +57,61 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		}
 	}
 	
+	/**
+	 * Returns an unmodifiable DEEP copy of the uncommitted work for the given producer.
+	 * If a RenderingBo is modified after this call, the changes will NOT be reflected in the active working set. You must call this.{@link #put(String, RenderingBo)} to update the working set.
+	 */
 	@Override
 	public Map<String, RenderingBo> getUncommittedWork(final String producerId) {
-		return Map.copyOf(this.getWorkingSetByProducer(producerId).next());
+		final var next = this.getWorkingSetByProducer(producerId).next();
+		synchronized (next) {
+			final var copy = new HashMap<String, RenderingBo>(next.size(), 1.0f);
+			next.entrySet().forEach(e -> {
+				copy.put(e.getKey(), this.rendererBoPool.copy(e.getValue()));
+			});
+			return Collections.unmodifiableMap(copy);
+		}
 	}
 	
+	/**
+	 * Returns the RenderingBo with the given id from the uncommitted work of the given producer.
+	 * If found, a DEEP copy is returned. If not found, null is returned
+	 * If a RenderingBo is modified after this call, the changes will NOT be reflected in the active working set. You must call this.{@link #put(String, RenderingBo)} to update the working set.
+	 */
 	@Override
 	public RenderingBo get(final String producerId, final String id) {
-		return this.getWorkingSetByProducer(producerId).next().get(id);
+		final var next = this.getWorkingSetByProducer(producerId).next();
+		synchronized (next) {
+			final var bo = this.getWorkingSetByProducer(producerId).next().get(id);
+			if (bo == null) {
+				return null;
+			}
+			return this.rendererBoPool.copy(bo);
+		}
 	}
 	
+	/**
+	 * Returns the RenderingBo with the given id from the uncommitted work of the given producer.
+	 * If found, a DEEP copy is returned. If not found, null is returned
+	 * If a RenderingBo is modified after this call, the changes will NOT be reflected in the active working set. You must call this.{@link #put(String, RenderingBo)} to update the working set.
+	 */
 	@Override
 	public <T extends RenderingBo> T get(final String producerId, final String id, final Class<T> type) {
-		final RenderingBo bo = this.getWorkingSetByProducer(producerId).next().get(id);
-		if (bo == null) {
-			return null;
+		final var next = this.getWorkingSetByProducer(producerId).next();
+		synchronized (next) {
+			final RenderingBo bo = this.getWorkingSetByProducer(producerId).next().get(id);
+			if (bo == null) {
+				return null;
+			}
+			return type.cast(this.rendererBoPool.copy(bo));
 		}
-		return type.cast(bo);
 	}
 	
+	/**
+	 * Returns the RenderingBo with the given id from the uncommitted work of the given producer or creates a new one if not found.
+	 * If found, a DEEP copy is returned. If not found, a new instance is acquired from the pool and returned.
+	 * If a RenderingBo is modified after this call, the changes will NOT be reflected in the active working set. You must call this.{@link #put(String, RenderingBo)} to update the working set.
+	 */
 	@Override
 	public <T extends RenderingBo> T getOrAcquire(final String producerId, final String id, final Class<T> type) {
 		final var bo = this.get(producerId, id, type);
@@ -94,10 +131,12 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 			previousLiveRef.set(v.live());
 			if (clone) {
 				final Map<String, RenderingBo> newNext = this.obtainMapFromPool();
-				v.next().entrySet().forEach(e -> {
-					final RenderingBo copy = this.rendererBoPool.copy(e.getValue());
-					newNext.put(e.getKey(), copy);
-				});
+				synchronized (v.next()) {
+					v.next().entrySet().forEach(e -> {
+						final RenderingBo copy = this.rendererBoPool.copy(e.getValue());
+						newNext.put(e.getKey(), copy);
+					});
+				}
 				return new RendererWork(v.next(), newNext);
 			}
 			else {
@@ -122,7 +161,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		next.values().forEach(this.rendererBoPool::returnToPool);
 		next.clear();
 	}
-
+	
 	@Override
 	public void clear(final String producerId) {
 		final RendererWork rendererWork = this.workingSet.remove(producerId);
