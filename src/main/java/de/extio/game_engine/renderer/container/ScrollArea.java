@@ -10,20 +10,13 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.event.EventService;
-import de.extio.game_engine.module.ModuleService;
-import de.extio.game_engine.renderer.RendererControl;
-import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoHasDimension;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderControl;
-import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
-import de.extio.game_engine.renderer.model.event.MouseEvent;
-import de.extio.game_engine.renderer.model.event.MouseMoveEvent;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
-import de.extio.game_engine.renderer.work.RendererWorkingSet;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
@@ -36,25 +29,25 @@ import de.extio.game_engine.spatial2.model.MutableCoordI2;
 public class ScrollArea implements WindowComponent {
 	
 	private final static Logger LOGGER = LoggerFactory.getLogger(ScrollArea.class);
-
+	
 	protected static final int SCROLLBAR_WIDTH = 20;
-
+	
 	protected static final int SCROLLBAR_WIDTH_WITH_MARGIN = 25;
-
+	
 	protected final RenderingBoPool renderingBoPool;
-
-	protected final EventService eventService; 
-
+	
+	protected final EventService eventService;
+	
 	protected final String id = Objects.toIdentityString(this);
 	
 	protected final String verticalScrollbarName = Objects.toIdentityString(this) + "_VerticalScrollbar";
 	
 	protected final String horizontalScrollbarName = Objects.toIdentityString(this) + "_HorizontalScrollbar";
-
+	
 	protected final MutableCoordI2 contentDimension = MutableCoordI2.create();
 	
 	protected final Set<String> renderingBoIds = new HashSet<>();
-
+	
 	protected final Area2 relativeArea = new Area2(ImmutableCoordI2.zero(), ImmutableCoordI2.one());
 	
 	protected Window parent;
@@ -63,7 +56,6 @@ public class ScrollArea implements WindowComponent {
 	
 	protected double scrollPositionHorizontal = 0.0;
 	
-
 	public ScrollArea(final RenderingBoPool renderingBoPool, final EventService eventService) {
 		this.renderingBoPool = renderingBoPool;
 		this.eventService = eventService;
@@ -96,15 +88,14 @@ public class ScrollArea implements WindowComponent {
 	
 	protected void onMouseWheelEvent(final MouseClickEvent event) {
 		if (event.getButton() == 4 || event.getButton() == 5) {
-			if (! SpatialUtils2.intersects(
-				this.relativeArea.getPosition().add(this.parent.getAbsolutePosition()),
-				this.relativeArea.getDimension(),
-				event.getScaledCoord(),
-				ImmutableCoordI2.one()
-			)) {
+			if (!SpatialUtils2.intersects(
+					this.relativeArea.getPosition().add(this.parent.getAbsolutePosition()),
+					this.relativeArea.getDimension(),
+					event.getScaledCoord(),
+					ImmutableCoordI2.one())) {
 				return;
 			}
-						
+			
 			final double scrollIncrement = 1.0 / Math.max(1, this.contentDimension.getY() / 50);
 			final double delta = event.getButton() == 4 ? scrollIncrement : -scrollIncrement;
 			this.scrollPositionVertical = Math.max(0.0, Math.min(1.0, this.scrollPositionVertical + delta));
@@ -115,7 +106,7 @@ public class ScrollArea implements WindowComponent {
 	@Override
 	public void draw() {
 		final var renderingBos = this.parent.getRenderingBos().values();
-
+		
 		this.contentDimension.setXY(0, 0);
 		for (final var bo : renderingBos) {
 			if (bo instanceof final RenderingBoHasDimension boWithDim && this.renderingBoIds.contains(bo.getId())) {
@@ -128,13 +119,13 @@ public class ScrollArea implements WindowComponent {
 		
 		if (needsHorizontalScrollbar || needsVerticalScrollbar) {
 			for (final var bo : renderingBos) {
-				if (bo instanceof final RenderingBoHasDimension boWithDim && this.renderingBoIds.contains(bo.getId())) {
-					boWithDim.withVisibleArea(
-						this.parent.getAbsolutePosition().getX() + this.relativeArea.getPosition().getX(), 
-						this.parent.getAbsolutePosition().getY() + this.relativeArea.getPosition().getY(),
-						this.relativeArea.getDimension().getX() - (needsVerticalScrollbar ? SCROLLBAR_WIDTH_WITH_MARGIN : 0), 
-						this.relativeArea.getDimension().getY() - (needsHorizontalScrollbar ? SCROLLBAR_WIDTH_WITH_MARGIN : 0));
-					this.parent.putRenderingBo(boWithDim);
+				if (this.renderingBoIds.contains(bo.getId())) {
+					bo.withVisibleArea(
+							this.parent.getAbsolutePosition().getX() + this.relativeArea.getPosition().getX(),
+							this.parent.getAbsolutePosition().getY() + this.relativeArea.getPosition().getY(),
+							this.relativeArea.getDimension().getX() - (needsVerticalScrollbar ? SCROLLBAR_WIDTH_WITH_MARGIN : 0),
+							this.relativeArea.getDimension().getY() - (needsHorizontalScrollbar ? SCROLLBAR_WIDTH_WITH_MARGIN : 0));
+					this.parent.putRenderingBo(bo);
 				}
 			}
 			
@@ -175,9 +166,9 @@ public class ScrollArea implements WindowComponent {
 	}
 	
 	@Override
-	public CoordI2 getRenderingBoExtraOffset(RenderingBo renderingBo) {
-		int startX = (int) (this.scrollPositionHorizontal * (this.contentDimension.getX() - this.relativeArea.getDimension().getX() + SCROLLBAR_WIDTH_WITH_MARGIN));
-		int startY = (int) ((1.0 - this.scrollPositionVertical) * (this.contentDimension.getY() - this.relativeArea.getDimension().getY() + SCROLLBAR_WIDTH_WITH_MARGIN));
+	public CoordI2 getRenderingBoExtraOffset(final RenderingBo renderingBo) {
+		final int startX = (int) (this.scrollPositionHorizontal * (this.contentDimension.getX() - this.relativeArea.getDimension().getX() + SCROLLBAR_WIDTH_WITH_MARGIN));
+		final int startY = (int) ((1.0 - this.scrollPositionVertical) * (this.contentDimension.getY() - this.relativeArea.getDimension().getY() + SCROLLBAR_WIDTH_WITH_MARGIN));
 		return ImmutableCoordI2.create(-startX, -startY);
 	}
 	
@@ -208,33 +199,33 @@ public class ScrollArea implements WindowComponent {
 		// this.scrollPositionHorizontal = Math.max(0.0, Math.min(1.0, scrollPositionHorizontal));
 		// this.draw();
 	}
-
+	
 	@Override
 	public CoordI2 getRelativePosition() {
 		return this.relativeArea.getPosition();
 	}
 	
-	public void setRelativePosition(CoordI2 relativePosition) {
+	public void setRelativePosition(final CoordI2 relativePosition) {
 		this.relativeArea.setPosition(relativePosition.toImmutableCoordI2());
 	}
-
-	public void setDimension(CoordI2 dimension) {
+	
+	public void setDimension(final CoordI2 dimension) {
 		this.relativeArea.setDimension(dimension.toImmutableCoordI2());
 	}
-
-	public void setRelativeArea(Area2 relativeArea) {
+	
+	public void setRelativeArea(final Area2 relativeArea) {
 		this.relativeArea.setPosition(relativeArea.getPosition().toImmutableCoordI2());
 		this.relativeArea.setDimension(relativeArea.getDimension().toImmutableCoordI2());
 	}
-
+	
 	@Override
 	public Set<String> getRenderingBoIds() {
 		return this.renderingBoIds;
 	}
-
+	
 	@Override
-	public void setParent(Window window) {
-		this.parent = window;		
+	public void setParent(final Window window) {
+		this.parent = window;
 	}
 	
 }
