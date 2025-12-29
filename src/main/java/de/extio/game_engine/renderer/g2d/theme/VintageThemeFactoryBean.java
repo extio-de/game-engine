@@ -8,7 +8,7 @@ public class VintageThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Vintage")
-				.font("LibreBaskerville-Regular.ttf")
+				.font("Lora-Regular.ttf")
 				.patternRendererName("vintagePatternRenderer")
 				.borderOuter(new HSBColor(0.08f, 0.55f, 0.22f))
 				.borderInner(new HSBColor(0.10f, 0.30f, 0.55f))

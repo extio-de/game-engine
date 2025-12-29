@@ -129,4 +129,9 @@ public class G2DAutoConfiguration {
 		return new BlueprintThemeFactoryBean();
 	}
 
+	@Bean
+	FactoryBean<Theme> steampunkTheme() {
+		return new SteampunkThemeFactoryBean();
+	}
+
 }

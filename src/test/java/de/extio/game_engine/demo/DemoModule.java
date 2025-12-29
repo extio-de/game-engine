@@ -349,10 +349,10 @@ public class DemoModule extends AbstractClientModule {
 		
 		final var themes = this.themeManager.getAvailableThemeNames();
 		
-		final var paddingX = 20;
+		final var paddingX = 24;
 		final var paddingBottom = 24;
 		final var columns = 2;
-		final var columnGap = 24;
+		final var columnGap = 16;
 		final var buttonWidth = 340;
 		final var buttonHeight = 54;
 		final var headerHeight = 60;
