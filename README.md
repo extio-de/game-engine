@@ -554,6 +554,441 @@ Themes loaded from storage or static resources are automatically registered into
 
 ---
 
+### Container System
+
+#### Purpose and Overview
+The Container System provides a windowing framework for building complex, composable UIs. Windows are Spring-managed modules that can contain components, be dragged, resized to viewport changes, and managed with z-index stacking. The system supports parent-child window relationships and automatic cleanup when modules are deactivated.
+
+Windows use normalized coordinates relative to a reference resolution (1920x1080), with automatic alignment for different viewport sizes. This ensures consistent UI layouts across various screen resolutions and aspect ratios.
+
+#### Core Components
+
+**Window**
+
+The `Window` class (extends `AbstractClientModule`) is the main container for UI elements. Windows:
+- Manage a collection of `WindowComponent` instances and child windows
+- Handle viewport resizing and automatic repositioning
+- Support dragging with automatic viewport constraint adjustments
+- Provide z-index based stacking with automatic bring-to-front behavior
+- Render a background panel and optional close button
+- Maintain both normalized (reference resolution) and absolute (screen) coordinates
+
+**WindowComponent**
+
+The `WindowComponent` interface defines the contract for components that can be added to windows. Components:
+- Receive lifecycle callbacks (`onAddedToWindow()`, `onRemovedFromWindow()`)
+- Contribute rendering objects to the parent window's working set
+- Define their relative position within the window
+- Can specify additional offsets for individual rendering objects
+
+**ScrollArea**
+
+The `ScrollArea` class is a built-in `WindowComponent` that provides scrollable content areas with vertical and horizontal scrollbars. Features:
+- Automatic scrollbar visibility based on content dimensions
+- Mouse wheel scrolling support
+- Rendering object clipping to visible area
+- Position offset calculations for scroll state
+
+#### Window Lifecycle and Setup
+
+Windows are Spring prototype-scoped beans managed by a parent module. The typical pattern is to create windows in the parent module's `onLoad()` method and manage their lifecycle through the module service:
+
+```java
+public class MyModule extends AbstractClientModule {
+    
+    @Autowired
+    private ApplicationContext applicationContext;
+    
+    private Window mainWindow;
+    private Window childWindow;
+    
+    @Override
+    public void onLoad() {
+        // Create window instances from Spring
+        this.mainWindow = this.applicationContext.getBean(Window.class);
+        this.mainWindow.setNormalizedDimension(ImmutableCoordI2.create(800, 600));
+        this.mainWindow.setNormalizedPosition(ImmutableCoordI2.create(560, 240));
+        this.mainWindow.setDraggable(true);
+        
+        this.childWindow = this.applicationContext.getBean(Window.class);
+        this.childWindow.setNormalizedDimension(ImmutableCoordI2.create(400, 300));
+        this.childWindow.setNormalizedPosition(ImmutableCoordI2.create(760, 390));
+        this.childWindow.setDraggable(true);
+        this.childWindow.setCloseButton(true);
+        this.childWindow.setParent(this.mainWindow);
+    }
+    
+    @Override
+    public void onUnload() {
+        // Unload all windows when module is unloaded
+        this.getModuleService().unloadModule(this.mainWindow.getId());
+        this.getModuleService().unloadModule(this.childWindow.getId());
+    }
+    
+    @Override
+    public void onActivate() {
+        // Setup main window content
+        this.setupMainWindow();
+        // Activate the main window
+        this.getModuleService().changeActiveState(this.mainWindow.getId(), true);
+    }
+    
+    @Override
+    public void onDeactivate() {
+        // Deactivate all windows
+        this.getModuleService().changeActiveState(this.mainWindow.getId(), false);
+        this.getModuleService().changeActiveState(this.childWindow.getId(), false);
+    }
+    
+    @Override
+    public void onShow() {
+        // Show the main window
+        this.getModuleService().changeDisplayState(this.mainWindow.getId(), true);
+    }
+    
+    @Override
+    public void onHide() {
+        // Hide and deactivate all windows
+        this.getModuleService().changeDisplayState(this.mainWindow.getId(), false);
+        this.getModuleService().changeActiveState(this.childWindow.getId(), false);
+    }
+    
+    private void setupMainWindow() {
+        var label = renderingBoPool.acquire("myLabel", ControlRenderingBo.class)
+            .setType(LabelControl.class)
+            .setCaption("Hello Window!")
+            .withPositionRelative(20, 20)
+            .withDimensionAbsolute(200, 30);
+        this.mainWindow.putRenderingBo(label);
+    }
+    
+    private void showChildWindow() {
+        // Setup child window content
+        this.childWindow.clearRenderingBos();
+        var button = renderingBoPool.acquire("okButton", ControlRenderingBo.class)
+            .setType(ButtonControl.class)
+            .setCaption("OK")
+            .withPositionRelative(150, 250)
+            .withDimensionAbsolute(100, 40);
+        this.childWindow.putRenderingBo(button);
+        
+        // Activate and show child window
+        this.getModuleService().changeActiveState(this.childWindow.getId(), true);
+        this.getModuleService().changeDisplayState(this.childWindow.getId(), true);
+    }
+}
+```
+
+**Window Properties:**
+- **Position and Dimension**: Set via `setNormalizedPosition()` and `setNormalizedDimension()` using reference resolution coordinates
+- **Alignment**: Controls how the window is positioned when the viewport differs from reference resolution
+- **Draggable**: Enable/disable window dragging via `setDraggable()`
+- **Close Button**: Add an automatic close button via `setCloseButton(true)`
+- **Close Action**: Custom action on close via `setOnCloseAction(Runnable)` (defaults to deactivating the module)
+- **Z-Index**: Stacking order via `setzIndex(short)` (automatically managed for draggable windows)
+
+#### Adding Content to Windows
+
+**Direct Rendering Objects**
+
+Windows maintain their own renderer working set. Add rendering objects directly using `putRenderingBo()`. Use `clearRenderingBos()` to reset window content before rebuilding:
+
+```java
+private void setupWindow(Window window) {
+    // Clear previous content
+    window.clearRenderingBos();
+    
+    // Add new rendering objects
+    var label = renderingBoPool.acquire("myLabel", ControlRenderingBo.class)
+        .setType(LabelControl.class)
+        .setCaption("Hello Window!")
+        .withPositionRelative(20, 20)
+        .withDimensionAbsolute(200, 30);
+    window.putRenderingBo(label);
+    
+    var button = renderingBoPool.acquire("myButton", ControlRenderingBo.class)
+        .setType(ButtonControl.class)
+        .setCaption("Click Me")
+        .withPositionRelative(20, 60)
+        .withDimensionAbsolute(120, 40);
+    window.putRenderingBo(button);
+    
+    // Remove specific rendering object if needed
+    // window.removeRenderingBo("myLabel");
+}
+```
+
+**Using Components**
+
+Add `WindowComponent` instances for reusable, encapsulated functionality. Components are typically created in `onLoad()` and added to windows before activation:
+
+```java
+public class MyModule extends AbstractClientModule {
+    
+    @Autowired
+    private ApplicationContext applicationContext;
+    
+    private Window scrollableWindow;
+    private ScrollArea scrollArea;
+    
+    @Override
+    public void onLoad() {
+        this.scrollableWindow = this.applicationContext.getBean(Window.class);
+        this.scrollableWindow.setNormalizedDimension(ImmutableCoordI2.create(800, 600));
+        this.scrollableWindow.setNormalizedPosition(ImmutableCoordI2.create(560, 240));
+        this.scrollableWindow.setDraggable(true);
+        this.scrollableWindow.setCloseButton(true);
+        
+        // Create and add ScrollArea component
+        this.scrollArea = this.applicationContext.getBean(ScrollArea.class);
+        this.scrollableWindow.addComponent(this.scrollArea);
+    }
+    
+    private void setupScrollableWindow() {
+        // Clear and setup window title
+        this.scrollableWindow.clearRenderingBos();
+        
+        var title = renderingBoPool.acquire("title", DrawFontRenderingBo.class)
+            .setText("Scrollable Content")
+            .setSize(28)
+            .setAlignment(HorizontalAlignment.CENTER)
+            .withPositionRelative(20, 30)
+            .withDimensionAbsolute(760, 50);
+        this.scrollableWindow.putRenderingBo(title);
+        
+        // Configure scroll area position and size
+        this.scrollArea.setRelativePosition(ImmutableCoordI2.create(20, 80));
+        this.scrollArea.setDimension(ImmutableCoordI2.create(760, 500));
+        
+        // Add content to the scroll area
+        for (int i = 0; i < 50; i++) {
+            var label = renderingBoPool.acquire("item" + i, ControlRenderingBo.class)
+                .setType(LabelControl.class)
+                .setCaption("Item " + (i + 1))
+                .setFontSize(24)
+                .withPositionRelative(10, i * 60 + 10)
+                .withDimensionAbsolute(700, 50);
+            this.scrollArea.putRenderingBo(label);
+        }
+    }
+}
+```
+
+#### Window Drawing and Rendering
+
+Windows use the `draw()` method to update their rendering state. The method:
+
+1. Renders the window background panel
+2. Renders the close button (if enabled)
+3. Calls `draw()` on all added components
+4. Adjusts z-index of all rendering objects to match the window's z-index
+5. Applies component-relative positioning to all rendering objects
+6. Commits the renderer working set
+
+**Automatic Redraw Triggers:**
+- Viewport resize events
+- Window position/dimension changes
+- Component modifications
+- Drag operations
+
+**Manual Redraw:**
+```java
+window.draw(); // Trigger full window redraw
+```
+
+#### Window Stacking and Z-Index Management
+
+Windows support hierarchical stacking through parent-child relationships and z-index values:
+
+**Parent-Child Relationships:**
+```java
+var childWindow = applicationContext.getBean(Window.class);
+childWindow.setParent(parentWindow);
+```
+
+When a child window is brought to the front, its entire parent chain is also brought forward, maintaining logical stacking order.
+
+**Automatic Z-Index Management:**
+
+Draggable windows automatically manage z-index stacking:
+- Clicking a window brings it (and its parent chain) to the front
+- Z-index values are recalculated to maintain proper stacking order
+- Non-draggable windows maintain their assigned z-index
+
+The z-index is synchronized with the renderer's layer system, ensuring window panels and their contents render in the correct order.
+
+#### Viewport Handling and Positioning
+
+**Normalized Coordinates:**
+
+Windows work with normalized coordinates relative to the reference resolution (1920x1080). The actual screen position is calculated based on the window's alignment settings:
+
+- **CENTER/CENTER** (default): Window is centered on the screen with normalized coordinates offset from the center
+- **LEFT/TOP**: Window position is relative to top-left corner
+- **RIGHT/BOTTOM**: Window position is relative to bottom-right corner
+
+**Automatic Viewport Adjustments:**
+
+When the viewport is resized or a window is dragged outside visible bounds, the system automatically:
+1. Calculates intersection percentage between window and viewport
+2. If less than 10% of the window is visible, repositions it to be fully visible
+3. Updates both normalized and absolute positions
+
+**Example - Ultra-wide Monitor Support:**
+```java
+// Window centered at reference resolution
+window.setNormalizedPosition(ImmutableCoordI2.create(560, 240)); // Center of 1920x1080
+window.setNormalizedDimension(ImmutableCoordI2.create(800, 600));
+window.setHorizontalAlignment(HorizontalAlignment.CENTER);
+
+// On a 3840x1080 monitor, the window will be centered on the screen
+// with the normalized position offset applied from the screen center
+```
+
+#### ScrollArea Component
+
+The `ScrollArea` component provides scrollable content regions with automatic scrollbar management. It supports any type of rendering object and handles vertical/horizontal scrolling automatically:
+
+```java
+private void setupScrollableContent() {
+    // Configure scroll area dimensions
+    scrollArea.setRelativePosition(ImmutableCoordI2.create(20, 80));
+    scrollArea.setDimension(ImmutableCoordI2.create(760, 500));
+    
+    // Add mixed content types to the scroll area
+    for (int i = 0; i < 20; i++) {
+        int yPos = i * 70;
+        
+        // Labels
+        var label = renderingBoPool.acquire("label" + i, ControlRenderingBo.class)
+            .setType(LabelControl.class)
+            .setCaption("Item " + (i + 1))
+            .withPositionRelative(10, yPos + 5)
+            .withDimensionAbsolute(150, 60);
+        scrollArea.putRenderingBo(label);
+        
+        // Text
+        var text = renderingBoPool.acquire("text" + i, DrawFontRenderingBo.class)
+            .setText(String.valueOf(i))
+            .setSize(28)
+            .withPositionRelative(200, yPos + 20)
+            .withDimensionAbsolute(100, 60)
+            .setLayer(RenderingBoLayer.UI0);
+        scrollArea.putRenderingBo(text);
+        
+        // Buttons
+        var button = renderingBoPool.acquire("button" + i, ControlRenderingBo.class)
+            .setType(ButtonControl.class)
+            .setCaption("Action " + (i + 1))
+            .withPositionRelative(350, yPos + 5)
+            .withDimensionAbsolute(200, 60);
+        scrollArea.putRenderingBo(button);
+        
+        // Images
+        var image = renderingBoPool.acquire("image" + i, DrawImageRenderingBo.class)
+            .setResource(new StaticResource(List.of("gfx"), "icon.png"))
+            .withPositionRelative(600, yPos)
+            .withDimensionAbsolute(64, 64)
+            .setLayer(RenderingBoLayer.UI0);
+        scrollArea.putRenderingBo(image);
+    }
+}
+```
+
+**ScrollArea Features:**
+- Automatic vertical/horizontal scrollbar visibility based on content size
+- Mouse wheel scrolling (scroll wheel up/down adjusts vertical position)
+- Scrollbar width: 20 pixels with 5-pixel margin (total 25 pixels)
+- Visible area clipping for content rendering
+- Scroll position state (`scrollPositionVertical`, `scrollPositionHorizontal` from 0.0 to 1.0)
+
+**Scrollbar Events:**
+
+ScrollArea automatically registers for `UiControlEvent` to handle scrollbar interactions:
+- Vertical scrollbar: Slider control with `customData=false` (vertical orientation)
+- Horizontal scrollbar: Slider control with `customData=true` (horizontal orientation)
+- Slider value changes update scroll position and trigger window redraw
+
+#### Integration with Module System
+
+Windows are `AbstractClientModule` instances and benefit from automatic lifecycle management:
+
+**Automatic Cleanup on Deactivate:**
+- Renderer working set is automatically cleared
+- Event handlers are automatically unregistered
+- Window is removed from the displayed containers list
+- Components receive `onRemovedFromWindow()` callback
+
+**Lifecycle Example:**
+```java
+public class MyWindow extends Window {
+    
+    @Override
+    public void onActivate() {
+        super.onActivate(); // Registers viewport resize handler
+        // Additional activation logic
+    }
+    
+    @Override
+    public void onShow() {
+        super.onShow(); // Adds to displayed containers, calls component callbacks
+        // Setup UI elements
+        this.draw();
+    }
+    
+    @Override
+    public void onHide() {
+        super.onHide(); // Removes from displayed containers
+        // Additional cleanup if needed
+    }
+}
+```
+
+#### Best Practices
+
+**Window Creation and Lifecycle:**
+- Always obtain windows via Spring (`applicationContext.getBean(Window.class)`) to ensure proper dependency injection
+- Create windows in the parent module's `onLoad()` method and store as instance variables
+- Configure window properties (position, dimension, draggable, close button) before activation
+- The parent module manages all window lifecycle transitions via `ModuleService`
+- Use normalized coordinates for position and dimension to support various screen sizes
+- Always unload child windows in the parent module's `onUnload()` method
+
+**Module Lifecycle Pattern:**
+```java
+// onLoad() - Create and configure windows
+// onUnload() - Unload all windows
+// onActivate() - Setup content and activate main window(s)
+// onDeactivate() - Deactivate all windows
+// onShow() - Show main window
+// onHide() - Hide and deactivate child windows
+```
+
+**Content Management:**
+- Use `clearRenderingBos()` before rebuilding window content to avoid stale objects
+- Call `putRenderingBo()` to add or update individual rendering objects
+- Call `removeRenderingBo()` to remove specific objects by ID
+- Create reusable `WindowComponent` implementations for complex, self-contained UI elements
+- Use `ScrollArea` for content that exceeds the window's visible area
+
+**Parent-Child Windows:**
+- Set parent relationship via `childWindow.setParent(parentWindow)` in `onLoad()`
+- Parent module explicitly manages child window activation/display state
+- Typically activate/show child windows in response to user actions (button clicks)
+- Deactivate child windows when parent is hidden or deactivated
+
+**Performance:**
+- Use event-driven rendering for static windows (only redraw on state changes)
+- Avoid calling `draw()` every frame unless content is highly dynamic
+- Leverage the renderer working set model - only modified objects need to be updated
+
+**Z-Index Management:**
+- Let the system handle z-index for draggable windows automatically
+- For non-draggable windows, explicitly set z-index if stacking order matters
+- Use parent-child relationships to group related windows - clicking a child brings its parent chain forward
+
+---
+
 ### Audio System
 
 #### Purpose and Overview
