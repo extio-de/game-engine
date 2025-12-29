@@ -75,4 +75,20 @@ public interface PatternRenderer {
 	 * @param viewPort Viewport size
 	 */
 	void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort);
+
+	/**
+	 * Draws a button background and borders with appropriate styling based on state.
+	 *
+	 * @param g2d             The graphics context
+	 * @param x               X position
+	 * @param y               Y position
+	 * @param width           Width of the button
+	 * @param height          Height of the button
+	 * @param enabled         Whether the button is enabled
+	 * @param state           Button state flags (normal, hovered, pressed, toggled)
+	 * @param backgroundColor Optional background color override (null to use theme defaults)
+	 * @param scaleFactor     UI scale factor
+	 * @param theme           Theme to use for colors
+	 */
+	void drawButton(Graphics2D g2d, int x, int y, int width, int height, boolean enabled, int state, Color backgroundColor, double scaleFactor, Theme theme);
 }

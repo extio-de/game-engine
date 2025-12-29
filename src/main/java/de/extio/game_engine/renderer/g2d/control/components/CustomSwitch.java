@@ -28,59 +28,22 @@ public class CustomSwitch extends CustomAbstractButton {
 		
 		final var g2d = (Graphics2D) g;
 		final Theme theme = this.themeManager.getCurrentTheme();
+		final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
 		
 		final var dimY = this.getHeight() - 1;
 		final var dimX = (int) (dimY * 1.5);
 		
-		float h, s, b;
-		final var baseColor = (this.state & STATE_TOGGLED) == 0 ? theme.getBackgroundNormal() : theme.getBackgroundSelected();
-		h = baseColor.getHue();
-		s = baseColor.getSaturation();
-		b = baseColor.getBrightness();
-		
-		if ((this.state & STATE_PRESSED) != 0) {
-			b += theme.getPressedBrightnessAdjustment();
-		}
-		else if ((this.state & STATE_HOVERED) != 0) {
-			b += theme.getHoverBrightnessAdjustment();
-		}
-		
-		b = Math.max(0.0f, Math.min(1.0f, b));
-		final var bodyColor = Color.getHSBColor(h, s, b);
-		Color border0Color;
-		Color border1Color;
-		
-		if (dimX < 45) {
-			border0Color = this.isEnabled() ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
-			border1Color = bodyColor;
-		}
-		else {
-			border0Color = theme.getBorderOuter().toColor();
-			border1Color = this.isEnabled() ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
-		}
-		
 		if ((this.state & STATE_TOGGLED) == 0) {
-			g2d.setColor(bodyColor);
-			g2d.fillRect(8, 8, (int) (dimX / 1.5) - 12, this.getHeight() - 15);
-			
-			final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
 			if (patternRenderer != null) {
-				patternRenderer.drawDecorativeBorder(g2d, 6, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, 2, border0Color);
-				patternRenderer.drawDecorativeBorder(g2d, 8, 6, (int) (dimX / 1.5) - 10, this.getHeight() - 13, 2, border1Color);
+				patternRenderer.drawButton(g2d, 6, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, this.isEnabled(), this.state, null, this.scaleFactor, theme);
 			}
 		}
 		else {
-			g2d.setColor(bodyColor);
-			g2d.fillRect(dimX - (int) (dimX / 1.5), 8, (int) (dimX / 1.5) - 12, this.getHeight() - 15);
-			
-			final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
 			if (patternRenderer != null) {
-				patternRenderer.drawDecorativeBorder(g2d, dimX - (int) (dimX / 1.5) - 3, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, 2, border0Color);
-				patternRenderer.drawDecorativeBorder(g2d, dimX - (int) (dimX / 1.5) - 1, 6, (int) (dimX / 1.5) - 10, this.getHeight() - 13, 2, border1Color);
+				patternRenderer.drawButton(g2d, dimX - (int) (dimX / 1.5) - 3, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, this.isEnabled(), this.state, null, this.scaleFactor, theme);
 			}
 		}
 		
-		// Text color based on state
 		if ((this.state & STATE_HOVERED) != 0) {
 			g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 		}
@@ -104,7 +67,6 @@ public class CustomSwitch extends CustomAbstractButton {
 		
 		if (this.drawBorder) {
 			final var borderColor1 = (this.state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
-			final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
 			if (patternRenderer != null) {
 				patternRenderer.drawDecorativeBorder(g2d, 0, 0, this.getWidth() - 1, this.getHeight() - 1, 2, borderColor1);
 				

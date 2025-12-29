@@ -145,4 +145,56 @@ public class MetroPatternRenderer implements PatternRenderer {
 			}
 		}
 	}
+
+	@Override
+	public void drawButton(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean enabled, final int state, final Color backgroundColor, final double scaleFactor, final Theme theme) {
+		final int STATE_TOGGLED = 1;
+		final int STATE_PRESSED = 2;
+		final int STATE_HOVERED = 4;
+		
+		float h, s, b;
+		
+		if (backgroundColor == null) {
+			final var baseColor = (state & STATE_TOGGLED) == 0 ? theme.getBackgroundNormal() : theme.getBackgroundSelected();
+			h = baseColor.getHue();
+			s = baseColor.getSaturation();
+			b = baseColor.getBrightness();
+			
+			if ((state & STATE_PRESSED) != 0) {
+				b += theme.getPressedBrightnessAdjustment();
+			}
+			else if ((state & STATE_HOVERED) != 0) {
+				b += theme.getHoverBrightnessAdjustment();
+			}
+		}
+		else {
+			final var hsb = new float[3];
+			Color.RGBtoHSB(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), hsb);
+			h = hsb[0];
+			s = hsb[1];
+			
+			if ((state & STATE_TOGGLED) == 0) {
+				b = 0.30F;
+			}
+			else {
+				b = 0.50F;
+			}
+			if ((state & STATE_PRESSED) != 0) {
+				b += theme.getPressedBrightnessAdjustment();
+			}
+			else if ((state & STATE_HOVERED) != 0) {
+				b += theme.getHoverBrightnessAdjustment();
+			}
+		}
+		
+		b = Math.max(0.0f, Math.min(1.0f, b));
+		final var bgColor = Color.getHSBColor(h, s, b);
+		g2d.setColor(bgColor);
+		g2d.fillRect(x, y, width, height);
+		
+		final var borderStrength = Math.max(1, (int) (2 * scaleFactor));
+		final var borderColor = (state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : 
+				enabled ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
+		this.drawDecorativeBordersMain(g2d, x, y, width, height, borderStrength, width >= 48 && height >= 48, borderColor);
+	}
 }

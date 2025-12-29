@@ -27,50 +27,13 @@ public class CustomButton extends CustomAbstractButton {
 		
 		final var g2d = (Graphics2D) g;
 		final Theme theme = this.themeManager.getCurrentTheme();
+		final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
 		
-		float h, s, b;
+		if (patternRenderer != null) {
+			patternRenderer.drawButton(g2d, 0, 0, this.getWidth(), this.getHeight(), this.isEnabled(), this.state, this.backgroundColor, this.scaleFactor, theme);
+		}
 		
-		final var borderStrength = (this.getWidth() < 48 || this.getHeight() < 48) ? 1 : 2;
 		final var bgrStrength = (this.getWidth() < 48 || this.getHeight() < 48) ? 0 : 2;
-		
-		if (this.backgroundColor == null) {
-			// Use theme colors
-			final var baseColor = (this.state & STATE_TOGGLED) == 0 ? theme.getBackgroundNormal() : theme.getBackgroundSelected();
-			h = baseColor.getHue();
-			s = baseColor.getSaturation();
-			b = baseColor.getBrightness();
-			
-			if ((this.state & STATE_PRESSED) != 0) {
-				b += theme.getPressedBrightnessAdjustment();
-			}
-			else if ((this.state & STATE_HOVERED) != 0) {
-				b += theme.getHoverBrightnessAdjustment();
-			}
-		}
-		else {
-			// Use custom background color
-			final var hsb = new float[3];
-			Color.RGBtoHSB(this.backgroundColor.getRed(), this.backgroundColor.getGreen(), this.backgroundColor.getBlue(), hsb);
-			h = hsb[0];
-			s = hsb[1];
-			
-			if ((this.state & STATE_TOGGLED) == 0) {
-				b = 0.30F;
-			}
-			else {
-				b = 0.50F;
-			}
-			if ((this.state & STATE_PRESSED) != 0) {
-				b += theme.getPressedBrightnessAdjustment();
-			}
-			else if ((this.state & STATE_HOVERED) != 0) {
-				b += theme.getHoverBrightnessAdjustment();
-			}
-		}
-		
-		b = Math.max(0.0f, Math.min(1.0f, b));
-		g2d.setColor(Color.getHSBColor(h, s, b));
-		g2d.fillRect(2 + bgrStrength, 2 + bgrStrength, this.getWidth() - 5 - bgrStrength * 2, this.getHeight() - 5 - bgrStrength * 2);
 		
 		if (this.iconResource != null && (this.icon == null || !this.iconResource.equals(this.loadedIconResource))) {
 			this.loadIcon();
@@ -79,7 +42,6 @@ public class CustomButton extends CustomAbstractButton {
 			g2d.drawImage(this.icon, 4 + bgrStrength, 4 + bgrStrength, this.getWidth() - 4 - bgrStrength, this.getHeight() - 4 - bgrStrength, 0, 0, this.icon.getWidth(), this.icon.getHeight(), null);
 		}
 		else if (this.caption != null) {
-			// Text color based on state
 			if ((this.state & STATE_HOVERED) != 0) {
 				g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 			}
@@ -100,18 +62,6 @@ public class CustomButton extends CustomAbstractButton {
 					(int) ((this.getHeight() - (textDim.getY())) / 2 / this.scaleFactor),
 					this.fontSize,
 					this.caption);
-		}
-		
-		// Draw borders using theme colors and pattern renderer
-		var borderColor = (this.state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
-		final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
-		if (patternRenderer != null) {
-			patternRenderer.drawDecorativeBorder(g2d, 0, 0, this.getWidth() - 1, this.getHeight() - 1, borderStrength, borderColor);
-			
-			borderColor = this.isEnabled() ? 
-					(this.state & STATE_HOVERED) != 0 ? theme.getSelectionSecondary().toColor() : theme.getBorderInner().toColor() : 
-					theme.getBorderInnerDisabled().toColor();
-			patternRenderer.drawDecorativeBorder(g2d, borderStrength, borderStrength, this.getWidth() - 1 - 2 * borderStrength, this.getHeight() - 1 - 2 * borderStrength, borderStrength, borderColor);
 		}
 	}
 	
