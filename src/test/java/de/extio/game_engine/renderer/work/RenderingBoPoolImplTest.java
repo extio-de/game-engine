@@ -17,7 +17,6 @@ import org.junit.jupiter.api.Test;
 
 import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.model.RenderingBo;
-import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 public class RenderingBoPoolImplTest {
@@ -349,7 +348,7 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
-		public RenderingBo setZIndex(short zIndex) {
+		public RenderingBo setZIndex(final short zIndex) {
 			return this;
 		}
 
@@ -508,7 +507,7 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
-		public RenderingBo setZIndex(short zIndex) {
+		public RenderingBo setZIndex(final short zIndex) {
 			return this;
 		}
 		
