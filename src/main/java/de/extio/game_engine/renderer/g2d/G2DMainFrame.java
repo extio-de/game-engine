@@ -521,7 +521,12 @@ public class G2DMainFrame extends Frame {
 				COMPONENT_Z_ORDER_PAIRS.sort((a, b) -> Integer.compare(b.effectiveLayer, a.effectiveLayer));
 				
 				for (int i = 0; i < COMPONENT_Z_ORDER_PAIRS.size(); i++) {
-					this.setComponentZOrder(COMPONENT_Z_ORDER_PAIRS.get(i).component, i);
+					try {
+						this.setComponentZOrder(COMPONENT_Z_ORDER_PAIRS.get(i).component, i);
+					}
+					catch (final IllegalArgumentException e) {
+						LOGGER.warn("Failed to set component z-order: {}", e.getMessage());
+					}
 				}
 			}
 			finally {
