@@ -664,7 +664,6 @@ public class MyModule extends AbstractClientModule {
     
     private void showChildWindow() {
         // Setup child window content
-        this.childWindow.clearRenderingBos();
         var button = renderingBoPool.acquire("okButton", ControlRenderingBo.class)
             .setType(ButtonControl.class)
             .setCaption("OK")
@@ -691,13 +690,10 @@ public class MyModule extends AbstractClientModule {
 
 **Direct Rendering Objects**
 
-Windows maintain their own renderer working set. Add rendering objects directly using `putRenderingBo()`. Use `clearRenderingBos()` to reset window content before rebuilding:
+Windows maintain their own renderer working set. Add rendering objects directly using `putRenderingBo()`:
 
 ```java
 private void setupWindow(Window window) {
-    // Clear previous content
-    window.clearRenderingBos();
-    
     // Add new rendering objects
     var label = renderingBoPool.acquire("myLabel", ControlRenderingBo.class)
         .setType(LabelControl.class)
@@ -745,9 +741,6 @@ public class MyModule extends AbstractClientModule {
     }
     
     private void setupScrollableWindow() {
-        // Clear and setup window title
-        this.scrollableWindow.clearRenderingBos();
-        
         var title = renderingBoPool.acquire("title", DrawFontRenderingBo.class)
             .setText("Scrollable Content")
             .setSize(28)
@@ -965,7 +958,6 @@ public class MyWindow extends Window {
 ```
 
 **Content Management:**
-- Use `clearRenderingBos()` before rebuilding window content to avoid stale objects
 - Call `putRenderingBo()` to add or update individual rendering objects
 - Call `removeRenderingBo()` to remove specific objects by ID
 - Create reusable `WindowComponent` implementations for complex, self-contained UI elements

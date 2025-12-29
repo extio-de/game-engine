@@ -324,8 +324,6 @@ public class DemoModule extends AbstractClientModule {
 	}
 	
 	private void setupSecondaryWindow() {
-		this.secondaryWindow.clearRenderingBos();
-		
 		var bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Text", DrawFontRenderingBo.class)
 				.setText(this.localizationService.translate("test-5").replace("\\n", "\n"))
 				.setSize(32)
@@ -345,7 +343,6 @@ public class DemoModule extends AbstractClientModule {
 	}
 	
 	private void setupThemeSelectionWindow() {
-		this.themeSelectionWindow.clearRenderingBos();
 		this.themeSelectionByControlId.clear();
 		
 		final var themes = this.themeManager.getAvailableThemeNames();
@@ -407,7 +404,6 @@ public class DemoModule extends AbstractClientModule {
 	}
 	
 	private void setupLanguageSelectionWindow() {
-		this.languageSelectionWindow.clearRenderingBos();
 		this.languageSelectionByControlId.clear();
 		
 		final var languages = this.localizationService.getLanguages();
@@ -471,8 +467,6 @@ public class DemoModule extends AbstractClientModule {
 	}
 	
 	private void setupScrollAreaWindow() {
-		this.scrollAreaWindow.clearRenderingBos();
-		
 		var bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Title", DrawFontRenderingBo.class)
 				.setText(this.localizationService.translate("test-8"))
 				.setSize(28)
