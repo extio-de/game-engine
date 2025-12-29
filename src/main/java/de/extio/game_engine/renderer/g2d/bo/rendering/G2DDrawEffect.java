@@ -3,6 +3,7 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 import java.awt.Color;
 import java.awt.Frame;
 import java.awt.Graphics2D;
+import java.awt.Shape;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -58,191 +59,264 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 			}
 		}
 		
-		switch (this.effect) {
-			case LINE: {
-				if (coordinates == null || coordinates.isEmpty()) {
-					break;
+		Shape oldClip = null;
+		Area2 intersection = null;
+		if (visibleAreaX != 0 || visibleAreaY != 0 || visibleAreaWidth != 0 || visibleAreaHeight != 0) {
+			int minX = x0;
+			int minY = y0;
+			int maxX = x0;
+			int maxY = y0;
+			if (coordinates != null && !coordinates.isEmpty()) {
+				for (final CoordI2 c : coordinates) {
+					final int px = x0 + c.getX();
+					final int py = y0 + c.getY();
+					minX = Math.min(minX, px);
+					minY = Math.min(minY, py);
+					maxX = Math.max(maxX, px);
+					maxY = Math.max(maxY, py);
 				}
-				final var x1 = x0 + coordinates.get(0).getX();
-				final var y1 = y0 + coordinates.get(0).getY();
-				
-				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
-				if (this.cull(area)) {
-					break;
-				}
-				
-				graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
-				graphics.drawLine(x0, y0, x1, y1);
-				
-				break;
+			}
+			if (this.width > 0) {
+				maxX = Math.max(maxX, x0 + this.width);
+			}
+			if (this.height > 0) {
+				maxY = Math.max(maxY, y0 + this.height);
 			}
 			
-			case RECT:
-			case RECT_FILLED: {
-				if (coordinates == null || coordinates.isEmpty()) {
+			switch (this.effect) {
+				case CIRCLE:
+				case CIRCLE_FILLED: {
+					final int diameter = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
+					maxX = Math.max(maxX, x0 + diameter);
+					maxY = Math.max(maxY, y0 + diameter);
 					break;
 				}
-				final var x1 = x0 + coordinates.get(0).getX();
-				final var y1 = y0 + coordinates.get(0).getY();
-				
-				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
-				if (this.cull(area)) {
+				case CIRCLE_CENTERED:
+				case CIRCLE_CENTERED_FILLED: {
+					final int radius = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
+					minX = Math.min(minX, x0 - radius);
+					minY = Math.min(minY, y0 - radius);
+					maxX = Math.max(maxX, x0 + radius);
+					maxY = Math.max(maxY, y0 + radius);
 					break;
 				}
-				
-				graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
-				if (this.effect == DrawEffectRenderingBoEffects.RECT) {
-					graphics.drawRect(area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY());
-				}
-				else {
-					graphics.fillRect(area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY());
-				}
-				
-				break;
-			}
-			
-			case CIRCLE:
-			case CIRCLE_FILLED: {
-				final var diameter = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
-				
-				final var area = new Area2(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(diameter, diameter));
-				if (this.cull(area)) {
-					break;
-				}
-				
-				graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
-				if (this.effect == DrawEffectRenderingBoEffects.CIRCLE) {
-					graphics.drawOval(x0, y0, diameter, diameter);
-				}
-				else {
-					graphics.fillOval(x0, y0, diameter, diameter);
-				}
-				
-				break;
-			}
-			
-			case CIRCLE_CENTERED:
-			case CIRCLE_CENTERED_FILLED: {
-				final var radius = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
-				
-				final var area = new Area2(ImmutableCoordI2.create(x0, y0).substract(radius), ImmutableCoordI2.zero().add(radius * 2));
-				if (this.cull(area)) {
-					break;
-				}
-				
-				graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
-				if (this.effect == DrawEffectRenderingBoEffects.CIRCLE_CENTERED) {
-					graphics.drawOval(x0 - radius, y0 - radius, radius * 2, radius * 2);
-				}
-				else {
-					graphics.fillOval(x0 - radius, y0 - radius, radius * 2, radius * 2);
-				}
-				
-				break;
-			}
-			
-			case ARROW: {
-				if (coordinates == null || coordinates.isEmpty()) {
-					break;
-				}
-				final var x1 = x0 + coordinates.get(0).getX();
-				final var y1 = y0 + coordinates.get(0).getY();
-				
-				final double width = Math.max(1, Math.max(Math.abs(x0 - x1), Math.abs(y0 - y1)) / 5);
-				final var height = width;
-				final var dx = x1 - x0;
-				final var dy = y1 - y0;
-				final var D = Math.max(1.0, Math.sqrt(Math.pow(dx, 2.0) + Math.pow(dy, 2.0)));
-				var xm = D - width;
-				var xn = xm;
-				var ym = height;
-				var yn = -height;
-				double x;
-				final var sin = dy / D;
-				final var cos = dx / D;
-				
-				x = xm * cos - ym * sin + x0;
-				ym = xm * sin + ym * cos + y0;
-				xm = x;
-				
-				x = xn * cos - yn * sin + x0;
-				yn = xn * sin + yn * cos + y0;
-				xn = x;
-				
-				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create((int) xm, (int) ym), ImmutableCoordI2.create((int) xn, (int) yn));
-				if (this.cull(area)) {
-					break;
-				}
-				
-				graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
-				graphics.drawLine(x0, y0, x1, y1);
-				graphics.drawLine(x1, y1, (int) xm, (int) ym);
-				graphics.drawLine(x1, y1, (int) xn, (int) yn);
-				
-				break;
-			}
-			
-			case CONE: {
-				if (coordinates == null || coordinates.size() < 2) {
-					break;
-				}
-				final var x1 = x0 + coordinates.get(0).getX();
-				final var y1 = y0 + coordinates.get(0).getY();
-				final var x2 = x0 + coordinates.get(1).getX();
-				final var y2 = y0 + coordinates.get(1).getY();
-				
-				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create(x2, y2));
-				if (this.cull(area)) {
-					break;
-				}
-				
-				graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
-				graphics.drawLine(x0, y0, x1, y1);
-				graphics.drawLine(x0, y0, x2, y2);
-				
-				break;
-			}
-			
-			case DECORATIVE_BORDER:
-			case DECORATIVE_BORDER_FILLED: {
-				if (coordinates == null || coordinates.isEmpty()) {
-					break;
-				}
-				final var x1 = x0 + coordinates.get(0).getX();
-				final var y1 = y0 + coordinates.get(0).getY();
-				
-				final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
-				if (this.cull(area)) {
-					break;
-				}
-
-				final var themeManager = (G2DThemeManager) this.rendererData.getThemeManager();
-				final var theme = themeManager.getCurrentTheme();
-				final PatternRenderer patternRenderer = themeManager.getPatternRenderer(theme.getPatternRendererName());
-				final var strength = this.customInt0 <= 0 ? 2 : this.customInt0;
-				final var effectColor = this.color == null ? theme.getBorderOuter().toColor() : this.color.toAwtColor();
-				if (patternRenderer != null) {
-					if (this.effect == DrawEffectRenderingBoEffects.DECORATIVE_BORDER) {
-						patternRenderer.drawDecorativeBorder(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor);
-					} else {
-						patternRenderer.drawDecorativeBorderFilled(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor, theme.getWindowBackground().toColor());
+				case TEXT: {
+					if (this.customString0 != null && !this.customString0.isEmpty()) {
+						final var td = G2DDrawFont.getTextDimensions(this.customString0, graphics, (int) (this.customInt0), scaleFactor);
+						maxX = Math.max(maxX, x0 + td.getX());
+						maxY = Math.max(maxY, y0 + td.getY());
 					}
-				}
-				
-				break;
-			}
-			
-			case TEXT: {
-				if (this.customString0 == null || this.customString0.isEmpty()) {
 					break;
 				}
-				graphics.setColor(this.color.toAwtColor());
-				G2DDrawFont.renderText(graphics, 1.0, x0, y0, (int) (this.customInt0 * scaleFactor), this.customString0);
-				break;
+				default:
+					break;
 			}
 			
-			default:
-				throw new UnsupportedOperationException("Effect not implemented: " + this.effect.toString());
+			final int blockX = minX;
+			final int blockY = minY;
+			final int blockW = Math.max(1, maxX - minX);
+			final int blockH = Math.max(1, maxY - minY);
+			final var controlArea = new Area2(ImmutableCoordI2.create(blockX, blockY), ImmutableCoordI2.create(blockW, blockH));
+			final var visibleArea = new Area2(ImmutableCoordI2.create((int) (this.visibleAreaX * scaleFactor), (int) (this.visibleAreaY * scaleFactor)), ImmutableCoordI2.create((int) (this.visibleAreaWidth * scaleFactor), (int) (this.visibleAreaHeight * scaleFactor)));
+			intersection = SpatialUtils2.intersectAreas(controlArea, visibleArea);
+			if (intersection == null) {
+				return;
+			}
+			oldClip = graphics.getClip();
+			graphics.setClip(intersection.getPosition().getX(), intersection.getPosition().getY(), intersection.getDimension().getX(), intersection.getDimension().getY());
+		}
+		
+		try {
+			switch (this.effect) {
+				case LINE: {
+					if (coordinates == null || coordinates.isEmpty()) {
+						break;
+					}
+					final var x1 = x0 + coordinates.get(0).getX();
+					final var y1 = y0 + coordinates.get(0).getY();
+					
+					final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+					if (this.cull(area)) {
+						break;
+					}
+					
+					graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
+					graphics.drawLine(x0, y0, x1, y1);
+					
+					break;
+				}
+				
+				case RECT:
+				case RECT_FILLED: {
+					if (coordinates == null || coordinates.isEmpty()) {
+						break;
+					}
+					final var x1 = x0 + coordinates.get(0).getX();
+					final var y1 = y0 + coordinates.get(0).getY();
+					
+					final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+					if (this.cull(area)) {
+						break;
+					}
+					
+					graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
+					if (this.effect == DrawEffectRenderingBoEffects.RECT) {
+						graphics.drawRect(area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY());
+					}
+					else {
+						graphics.fillRect(area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY());
+					}
+					
+					break;
+				}
+				
+				case CIRCLE:
+				case CIRCLE_FILLED: {
+					final var diameter = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
+					
+					final var area = new Area2(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(diameter, diameter));
+					if (this.cull(area)) {
+						break;
+					}
+					
+					graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
+					if (this.effect == DrawEffectRenderingBoEffects.CIRCLE) {
+						graphics.drawOval(x0, y0, diameter, diameter);
+					}
+					else {
+						graphics.fillOval(x0, y0, diameter, diameter);
+					}
+					
+					break;
+				}
+				
+				case CIRCLE_CENTERED:
+				case CIRCLE_CENTERED_FILLED: {
+					final var radius = Math.max(3, (int) Math.round(this.customInt0 * scaleFactor));
+					
+					final var area = new Area2(ImmutableCoordI2.create(x0, y0).substract(radius), ImmutableCoordI2.zero().add(radius * 2));
+					if (this.cull(area)) {
+						break;
+					}
+					
+					graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
+					if (this.effect == DrawEffectRenderingBoEffects.CIRCLE_CENTERED) {
+						graphics.drawOval(x0 - radius, y0 - radius, radius * 2, radius * 2);
+					}
+					else {
+						graphics.fillOval(x0 - radius, y0 - radius, radius * 2, radius * 2);
+					}
+					
+					break;
+				}
+				
+				case ARROW: {
+					if (coordinates == null || coordinates.isEmpty()) {
+						break;
+					}
+					final var x1 = x0 + coordinates.get(0).getX();
+					final var y1 = y0 + coordinates.get(0).getY();
+					
+					final double width = Math.max(1, Math.max(Math.abs(x0 - x1), Math.abs(y0 - y1)) / 5);
+					final var height = width;
+					final var dx = x1 - x0;
+					final var dy = y1 - y0;
+					final var D = Math.max(1.0, Math.sqrt(Math.pow(dx, 2.0) + Math.pow(dy, 2.0)));
+					var xm = D - width;
+					var xn = xm;
+					var ym = height;
+					var yn = -height;
+					double x;
+					final var sin = dy / D;
+					final var cos = dx / D;
+					
+					x = xm * cos - ym * sin + x0;
+					ym = xm * sin + ym * cos + y0;
+					xm = x;
+					
+					x = xn * cos - yn * sin + x0;
+					yn = xn * sin + yn * cos + y0;
+					xn = x;
+					
+					final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create((int) xm, (int) ym), ImmutableCoordI2.create((int) xn, (int) yn));
+					if (this.cull(area)) {
+						break;
+					}
+					
+					graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
+					graphics.drawLine(x0, y0, x1, y1);
+					graphics.drawLine(x1, y1, (int) xm, (int) ym);
+					graphics.drawLine(x1, y1, (int) xn, (int) yn);
+					
+					break;
+				}
+				
+				case CONE: {
+					if (coordinates == null || coordinates.size() < 2) {
+						break;
+					}
+					final var x1 = x0 + coordinates.get(0).getX();
+					final var y1 = y0 + coordinates.get(0).getY();
+					final var x2 = x0 + coordinates.get(1).getX();
+					final var y2 = y0 + coordinates.get(1).getY();
+					
+					final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1), ImmutableCoordI2.create(x2, y2));
+					if (this.cull(area)) {
+						break;
+					}
+					
+					graphics.setColor(this.color == null ? Color.WHITE : this.color.toAwtColor());
+					graphics.drawLine(x0, y0, x1, y1);
+					graphics.drawLine(x0, y0, x2, y2);
+					
+					break;
+				}
+				
+				case DECORATIVE_BORDER:
+				case DECORATIVE_BORDER_FILLED: {
+					if (coordinates == null || coordinates.isEmpty()) {
+						break;
+					}
+					final var x1 = x0 + coordinates.get(0).getX();
+					final var y1 = y0 + coordinates.get(0).getY();
+					
+					final var area = SpatialUtils2.pointsToArea(ImmutableCoordI2.create(x0, y0), ImmutableCoordI2.create(x1, y1));
+					if (this.cull(area)) {
+						break;
+					}
+					
+					final var themeManager = (G2DThemeManager) this.rendererData.getThemeManager();
+					final var theme = themeManager.getCurrentTheme();
+					final PatternRenderer patternRenderer = themeManager.getPatternRenderer(theme.getPatternRendererName());
+					final var strength = this.customInt0 <= 0 ? 2 : this.customInt0;
+					final var effectColor = this.color == null ? theme.getBorderInner().toColor() : this.color.toAwtColor();
+					if (patternRenderer != null) {
+						if (this.effect == DrawEffectRenderingBoEffects.DECORATIVE_BORDER) {
+							patternRenderer.drawDecorativeBorder(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor);
+						}
+						else {
+							patternRenderer.drawDecorativeBorderFilled(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor, theme.getWindowBackground().toColor());
+						}
+					}
+					
+					break;
+				}
+				
+				case TEXT: {
+					if (this.customString0 == null || this.customString0.isEmpty()) {
+						break;
+					}
+					graphics.setColor(this.color.toAwtColor());
+					G2DDrawFont.renderText(graphics, 1.0, x0, y0, (int) (this.customInt0 * scaleFactor), this.customString0);
+					break;
+				}
+				
+				default:
+					throw new UnsupportedOperationException("Effect not implemented: " + this.effect.toString());
+			}
+		}
+		finally {
+			graphics.setClip(oldClip);
 		}
 	}
 	
@@ -261,16 +335,17 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 		this.customDouble0 = 0.0;
 		this.customString0 = null;
 	}
-
+	
 	@Override
 	public void apply(final RenderingBo other) {
 		super.apply(other);
-
+		
 		if (other instanceof final G2DDrawEffect o) {
 			this.effect = o.effect;
 			if (o.relativeCoordinates != null) {
 				this.relativeCoordinates = List.copyOf(o.relativeCoordinates);
-			} else {
+			}
+			else {
 				this.relativeCoordinates = null;
 			}
 			this.customInt0 = o.customInt0;
