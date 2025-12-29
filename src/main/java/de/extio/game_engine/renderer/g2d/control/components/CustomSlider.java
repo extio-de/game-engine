@@ -206,53 +206,57 @@ public class CustomSlider extends Component {
 		// Main line
 		if (this.horizontal) {
 			this.drawLine(g2d, h, s, b, 0, this.getHeight() / 2, this.getWidth(), this.getHeight() / 2, this.horizontal);
-			// Small lines
-			b -= 0.20F;
-			final var length = this.horizontal ? this.getWidth() : this.getHeight();
-			for (var i = 1; i < 10; i++) {
-				final var pos = (int) ((double) length / 10.0 * i);
-				if (this.horizontal) {
-					this.drawLine(g2d, h, s, b, pos, this.getHeight() / 4, pos, this.getHeight() / 4 * 3, !this.horizontal);
-				}
-				else {
-					this.drawLine(g2d, h, s, b, this.getWidth() / 4, pos, this.getWidth() / 4 * 3, pos, !this.horizontal);
-				}
-			}
-			b += 0.20F;
-			
-			// Pointer
-			if ((this.state & STATE_HOVERED) != 0 && this.lastMousePosition != null) {
-				try {
-					if (this.horizontal) {
-						this.drawLine(g2d, h, s, b, this.lastMousePosition.getX(), 0, this.lastMousePosition.getX(), this.getHeight(), !this.horizontal);
-					}
-					else {
-						this.drawLine(g2d, h, s, b, 0, this.lastMousePosition.getY(), this.getWidth(), this.lastMousePosition.getY(), !this.horizontal);
-					}
-				}
-				catch (final NullPointerException exc) {
-					// AWT MouseAdapter can set this.lastMousePosition null at any time 
-				}
-			}
-			
-			// Value2
-			if (this.value2 != this.value) {
-				if (this.horizontal) {
-					this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value2), 0, (int) (this.getWidth() * this.value2), this.getHeight(), !this.horizontal);
-				}
-				else {
-					this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value2)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value2)), !this.horizontal);
-				}
-			}
-			
-			// Value
-			b += 0.15F;
+		}
+		else {
+			this.drawLine(g2d, h, s, b, this.getWidth() / 2, 0, this.getWidth() / 2, this.getHeight(), this.horizontal);
+		}
+		
+		// Small lines
+		b -= 0.20F;
+		final int length = this.horizontal ? this.getWidth() : this.getHeight();
+		for (int i = 1; i < 10; i++) {
+			final int pos = (int) ((double) length / 10.0 * i);
 			if (this.horizontal) {
-				this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value), 0, (int) (this.getWidth() * this.value), this.getHeight(), !this.horizontal);
+				this.drawLine(g2d, h, s, b, pos, this.getHeight() / 4, pos, this.getHeight() / 4 * 3, !this.horizontal);
 			}
 			else {
-				this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value)), !this.horizontal);
+				this.drawLine(g2d, h, s, b, this.getWidth() / 4, pos, this.getWidth() / 4 * 3, pos, !this.horizontal);
 			}
+		}
+		b += 0.20F;
+		
+		// Pointer
+		if ((this.state & STATE_HOVERED) != 0 && this.lastMousePosition != null) {
+			try {
+				if (this.horizontal) {
+					this.drawLine(g2d, h, s, b, this.lastMousePosition.getX(), 0, this.lastMousePosition.getX(), this.getHeight(), !this.horizontal);
+				}
+				else {
+					this.drawLine(g2d, h, s, b, 0, this.lastMousePosition.getY(), this.getWidth(), this.lastMousePosition.getY(), !this.horizontal);
+				}
+			}
+			catch (final NullPointerException exc) {
+				// AWT MouseAdapter can set this.lastMousePosition null at any time 
+			}
+		}
+		
+		// Value2
+		if (this.value2 != this.value) {
+			if (this.horizontal) {
+				this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value2), 0, (int) (this.getWidth() * this.value2), this.getHeight(), !this.horizontal);
+			}
+			else {
+				this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value2)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value2)), !this.horizontal);
+			}
+		}
+		
+		// Value
+		b += 0.15F;
+		if (this.horizontal) {
+			this.drawLine(g2d, h, s, b, (int) (this.getWidth() * this.value), 0, (int) (this.getWidth() * this.value), this.getHeight(), !this.horizontal);
+		}
+		else {
+			this.drawLine(g2d, h, s, b, 0, (int) (this.getHeight() * (1.0 - this.value)), this.getWidth(), (int) (this.getHeight() * (1.0 - this.value)), !this.horizontal);
 		}
 	}
 	
