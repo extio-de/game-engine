@@ -12,7 +12,7 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	protected final static Logger LOGGER = LoggerFactory.getLogger(AbstractRenderingBo.class);
 	
 	protected String id;
-
+	
 	protected RendererData rendererData;
 	
 	protected RgbaColor color;
@@ -28,14 +28,14 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	protected int width;
 	
 	protected int height;
-
+	
 	protected int visibleAreaX;
-
+	
 	protected int visibleAreaY;
-
+	
 	protected int visibleAreaWidth;
-
-	protected int visibleAreaHeight;	
+	
+	protected int visibleAreaHeight;
 	
 	protected short layer;
 	
@@ -47,17 +47,17 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		this.layer = layer;
 		this.defaultLayer = layer;
 	}
-
+	
 	@Override
 	public void setId(final String id) {
 		this.id = id;
 	}
-
+	
 	@Override
 	public String getId() {
 		return this.id;
 	}
-
+	
 	@Override
 	public RenderingBo withPositionRelative(final int x, final int y) {
 		this.localX = x;
@@ -222,13 +222,14 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		
 		return (RenderingBoHasDimension) this;
 	}
-
-	public RenderingBoHasDimension withVisibleArea(final int x, final int y, final int width, final int height) {
+	
+	@Override
+	public RenderingBo withVisibleArea(final int x, final int y, final int width, final int height) {
 		this.visibleAreaX = x;
 		this.visibleAreaY = y;
 		this.visibleAreaWidth = width;
 		this.visibleAreaHeight = height;
-		return (RenderingBoHasDimension) this;
+		return this;
 	}
 	
 	@Override
@@ -248,7 +249,7 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		this.visibleAreaWidth = 0;
 		this.visibleAreaHeight = 0;
 	}
-
+	
 	@Override
 	public void apply(final RenderingBo other) {
 		if (other instanceof final AbstractRenderingBo abstractRenderingBo) {
