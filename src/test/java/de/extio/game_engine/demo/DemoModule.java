@@ -490,14 +490,14 @@ public class DemoModule extends AbstractClientModule {
 					.setCustomData2(HorizontalAlignment.LEFT)
 					.setVisible(true)
 					.setEnabled(true)
-					.withDimensionAbsolute(150, 60)
+					.withDimensionAbsolute(100, 60)
 					.withPositionRelative(1, y + 2);
 			this.scrollArea.putRenderingBo(bo);
 			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Text_" + i, DrawFontRenderingBo.class)
 					.setText(String.valueOf(i))
 					.setSize(28)
-					.setAlignment(HorizontalAlignment.CENTER)
+					.setAlignment(HorizontalAlignment.RIGHT)
 					.withDimensionAbsolute(50, 60)
 					.setLayer(RenderingBoLayer.UI0)
 					.withPositionRelative(100, y + 22);

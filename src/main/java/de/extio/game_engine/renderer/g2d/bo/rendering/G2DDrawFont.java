@@ -22,6 +22,7 @@ import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
+import de.extio.game_engine.spatial2.model.MutableCoordD2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
 @Conditional(G2DRendererCondition.class)
@@ -122,20 +123,20 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 				final var line = lines[i];
 				final var yOffset = this.y + i * lineHeight;
 				
+				final var textDimScaled = ImmutableCoordI2.create((int)(lineDims[i].getX() * scaleFactor), (int)(lineDims[i].getY() * scaleFactor));
 				switch (this.alignment) {
-					case LEFT:
-						renderSingleLine(graphics, null, scaleFactor, this.x, yOffset, this.size, line);
+					case LEFT: {
+						renderSingleLine(graphics, textDimScaled, scaleFactor, this.x, yOffset, this.size, line);
 						break;
+					}
 					
 					case CENTER: {
-						final var textDim = lineDims[i];
-						renderSingleLine(graphics, textDim, scaleFactor, (this.width - textDim.getX()) / 2 + this.x, yOffset, this.size, line);
+						renderSingleLine(graphics, textDimScaled, scaleFactor, (this.width - lineDims[i].getX()) / 2 + this.x, yOffset, this.size, line);
 						break;
 					}
 					
 					case RIGHT: {
-						final var textDim = lineDims[i];
-						renderSingleLine(graphics, textDim, scaleFactor, this.width - textDim.getX() + this.x, yOffset, this.size, line);
+						renderSingleLine(graphics, textDimScaled, scaleFactor, this.width - lineDims[i].getX() + this.x, yOffset, this.size, line);
 						break;
 					}
 					
