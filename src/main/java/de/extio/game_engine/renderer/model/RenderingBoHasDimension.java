@@ -14,7 +14,7 @@ public interface RenderingBoHasDimension extends RenderingBo {
 	RenderingBoHasDimension withDimensionAbsolute(HasPosition2 dim);
 	
 	RenderingBoHasDimension withDimensionAbsolute(int width, int height);
-	
+
 	/**
 	 * @param width Range 0.0 (No width) to 1.0 (Viewport width)
 	 * @param height Range 0.0 (No height) to 1.0 (Viewport height)
@@ -26,4 +26,6 @@ public interface RenderingBoHasDimension extends RenderingBo {
 	RenderingBoHasDimension withDimensionIncrementalAbsolute(int width, int height);
 	
 	RenderingBoHasDimension withDimensionIncrementalPercentual(double width, double height);
+
+	RenderingBoHasDimension withVisibleArea(int x, int y, int width, int height);
 }

@@ -20,6 +20,9 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.spatial2.SpatialUtils2;
+import de.extio.game_engine.spatial2.model.Area2;
+import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 @Conditional(G2DRendererCondition.class)
 @Component
@@ -172,7 +175,8 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 	}
 	
 	private void doDraw(final Graphics2D graphics, final CachedImage cachedImage, final double scaleFactor) {
-		int x, y;
+		int x, y, w, h;
+		final int visX, visY, visW, visH;
 		if (this.scaledX != 0 || this.scaledY != 0) {
 			x = this.scaledX;
 			y = this.scaledY;
@@ -181,12 +185,48 @@ public class G2DDrawImage extends G2DAbstractRenderingBo implements DrawImageRen
 			x = (int) (this.x * scaleFactor);
 			y = (int) (this.y * scaleFactor);
 		}
-		
-		if (this.width == 0 && this.height == 0) {
+		w = (int) ((this.width > 0 ? this.width : cachedImage.getImage().getWidth()) * scaleFactor);
+		h = (int) ((this.height > 0 ? this.height : cachedImage.getImage().getHeight()) * scaleFactor);
+		visX = (int) (this.visibleAreaX * scaleFactor);
+		visY = (int) (this.visibleAreaY * scaleFactor);
+		visW = (int) (this.visibleAreaWidth * scaleFactor);
+		visH = (int) (this.visibleAreaHeight * scaleFactor);
+	
+		Area2 intersection = null;
+		if (visX != 0 || visY != 0 || visW != 0 || visH != 0) {
+			final var controlArea = new Area2(ImmutableCoordI2.create(x, y), ImmutableCoordI2.create(w, h));
+			final var visibleArea = new Area2(ImmutableCoordI2.create(visX, visY), ImmutableCoordI2.create(visW, visH));
+			intersection = SpatialUtils2.intersectAreas(controlArea, visibleArea);
+			if (intersection == null) {
+				return;
+			}
+		}
+
+		if (intersection != null) {
+			try {
+				final double dstPerSrcX = (double) w / (double) cachedImage.getImage().getWidth();
+				final double dstPerSrcY = (double) h / (double) cachedImage.getImage().getHeight();
+				graphics.drawImage(
+					cachedImage.getImage(),
+					intersection.getPosition().getX(),
+					intersection.getPosition().getY(),
+					intersection.getPosition().getX() + intersection.getDimension().getX(),
+					intersection.getPosition().getY() + intersection.getDimension().getY(),
+					Math.max(0, Math.min(cachedImage.getImage().getWidth(), (int) Math.round((intersection.getPosition().getX() - x) / dstPerSrcX))),
+					Math.max(0, Math.min(cachedImage.getImage().getHeight(), (int) Math.round((intersection.getPosition().getY() - y) / dstPerSrcY))),
+					Math.max(0, Math.min(cachedImage.getImage().getWidth(), (int) Math.round((intersection.getPosition().getX() - x + intersection.getDimension().getX()) / dstPerSrcX))),
+					Math.max(0, Math.min(cachedImage.getImage().getHeight(), (int) Math.round((intersection.getPosition().getY() - y + intersection.getDimension().getY()) / dstPerSrcY))),
+					null);
+			}
+			catch (final Exception e) {
+				LOGGER.error("Error drawing image '" + cachedImage.getName() + "': " + e.getMessage(), e);
+			}
+		}
+		else if (this.width	== 0 && this.height == 0) {
 			graphics.drawImage(cachedImage.getImage(), x, y, null);
 		}
 		else {
-			graphics.drawImage(cachedImage.getImage(), x, y, (int) (this.width * scaleFactor), (int) (this.height * scaleFactor), null);
+			graphics.drawImage(cachedImage.getImage(), x, y, w, h, null);
 		}
 	}
 	

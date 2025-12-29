@@ -17,6 +17,7 @@ import de.extio.game_engine.renderer.g2d.control.G2DDrawControlTooltip.TooltipRe
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.spatial2.SpatialUtils2;
+import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
@@ -35,6 +36,14 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	protected int height;
 	
 	protected int fontSize;
+	
+	protected int visibleAreaX;
+	
+	protected int visibleAreaY;
+	
+	protected int visibleAreaWidth;
+	
+	protected int visibleAreaHeight;
 	
 	protected Graphics2D mainFrameGraphics;
 	
@@ -67,7 +76,7 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	protected short layer;
 	
 	protected boolean modified;
-
+	
 	protected boolean positionModified;
 	
 	@Override
@@ -192,11 +201,41 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 		return this;
 	}
 	
+	public G2DBaseControlImpl setVisibleArea(final int x, final int y, final int width, final int height) {
+		this.modified |= this.visibleAreaX != x || this.visibleAreaY != y || this.visibleAreaWidth != width || this.visibleAreaHeight != height;
+		this.visibleAreaX = x;
+		this.visibleAreaY = y;
+		this.visibleAreaWidth = width;
+		this.visibleAreaHeight = height;
+		return this;
+	}
+	
 	@Override
 	public void render() {
 		if (this.visible && this.bufferedImage != null) {
-			this.mainFrameGraphics.drawImage(this.bufferedImage, this.x, this.y, null);
-			this.drawToolTip();
+			if (this.visibleAreaX == 0 && this.visibleAreaY == 0 && this.visibleAreaWidth == 0 && this.visibleAreaHeight == 0) {
+				this.mainFrameGraphics.drawImage(this.bufferedImage, this.x, this.y, null);
+				this.drawToolTip();
+			}
+			else {
+				final var controlArea = new Area2(ImmutableCoordI2.create(this.x, this.y), ImmutableCoordI2.create(this.width, this.height));
+				final var visibleArea = new Area2(ImmutableCoordI2.create(this.visibleAreaX, this.visibleAreaY), ImmutableCoordI2.create(this.visibleAreaWidth, this.visibleAreaHeight));
+				final var intersection = SpatialUtils2.intersectAreas(controlArea, visibleArea);
+				if (intersection != null) {
+					this.mainFrameGraphics.drawImage(
+							this.bufferedImage,
+							intersection.getPosition().getX(),
+							intersection.getPosition().getY(),
+							intersection.getPosition().getX() + intersection.getDimension().getX(),
+							intersection.getPosition().getY() + intersection.getDimension().getY(),
+							intersection.getPosition().getX() - this.x,
+							intersection.getPosition().getY() - this.y,
+							intersection.getPosition().getX() - this.x + intersection.getDimension().getX(),
+							intersection.getPosition().getY() - this.y + intersection.getDimension().getY(),
+							null);
+					this.drawToolTip();
+				}
+			}
 		}
 		
 		if (this.modified) {

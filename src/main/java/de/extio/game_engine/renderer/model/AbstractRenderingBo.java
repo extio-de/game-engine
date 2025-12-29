@@ -28,6 +28,14 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 	protected int width;
 	
 	protected int height;
+
+	protected int visibleAreaX;
+
+	protected int visibleAreaY;
+
+	protected int visibleAreaWidth;
+
+	protected int visibleAreaHeight;	
 	
 	protected short layer;
 	
@@ -214,6 +222,14 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		
 		return (RenderingBoHasDimension) this;
 	}
+
+	public RenderingBoHasDimension withVisibleArea(final int x, final int y, final int width, final int height) {
+		this.visibleAreaX = x;
+		this.visibleAreaY = y;
+		this.visibleAreaWidth = width;
+		this.visibleAreaHeight = height;
+		return (RenderingBoHasDimension) this;
+	}
 	
 	@Override
 	public void close() throws Exception {
@@ -227,6 +243,10 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 		this.height = 0;
 		this.layer = this.defaultLayer;
 		this.zIndex = 0;
+		this.visibleAreaX = 0;
+		this.visibleAreaY = 0;
+		this.visibleAreaWidth = 0;
+		this.visibleAreaHeight = 0;
 	}
 
 	@Override
@@ -242,6 +262,10 @@ public abstract class AbstractRenderingBo implements RenderingBo {
 			this.height = abstractRenderingBo.height;
 			this.layer = abstractRenderingBo.layer;
 			this.zIndex = abstractRenderingBo.zIndex;
+			this.visibleAreaX = abstractRenderingBo.visibleAreaX;
+			this.visibleAreaY = abstractRenderingBo.visibleAreaY;
+			this.visibleAreaWidth = abstractRenderingBo.visibleAreaWidth;
+			this.visibleAreaHeight = abstractRenderingBo.visibleAreaHeight;
 		}
 	}
 	

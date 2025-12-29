@@ -30,6 +30,9 @@ import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.spatial2.SpatialUtils2;
+import de.extio.game_engine.spatial2.model.Area2;
+import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 @Conditional(G2DRendererCondition.class)
@@ -136,6 +139,15 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
+		if (visibleAreaX != 0 || visibleAreaY != 0 || visibleAreaWidth != 0 || visibleAreaHeight != 0) {
+			final var controlArea = new Area2(ImmutableCoordI2.create(this.x, this.y), ImmutableCoordI2.create(this.width, this.height));
+			final var visibleArea = new Area2(ImmutableCoordI2.create(this.visibleAreaX, this.visibleAreaY), ImmutableCoordI2.create(this.visibleAreaWidth, this.visibleAreaHeight));
+			final var intersection = SpatialUtils2.intersectAreas(controlArea, visibleArea);
+			if (intersection == null) {
+				return;
+			}
+		}
+		
 		var control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);
 		if (control == null) {
 			if (this.clazz == ButtonControl.class) {
@@ -173,7 +185,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				control = new G2DTooltipControl();
 			}
 			else if (this.clazz == null) {
-				throw new IllegalArgumentException("G2DDrawControl: control type not specified");
+				LOGGER.warn("G2DDrawControl: control type not specified for control id {}", this.id);
+				return;
 			}
 			else {
 				throw new UnsupportedOperationException("Not implemented " + this.clazz.getName());
@@ -203,7 +216,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			
 			LOGGER.debug("Added control " + control.toString());
 		}
-		
+
 		this.setControlProps(control, scaleFactor);
 		control.setMainFrameGraphics(graphics);
 		control.setInUse(true);
@@ -224,6 +237,11 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		control.setTooltip(this.tooltip);
 		control.setZIndex(this.zIndex);
 		control.setLayer(this.layer);
+		control.setVisibleArea(
+				(int) (this.visibleAreaX * scaleFactor),
+				(int) (this.visibleAreaY * scaleFactor),
+				(int) (this.visibleAreaWidth * scaleFactor),
+				(int) (this.visibleAreaHeight * scaleFactor));
 		
 		if (this.clazz == LabelControl.class) {
 			((LabelControl) control).setForegroundColor(this.color);
@@ -311,11 +329,11 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			}
 		}
 	}
-
+	
 	@Override
 	public void apply(final RenderingBo other) {
 		super.apply(other);
-
+		
 		if (other instanceof final G2DDrawControl o) {
 			this.id = o.id;
 			this.clazz = o.clazz;
