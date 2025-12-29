@@ -215,19 +215,17 @@ public class G2DDrawEffect extends G2DAbstractRenderingBo implements DrawEffectR
 				if (this.cull(area)) {
 					break;
 				}
-				
-				final var strength = this.customInt0 <= 0 ? 2 : this.customInt0;
-				final var effectColor = this.color == null ? Color.WHITE : this.color.toAwtColor();
-				
-				// Use PatternRenderer from ThemeManager
+
 				final var themeManager = (G2DThemeManager) this.rendererData.getThemeManager();
 				final var theme = themeManager.getCurrentTheme();
 				final PatternRenderer patternRenderer = themeManager.getPatternRenderer(theme.getPatternRendererName());
+				final var strength = this.customInt0 <= 0 ? 2 : this.customInt0;
+				final var effectColor = this.color == null ? theme.getBorderOuter().toColor() : this.color.toAwtColor();
 				if (patternRenderer != null) {
 					if (this.effect == DrawEffectRenderingBoEffects.DECORATIVE_BORDER) {
 						patternRenderer.drawDecorativeBorder(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor);
 					} else {
-						patternRenderer.drawDecorativeBorderFilled(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor, effectColor);
+						patternRenderer.drawDecorativeBorderFilled(graphics, area.getPosition().getX(), area.getPosition().getY(), area.getDimension().getX(), area.getDimension().getY(), strength, effectColor, theme.getWindowBackground().toColor());
 					}
 				}
 				

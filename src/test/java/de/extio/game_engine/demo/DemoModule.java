@@ -18,8 +18,11 @@ import de.extio.game_engine.renderer.container.ScrollArea;
 import de.extio.game_engine.renderer.container.Window;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
+import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
+import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
@@ -394,10 +397,20 @@ public class DemoModule extends AbstractClientModule {
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Text_" + i, DrawFontRenderingBo.class)
 					.setText(String.valueOf(i))
 					.setSize(28)
-					.setAlignment(HorizontalAlignment.CENTER)
+					.setAlignment(HorizontalAlignment.LEFT)
 					.withDimensionAbsolute(150, 60)
+					.setLayer(RenderingBoLayer.UI0)
 					.withPositionRelative(250, y + 22);
-			this.scrollArea.putRenderingBo(bo);			
+			this.scrollArea.putRenderingBo(bo);	
+
+			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Effect_" + i, DrawEffectRenderingBo.class)
+				.setRelativeCoordinates(List.of(ImmutableCoordI2.create(64, 64)))
+				.setEffect(DrawEffectRenderingBoEffects.DECORATIVE_BORDER_FILLED)
+				.setCustomInt0(4)
+				.setColor(RgbaColor.GRAY)
+				.setLayer(RenderingBoLayer.UI0)
+				.withPositionRelative(350, y);
+			this.scrollArea.putRenderingBo(bo);	
 			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Button_" + i, ControlRenderingBo.class)
 					.setCaption("Button " + (i + 1))
