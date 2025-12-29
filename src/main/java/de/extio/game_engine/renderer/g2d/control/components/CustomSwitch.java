@@ -85,7 +85,7 @@ public class CustomSwitch extends CustomAbstractButton {
 			g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 		}
 		else if ((this.state & STATE_TOGGLED) != 0) {
-			g2d.setColor(theme.getSelectionPrimary().toColor());
+			g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 		}
 		else if (this.isEnabled()) {
 			g2d.setColor(theme.getTextNormal().toColor());
@@ -93,7 +93,6 @@ public class CustomSwitch extends CustomAbstractButton {
 		else {
 			g2d.setColor(theme.getTextDisabled().toColor());
 		}
-		
 		final var textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
 		G2DDrawFont.renderText(g2d,
 				textDim,

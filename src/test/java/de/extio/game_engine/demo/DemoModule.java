@@ -20,6 +20,8 @@ import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SwitchControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonControl;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
@@ -495,10 +497,10 @@ public class DemoModule extends AbstractClientModule {
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Text_" + i, DrawFontRenderingBo.class)
 					.setText(String.valueOf(i))
 					.setSize(28)
-					.setAlignment(HorizontalAlignment.LEFT)
-					.withDimensionAbsolute(150, 60)
+					.setAlignment(HorizontalAlignment.CENTER)
+					.withDimensionAbsolute(50, 60)
 					.setLayer(RenderingBoLayer.UI0)
-					.withPositionRelative(250, y + 22);
+					.withPositionRelative(100, y + 22);
 			this.scrollArea.putRenderingBo(bo);
 			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Effect_" + i, DrawEffectRenderingBo.class)
@@ -506,17 +508,27 @@ public class DemoModule extends AbstractClientModule {
 					.setEffect(DrawEffectRenderingBoEffects.DECORATIVE_BORDER_FILLED)
 					.setCustomInt0(4)
 					.setLayer(RenderingBoLayer.UI0)
-					.withPositionRelative(350, y);
+					.withPositionRelative(200, y);
+			this.scrollArea.putRenderingBo(bo);
+			
+			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Switch_" + i, ControlRenderingBo.class)
+					.setCaption("Switch " + (i + 1))
+					.setFontSize(24)
+					.setType(SwitchControl.class)
+					.setVisible(true)
+					.setEnabled(true)
+					.withDimensionAbsolute(250, 60)
+					.withPositionRelative(300, y + 2);
 			this.scrollArea.putRenderingBo(bo);
 			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Button_" + i, ControlRenderingBo.class)
 					.setCaption("Button " + (i + 1))
 					.setFontSize(24)
-					.setType(ButtonControl.class)
+					.setType(ToggleButtonControl.class)
 					.setVisible(true)
 					.setEnabled(true)
-					.withDimensionAbsolute(200, 60)
-					.withPositionRelative(500, y + 2);
+					.withDimensionAbsolute(150, 60)
+					.withPositionRelative(550, y + 2);
 			this.scrollArea.putRenderingBo(bo);
 			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Image_" + i, DrawImageRenderingBo.class)

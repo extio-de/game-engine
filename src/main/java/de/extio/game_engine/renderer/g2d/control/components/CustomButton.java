@@ -84,7 +84,7 @@ public class CustomButton extends CustomAbstractButton {
 				g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 			}
 			else if ((this.state & STATE_TOGGLED) != 0) {
-				g2d.setColor(theme.getSelectionPrimary().toColor());
+				g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 			}
 			else if (this.isEnabled()) {
 				g2d.setColor(theme.getTextNormal().toColor());
