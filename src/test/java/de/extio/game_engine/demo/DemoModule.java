@@ -18,11 +18,10 @@ import de.extio.game_engine.renderer.container.ScrollArea;
 import de.extio.game_engine.renderer.container.Window;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
-import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
-import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
+import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawImageRenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
@@ -44,10 +43,10 @@ public class DemoModule extends AbstractClientModule {
 	
 	@Autowired
 	private EventService eventService;
-
+	
 	@Autowired
 	private LocalizationService localizationService;
-
+	
 	@Autowired
 	private ThemeManager themeManager;
 	
@@ -58,10 +57,14 @@ public class DemoModule extends AbstractClientModule {
 	private Window themeSelectionWindow;
 	
 	private Window scrollAreaWindow;
-
+	
+	private Window languageSelectionWindow;
+	
 	private ScrollArea scrollArea;
-
+	
 	private final Map<String, String> themeSelectionByControlId = new HashMap<>();
+	
+	private final Map<String, String> languageSelectionByControlId = new HashMap<>();
 	
 	private boolean audioMuted;
 	
@@ -92,7 +95,14 @@ public class DemoModule extends AbstractClientModule {
 		this.scrollAreaWindow.setDraggable(true);
 		this.scrollAreaWindow.setCloseButton(true);
 		this.scrollAreaWindow.setParent(this.mainWindow);
-
+		
+		this.languageSelectionWindow = this.applicationContext.getBean(Window.class);
+		this.languageSelectionWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2));
+		this.languageSelectionWindow.setNormalizedPosition(centeredPosition(this.languageSelectionWindow.getNormalizedDimension()));
+		this.languageSelectionWindow.setDraggable(true);
+		this.languageSelectionWindow.setCloseButton(true);
+		this.languageSelectionWindow.setParent(this.mainWindow);
+		
 		this.scrollArea = this.applicationContext.getBean(ScrollArea.class);
 		this.scrollAreaWindow.addComponent(this.scrollArea);
 		
@@ -106,6 +116,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().unloadModule(this.secondaryWindow.getId());
 		this.getModuleService().unloadModule(this.themeSelectionWindow.getId());
 		this.getModuleService().unloadModule(this.scrollAreaWindow.getId());
+		this.getModuleService().unloadModule(this.languageSelectionWindow.getId());
 	}
 	
 	@Override
@@ -124,6 +135,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().changeActiveState(this.secondaryWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), false);
+		this.getModuleService().changeActiveState(this.languageSelectionWindow.getId(), false);
 	}
 	
 	@Override
@@ -138,6 +150,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().changeActiveState(this.secondaryWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), false);
+		this.getModuleService().changeActiveState(this.languageSelectionWindow.getId(), false);
 		this.audioController.stopMusic();
 	}
 	
@@ -167,17 +180,37 @@ public class DemoModule extends AbstractClientModule {
 				this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), true);
 				this.getModuleService().changeDisplayState(this.scrollAreaWindow.getId(), true);
 			}
-
+			
+			case "DemoModule_MainWindow_Label_Language" -> {
+				this.audioController.play(new StaticResource(List.of("audio"), "contact0.ogg"));
+				this.setupLanguageSelectionWindow();
+				this.getModuleService().changeActiveState(this.languageSelectionWindow.getId(), true);
+				this.getModuleService().changeDisplayState(this.languageSelectionWindow.getId(), true);
+			}
+			
 			case "DemoModule_SecondaryWindow_Button_Ok" -> {
 				this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
 				this.getModuleService().changeActiveState(this.secondaryWindow.getId(), false);
 			}
-
+			
 			default -> {
 				final var themeName = this.themeSelectionByControlId.get(event.getId());
 				if (themeName != null) {
 					this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
 					this.themeManager.setCurrentTheme(themeName);
+					break;
+				}
+
+				final var languageShort = this.languageSelectionByControlId.get(event.getId());
+				if (languageShort != null) {
+					this.audioController.play(new StaticResource(List.of("audio"), "alert0.ogg"));
+					this.localizationService.setLanguage(languageShort);
+					this.getModuleService().changeActiveState(this.languageSelectionWindow.getId(), false);
+					// refresh UI
+					this.getModuleService().changeActiveState(this.id, false);
+					this.getModuleService().changeActiveState(this.id, true);
+					this.getModuleService().changeDisplayState(this.id, true);
+					break;
 				}
 			}
 		}
@@ -219,22 +252,32 @@ public class DemoModule extends AbstractClientModule {
 		
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Start", ControlRenderingBo.class)
 				.setCaption(this.localizationService.translate("test-4"))
-				.setFontSize(96)
+				.setFontSize(78)
 				.setType(LabelControl.class)
 				.setVisible(true)
 				.setEnabled(true)
 				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
-				.withPositionRelative(10, 500);
+				.withPositionRelative(10, 480);
+		this.mainWindow.putRenderingBo(bo);
+		
+		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Language", ControlRenderingBo.class)
+				.setCaption(this.localizationService.translate("test-9"))
+				.setFontSize(78)
+				.setType(LabelControl.class)
+				.setVisible(true)
+				.setEnabled(true)
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
+				.withPositionRelative(10, 580);
 		this.mainWindow.putRenderingBo(bo);
 		
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_ScrollDemo", ControlRenderingBo.class)
-		.setCaption(this.localizationService.translate("test-8"))
-				.setFontSize(96)
+				.setCaption(this.localizationService.translate("test-8"))
+				.setFontSize(78)
 				.setType(LabelControl.class)
 				.setVisible(true)
 				.setEnabled(true)
 				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
-				.withPositionRelative(10, 630);
+				.withPositionRelative(10, 690);
 		this.mainWindow.putRenderingBo(bo);
 	}
 	
@@ -262,7 +305,7 @@ public class DemoModule extends AbstractClientModule {
 			this.mainWindow.draw();
 			return;
 		}
-
+		
 		final var buttonX = Math.max(0, this.mainWindow.getNormalizedDimension().getX() - 64 - 21);
 		final var buttonY = 20;
 		final DrawImageRenderingBo overlayBo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_Audio_Overlay", DrawImageRenderingBo.class);
@@ -300,16 +343,13 @@ public class DemoModule extends AbstractClientModule {
 				.withPositionRelative(RendererControl.REFERENCE_RESOLUTION.divide(7).getX() - 80, 200);
 		this.secondaryWindow.putRenderingBo(bo);
 	}
-
+	
 	private void setupThemeSelectionWindow() {
 		this.themeSelectionWindow.clearRenderingBos();
 		this.themeSelectionByControlId.clear();
-
+		
 		final var themes = this.themeManager.getAvailableThemeNames();
-		final var title = themes.size() <= 1
-				? "Theme"
-				: "Select Theme";
-
+		
 		final var paddingX = 20;
 		final var paddingBottom = 24;
 		final var columns = 2;
@@ -321,24 +361,24 @@ public class DemoModule extends AbstractClientModule {
 		final var startY = 150;
 		final var gapY = 14;
 		final var rows = (themes.size() + columns - 1) / columns;
-
+		
 		final var desiredWidth = (paddingX * 2) + (columns * buttonWidth) + ((columns - 1) * columnGap);
 		final var desiredHeight = startY + (rows * buttonHeight) + (Math.max(0, rows - 1) * gapY) + paddingBottom;
 		this.themeSelectionWindow.setNormalizedDimension(ImmutableCoordI2.create(desiredWidth, desiredHeight));
 		this.themeSelectionWindow.setNormalizedPosition(centeredPosition(ImmutableCoordI2.create(desiredWidth, desiredHeight)));
 		
 		var bo = this.renderingBoPool.acquire("DemoModule_ThemeSelect_Text_Title", DrawFontRenderingBo.class)
-				.setText(title)
+				.setText(this.localizationService.translate("test-4"))
 				.setSize(42)
 				.setAlignment(HorizontalAlignment.CENTER)
 				.withDimensionAbsolute(desiredWidth - (paddingX * 2), headerHeight)
 				.withPositionRelative(paddingX, 40);
 		this.themeSelectionWindow.putRenderingBo(bo);
-
+		
 		final var currentTheme = this.themeManager.getCurrentTheme();
 		final var currentThemeName = currentTheme != null ? currentTheme.getName() : "";
 		bo = this.renderingBoPool.acquire("DemoModule_ThemeSelect_Text_Current", DrawFontRenderingBo.class)
-				.setText(currentThemeName.isBlank() ? "" : "Current: " + currentThemeName)
+				.setText(currentThemeName.isBlank() ? "" : this.localizationService.translate("test-10") + currentThemeName)
 				.setSize(24)
 				.setAlignment(HorizontalAlignment.CENTER)
 				.withDimensionAbsolute(desiredWidth - (paddingX * 2), currentHeight)
@@ -353,7 +393,7 @@ public class DemoModule extends AbstractClientModule {
 			final var row = i / columns;
 			final var x = paddingX + (column * (buttonWidth + columnGap));
 			final var y = startY + (row * (buttonHeight + gapY));
-
+			
 			bo = this.renderingBoPool.acquire(controlId, ControlRenderingBo.class)
 					.setCaption(themeName)
 					.setType(ButtonControl.class)
@@ -365,7 +405,71 @@ public class DemoModule extends AbstractClientModule {
 			this.themeSelectionWindow.putRenderingBo(bo);
 		}
 	}
-
+	
+	private void setupLanguageSelectionWindow() {
+		this.languageSelectionWindow.clearRenderingBos();
+		this.languageSelectionByControlId.clear();
+		
+		final var languages = this.localizationService.getLanguages();
+		final var title = "Select Language";
+		
+		final var paddingX = 20;
+		final var paddingBottom = 24;
+		final var columns = 2;
+		final var columnGap = 24;
+		final var buttonWidth = 340;
+		final var buttonHeight = 54;
+		final var headerHeight = 60;
+		final var currentHeight = 40;
+		final var startY = 150;
+		final var gapY = 14;
+		final var rows = (languages.size() + columns - 1) / columns;
+		
+		final var desiredWidth = (paddingX * 2) + (columns * buttonWidth) + ((columns - 1) * columnGap);
+		final var desiredHeight = startY + (rows * buttonHeight) + (Math.max(0, rows - 1) * gapY) + paddingBottom;
+		this.languageSelectionWindow.setNormalizedDimension(ImmutableCoordI2.create(desiredWidth, desiredHeight));
+		this.languageSelectionWindow.setNormalizedPosition(centeredPosition(ImmutableCoordI2.create(desiredWidth, desiredHeight)));
+		
+		var bo = this.renderingBoPool.acquire("DemoModule_LanguageSelect_Text_Title", DrawFontRenderingBo.class)
+				.setText(title)
+				.setSize(42)
+				.setAlignment(HorizontalAlignment.CENTER)
+				.withDimensionAbsolute(desiredWidth - (paddingX * 2), headerHeight)
+				.withPositionRelative(paddingX, 40);
+		this.languageSelectionWindow.putRenderingBo(bo);
+		
+		final var currentLanguage = this.localizationService.getCurrentLanguage();
+		final var currentLangObj = languages.stream().filter(l -> l.getShortName().equals(currentLanguage)).findFirst().orElse(null);
+		final var currentLangName = currentLangObj != null ? currentLangObj.getName() : currentLanguage;
+		bo = this.renderingBoPool.acquire("DemoModule_LanguageSelect_Text_Current", DrawFontRenderingBo.class)
+				.setText("Current: " + currentLangName)
+				.setSize(24)
+				.setAlignment(HorizontalAlignment.CENTER)
+				.withDimensionAbsolute(desiredWidth - (paddingX * 2), currentHeight)
+				.withPositionRelative(paddingX, 95);
+		this.languageSelectionWindow.putRenderingBo(bo);
+		
+		for (var i = 0; i < languages.size(); i++) {
+			final var language = languages.get(i);
+			final var controlId = "DemoModule_LanguageSelect_Button_" + sanitizeLanguageId(language.getShortName());
+			this.languageSelectionByControlId.put(controlId, language.getShortName());
+			final var column = i % columns;
+			final var row = i / columns;
+			final var x = paddingX + (column * (buttonWidth + columnGap));
+			final var y = startY + (row * (buttonHeight + gapY));
+			
+			bo = this.renderingBoPool.acquire(controlId, ControlRenderingBo.class)
+					.setCaption(language.getName())
+					.setType(ButtonControl.class)
+					.setFontSize(28)
+					.setVisible(true)
+					.setEnabled(true)
+					.withDimensionAbsolute(buttonWidth, buttonHeight)
+					.withPositionRelative(x, y);
+			this.languageSelectionWindow.putRenderingBo(bo);
+		}
+	}
+	
 	private void setupScrollAreaWindow() {
 		this.scrollAreaWindow.clearRenderingBos();
 		
@@ -376,7 +480,7 @@ public class DemoModule extends AbstractClientModule {
 				.withDimensionAbsolute(this.scrollAreaWindow.getNormalizedDimension().getX() - 40, 50)
 				.withPositionRelative(20, 30);
 		this.scrollAreaWindow.putRenderingBo(bo);
-
+		
 		this.scrollArea.setRelativePosition(ImmutableCoordI2.create(20, 65));
 		this.scrollArea.setDimension(this.scrollAreaWindow.getNormalizedDimension().substract(40, 90));
 		
@@ -393,7 +497,7 @@ public class DemoModule extends AbstractClientModule {
 					.withDimensionAbsolute(150, 60)
 					.withPositionRelative(1, y + 2);
 			this.scrollArea.putRenderingBo(bo);
-
+			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Text_" + i, DrawFontRenderingBo.class)
 					.setText(String.valueOf(i))
 					.setSize(28)
@@ -401,15 +505,15 @@ public class DemoModule extends AbstractClientModule {
 					.withDimensionAbsolute(150, 60)
 					.setLayer(RenderingBoLayer.UI0)
 					.withPositionRelative(250, y + 22);
-			this.scrollArea.putRenderingBo(bo);	
-
+			this.scrollArea.putRenderingBo(bo);
+			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Effect_" + i, DrawEffectRenderingBo.class)
-				.setRelativeCoordinates(List.of(ImmutableCoordI2.create(64, 64)))
-				.setEffect(DrawEffectRenderingBoEffects.DECORATIVE_BORDER_FILLED)
-				.setCustomInt0(4)
-				.setLayer(RenderingBoLayer.UI0)
-				.withPositionRelative(350, y);
-			this.scrollArea.putRenderingBo(bo);	
+					.setRelativeCoordinates(List.of(ImmutableCoordI2.create(64, 64)))
+					.setEffect(DrawEffectRenderingBoEffects.DECORATIVE_BORDER_FILLED)
+					.setCustomInt0(4)
+					.setLayer(RenderingBoLayer.UI0)
+					.withPositionRelative(350, y);
+			this.scrollArea.putRenderingBo(bo);
 			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Button_" + i, ControlRenderingBo.class)
 					.setCaption("Button " + (i + 1))
@@ -436,11 +540,18 @@ public class DemoModule extends AbstractClientModule {
 		final var y = Math.max(0, (ref.getY() - dimension.getY()) / 2);
 		return ImmutableCoordI2.create(x, y);
 	}
-
+	
 	private static String sanitizeThemeId(final String themeName) {
 		if (themeName == null || themeName.isBlank()) {
 			return "Unknown";
 		}
 		return themeName.replaceAll("[^a-zA-Z0-9]+", "_");
+	}
+	
+	private static String sanitizeLanguageId(final String shortName) {
+		if (shortName == null || shortName.isBlank()) {
+			return "Unknown";
+		}
+		return shortName.replaceAll("[^a-zA-Z0-9]+", "_");
 	}
 }
