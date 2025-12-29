@@ -390,6 +390,14 @@ public class DemoModule extends AbstractClientModule {
 					.withDimensionAbsolute(150, 60)
 					.withPositionRelative(1, y + 2);
 			this.scrollArea.putRenderingBo(bo);
+
+			bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Text_" + i, DrawFontRenderingBo.class)
+					.setText(String.valueOf(i))
+					.setSize(28)
+					.setAlignment(HorizontalAlignment.CENTER)
+					.withDimensionAbsolute(150, 60)
+					.withPositionRelative(250, y + 22);
+			this.scrollArea.putRenderingBo(bo);			
 			
 			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Button_" + i, ControlRenderingBo.class)
 					.setCaption("Button " + (i + 1))
