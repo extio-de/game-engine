@@ -158,7 +158,7 @@ public class CustomSlider extends Component {
 	
 	public void releaseEvents() {
 		synchronized (this) {
-			if (this.lastActionEvent != null && Math.abs(System.currentTimeMillis() - this.lastActionEventReleased) >= 200) {
+			if (this.lastActionEvent != null && Math.abs(System.currentTimeMillis() - this.lastActionEventReleased) >= 33) {
 				this.lastActionEventReleased = System.currentTimeMillis();
 				this.actionListener.actionPerformed(this.lastActionEvent);
 				this.lastActionEvent = null;
