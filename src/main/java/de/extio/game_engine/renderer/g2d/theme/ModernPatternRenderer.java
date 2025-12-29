@@ -1,6 +1,7 @@
 package de.extio.game_engine.renderer.g2d.theme;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -143,6 +144,10 @@ public class ModernPatternRenderer implements PatternRenderer {
 		final int STATE_PRESSED = 2;
 		final int STATE_HOVERED = 4;
 		
+		final boolean toggled = (state & STATE_TOGGLED) != 0;
+		final boolean pressed = (state & STATE_PRESSED) != 0;
+		final boolean hovered = (state & STATE_HOVERED) != 0;
+		
 		float h, s, b;
 		
 		if (backgroundColor == null) {
@@ -179,13 +184,46 @@ public class ModernPatternRenderer implements PatternRenderer {
 		}
 		
 		b = Math.max(0.0f, Math.min(1.0f, b));
-		final var bgColor = Color.getHSBColor(h, s, b);
-		g2d.setColor(bgColor);
+		Color bgColor = Color.getHSBColor(h, s, b);
+		if (!enabled) {
+			final var hsb = Color.RGBtoHSB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), null);
+			bgColor = Color.getHSBColor(hsb[0], Math.min(1.0f, hsb[1] * 0.15f), Math.min(1.0f, hsb[2] * 0.55f));
+		}
+		
+		final var bgHsb = Color.RGBtoHSB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), null);
+		final float topB = pressed ? Math.max(0.0f, bgHsb[2] - 0.12f) : Math.min(1.0f, bgHsb[2] + 0.12f);
+		final float bottomB = pressed ? Math.min(1.0f, bgHsb[2] + 0.05f) : Math.max(0.0f, bgHsb[2] - 0.10f);
+		final var top = Color.getHSBColor(bgHsb[0], bgHsb[1], topB);
+		final var bottom = Color.getHSBColor(bgHsb[0], bgHsb[1], bottomB);
+		
+		final var oldPaint = g2d.getPaint();
+		g2d.setPaint(new GradientPaint(x, y, top, x, y + height, bottom));
 		g2d.fillRect(x, y, width, height);
+		g2d.setPaint(oldPaint);
+		
+		final var accentBase = hovered || toggled ? theme.getSelectionPrimary().toColor() : theme.getSelectionSecondary().toColor();
+		final var accent = new Color(accentBase.getRed(), accentBase.getGreen(), accentBase.getBlue(), pressed ? 70 : 110);
+		final var shine = new Color(255, 255, 255, pressed ? 18 : 40);
+		final var shadow = new Color(0, 0, 0, pressed ? 40 : 60);
+		
+		final var t = Math.max(1, (int) (1 * scaleFactor));
+		g2d.setColor(shine);
+		g2d.fillRect(x + t, y + t, Math.max(0, width - t * 2), Math.max(0, t));
+		g2d.setColor(shadow);
+		g2d.fillRect(x + t, y + height - t * 2, Math.max(0, width - t * 2), Math.max(0, t));
+		
+		if (hovered || toggled) {
+			g2d.setColor(accent);
+			g2d.fillRect(x + t, y + t, Math.max(0, width - t * 2), Math.max(0, t));
+		}
 		
 		final var borderStrength = Math.max(1, (int) (2 * scaleFactor));
-		final var borderColor = (state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : 
-				enabled ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
-		this.drawDecorativeBorder(g2d, x, y, width, height, borderStrength, borderColor);
+		final var outerBorderColor = hovered ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
+		final var innerBorderColor = enabled ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
+		this.drawDecorativeBorder(g2d, x, y, width, height, borderStrength, outerBorderColor);
+		final var inset = Math.max(1, borderStrength);
+		if (width > inset * 3 && height > inset * 3) {
+			this.drawDecorativeBorder(g2d, x + inset, y + inset, width - inset * 2, height - inset * 2, Math.max(1, borderStrength / 2), innerBorderColor);
+		}
 	}
 }

@@ -70,10 +70,10 @@ public class CustomSwitch extends CustomAbstractButton {
 			if (patternRenderer != null) {
 				patternRenderer.drawDecorativeBorder(g2d, 0, 0, this.getWidth() - 1, this.getHeight() - 1, 2, borderColor1);
 				
-				final var borderColor2 = this.isEnabled() ? 
-						(this.state & STATE_HOVERED) != 0 ? theme.getSelectionSecondary().toColor() : theme.getBorderInner().toColor() : 
-						theme.getBorderInnerDisabled().toColor();
-				patternRenderer.drawDecorativeBorder(g2d, 2, 2, this.getWidth() - 5, this.getHeight() - 5, 2, borderColor2);
+				// final var borderColor2 = this.isEnabled() ? 
+				// 		(this.state & STATE_HOVERED) != 0 ? theme.getSelectionSecondary().toColor() : theme.getBorderInner().toColor() : 
+				// 		theme.getBorderInnerDisabled().toColor();
+				// patternRenderer.drawDecorativeBorder(g2d, 2, 2, this.getWidth() - 5, this.getHeight() - 5, 2, borderColor2);
 			}
 		}
 	}

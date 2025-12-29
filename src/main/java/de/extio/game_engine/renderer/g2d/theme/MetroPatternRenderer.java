@@ -1,6 +1,7 @@
 package de.extio.game_engine.renderer.g2d.theme;
 
 import java.awt.Color;
+import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 
@@ -152,6 +153,10 @@ public class MetroPatternRenderer implements PatternRenderer {
 		final int STATE_PRESSED = 2;
 		final int STATE_HOVERED = 4;
 		
+		final boolean toggled = (state & STATE_TOGGLED) != 0;
+		final boolean pressed = (state & STATE_PRESSED) != 0;
+		final boolean hovered = (state & STATE_HOVERED) != 0;
+		
 		float h, s, b;
 		
 		if (backgroundColor == null) {
@@ -188,13 +193,44 @@ public class MetroPatternRenderer implements PatternRenderer {
 		}
 		
 		b = Math.max(0.0f, Math.min(1.0f, b));
-		final var bgColor = Color.getHSBColor(h, s, b);
-		g2d.setColor(bgColor);
+		Color bgColor = Color.getHSBColor(h, s, b);
+		if (!enabled) {
+			final var hsb = Color.RGBtoHSB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), null);
+			bgColor = Color.getHSBColor(hsb[0], Math.min(1.0f, hsb[1] * 0.20f), Math.min(1.0f, hsb[2] * 0.60f));
+		}
+		
+		final var bgHsb = Color.RGBtoHSB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), null);
+		final float topB = pressed ? Math.max(0.0f, bgHsb[2] - 0.10f) : Math.min(1.0f, bgHsb[2] + 0.10f);
+		final float bottomB = pressed ? Math.min(1.0f, bgHsb[2] + 0.04f) : Math.max(0.0f, bgHsb[2] - 0.10f);
+		final var top = Color.getHSBColor(bgHsb[0], bgHsb[1], topB);
+		final var bottom = Color.getHSBColor(bgHsb[0], bgHsb[1], bottomB);
+		
+		final var oldPaint = g2d.getPaint();
+		g2d.setPaint(new GradientPaint(x, y, top, x, y + height, bottom));
 		g2d.fillRect(x, y, width, height);
+		g2d.setPaint(oldPaint);
 		
 		final var borderStrength = Math.max(1, (int) (2 * scaleFactor));
-		final var borderColor = (state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : 
-				enabled ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
-		this.drawDecorativeBordersMain(g2d, x, y, width, height, borderStrength, width >= 48 && height >= 48, borderColor);
+		final var outerBorderColor = hovered ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
+		final var innerBorderColor = enabled ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
+		this.drawDecorativeBordersMain(g2d, x, y, width, height, borderStrength, false, outerBorderColor);
+		final var inset = Math.max(1, borderStrength);
+		if (width > inset * 3 && height > inset * 3) {
+			this.drawDecorativeBordersMain(g2d, x + inset, y + inset, width - inset * 2, height - inset * 2, Math.max(1, borderStrength / 2), false, innerBorderColor);
+		}
+		
+		final int routeT = Math.max(1, (int) (2 * scaleFactor));
+		final int pad = Math.max(4, (int) (6 * scaleFactor));
+		final int cy = y + height - pad;
+		final var routeBase = pressed ? theme.getSelectionSecondary().toColor() : (hovered || toggled ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor());
+		final var route = new Color(routeBase.getRed(), routeBase.getGreen(), routeBase.getBlue(), enabled ? (pressed ? 150 : 200) : 80);
+		g2d.setColor(route);
+		g2d.fillRect(x + pad, cy - routeT / 2, Math.max(0, width - pad * 2), routeT);
+		
+		final int station = Math.max(5, (int) (7 * scaleFactor));
+		if (width >= pad * 2 + station * 2 && height >= station + 2) {
+			g2d.fillOval(x + pad, cy - station / 2, station, station);
+			g2d.fillOval(x + width - pad - station, cy - station / 2, station, station);
+		}
 	}
 }

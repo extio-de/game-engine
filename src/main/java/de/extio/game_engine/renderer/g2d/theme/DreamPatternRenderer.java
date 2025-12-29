@@ -98,9 +98,9 @@ public class DreamPatternRenderer implements PatternRenderer {
 		final var textDim = G2DDrawFont.getTextDimensions("X", g2d, 15, scaleFactor);
 		G2DDrawFont.renderText(g2d, textDim, 1.0, ((width - textDim.getX()) / 2), ((height - textDim.getY()) / 2), fontSize, "X");
 	}
-
+	
 	private java.awt.image.BufferedImage patternCache;
-
+	
 	private java.awt.image.BufferedImage getPatternCache() {
 		if (this.patternCache == null) {
 			final int cellSize = 100;
@@ -120,7 +120,7 @@ public class DreamPatternRenderer implements PatternRenderer {
 		}
 		return this.patternCache;
 	}
-
+	
 	@Override
 	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
 		final var cache = this.getPatternCache();
@@ -135,12 +135,16 @@ public class DreamPatternRenderer implements PatternRenderer {
 			}
 		}
 	}
-
+	
 	@Override
 	public void drawButton(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean enabled, final int state, final Color backgroundColor, final double scaleFactor, final Theme theme) {
 		final int STATE_TOGGLED = 1;
 		final int STATE_PRESSED = 2;
 		final int STATE_HOVERED = 4;
+		
+		final boolean toggled = (state & STATE_TOGGLED) != 0;
+		final boolean pressed = (state & STATE_PRESSED) != 0;
+		final boolean hovered = (state & STATE_HOVERED) != 0;
 		
 		float h, s, b;
 		
@@ -184,31 +188,36 @@ public class DreamPatternRenderer implements PatternRenderer {
 		final var arc = Math.max(6, (int) (10 * scaleFactor));
 		g2d.setColor(bgColor2);
 		g2d.fillRoundRect(x, y, width, height, arc, arc);
-				// Add vertical gradient overlay for depth
+		
+		// Add vertical gradient overlay for depth
 		if (height > 20) {
-			final var gradientColor = new Color(255, 255, 255, 20);
 			for (int i = 0; i < height / 3; i++) {
 				g2d.setColor(new Color(255, 255, 255, (int) (20 - (i * 20.0 / (height / 3)))));
 				g2d.fillRect(x + arc / 2, y + i, width - arc, 1);
 			}
 		}
 		
-		// Add dreamy bubble decorations for toggled buttons
-		if ((state & STATE_TOGGLED) != 0 && width > 35 && height > 35) {
+		if (toggled && width > 35 && height > 35) {
 			g2d.setColor(new Color(255, 255, 255, 80));
 			g2d.fillOval(x + width / 4, y + height / 4, 5, 5);
 			g2d.fillOval(x + width * 2 / 3, y + height / 3, 3, 3);
 			g2d.fillOval(x + width / 3, y + height * 2 / 3, 4, 4);
 		}
 		
-		// Add soft shimmer effect when hovered
-		if ((state & STATE_HOVERED) != 0) {
-			g2d.setColor(new Color(255, 255, 255, 30));
-			g2d.fillRoundRect(x + 2, y + 2, width - 4, height / 2, arc, arc);
+		int shimmerAlpha = hovered ? 30 : 18;
+		if (pressed) {
+			shimmerAlpha = 12;
 		}
-				final var borderStrength = Math.max(1, (int) (2 * scaleFactor));
-		final var borderColor = (state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : 
-				enabled ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
+		if (!enabled) {
+			shimmerAlpha = 8;
+		}
+		if (shimmerAlpha > 0 && width > 8 && height > 8) {
+			g2d.setColor(new Color(255, 255, 255, shimmerAlpha));
+			final int shimmerHeight = hovered ? height / 2 : Math.max(3, height / 3);
+			g2d.fillRoundRect(x + 2, y + 2, width - 4, shimmerHeight, arc, arc);
+		}
+		final var borderStrength = Math.max(1, (int) (2 * scaleFactor));
+		final var borderColor = hovered ? theme.getSelectionPrimary().toColor() : enabled ? theme.getBorderOuter().toColor() : theme.getBorderInnerDisabled().toColor();
 		this.drawDecorativeBorder(g2d, x, y, width, height, borderStrength, borderColor);
 	}
 }
