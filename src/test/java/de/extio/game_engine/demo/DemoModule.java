@@ -14,6 +14,7 @@ import de.extio.game_engine.i18n.LocalizationService;
 import de.extio.game_engine.module.AbstractClientModule;
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.ThemeManager;
+import de.extio.game_engine.renderer.container.ScrollArea;
 import de.extio.game_engine.renderer.container.Window;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
@@ -52,6 +53,10 @@ public class DemoModule extends AbstractClientModule {
 	private Window secondaryWindow;
 	
 	private Window themeSelectionWindow;
+	
+	private Window scrollAreaWindow;
+
+	private ScrollArea scrollArea;
 
 	private final Map<String, String> themeSelectionByControlId = new HashMap<>();
 	
@@ -78,6 +83,16 @@ public class DemoModule extends AbstractClientModule {
 		this.themeSelectionWindow.setCloseButton(true);
 		this.themeSelectionWindow.setParent(this.mainWindow);
 		
+		this.scrollAreaWindow = this.applicationContext.getBean(Window.class);
+		this.scrollAreaWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(5).multiply(2));
+		this.scrollAreaWindow.setNormalizedPosition(centeredPosition(this.scrollAreaWindow.getNormalizedDimension()));
+		this.scrollAreaWindow.setDraggable(true);
+		this.scrollAreaWindow.setCloseButton(true);
+		this.scrollAreaWindow.setParent(this.mainWindow);
+
+		this.scrollArea = this.applicationContext.getBean(ScrollArea.class);
+		this.scrollAreaWindow.addComponent(this.scrollArea);
+		
 		this.getModuleService().changeActiveState(this.getId(), true);
 		this.getModuleService().changeDisplayState(this.getId(), true);
 	}
@@ -87,6 +102,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().unloadModule(this.mainWindow.getId());
 		this.getModuleService().unloadModule(this.secondaryWindow.getId());
 		this.getModuleService().unloadModule(this.themeSelectionWindow.getId());
+		this.getModuleService().unloadModule(this.scrollAreaWindow.getId());
 	}
 	
 	@Override
@@ -104,6 +120,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().changeActiveState(this.mainWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.secondaryWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
+		this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), false);
 	}
 	
 	@Override
@@ -117,6 +134,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().changeDisplayState(this.mainWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.secondaryWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
+		this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), false);
 		this.audioController.stopMusic();
 	}
 	
@@ -138,6 +156,13 @@ public class DemoModule extends AbstractClientModule {
 				this.setupThemeSelectionWindow();
 				this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), true);
 				this.getModuleService().changeDisplayState(this.themeSelectionWindow.getId(), true);
+			}
+			
+			case "DemoModule_MainWindow_Button_ScrollDemo" -> {
+				this.audioController.play(new StaticResource(List.of("audio"), "contact0.ogg"));
+				this.setupScrollAreaWindow();
+				this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), true);
+				this.getModuleService().changeDisplayState(this.scrollAreaWindow.getId(), true);
 			}
 
 			case "DemoModule_SecondaryWindow_Button_Ok" -> {
@@ -196,7 +221,17 @@ public class DemoModule extends AbstractClientModule {
 				.setVisible(true)
 				.setEnabled(true)
 				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
-				.withPositionRelative(10, 600);
+				.withPositionRelative(10, 500);
+		this.mainWindow.putRenderingBo(bo);
+		
+		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_ScrollDemo", ControlRenderingBo.class)
+		.setCaption(this.localizationService.translate("test-8"))
+				.setFontSize(96)
+				.setType(LabelControl.class)
+				.setVisible(true)
+				.setEnabled(true)
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
+				.withPositionRelative(10, 630);
 		this.mainWindow.putRenderingBo(bo);
 	}
 	
@@ -261,7 +296,6 @@ public class DemoModule extends AbstractClientModule {
 				.withDimensionAbsolute(160, 60)
 				.withPositionRelative(RendererControl.REFERENCE_RESOLUTION.divide(7).getX() - 80, 200);
 		this.secondaryWindow.putRenderingBo(bo);
-		this.secondaryWindow.draw();
 	}
 
 	private void setupThemeSelectionWindow() {
@@ -327,10 +361,55 @@ public class DemoModule extends AbstractClientModule {
 					.withPositionRelative(x, y);
 			this.themeSelectionWindow.putRenderingBo(bo);
 		}
-
-		this.themeSelectionWindow.draw();
 	}
 
+	private void setupScrollAreaWindow() {
+		this.scrollAreaWindow.clearRenderingBos();
+		
+		var bo = this.renderingBoPool.acquire("DemoModule_ScrollAreaWindow_Title", DrawFontRenderingBo.class)
+				.setText(this.localizationService.translate("test-8"))
+				.setSize(28)
+				.setAlignment(HorizontalAlignment.CENTER)
+				.withDimensionAbsolute(this.scrollAreaWindow.getNormalizedDimension().getX() - 40, 50)
+				.withPositionRelative(20, 30);
+		this.scrollAreaWindow.putRenderingBo(bo);
+
+		this.scrollArea.setRelativePosition(ImmutableCoordI2.create(20, 65));
+		this.scrollArea.setDimension(this.scrollAreaWindow.getNormalizedDimension().substract(40, 90));
+		
+		for (var i = 0; i < 20; i++) {
+			final var y = i * 70 + 1;
+			
+			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Label_" + i, ControlRenderingBo.class)
+					.setCaption("Item " + (i + 1) + "")
+					.setFontSize(28)
+					.setType(LabelControl.class)
+					.setCustomData2(HorizontalAlignment.LEFT)
+					.setVisible(true)
+					.setEnabled(true)
+					.withDimensionAbsolute(150, 60)
+					.withPositionRelative(1, y + 2);
+			this.scrollArea.putRenderingBo(bo);
+			
+			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Button_" + i, ControlRenderingBo.class)
+					.setCaption("Button " + (i + 1))
+					.setFontSize(24)
+					.setType(ButtonControl.class)
+					.setVisible(true)
+					.setEnabled(true)
+					.withDimensionAbsolute(200, 60)
+					.withPositionRelative(500, y + 2);
+			this.scrollArea.putRenderingBo(bo);
+			
+			bo = this.renderingBoPool.acquire("DemoModule_ScrollArea_Image_" + i, DrawImageRenderingBo.class)
+					.setResource(new StaticResource(List.of("gfx"), "settings.png"))
+					.withDimensionAbsolute(64, 64)
+					.setLayer(RenderingBoLayer.UI0)
+					.withPositionRelative(750, y);
+			this.scrollArea.putRenderingBo(bo);
+		}
+	}
+	
 	private static ImmutableCoordI2 centeredPosition(final de.extio.game_engine.spatial2.model.CoordI2 dimension) {
 		final var ref = RendererControl.REFERENCE_RESOLUTION;
 		final var x = Math.max(0, (ref.getX() - dimension.getX()) / 2);
