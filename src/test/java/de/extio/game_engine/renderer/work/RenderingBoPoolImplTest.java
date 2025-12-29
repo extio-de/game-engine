@@ -423,6 +423,11 @@ public class RenderingBoPoolImplTest {
 		}
 
 		@Override
+		public RenderingBo withVisibleArea(final int x, final int y, final int width, final int height) {
+			return this;
+		}
+
+		@Override
 		public void setRendererData(final RendererData rendererData) {
 			this.rendererData = rendererData;
 		}
@@ -578,6 +583,11 @@ public class RenderingBoPoolImplTest {
 
 		@Override
 		public RenderingBo withPositionRelative(final de.extio.game_engine.spatial2.model.HasPosition2 position) {
+			return this;
+		}
+
+		@Override
+		public RenderingBo withVisibleArea(final int x, final int y, final int width, final int height) {
 			return this;
 		}
 

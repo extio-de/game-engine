@@ -26,6 +26,5 @@ public interface RenderingBoHasDimension extends RenderingBo {
 	RenderingBoHasDimension withDimensionIncrementalAbsolute(int width, int height);
 	
 	RenderingBoHasDimension withDimensionIncrementalPercentual(double width, double height);
-
-	RenderingBoHasDimension withVisibleArea(int x, int y, int width, int height);
+	
 }

@@ -117,6 +117,11 @@ public interface RenderingBo extends AutoCloseable {
 	 */
 	RenderingBo withPositionRelative(HasPosition2 position);
 
+	/**
+	 * Sets a visible area (clipping area) for this rendering bo. Coordinates are absolute viewport coordinates.
+	 */
+	RenderingBo withVisibleArea(int x, int y, int width, int height);
+
 	void apply(RenderingBo other);
 
 	void staticCleanupAfterFrame();

@@ -624,6 +624,11 @@ public class RendererWorkingSetImplTest {
 		public RenderingBo withPositionRelative(final HasPosition2 position) {
 			return this;
 		}
+
+		@Override
+		public RenderingBo withVisibleArea(int x, int y, int width, int height) {
+			return this;
+		}
 		
 		@Override
 		public void staticCleanupAfterFrame() {
