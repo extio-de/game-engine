@@ -104,7 +104,7 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 		synchronized (this.modulesAll) {
 			this.modulesAllView = List.copyOf(this.modulesAll);
 		}
-		LOGGER.debug("Loaded module {} {}", module.getClass().getName(), module.getId());
+		LOGGER.debug("Loaded module {} {}", module.getId());
 		this.invokeSafe(module, m -> m.onLoad());
 	}
 	
