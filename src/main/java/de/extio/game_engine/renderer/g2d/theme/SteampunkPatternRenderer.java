@@ -3,6 +3,7 @@ package de.extio.game_engine.renderer.g2d.theme;
 import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
+import java.awt.image.BufferedImage;
 
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,8 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 @Conditional(G2DRendererCondition.class)
 @Component
 public class SteampunkPatternRenderer implements PatternRenderer {
+	
+	private java.awt.image.BufferedImage patternCache;
 	
 	@Override
 	public void drawDecorativeBorder(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final Color color) {
@@ -33,18 +36,18 @@ public class SteampunkPatternRenderer implements PatternRenderer {
 		for (int xx = x + s; xx < x + width - s; xx += toothWidth * 2) {
 			final int tw = Math.min(toothWidth, x + width - s - xx);
 			// Top teeth pointing up
-			g2d.fillPolygon(new int[]{xx, xx + tw/2, xx + tw}, new int[]{y, y - toothHeight, y}, 3);
+			g2d.fillPolygon(new int[] { xx, xx + tw / 2, xx + tw }, new int[] { y, y - toothHeight, y }, 3);
 			// Bottom teeth pointing down
-			g2d.fillPolygon(new int[]{xx, xx + tw/2, xx + tw}, new int[]{y + height, y + height + toothHeight, y + height}, 3);
+			g2d.fillPolygon(new int[] { xx, xx + tw / 2, xx + tw }, new int[] { y + height, y + height + toothHeight, y + height }, 3);
 		}
 		
 		// Add gear teeth on left and right
 		for (int yy = y + s; yy < y + height - s; yy += toothWidth * 2) {
 			final int th = Math.min(toothWidth, y + height - s - yy);
 			// Left teeth pointing left
-			g2d.fillPolygon(new int[]{x, x - toothHeight, x}, new int[]{yy, yy + th/2, yy + th}, 3);
+			g2d.fillPolygon(new int[] { x, x - toothHeight, x }, new int[] { yy, yy + th / 2, yy + th }, 3);
 			// Right teeth pointing right
-			g2d.fillPolygon(new int[]{x + width, x + width + toothHeight, x + width}, new int[]{yy, yy + th/2, yy + th}, 3);
+			g2d.fillPolygon(new int[] { x + width, x + width + toothHeight, x + width }, new int[] { yy, yy + th / 2, yy + th }, 3);
 		}
 		
 		// Draw rivets at corners and along borders
@@ -139,49 +142,64 @@ public class SteampunkPatternRenderer implements PatternRenderer {
 		g2d.fillRect(centerX - crossSize / 2, centerY - t / 2, crossSize, t);
 		g2d.fillRect(centerX - t / 2, centerY - crossSize / 2, t, crossSize);
 	}
-
+	
+	private java.awt.image.BufferedImage getPatternCache() {
+		if (this.patternCache == null) {
+			final int cellSize = 100;
+			this.patternCache = new BufferedImage(cellSize, cellSize, java.awt.image.BufferedImage.TYPE_INT_ARGB);
+			final Graphics2D g2d = this.patternCache.createGraphics();
+			
+			// Clear background (transparent)
+			g2d.setBackground(new Color(0, 0, 0, 0));
+			g2d.clearRect(0, 0, cellSize, cellSize);
+			
+			// Draw pattern
+			g2d.setColor(new Color(210, 180, 140, 40)); // light brown for steam
+			final int cx = cellSize / 2;
+			final int cy = cellSize / 2;
+			final int radius = cellSize / 6;
+			
+			// Draw gear with more teeth
+			g2d.drawOval(cx - radius, cy - radius, radius * 2, radius * 2);
+			for (int i = 0; i < 12; i++) {
+				final double angle = i * Math.PI / 6;
+				final int tx = cx + (int) (radius * 1.3 * Math.cos(angle));
+				final int ty = cy + (int) (radius * 1.3 * Math.sin(angle));
+				g2d.drawLine(cx, cy, tx, ty);
+			}
+			
+			// Draw connecting pipes
+			// Horizontal pipe to left
+			g2d.drawLine(0, cy, cx, cy);
+			// Vertical pipe to top
+			g2d.drawLine(cx, 0, cx, cy);
+			
+			// Draw steam puffs (small circles) at fixed positions
+			g2d.setColor(new Color(255, 255, 255, 20));
+			g2d.fillOval(cx - 10, cy - radius - 5, 4, 4);
+			g2d.fillOval(cx + 5, cy - radius - 10, 4, 4);
+			g2d.fillOval(cx + 15, cy - radius - 2, 4, 4);
+			
+			g2d.dispose();
+		}
+		return this.patternCache;
+	}
+	
 	@Override
 	public void drawBackgroundPattern(final Graphics2D g2d, final CoordI2 offset, final CoordI2 viewPort) {
-		g2d.setColor(new Color(210, 180, 140, 40)); // light brown for steam
-		final int cellSize = 100;
+		final var cache = this.getPatternCache();
+		final int cellSize = cache.getWidth();
+		
 		final int offX = Math.floorMod(offset.getX(), cellSize);
 		final int offY = Math.floorMod(offset.getY(), cellSize);
 		
 		for (int x = -cellSize; x < viewPort.getX() + cellSize; x += cellSize) {
 			for (int y = -cellSize; y < viewPort.getY() + cellSize; y += cellSize) {
-				final int cx = x + offX + cellSize / 2;
-				final int cy = y + offY + cellSize / 2;
-				final int radius = cellSize / 6;
-				
-				// Draw gear with more teeth
-				g2d.drawOval(cx - radius, cy - radius, radius * 2, radius * 2);
-				for (int i = 0; i < 12; i++) {
-					final double angle = i * Math.PI / 6;
-					final int tx = cx + (int) (radius * 1.3 * Math.cos(angle));
-					final int ty = cy + (int) (radius * 1.3 * Math.sin(angle));
-					g2d.drawLine(cx, cy, tx, ty);
-				}
-				
-				// Draw connecting pipes
-				if (x > -cellSize) {
-					g2d.drawLine(cx - cellSize, cy, cx, cy); // horizontal pipe
-				}
-				if (y > -cellSize) {
-					g2d.drawLine(cx, cy - cellSize, cx, cy); // vertical pipe
-				}
-				
-				// Draw steam puffs (small circles)
-				g2d.setColor(new Color(255, 255, 255, 20));
-				for (int i = 0; i < 3; i++) {
-					final int sx = cx + (int) ((Math.random() - 0.5) * radius * 2);
-					final int sy = cy - radius - (int) (Math.random() * radius);
-					g2d.fillOval(sx - 2, sy - 2, 4, 4);
-				}
-				g2d.setColor(new Color(210, 180, 140, 40));
+				g2d.drawImage(cache, x + offX, y + offY, null);
 			}
 		}
 	}
-
+	
 	@Override
 	public void drawButton(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean enabled, final int state, final Color backgroundColor, final double scaleFactor, final Theme theme) {
 		final int STATE_TOGGLED = 1;
