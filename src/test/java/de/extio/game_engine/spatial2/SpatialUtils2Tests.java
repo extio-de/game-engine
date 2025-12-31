@@ -9,7 +9,9 @@
 package de.extio.game_engine.spatial2;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertNull;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import org.junit.jupiter.api.Test;
 
@@ -19,8 +21,9 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.Edge2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordD2;
+import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
-public class WorldUtils2Tests {
+public class SpatialUtils2Tests {
 	
 	@Test
 	public void testVectorAngle() {
@@ -75,6 +78,10 @@ public class WorldUtils2Tests {
 			}
 		}
 	}
+
+	private void calcAngle(final CoordD2 v0, final CoordD2 v1) {
+		System.out.println(SpatialUtils2.getVectorAngle(v0, v1) + " " + v0 + " " + v1);
+	}
 	
 	@Test
 	public void testWorldUtils2PointsToArea() {
@@ -109,8 +116,73 @@ public class WorldUtils2Tests {
 		assertNull(result);
 	}
 	
-	private void calcAngle(final CoordD2 v0, final CoordD2 v1) {
-		System.out.println(SpatialUtils2.getVectorAngle(v0, v1) + " " + v0 + " " + v1);
+	@Test
+	public void testIntersectAreasNoOverlap() {
+		final Area2 a0 = new Area2(ImmutableCoordI2.create(0, 0), ImmutableCoordI2.create(10, 10));
+		final Area2 a1 = new Area2(ImmutableCoordI2.create(20, 20), ImmutableCoordI2.create(10, 10));
+		assertNull(SpatialUtils2.intersectAreas(a0, a1));
+
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a1, intersection);
+		assertFalse(intersects);
+	}
+	
+	@Test
+	public void testIntersectAreasOverlap() {
+		final Area2 a0 = new Area2(ImmutableCoordI2.create(0, 0), ImmutableCoordI2.create(10, 10));
+		final Area2 a1 = new Area2(ImmutableCoordI2.create(5, 5), ImmutableCoordI2.create(10, 10));
+		final Area2 expected = new Area2(ImmutableCoordI2.create(5, 5), ImmutableCoordI2.create(5, 5));
+		assertEquals(expected, SpatialUtils2.intersectAreas(a0, a1));
+
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a1, intersection);
+		assertTrue(intersects);
+		assertEquals(expected, intersection);
+	}
+	
+	@Test
+	public void testIntersectAreasOneInsideOther() {
+		final Area2 a0 = new Area2(ImmutableCoordI2.create(0, 0), ImmutableCoordI2.create(20, 20));
+		final Area2 a1 = new Area2(ImmutableCoordI2.create(5, 5), ImmutableCoordI2.create(10, 10));
+		assertEquals(a1, SpatialUtils2.intersectAreas(a0, a1));
+
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a1, intersection);
+		assertTrue(intersects);
+		assertEquals(a1, intersection);
+	}
+	
+	@Test
+	public void testIntersectAreasTouching() {
+		final Area2 a0 = new Area2(ImmutableCoordI2.create(0, 0), ImmutableCoordI2.create(10, 10));
+		final Area2 a1 = new Area2(ImmutableCoordI2.create(10, 0), ImmutableCoordI2.create(10, 10));
+		assertNull(SpatialUtils2.intersectAreas(a0, a1));
+
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a1, intersection);
+		assertFalse(intersects);
+	}
+	
+	@Test
+	public void testIntersectAreasZeroDimension() {
+		final Area2 a0 = new Area2(ImmutableCoordI2.create(0, 0), ImmutableCoordI2.create(0, 0));
+		final Area2 a1 = new Area2(ImmutableCoordI2.create(0, 0), ImmutableCoordI2.create(10, 10));
+		assertNull(SpatialUtils2.intersectAreas(a0, a1));
+
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a1, intersection);
+		assertFalse(intersects);
+	}
+	
+	@Test
+	public void testIntersectAreasSameArea() {
+		final Area2 a0 = new Area2(ImmutableCoordI2.create(0, 0), ImmutableCoordI2.create(10, 10));
+		assertEquals(a0, SpatialUtils2.intersectAreas(a0, a0));
+
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a0, intersection);
+		assertTrue(intersects);
+		assertEquals(a0, intersection);
 	}
 	
 }
