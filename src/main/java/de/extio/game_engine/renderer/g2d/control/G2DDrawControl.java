@@ -29,11 +29,12 @@ import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
+import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
-import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
 @Conditional(G2DRendererCondition.class)
 @Component
@@ -66,6 +67,12 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private boolean enabled = true;
 	
 	private String tooltip;
+	
+	private Area2 visibleArea = null;
+	
+	private Area2 controlArea = null;
+	
+	private final Area2 tempArea = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
 	
 	public G2DDrawControl() {
 		super(RenderingBoLayer.UI0);
@@ -138,12 +145,32 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	}
 	
 	@Override
+	public RenderingBo withVisibleArea(final int x, final int y, final int width, final int height) {
+		if (this.visibleArea == null ||
+				this.visibleArea.getPosition().getX() != x ||
+				this.visibleArea.getPosition().getY() != y ||
+				this.visibleArea.getDimension().getX() != width ||
+				this.visibleArea.getDimension().getY() != height) {
+			
+			this.visibleArea = new Area2(ImmutableCoordI2.create(x, y), ImmutableCoordI2.create(width, height));
+			super.withVisibleArea(x, y, width, height);
+		}
+		
+		return this;
+	}
+	
+	@Override
 	public void render(final Graphics2D graphics, final double scaleFactor, final boolean force) {
 		if (visibleAreaX != 0 || visibleAreaY != 0 || visibleAreaWidth != 0 || visibleAreaHeight != 0) {
-			final var controlArea = new Area2(ImmutableCoordI2.create(this.x, this.y), ImmutableCoordI2.create(this.width, this.height));
-			final var visibleArea = new Area2(ImmutableCoordI2.create(this.visibleAreaX, this.visibleAreaY), ImmutableCoordI2.create(this.visibleAreaWidth, this.visibleAreaHeight));
-			final var intersection = SpatialUtils2.intersectAreas(controlArea, visibleArea);
-			if (intersection == null) {
+			if (this.controlArea == null ||
+					this.controlArea.getPosition().getX() != this.x ||
+					this.controlArea.getPosition().getY() != this.y ||
+					this.controlArea.getDimension().getX() != this.width ||
+					this.controlArea.getDimension().getY() != this.height) {
+				
+				this.controlArea = new Area2(ImmutableCoordI2.create(this.x, this.y), ImmutableCoordI2.create(this.width, this.height));
+			}
+			if (!SpatialUtils2.intersectAreasMutable(this.controlArea, this.visibleArea, this.tempArea)) {
 				return;
 			}
 		}
@@ -216,7 +243,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			
 			LOGGER.debug("Added control " + control.toString());
 		}
-
+		
 		this.setControlProps(control, scaleFactor);
 		control.setMainFrameGraphics(graphics);
 		control.setInUse(true);
@@ -347,6 +374,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.visible = o.visible;
 			this.enabled = o.enabled;
 			this.tooltip = o.tooltip;
+			this.visibleArea = o.visibleArea;
+			this.controlArea = o.controlArea;
 		}
 	}
 	
@@ -366,6 +395,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.visible = false;
 		this.enabled = true;
 		this.tooltip = null;
+		this.visibleArea = null;
+		this.controlArea = null;
 	}
 	
 	@Override

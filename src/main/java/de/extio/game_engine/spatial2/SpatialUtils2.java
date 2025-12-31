@@ -1,6 +1,5 @@
 package de.extio.game_engine.spatial2;
 
-import java.awt.Rectangle;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -188,19 +187,16 @@ public final class SpatialUtils2 {
 	 */
 	//	@Deprecated
 	public static RectI2 intersectRectangles(final RectI2 r0, final RectI2 r1) {
-		final CoordI2 size0 = ImmutableCoordI2.create(r0.getC1().getX() - r0.getC0().getX(), r0.getC1().getY() - r0.getC0().getY());
-		final CoordI2 size1 = ImmutableCoordI2.create(r1.getC1().getX() - r1.getC0().getX(), r1.getC1().getY() - r1.getC0().getY());
-		final var rect0 = new Rectangle(r0.getC0().getX(), r0.getC0().getY(), size0.getX(), size0.getY());
-		final var rect1 = new Rectangle(r1.getC0().getX(), r1.getC0().getY(), size1.getX(), size1.getY());
-		
-		final var intersection = rect0.intersection(rect1);
-		if (intersection.isEmpty()) {
+		final Area2 a0 = new Area2(r0.getC0(), r0.getC1().toImmutableCoordI2().substract(r0.getC0()));
+		final Area2 a1 = new Area2(r1.getC0(), r1.getC1().toImmutableCoordI2().substract(r1.getC0()));
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a1, intersection);
+		if (!intersects) {
 			return null;
 		}
-		
 		return new RectI2(
-				ImmutableCoordI2.create((int) intersection.getX(), (int) intersection.getY()),
-				ImmutableCoordI2.create((int) (intersection.getX() + intersection.getWidth()), (int) (intersection.getY() + intersection.getHeight())));
+				intersection.getPosition().toImmutableCoordI2(),
+				intersection.getPosition().toImmutableCoordI2().add(intersection.getDimension().toImmutableCoordI2()));
 	}
 	
 	/**
@@ -210,17 +206,50 @@ public final class SpatialUtils2 {
 	 * @return The intersected area if r0 and r1 overlap, else null
 	 */
 	public static Area2 intersectAreas(final HasPositionAndDimension2 a0, final HasPositionAndDimension2 a1) {
-		final var rect0 = new Rectangle(a0.getPosition().getX(), a0.getPosition().getY(), a0.getDimension().getX(), a0.getDimension().getY());
-		final var rect1 = new Rectangle(a1.getPosition().getX(), a1.getPosition().getY(), a1.getDimension().getX(), a1.getDimension().getY());
-		
-		final var intersection = rect0.intersection(rect1);
-		if (intersection.isEmpty()) {
+		final Area2 intersection = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+		final boolean intersects = SpatialUtils2.intersectAreasMutable(a0, a1, intersection);
+		if (!intersects) {
 			return null;
 		}
+		intersection.setPosition(intersection.getPosition().toImmutableCoordI2());
+		intersection.setDimension(intersection.getDimension().toImmutableCoordI2());
+		return intersection;
+	}
+	
+	/**
+	 * Intersects 2 areas and writes the result into a mutable result area
+	 * @param r0 Area 0
+	 * @param r1 Area 1
+	 * @param mutableResult Area to write the result into. The position and dimension will be modified in-place and must be mutable.
+	 * @return true if there is no intersection, false otherwise
+	 */
+	public static boolean intersectAreasMutable(final HasPositionAndDimension2 a0, final HasPositionAndDimension2 a1, final HasPositionAndDimension2 mutableResult) {
+		int tx1 = a0.getPosition().getX();
+		int ty1 = a0.getPosition().getY();
+		final int rx1 = a1.getPosition().getX();
+		final int ry1 = a1.getPosition().getY();
+		long tx2 = tx1 + a0.getDimension().getX();
+		long ty2 = ty1 + a0.getDimension().getY();
+		final long rx2 = rx1 + a1.getDimension().getX();
+		final long ry2 = ry1 + a1.getDimension().getY();
+		if (tx1 < rx1) {
+			tx1 = rx1;
+		}
+		if (ty1 < ry1) {
+			ty1 = ry1;
+		}
+		if (tx2 > rx2) {
+			tx2 = rx2;
+		}
+		if (ty2 > ry2) {
+			ty2 = ry2;
+		}
+		tx2 = Math.max(Integer.MIN_VALUE, tx2 - tx1);
+		ty2 = Math.max(Integer.MIN_VALUE, ty2 - ty1);
 		
-		return new Area2(
-				ImmutableCoordI2.create((int) intersection.getX(), (int) intersection.getY()),
-				ImmutableCoordI2.create((int) intersection.getWidth(), (int) intersection.getHeight()));
+		mutableResult.getPosition().setXY(tx1, ty1);
+		mutableResult.getDimension().setXY((int) tx2, (int) ty2);
+		return (tx2 > 0) && (ty2 > 0);
 	}
 	
 	/**
