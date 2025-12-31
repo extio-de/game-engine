@@ -22,7 +22,7 @@ public class G2DThemeManager implements ThemeManager {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(G2DThemeManager.class);
 	
-	private static final List<String> THEME_STORAGE_PATH = List.of("gameEngine", "themes");
+	private static final List<String> THEME_STORAGE_PATH = List.of("gameEngine");
 	private static final String THEME_STORAGE_NAME = "lastTheme";
 	
 	private G2DRenderer g2dRenderer;

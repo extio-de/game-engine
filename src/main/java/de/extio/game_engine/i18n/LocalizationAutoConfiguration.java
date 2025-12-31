@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.resource.StaticResourceService;
+import de.extio.game_engine.storage.StorageService;
 
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.i18n.enabled", havingValue = "true", matchIfMissing = true)
@@ -24,8 +25,8 @@ public class LocalizationAutoConfiguration {
 	
 	@Bean
 	@ConditionalOnMissingBean
-	LocalizationService localizationManager(@Value("${game-engine.i18n.load-on-start:true}") final boolean loadOnStart, @Value("${game-engine.i18n.resource:i18n/i18n.yaml}") final String resource, final StaticResourceService staticResourceService) {
-		final var localizationManager = new LocalizationServiceImpl();
+	LocalizationService localizationManager(@Value("${game-engine.i18n.load-on-start:true}") final boolean loadOnStart, @Value("${game-engine.i18n.resource:i18n/i18n.yaml}") final String resource, final StaticResourceService staticResourceService, final StorageService storageService) {
+		final var localizationManager = new LocalizationServiceImpl(storageService);
 		
 		if (loadOnStart) {
 			final var path = new File(resource).toPath();

@@ -137,7 +137,7 @@ public class LocalizationEditor extends JFrame {
 	 * Create the frame.
 	 */
 	public LocalizationEditor() {
-		this.localizationManagerImpl = new LocalizationServiceImpl();
+		this.localizationManagerImpl = new LocalizationServiceImpl(null);
 		
 		this.setTitle("i18n Editor");
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);

@@ -10,17 +10,29 @@ import java.io.InputStream;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import de.extio.game_engine.storage.StorageService;
 
 class LocalizationManagerTest {
+	
+	@Mock
+	private StorageService storageService;
 	
 	private LocalizationService localizationManager;
 	
 	@BeforeEach
 	void setUp() {
-		this.localizationManager = new LocalizationServiceImpl();
+		MockitoAnnotations.openMocks(this);
+		this.localizationManager = new LocalizationServiceImpl(storageService);
 	}
 	
 	@Test
@@ -277,5 +289,40 @@ class LocalizationManagerTest {
 		
 		assertEquals("Hello", englishGreeting);
 		assertEquals("Hallo", germanGreeting);
+	}
+	
+	@Test
+	void testPersistCurrentLanguage() {
+		Localizations localizations = this.localizationManager.getLocalizations();
+		Language english = new Language("English", "en");
+		localizations.getLanguagesInfo().put("en", english);
+		localizations.getLanguages().put("en", new LinkedHashMap<>(Map.of("greeting", "Hello")));
+		
+		this.localizationManager.setLanguage("en");
+		
+		verify(storageService).store(List.of("gameEngine"), "currentLanguage", "en");
+	}
+	
+	@Test
+	void testLoadPersistedLanguage() {
+		when(storageService.loadByPath(String.class, List.of("gameEngine"), "currentLanguage"))
+			.thenReturn(Optional.of("de"));
+		
+		// Load localizations with "de"
+		Localizations localizationsToSave = new Localizations();
+		Language german = new Language("German", "de");
+		Map<String, String> germanEntries = new LinkedHashMap<>(Map.of("greeting", "Hallo"));
+		localizationsToSave.getLanguagesInfo().put("de", german);
+		localizationsToSave.getLanguages().put("de", germanEntries);
+		localizationsToSave.setPrefix("i18n.");
+		localizationsToSave.setCurId(1);
+		
+		byte[] serialized = de.extio.game_engine.util.ObjectSerialization.serialize(
+			localizationsToSave, false, false, false, null, digest -> {});
+		InputStream stream = new ByteArrayInputStream(serialized);
+		
+		this.localizationManager.load(stream);
+		
+		assertEquals("de", this.localizationManager.getCurrentLanguage());
 	}
 }

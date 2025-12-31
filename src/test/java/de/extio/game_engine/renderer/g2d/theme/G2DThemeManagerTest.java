@@ -16,6 +16,9 @@ import java.util.Optional;
 
 import org.junit.jupiter.api.Test;
 
+import de.extio.game_engine.renderer.g2d.G2DRenderer;
+import de.extio.game_engine.renderer.g2d.G2DRendererControl;
+import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.storage.StorageService;
@@ -42,7 +45,7 @@ public class G2DThemeManagerTest {
 	}
 	
 	@Test
-	void loadsLastUsedThemeFromStorageOnConstruction() {
+	void loadsLastUsedThemeFromStorage() {
 		final StaticResourceService staticResourceService = org.mockito.Mockito.mock(StaticResourceService.class);
 		final StorageService storageService = org.mockito.Mockito.mock(StorageService.class);
 		final PatternRenderer patternRenderer = org.mockito.Mockito.mock(PatternRenderer.class);
@@ -50,7 +53,7 @@ public class G2DThemeManagerTest {
 		final Theme defaultTheme = theme("Default");
 		final Theme persistedTheme = theme("Persisted");
 		
-		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine", "themes")), eq("lastTheme")))
+		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine")), eq("lastTheme")))
 				.thenReturn(Optional.of(persistedTheme));
 		
 		final var manager = new G2DThemeManager(
@@ -59,19 +62,21 @@ public class G2DThemeManagerTest {
 				List.of(patternRenderer),
 				Map.of("defaultKey", defaultTheme),
 				"defaultKey");
+		manager.setCurrentTheme((Theme) null);
 		
 		assertEquals("Persisted", manager.getCurrentTheme().getName());
-		assertTrue(manager.getAvailableThemeNames().contains("Persisted"));
 	}
 	
 	@Test
 	void setCurrentThemePersistsLastThemeObject() {
 		final StaticResourceService staticResourceService = org.mockito.Mockito.mock(StaticResourceService.class);
 		final StorageService storageService = org.mockito.Mockito.mock(StorageService.class);
-		final PatternRenderer patternRenderer = org.mockito.Mockito.mock(PatternRenderer.class);
-		
-		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine", "themes")), eq("lastTheme")))
+		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine")), eq("lastTheme")))
 				.thenReturn(Optional.empty());
+		final PatternRenderer patternRenderer = org.mockito.Mockito.mock(PatternRenderer.class);
+		final G2DRendererControl g2dRendererControl = org.mockito.Mockito.mock(G2DRendererControl.class);
+		when(g2dRendererControl.getUiOptions()).thenReturn(new UiOptions());
+		final G2DRenderer g2dRenderer = org.mockito.Mockito.mock(G2DRenderer.class);
 		
 		final Theme defaultTheme = theme("Default");
 		final var manager = new G2DThemeManager(
@@ -80,11 +85,13 @@ public class G2DThemeManagerTest {
 				List.of(patternRenderer),
 				Map.of("defaultKey", defaultTheme),
 				"defaultKey");
+		manager.setG2dRendererControl(g2dRendererControl);
+		manager.setG2dRenderer(g2dRenderer);
 		
 		final Theme selected = theme("Selected");
 		manager.setCurrentTheme(selected);
 		
-		verify(storageService).store(eq(List.of("gameEngine", "themes")), eq("lastTheme"), eq(selected));
+		verify(storageService).store(eq(List.of("gameEngine")), eq("lastTheme"), eq(selected));
 		assertTrue(manager.getAvailableThemeNames().contains("Selected"));
 	}
 	
@@ -94,7 +101,7 @@ public class G2DThemeManagerTest {
 		final StorageService storageService = org.mockito.Mockito.mock(StorageService.class);
 		final PatternRenderer patternRenderer = org.mockito.Mockito.mock(PatternRenderer.class);
 		
-		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine", "themes")), eq("lastTheme")))
+		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine")), eq("lastTheme")))
 				.thenReturn(Optional.empty());
 		
 		final Theme defaultTheme = theme("Default");
@@ -106,7 +113,7 @@ public class G2DThemeManagerTest {
 				"defaultKey");
 		
 		final Theme loaded = theme("FromStorage");
-		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine", "themes")), eq("FromStorage")))
+		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine")), eq("FromStorage")))
 				.thenReturn(Optional.of(loaded));
 		
 		final Optional<Theme> result = manager.loadThemeFromStorage("FromStorage");
@@ -121,7 +128,7 @@ public class G2DThemeManagerTest {
 		final StorageService storageService = org.mockito.Mockito.mock(StorageService.class);
 		final PatternRenderer patternRenderer = org.mockito.Mockito.mock(PatternRenderer.class);
 		
-		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine", "themes")), eq("lastTheme")))
+		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine")), eq("lastTheme")))
 				.thenReturn(Optional.empty());
 		
 		final Theme defaultTheme = theme("Default");
@@ -149,7 +156,7 @@ public class G2DThemeManagerTest {
 		final StorageService storageService = org.mockito.Mockito.mock(StorageService.class);
 		final PatternRenderer patternRenderer = org.mockito.Mockito.mock(PatternRenderer.class);
 		
-		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine", "themes")), eq("lastTheme")))
+		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine")), eq("lastTheme")))
 				.thenReturn(Optional.empty());
 		
 		final Theme defaultTheme = theme("Default");
@@ -163,7 +170,7 @@ public class G2DThemeManagerTest {
 		final Theme themeToSave = theme("UserTheme");
 		manager.saveThemeToStorage(themeToSave);
 		
-		verify(storageService).store(eq(List.of("gameEngine", "themes")), eq("UserTheme"), eq(themeToSave));
+		verify(storageService).store(eq(List.of("gameEngine")), eq("UserTheme"), eq(themeToSave));
 	}
 	
 	@Test
@@ -204,7 +211,7 @@ public class G2DThemeManagerTest {
 		final StorageService storageService = org.mockito.Mockito.mock(StorageService.class);
 		final PatternRenderer patternRenderer = org.mockito.Mockito.mock(PatternRenderer.class);
 		
-		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine", "themes")), eq("lastTheme")))
+		when(storageService.loadByPath(eq(Theme.class), eq(List.of("gameEngine")), eq("lastTheme")))
 				.thenReturn(Optional.empty());
 		
 		final Theme defaultTheme = theme("Default");

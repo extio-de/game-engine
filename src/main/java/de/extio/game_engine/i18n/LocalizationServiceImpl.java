@@ -5,10 +5,12 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.extio.game_engine.storage.StorageService;
 import de.extio.game_engine.util.ObjectSerialization;
 
 public class LocalizationServiceImpl implements LocalizationService {
@@ -17,12 +19,21 @@ public class LocalizationServiceImpl implements LocalizationService {
 	
 	public final static String NOT_FOUND_PREFIX = "{i18n.";
 	
+	private static final List<String> LANGUAGE_STORAGE_PATH = List.of("gameEngine");
+	private static final String LANGUAGE_STORAGE_NAME = "currentLanguage";
+
+	private final StorageService storageService;
+	
 	private Localizations localizations = new Localizations();
 	
 	private Map<String, String> currentLanguage;
 	
 	private String currentLanguageName;
 	
+	LocalizationServiceImpl(final StorageService storageService) {
+		this.storageService = storageService;
+	}
+
 	@Override
 	public void resetEntries() {
 		this.localizations.getLanguages().forEach((lang, mapping) -> mapping.clear());
@@ -74,10 +85,12 @@ public class LocalizationServiceImpl implements LocalizationService {
 			LOGGER.info("Loaded {} localizations for {} languages", localizations.getDescriptions().size(), localizations.getLanguages().size());
 		}
 		
+		this.loadPersistedLanguageName();
 		if (this.currentLanguageName == null) {
 			this.currentLanguageName = "en";
 		}
 		this.setLanguage(this.currentLanguageName);
+		
 	}
 	
 	@Override
@@ -88,6 +101,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 		
 		this.currentLanguageName = lang;
 		this.currentLanguage = this.localizations.getLanguages().get(lang);
+		this.persistCurrentLanguageName();
 	}
 	
 	@Override
@@ -169,4 +183,30 @@ public class LocalizationServiceImpl implements LocalizationService {
 		}
 	}
 	
+	private void persistCurrentLanguageName() {
+		if (this.storageService == null) {
+			return;
+		}
+		try {
+			this.storageService.store(LANGUAGE_STORAGE_PATH, LANGUAGE_STORAGE_NAME, this.currentLanguageName);
+		}
+		catch (final Exception e) {
+			LOGGER.warn("Could not persist current language name", e);
+		}
+	}
+
+	private void loadPersistedLanguageName() {
+		if (this.storageService == null) {
+			return;
+		}
+		try {
+			final Optional<String> loaded = this.storageService.loadByPath(String.class, LANGUAGE_STORAGE_PATH, LANGUAGE_STORAGE_NAME);
+			if (loaded.isPresent()) {
+				this.currentLanguageName = loaded.get();
+			}
+		}
+		catch (final Exception e) {
+			LOGGER.warn("Could not load persisted language name", e);
+		}
+	}
 }
