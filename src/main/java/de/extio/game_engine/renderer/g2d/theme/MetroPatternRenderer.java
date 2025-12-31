@@ -117,7 +117,7 @@ public class MetroPatternRenderer implements PatternRenderer {
 
 	private java.awt.image.BufferedImage getPatternCache() {
 		if (this.patternCache == null) {
-			final int spacing = 40;
+			final int spacing = 100;
 			this.patternCache = new BufferedImage(spacing, spacing, java.awt.image.BufferedImage.TYPE_INT_ARGB);
 			final Graphics2D g2d = this.patternCache.createGraphics();
 			
