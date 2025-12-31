@@ -12,7 +12,7 @@ import org.springframework.core.type.AnnotatedTypeMetadata;
 import de.extio.game_engine.demo.DemoModule;
 
 @SpringBootApplication
-public class Main {
+public class Demo {
 	
 	public static void main(final String[] args) {
 		System.setProperty("game-engine.env", "standalone");
@@ -26,14 +26,14 @@ public class Main {
 		// logger.setUseParentHandlers(false);
 		// logger.addHandler(consoleHandler);
 		
-		final SpringApplicationBuilder builder = new SpringApplicationBuilder(Main.class);
+		final SpringApplicationBuilder builder = new SpringApplicationBuilder(Demo.class);
 		builder.headless(false);
 		builder.properties("logging.level.de.extio=TRACE", "game-engine.renderer.title=Exo's Game Engine Demo");
 		builder.run(args);
 	}
 	
 	@Configuration
-	@Conditional(de.extio.game_engine.Main.StandaloneConfig.StandaloneCondition.class)
+	@Conditional(de.extio.game_engine.Demo.StandaloneConfig.StandaloneCondition.class)
 	static class StandaloneConfig {
 		
 		@Bean
