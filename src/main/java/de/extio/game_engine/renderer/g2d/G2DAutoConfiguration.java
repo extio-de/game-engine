@@ -40,7 +40,7 @@ public class G2DAutoConfiguration {
 			final StorageService storageService,
 			final List<PatternRenderer> patternRendererList,
 			final Map<String, Theme> themes,
-			@Value("${game-engine.renderer.default-theme:urbanTheme}") final String defaultThemeName) {
+			@Value("${game-engine.renderer.default-theme:modernTheme}") final String defaultThemeName) {
 		return new G2DThemeManager(staticResourceService, storageService, patternRendererList, themes, defaultThemeName);
 	}
 
