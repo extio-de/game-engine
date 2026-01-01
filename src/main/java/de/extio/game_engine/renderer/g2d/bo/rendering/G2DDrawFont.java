@@ -91,7 +91,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		graphics.setColor(this.color == null ? this.rendererData.getThemeManager().getCurrentTheme().getTextNormal().toColor() : this.color.toAwtColor());
 		
 		final var lines = this.text.contains("\n") ? this.text.split("\n", -1) : new String[] { this.text };
-		final var lineHeight = getTextDimensions("M", graphics, this.size, 1.0).getY() + (int) (Math.max(FONT_SIZE_MIN, this.size) * 0.4 * scaleFactor);
+		final var lineHeight = getTextDimensions("M", graphics, this.size, 1.0).getY() + (int) (Math.max(FONT_SIZE_MIN, this.size) * 0.5);
 		final CoordI2[] lineDims = new CoordI2[lines.length];
 		int maxLineWidth = 0;
 		for (int i = 0; i < lines.length; i++) {
