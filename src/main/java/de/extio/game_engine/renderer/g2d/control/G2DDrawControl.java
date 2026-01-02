@@ -52,7 +52,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	private String controlGroup;
 	
-	private int fontSize = 16;
+	private int fontSize = 18;
 	
 	private Object customData;
 	
