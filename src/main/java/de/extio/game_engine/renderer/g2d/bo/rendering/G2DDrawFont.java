@@ -22,7 +22,6 @@ import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
-import de.extio.game_engine.spatial2.model.MutableCoordD2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
 @Conditional(G2DRendererCondition.class)
@@ -31,7 +30,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	
 	private final static float FONT_SIZE_MIN = 12.0F;
 	
-	private final static int FONT_SIZE_DEFAULT = 14;
+	private final static int FONT_SIZE_DEFAULT = 18;
 	
 	private static Font baseFont;
 	
