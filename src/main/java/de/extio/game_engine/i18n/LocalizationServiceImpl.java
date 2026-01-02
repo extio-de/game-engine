@@ -135,6 +135,17 @@ public class LocalizationServiceImpl implements LocalizationService {
 	}
 	
 	@Override
+	public String translate(final String id, final List<String> params) {
+		String result = this.translate(id);
+		if (params != null && !params.isEmpty()) {
+			for (int i = 0; i < params.size(); i++) {
+				result = result.replace("{" + i + "}", params.get(i));
+			}
+		}
+		return result;
+	}
+	
+	@Override
 	public void put(final String lang, final String id, final String value) {
 		final Map<String, String> mapping = this.localizations.getLanguages().get(lang);
 		if (mapping == null) {

@@ -21,6 +21,8 @@ public interface LocalizationService {
 	
 	String translate(String id, String defaultText);
 	
+	String translate(String id, List<String> params);
+	
 	void put(String lang, String id, String value);
 	
 	void remove(String id);
