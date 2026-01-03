@@ -4,11 +4,28 @@ import de.extio.game_engine.renderer.g2d.control.G2DDrawControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SwitchControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonData;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SwitchData;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 
 public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonControlImpl implements ToggleButtonControl, SwitchControl {
 	
 	protected boolean drawBorder = true;
+	
+	protected void applyToggleButtonData(final ToggleButtonData data) {
+		if (data != null) {
+			this.setToggled(data.toggled());
+			this.setIconResource(data.iconResource());
+		}
+	}
+	
+	protected void applySwitchData(final SwitchData data) {
+		if (data != null) {
+			this.setToggled(data.toggled());
+			this.setIconResource(data.iconResource());
+			this.setDrawBorder(data.drawBorder());
+		}
+	}
 	
 	@Override
 	public void performAction() {
@@ -18,26 +35,22 @@ public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonContro
 		}
 	}
 	
-	@Override
-	public boolean isToggled() {
+	private boolean isToggled() {
 		return this.control.isToggled();
 	}
 	
-	@Override
-	public void setToggled(final boolean toggled) {
+	private void setToggled(final boolean toggled) {
 		if (this.control != null && toggled != this.control.isToggled()) {
 			this.control.setToggled(toggled);
 			this.manageCtrlGroupToggleState();
 		}
 	}
 	
-	@Override
-	public boolean isDrawBorder() {
+	private boolean isDrawBorder() {
 		return this.drawBorder;
 	}
 	
-	@Override
-	public void setDrawBorder(final boolean draw) {
+	private void setDrawBorder(final boolean draw) {
 		this.modified |= draw != this.drawBorder;
 		this.drawBorder = draw;
 	}

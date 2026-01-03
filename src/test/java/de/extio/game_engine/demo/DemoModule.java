@@ -19,7 +19,9 @@ import de.extio.game_engine.renderer.container.Window;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonData;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelData;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SwitchControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonControl;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
@@ -238,7 +240,7 @@ public class DemoModule extends AbstractClientModule {
 				.setTooltip(this.localizationService.translate("test-7"))
 				.setVisible(true)
 				.setEnabled(true)
-				.setCustomData2(new StaticResource(List.of("gfx"), "settings.png"))
+				.setControlData(new ButtonData(null, new StaticResource(List.of("gfx"), "settings.png")))
 				.withDimensionAbsolute(64, 64)
 				.withPositionRelative(buttonX, buttonY);
 		this.mainWindow.putRenderingBo(bo);
@@ -487,7 +489,7 @@ public class DemoModule extends AbstractClientModule {
 					.setCaption("Item " + (i + 1) + "")
 					.setFontSize(28)
 					.setType(LabelControl.class)
-					.setCustomData2(HorizontalAlignment.LEFT)
+					.setControlData(new LabelData(null, null, HorizontalAlignment.LEFT))
 					.setVisible(true)
 					.setEnabled(true)
 					.withDimensionAbsolute(100, 60)

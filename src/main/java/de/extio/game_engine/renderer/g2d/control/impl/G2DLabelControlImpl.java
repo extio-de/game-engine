@@ -4,6 +4,7 @@ import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomLabel;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 
@@ -18,34 +19,37 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 	protected HorizontalAlignment textAlignment;
 	
 	@Override
-	public RgbaColor getBackgroundColor() {
+	public void setCustomData(final LabelData data) {
+		if (data != null) {
+			this.setBackgroundColor(data.backgroundColor());
+			this.setForegroundColor(data.foregroundColor());
+			this.setTextAlignment(data.textAlignment());
+		}
+	}
+	
+	private RgbaColor getBackgroundColor() {
 		return this.backgroundColor;
 	}
 	
-	@Override
-	public void setBackgroundColor(final RgbaColor color) {
+	private void setBackgroundColor(final RgbaColor color) {
 		this.modified |= (color == null) ? this.backgroundColor != null : !color.equals(this.backgroundColor);
 		this.backgroundColor = color;
 	}
 	
-	@Override
-	public RgbaColor getForegroundColor() {
+	private RgbaColor getForegroundColor() {
 		return this.foregroundColor;
 	}
 	
-	@Override
-	public void setForegroundColor(final RgbaColor color) {
+	private void setForegroundColor(final RgbaColor color) {
 		this.modified |= (color != null) && !color.equals(this.foregroundColor);
 		this.foregroundColor = color;
 	}
 	
-	@Override
-	public HorizontalAlignment getTextAlignment() {
+	private HorizontalAlignment getTextAlignment() {
 		return this.textAlignment;
 	}
 	
-	@Override
-	public void setTextAlignment(final HorizontalAlignment alignment) {
+	private void setTextAlignment(final HorizontalAlignment alignment) {
 		this.modified |= alignment != this.textAlignment;
 		this.textAlignment = alignment;
 	}

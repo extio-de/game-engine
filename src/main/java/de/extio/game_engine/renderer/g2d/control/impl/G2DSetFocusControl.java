@@ -2,18 +2,24 @@ package de.extio.game_engine.renderer.g2d.control.impl;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SetFocusControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SetFocusData;
 
 public class G2DSetFocusControl extends G2DBaseControlImpl implements SetFocusControl {
 	
 	protected String focusId;
 	
 	@Override
-	public String getFocusId() {
+	public void setCustomData(final SetFocusData data) {
+		if (data != null) {
+			this.setFocusId(data.focusId());
+		}
+	}
+	
+	private String getFocusId() {
 		return this.focusId;
 	}
 	
-	@Override
-	public void setFocusId(final String id) {
+	private void setFocusId(final String id) {
 		this.focusId = id;
 	}
 	

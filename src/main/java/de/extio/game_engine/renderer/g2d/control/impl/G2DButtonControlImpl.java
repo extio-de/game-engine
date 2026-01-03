@@ -7,6 +7,7 @@ import de.extio.game_engine.renderer.g2d.control.components.CustomAbstractButton
 import de.extio.game_engine.renderer.g2d.control.components.CustomButton;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.resource.StaticResource;
@@ -18,6 +19,14 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	protected StaticResource iconResource;
 	
 	private RgbaColor backgroundColor;
+	
+	@Override
+	public void setCustomData(final ButtonData data) {
+		if (data != null) {
+			this.setBackgroundColor(data.backgroundColor());
+			this.setIconResource(data.iconResource());
+		}
+	}
 	
 	@Override
 	public void build() {
@@ -92,24 +101,20 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 		}
 	}
 	
-	@Override
-	public void setIconResource(final StaticResource iconResource) {
+	protected void setIconResource(final StaticResource iconResource) {
 		this.modified |= !Objects.equals(this.iconResource, iconResource);
 		this.iconResource = iconResource;
 	}
 	
-	@Override
-	public StaticResource getIconResource() {
+	private StaticResource getIconResource() {
 		return this.iconResource;
 	}
 	
-	@Override
-	public RgbaColor getBackgroundColor() {
+	private RgbaColor getBackgroundColor() {
 		return this.backgroundColor;
 	}
 	
-	@Override
-	public void setBackgroundColor(final RgbaColor backgroundColor) {
+	private void setBackgroundColor(final RgbaColor backgroundColor) {
 		this.modified |= !Objects.equals(this.backgroundColor, backgroundColor);
 		this.backgroundColor = backgroundColor;
 	}

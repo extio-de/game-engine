@@ -6,6 +6,7 @@ import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomSlider;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 
@@ -23,6 +24,16 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 	
 	protected Consumer<Double> actionConsumer;
 	
+	@Override
+	public void setCustomData(final SliderData data) {
+		if (data != null) {
+			this.setColor(data.color());
+			this.setHorizontal(data.horizontal());
+			this.setValue(data.value());
+			this.setValue2(data.value2());
+		}
+	}
+	
 	public G2DSliderControlImpl() {
 		
 	}
@@ -31,46 +42,38 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 		this.actionConsumer = actionConsumer;
 	}
 	
-	@Override
-	public RgbaColor getColor() {
+	RgbaColor getColor() {
 		return this.color;
 	}
 	
-	@Override
-	public void setColor(final RgbaColor color) {
+	void setColor(final RgbaColor color) {
 		this.modified |= (color != null) && !color.equals(this.color);
 		this.color = color;
 	}
 	
-	@Override
-	public double getValue() {
+	double getValue() {
 		return this.lastValue;
 	}
 	
-	@Override
-	public void setValue(final double value) {
+	void setValue(final double value) {
 		this.modified |= value != this.lastValue;
 		this.lastValue = value;
 	}
 	
-	@Override
-	public double getValue2() {
+	double getValue2() {
 		return this.lastValue2;
 	}
 	
-	@Override
-	public void setValue2(final double value2) {
+	void setValue2(final double value2) {
 		this.modified |= value2 != this.lastValue2;
 		this.lastValue2 = value2;
 	}
 	
-	@Override
-	public boolean isHorizontal() {
+	boolean isHorizontal() {
 		return this.horizontal;
 	}
 	
-	@Override
-	public void setHorizontal(final boolean horizontal) {
+	void setHorizontal(final boolean horizontal) {
 		this.modified |= horizontal != this.horizontal;
 		this.horizontal = horizontal;
 	}

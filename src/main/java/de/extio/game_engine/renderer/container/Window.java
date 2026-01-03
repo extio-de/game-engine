@@ -22,6 +22,8 @@ import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowPanelControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowPanelData;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonData;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
 import de.extio.game_engine.renderer.model.bo.VerticalAlignment;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
@@ -245,7 +247,7 @@ public class Window extends AbstractClientModule implements InitializingBean {
 		
 		final var windowPanel = this.renderingBoPool.acquire(this.id + "_WindowPanel", ControlRenderingBo.class)
 				.setType(WindowPanelControl.class)
-				.setCustomData(true)
+				.setControlData(new WindowPanelData(true, null))
 				.setEnabled(true)
 				.setVisible(true)
 				.withDimensionAbsolute(this.area.getDimension())
@@ -258,7 +260,7 @@ public class Window extends AbstractClientModule implements InitializingBean {
 			this.closeButtonName = this.id + "_CloseButton";
 			final var closeButtonBo = this.renderingBoPool.acquire(this.closeButtonName, ControlRenderingBo.class)
 					.setType(WindowCloseButtonControl.class)
-					.setCustomData(true)
+					.setControlData(new WindowCloseButtonData(true))
 					.setEnabled(true)
 					.setVisible(true)
 					.withDimensionAbsolute(this.area.getDimension())

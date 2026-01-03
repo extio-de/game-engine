@@ -14,6 +14,7 @@ import de.extio.game_engine.renderer.g2d.control.components.CustomTextField;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 
@@ -26,12 +27,19 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 	private String lastText;
 	
 	@Override
-	public boolean isMultiLine() {
+	public void setCustomData(final TextfieldData data) {
+		if (data != null) {
+			this.setMultiLine(data.multiLine());
+			this.setReadonly(data.readonly());
+			this.setBackgroundColor(data.backgroundColor());
+		}
+	}
+	
+	private boolean isMultiLine() {
 		return this.multiLine;
 	}
 	
-	@Override
-	public void setMultiLine(final boolean multiLine) {
+	private void setMultiLine(final boolean multiLine) {
 		if (this.textComponent != null) {
 			throw new UnsupportedOperationException("Multiline property is read-only after initial control creation");
 		}
@@ -165,23 +173,19 @@ public class G2DTextfieldControlImpl extends G2DBaseControlImpl implements Textf
 		}
 	}
 	
-	@Override
-	public RgbaColor getBackgroundColor() {
+	private RgbaColor getBackgroundColor() {
 		return null;
 	}
 	
-	@Override
-	public void setBackgroundColor(final RgbaColor color) {
+	private void setBackgroundColor(final RgbaColor color) {
 		
 	}
 	
-	@Override
-	public boolean isReadonly() {
+	private boolean isReadonly() {
 		return false;
 	}
 	
-	@Override
-	public void setReadonly(final boolean readonly) {
+	private void setReadonly(final boolean readonly) {
 		
 	}
 	

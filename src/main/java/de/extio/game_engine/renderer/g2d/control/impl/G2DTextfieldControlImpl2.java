@@ -17,6 +17,7 @@ import de.extio.game_engine.renderer.g2d.control.components.CustomJTextField;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 
@@ -42,43 +43,46 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	
 	private double scrollPositionPerc = 0.0;
 	
+	@Override
+	public void setCustomData(final TextfieldData data) {
+		if (data != null) {
+			this.setMultiLine(data.multiLine());
+			this.setReadonly(data.readonly());
+			this.setBackgroundColor(data.backgroundColor());
+		}
+	}
+	
 	public G2DTextfieldControlImpl2() {
 		this.scrollbar = new G2DSliderControlImpl(value -> {
 			this.onScroll(value.doubleValue());
 		});
 	}
 	
-	@Override
-	public RgbaColor getBackgroundColor() {
+	private RgbaColor getBackgroundColor() {
 		return this.backgroundColor;
 	}
 	
-	@Override
-	public void setBackgroundColor(final RgbaColor color) {
+	private void setBackgroundColor(final RgbaColor color) {
 		this.modified |= (color == null) ? this.backgroundColor != null : !color.equals(this.backgroundColor);
 		this.backgroundColor = color;
 	}
 	
-	@Override
-	public boolean isMultiLine() {
+	private boolean isMultiLine() {
 		return this.multiLine;
 	}
 	
-	@Override
-	public void setMultiLine(final boolean multiLine) {
+	private void setMultiLine(final boolean multiLine) {
 		if (this.textComponent != null) {
 			throw new UnsupportedOperationException("Multiline property is read-only after initial control creation");
 		}
 		this.multiLine = multiLine;
 	}
 	
-	@Override
-	public boolean isReadonly() {
+	private boolean isReadonly() {
 		return this.readonly;
 	}
 	
-	@Override
-	public void setReadonly(final boolean readonly) {
+	private void setReadonly(final boolean readonly) {
 		this.modified |= readonly != this.readonly;
 		this.readonly = readonly;
 	}

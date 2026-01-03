@@ -22,6 +22,7 @@ import de.extio.game_engine.renderer.g2d.control.components.CustomTable;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.BaseControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TableControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TableData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
@@ -50,6 +51,16 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 		this.scrollbar = new G2DSliderControlImpl(value -> {
 			this.onScroll(value.doubleValue());
 		});
+	}
+	
+	@Override
+	public void setCustomData(final TableData data) {
+		if (data != null) {
+			this.setData(data.data());
+			this.setRows(data.rows());
+			this.setVersion(data.version());
+			this.setFirstColDoubleSize(data.firstColDoubleSize());
+		}
 	}
 	
 	@Override
@@ -247,45 +258,37 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 		return super.setControlId(id);
 	}
 	
-	@Override
-	public List<Object> getData() {
+	private List<Object> getData() {
 		return this.data;
 	}
 	
-	@Override
-	public void setData(final List<Object> data) {
+	private void setData(final List<Object> data) {
 		this.data = data;
 	}
 	
-	@Override
-	public int getRows() {
+	private int getRows() {
 		return this.rows;
 	}
 	
-	@Override
-	public void setRows(final int rows) {
+	private void setRows(final int rows) {
 		this.rows = rows;
 	}
 	
-	@Override
-	public long getVersion() {
+	private long getVersion() {
 		return this.version;
 	}
 	
-	@Override
-	public void setVersion(final long version) {
+	private void setVersion(final long version) {
 		this.modified |= version != this.version;
 		this.dataModified |= version != this.version;
 		this.version = version;
 	}
 	
-	@Override
-	public boolean isFirstColDoubleSize() {
+	private boolean isFirstColDoubleSize() {
 		return this.firstColDoubleSize;
 	}
 	
-	@Override
-	public void setFirstColDoubleSize(final boolean firstColDoubleSize) {
+	private void setFirstColDoubleSize(final boolean firstColDoubleSize) {
 		this.firstColDoubleSize = firstColDoubleSize;
 	}
 	

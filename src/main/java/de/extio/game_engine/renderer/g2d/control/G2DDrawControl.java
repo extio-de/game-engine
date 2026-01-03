@@ -29,9 +29,6 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowPanelControlImpl;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
-import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
-import de.extio.game_engine.renderer.model.color.RgbaColor;
-import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.spatial2.SpatialUtils2;
 import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
@@ -55,13 +52,25 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	private int fontSize = G2DDrawFont.FONT_SIZE_DEFAULT;
 	
-	private Object customData;
+	private LabelData labelData;
 	
-	private Object customData2;
+	private ButtonData buttonData;
 	
-	private Object customData3;
+	private ToggleButtonData toggleButtonData;
 	
-	private Object customData4;
+	private SwitchData switchData;
+	
+	private WindowCloseButtonData windowCloseButtonData;
+	
+	private WindowPanelData windowPanelData;
+	
+	private TextfieldData textfieldData;
+	
+	private SliderData sliderData;
+	
+	private TableData tableData;
+	
+	private SetFocusData setFocusData;
 	
 	private boolean visible;
 	
@@ -104,26 +113,37 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	}
 	
 	@Override
-	public ControlRenderingBo setCustomData(final Object data) {
-		this.customData = data;
-		return this;
-	}
-	
-	@Override
-	public ControlRenderingBo setCustomData2(final Object data) {
-		this.customData2 = data;
-		return this;
-	}
-	
-	@Override
-	public ControlRenderingBo setCustomData3(final Object data) {
-		this.customData3 = data;
-		return this;
-	}
-	
-	@Override
-	public ControlRenderingBo setCustomData4(final Object data) {
-		this.customData4 = data;
+	public ControlRenderingBo setControlData(final Object data) {
+		if (data instanceof final LabelData labelData) {
+			this.labelData = labelData;
+		}
+		else if (data instanceof final ButtonData buttonData) {
+			this.buttonData = buttonData;
+		}
+		else if (data instanceof final ToggleButtonData toggleButtonData) {
+			this.toggleButtonData = toggleButtonData;
+		}
+		else if (data instanceof final SwitchData switchData) {
+			this.switchData = switchData;
+		}
+		else if (data instanceof final WindowCloseButtonData windowCloseButtonData) {
+			this.windowCloseButtonData = windowCloseButtonData;
+		}
+		else if (data instanceof final WindowPanelData windowPanelData) {
+			this.windowPanelData = windowPanelData;
+		}
+		else if (data instanceof final TextfieldData textfieldData) {
+			this.textfieldData = textfieldData;
+		}
+		else if (data instanceof final SliderData sliderData) {
+			this.sliderData = sliderData;
+		}
+		else if (data instanceof final TableData tableData) {
+			this.tableData = tableData;
+		}
+		else if (data instanceof final SetFocusData setFocusData) {
+			this.setFocusData = setFocusData;
+		}
 		return this;
 	}
 	
@@ -224,8 +244,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 					.setControlGroup(this.controlGroup)
 					.setRendererData(this.rendererData)
 					.setControlId(this.id);
-			if (this.clazz == TextfieldControl.class && this.customData instanceof Boolean) {
-				((TextfieldControl) control).setMultiLine(((Boolean) this.customData).booleanValue());
+			if (this.clazz == TextfieldControl.class && this.textfieldData != null) {
+				((TextfieldControl) control).setCustomData(this.textfieldData);
 			}
 			this.setControlProps(control, scaleFactor);
 			
@@ -251,7 +271,6 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		control.render();
 	}
 	
-	@SuppressWarnings("unchecked")
 	private void setControlProps(final G2DBaseControlImpl control, final double scaleFactor) {
 		control.setScaleFactor(scaleFactor);
 		control.setX((int) (this.x * scaleFactor));
@@ -271,90 +290,35 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				(int) (this.visibleAreaWidth * scaleFactor),
 				(int) (this.visibleAreaHeight * scaleFactor));
 		
-		if (this.clazz == LabelControl.class) {
-			((LabelControl) control).setForegroundColor(this.color);
-			if (this.customData instanceof RgbaColor) {
-				((LabelControl) control).setBackgroundColor((RgbaColor) this.customData);
-			}
-			if (this.customData2 instanceof HorizontalAlignment) {
-				((LabelControl) control).setTextAlignment((HorizontalAlignment) this.customData2);
-			}
+		if (this.clazz == LabelControl.class && this.labelData != null) {
+			((LabelControl) control).setCustomData(this.labelData);
 		}
-		else if (this.clazz == ToggleButtonControl.class) {
-			((ButtonControl) control).setBackgroundColor(this.color);
-			if (this.customData instanceof Boolean) {
-				((ToggleButtonControl) control).setToggled(((Boolean) this.customData).booleanValue());
-			}
-			if (this.customData2 instanceof StaticResource) {
-				((ButtonControl) control).setIconResource((StaticResource) this.customData2);
-			}
+		else if (this.clazz == ToggleButtonControl.class && this.toggleButtonData != null) {
+			((ToggleButtonControl) control).setCustomData(this.toggleButtonData);
 		}
-		else if (this.clazz == SwitchControl.class) {
-			((ButtonControl) control).setBackgroundColor(this.color);
-			if (this.customData instanceof Boolean) {
-				((SwitchControl) control).setToggled(((Boolean) this.customData).booleanValue());
-			}
-			if (this.customData2 instanceof StaticResource) {
-				((ButtonControl) control).setIconResource((StaticResource) this.customData2);
-			}
-			if (this.customData4 instanceof Boolean) {
-				((SwitchControl) control).setDrawBorder(((Boolean) this.customData4).booleanValue());
-			}
+		else if (this.clazz == SwitchControl.class && this.switchData != null) {
+			((SwitchControl) control).setCustomData(this.switchData);
 		}
-		else if (this.clazz == ButtonControl.class) {
-			((ButtonControl) control).setBackgroundColor(this.color);
-			if (this.customData2 instanceof StaticResource) {
-				((ButtonControl) control).setIconResource((StaticResource) this.customData2);
-			}
+		else if (this.clazz == ButtonControl.class && this.buttonData != null) {
+			((ButtonControl) control).setCustomData(this.buttonData);
 		}
-		else if (this.clazz == WindowCloseButtonControl.class) {
-			((ButtonControl) control).setBackgroundColor(this.color);
-			if (this.customData instanceof Boolean) {
-				((WindowCloseButtonControl) control).setThickBorder(((Boolean) this.customData).booleanValue());
-			}
+		else if (this.clazz == WindowCloseButtonControl.class && this.windowCloseButtonData != null) {
+			((WindowCloseButtonControl) control).setCustomData(this.windowCloseButtonData);
 		}
-		else if (this.clazz == WindowPanelControl.class) {
-			((WindowPanelControl) control).setColor(this.color);
-			if (this.customData instanceof Boolean) {
-				((WindowPanelControl) control).setThickBorder(((Boolean) this.customData).booleanValue());
-			}
+		else if (this.clazz == WindowPanelControl.class && this.windowPanelData != null) {
+			((WindowPanelControl) control).setCustomData(this.windowPanelData);
 		}
-		else if (this.clazz == SliderControl.class) {
-			((SliderControl) control).setColor(this.color);
-			if (this.customData instanceof Boolean) {
-				((SliderControl) control).setHorizontal(((Boolean) this.customData).booleanValue());
-			}
-			if (this.customData2 instanceof Double) {
-				((SliderControl) control).setValue(((Double) this.customData2).doubleValue());
-			}
-			if (this.customData3 instanceof Double) {
-				((SliderControl) control).setValue2(((Double) this.customData3).doubleValue());
-			}
+		else if (this.clazz == SliderControl.class && this.sliderData != null) {
+			((SliderControl) control).setCustomData(this.sliderData);
 		}
-		else if (this.clazz == TableControl.class) {
-			if (this.customData instanceof List) {
-				((TableControl) control).setData((List<Object>) this.customData);
-			}
-			if (this.customData2 instanceof Integer) {
-				((TableControl) control).setRows((Integer) this.customData2);
-			}
-			if (this.customData3 instanceof Long) {
-				((TableControl) control).setVersion((Long) this.customData3);
-			}
-			if (this.customData4 instanceof Boolean) { // This parameter could be changed to a more generic way to set column sizing 
-				((TableControl) control).setFirstColDoubleSize((Boolean) this.customData4);
-			}
+		else if (this.clazz == TableControl.class && this.tableData != null) {
+			((TableControl) control).setCustomData(this.tableData);
 		}
-		else if (this.clazz == SetFocusControl.class) {
-			if (this.customData instanceof String) {
-				((SetFocusControl) control).setFocusId((String) this.customData);
-			}
+		else if (this.clazz == SetFocusControl.class && this.setFocusData != null) {
+			((SetFocusControl) control).setCustomData(this.setFocusData);
 		}
-		else if (this.clazz == TextfieldControl.class) {
-			((TextfieldControl) control).setBackgroundColor(this.color);
-			if (this.customData2 instanceof Boolean) {
-				((TextfieldControl) control).setReadonly((Boolean) this.customData2);
-			}
+		else if (this.clazz == TextfieldControl.class && this.textfieldData != null) {
+			((TextfieldControl) control).setCustomData(this.textfieldData);
 		}
 	}
 	
@@ -368,10 +332,16 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.caption = o.caption;
 			this.controlGroup = o.controlGroup;
 			this.fontSize = o.fontSize;
-			this.customData = o.customData;
-			this.customData2 = o.customData2;
-			this.customData3 = o.customData3;
-			this.customData4 = o.customData4;
+			this.labelData = o.labelData;
+			this.buttonData = o.buttonData;
+			this.toggleButtonData = o.toggleButtonData;
+			this.switchData = o.switchData;
+			this.windowCloseButtonData = o.windowCloseButtonData;
+			this.windowPanelData = o.windowPanelData;
+			this.textfieldData = o.textfieldData;
+			this.sliderData = o.sliderData;
+			this.tableData = o.tableData;
+			this.setFocusData = o.setFocusData;
 			this.visible = o.visible;
 			this.enabled = o.enabled;
 			this.tooltip = o.tooltip;
@@ -389,10 +359,16 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.caption = null;
 		this.controlGroup = null;
 		this.fontSize = G2DDrawFont.FONT_SIZE_DEFAULT;
-		this.customData = null;
-		this.customData2 = null;
-		this.customData3 = null;
-		this.customData4 = null;
+		this.labelData = null;
+		this.buttonData = null;
+		this.toggleButtonData = null;
+		this.switchData = null;
+		this.windowCloseButtonData = null;
+		this.windowPanelData = null;
+		this.textfieldData = null;
+		this.sliderData = null;
+		this.tableData = null;
+		this.setFocusData = null;
 		this.visible = false;
 		this.enabled = true;
 		this.tooltip = null;

@@ -15,6 +15,7 @@ import de.extio.game_engine.renderer.model.RenderingBoHasDimension;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SliderData;
 import de.extio.game_engine.renderer.model.event.MouseClickEvent;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
@@ -132,9 +133,7 @@ public class ScrollArea implements WindowComponent {
 			if (needsVerticalScrollbar) {
 				final var verticalScrollbar = this.renderingBoPool.acquire(this.verticalScrollbarName, ControlRenderingBo.class)
 						.setType(SliderControl.class)
-						.setCustomData(Boolean.FALSE)
-						.setCustomData2(this.scrollPositionVertical)
-						.setCustomData3(this.scrollPositionVertical)
+						.setControlData(new SliderData(false, this.scrollPositionVertical, this.scrollPositionVertical, null))
 						.setEnabled(true)
 						.setVisible(true)
 						.withDimensionAbsolute(SCROLLBAR_WIDTH, this.relativeArea.getDimension().getY() - SCROLLBAR_WIDTH)
@@ -149,9 +148,7 @@ public class ScrollArea implements WindowComponent {
 			if (needsHorizontalScrollbar) {
 				final var horizontalScrollbar = this.renderingBoPool.acquire(this.horizontalScrollbarName, ControlRenderingBo.class)
 						.setType(SliderControl.class)
-						.setCustomData(Boolean.TRUE)
-						.setCustomData2(this.scrollPositionHorizontal)
-						.setCustomData3(this.scrollPositionHorizontal)
+						.setControlData(new SliderData(true, this.scrollPositionHorizontal, this.scrollPositionHorizontal, null))
 						.setEnabled(true)
 						.setVisible(true)
 						.withDimensionAbsolute(this.relativeArea.getDimension().getX() - SCROLLBAR_WIDTH, SCROLLBAR_WIDTH)

@@ -4,6 +4,7 @@ import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomWindowPanel;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowPanelControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowPanelData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 
 public class G2DWindowPanelControlImpl extends G2DBaseControlImpl implements WindowPanelControl {
@@ -15,23 +16,27 @@ public class G2DWindowPanelControlImpl extends G2DBaseControlImpl implements Win
 	protected RgbaColor color;
 	
 	@Override
-	public boolean isThickBorder() {
+	public void setCustomData(final WindowPanelData data) {
+		if (data != null) {
+			this.setThickBorder(data.thickBorder());
+			this.setColor(data.color());
+		}
+	}
+	
+	private boolean isThickBorder() {
 		return this.thickBorder;
 	}
 	
-	@Override
-	public void setThickBorder(final boolean thickBorder) {
+	private void setThickBorder(final boolean thickBorder) {
 		this.modified |= thickBorder != this.thickBorder;
 		this.thickBorder = thickBorder;
 	}
 	
-	@Override
-	public RgbaColor getColor() {
+	private RgbaColor getColor() {
 		return this.color;
 	}
 	
-	@Override
-	public void setColor(final RgbaColor color) {
+	private void setColor(final RgbaColor color) {
 		this.modified |= (color == null) ? this.color != null : !color.equals(this.color);
 		this.color = color;
 	}

@@ -4,12 +4,20 @@ import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.control.components.CustomWindowCloseButton;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.WindowCloseButtonData;
 
 public class G2DWindowCloseButtonControlImpl extends G2DButtonControlImpl implements WindowCloseButtonControl {
 	
 	private int translations;
 	
 	private boolean thickBorder;
+	
+	@Override
+	public void setCustomData(final WindowCloseButtonData data) {
+		if (data != null) {
+			this.setThickBorder(data.thickBorder());
+		}
+	}
 	
 	@Override
 	protected void createControl() {
@@ -65,13 +73,11 @@ public class G2DWindowCloseButtonControlImpl extends G2DButtonControlImpl implem
 		}
 	}
 	
-	@Override
-	public boolean isThickBorder() {
+	private boolean isThickBorder() {
 		return this.thickBorder;
 	}
 	
-	@Override
-	public void setThickBorder(final boolean thickBorder) {
+	private void setThickBorder(final boolean thickBorder) {
 		this.thickBorder = thickBorder;
 	}
 	
