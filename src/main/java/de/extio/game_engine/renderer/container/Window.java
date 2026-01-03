@@ -41,6 +41,11 @@ import de.extio.game_engine.spatial2.model.MutableCoordI2;
 @Scope("prototype")
 public class Window extends AbstractClientModule implements InitializingBean {
 	
+	public static final int MARGIN_TOP = 30;
+	public static final int MARGIN_LEFT = 20;
+	public static final int MARGIN_RIGHT = 20;
+	public static final int MARGIN_BOTTOM = 20;
+	
 	protected final static List<Window> DISPLAYED_CONTAINERS = Collections.synchronizedList(new ArrayList<>());
 	
 	protected final ModuleService moduleService;

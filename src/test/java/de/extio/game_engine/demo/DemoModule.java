@@ -226,12 +226,12 @@ public class DemoModule extends AbstractClientModule {
 				.setType(LabelControl.class)
 				.setVisible(true)
 				.setEnabled(true)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 60)
-				.withPositionRelative(10, 100);
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX(), 60)
+				.withPositionRelative(Window.MARGIN_LEFT, 100);
 		this.mainWindow.putRenderingBo(bo);
 		
-		final var buttonX = Math.max(0, this.mainWindow.getNormalizedDimension().getX() - 64 - 21);
-		final var buttonY = 20;
+		final var buttonX = Math.max(0, this.mainWindow.getNormalizedDimension().getX() - 64 - Window.MARGIN_RIGHT - 1);
+		final var buttonY = Window.MARGIN_TOP;
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_Audio", ControlRenderingBo.class)
 				.setCaption("")
 				.setType(ButtonControl.class)
@@ -258,8 +258,8 @@ public class DemoModule extends AbstractClientModule {
 				.setType(LabelControl.class)
 				.setVisible(true)
 				.setEnabled(true)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
-				.withPositionRelative(10, 480);
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX(), 120)
+				.withPositionRelative(Window.MARGIN_LEFT, 480);
 		this.mainWindow.putRenderingBo(bo);
 		
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Label_Language", ControlRenderingBo.class)
@@ -268,8 +268,8 @@ public class DemoModule extends AbstractClientModule {
 				.setType(LabelControl.class)
 				.setVisible(true)
 				.setEnabled(true)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
-				.withPositionRelative(10, 580);
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX(), 120)
+				.withPositionRelative(Window.MARGIN_LEFT, 580);
 		this.mainWindow.putRenderingBo(bo);
 		
 		bo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_ScrollDemo", ControlRenderingBo.class)
@@ -278,8 +278,8 @@ public class DemoModule extends AbstractClientModule {
 				.setType(LabelControl.class)
 				.setVisible(true)
 				.setEnabled(true)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(20).getX(), 120)
-				.withPositionRelative(10, 690);
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX(), 120)
+				.withPositionRelative(Window.MARGIN_LEFT, 690);
 		this.mainWindow.putRenderingBo(bo);
 	}
 	
@@ -308,8 +308,8 @@ public class DemoModule extends AbstractClientModule {
 			return;
 		}
 		
-		final var buttonX = Math.max(0, this.mainWindow.getNormalizedDimension().getX() - 64 - 21);
-		final var buttonY = 20;
+		final var buttonX = Math.max(0, this.mainWindow.getNormalizedDimension().getX() - 64 - Window.MARGIN_RIGHT - 1);
+		final var buttonY = Window.MARGIN_TOP;
 		final DrawImageRenderingBo overlayBo = this.renderingBoPool.acquire("DemoModule_MainWindow_Button_Audio_Overlay", DrawImageRenderingBo.class);
 		overlayBo.setResource(new StaticResource(List.of("gfx"), "decline.png"));
 		overlayBo.withDimensionAbsolute(64, 64);
@@ -330,8 +330,8 @@ public class DemoModule extends AbstractClientModule {
 				.setText(this.localizationService.translate("test-5").replace("\\n", "\n"))
 				.setSize(32)
 				.setAlignment(HorizontalAlignment.CENTER)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).substract(20).getX(), 40)
-				.withPositionRelative(10, 50);
+				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX(), 40)
+				.withPositionRelative(Window.MARGIN_LEFT, 50);
 		this.secondaryWindow.putRenderingBo(bo);
 		
 		bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Button_Ok", ControlRenderingBo.class)
@@ -349,8 +349,8 @@ public class DemoModule extends AbstractClientModule {
 		
 		final var themes = this.themeManager.getAvailableThemeNames();
 		
-		final var paddingX = 24;
-		final var paddingBottom = 24;
+		final var paddingX = Window.MARGIN_LEFT;
+		final var paddingBottom = Window.MARGIN_BOTTOM;
 		final var columns = 2;
 		final var columnGap = 16;
 		final var buttonWidth = 340;
@@ -411,8 +411,8 @@ public class DemoModule extends AbstractClientModule {
 		final var languages = this.localizationService.getLanguages();
 		final var title = "Select Language";
 		
-		final var paddingX = 20;
-		final var paddingBottom = 24;
+		final var paddingX = Window.MARGIN_LEFT;
+		final var paddingBottom = Window.MARGIN_BOTTOM;
 		final var columns = 2;
 		final var columnGap = 24;
 		final var buttonWidth = 340;
@@ -473,12 +473,12 @@ public class DemoModule extends AbstractClientModule {
 				.setText(this.localizationService.translate("test-8"))
 				.setSize(28)
 				.setAlignment(HorizontalAlignment.CENTER)
-				.withDimensionAbsolute(this.scrollAreaWindow.getNormalizedDimension().getX() - 40, 50)
-				.withPositionRelative(20, 30);
+				.withDimensionAbsolute(this.scrollAreaWindow.getNormalizedDimension().getX() - (Window.MARGIN_LEFT + Window.MARGIN_RIGHT), 50)
+				.withPositionRelative(Window.MARGIN_LEFT, Window.MARGIN_TOP);
 		this.scrollAreaWindow.putRenderingBo(bo);
 		
-		this.scrollArea.setRelativePosition(ImmutableCoordI2.create(20, 65));
-		this.scrollArea.setDimension(this.scrollAreaWindow.getNormalizedDimension().substract(40, 90));
+		this.scrollArea.setRelativePosition(ImmutableCoordI2.create(Window.MARGIN_LEFT, 65));
+		this.scrollArea.setDimension(this.scrollAreaWindow.getNormalizedDimension().substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT, 90));
 		
 		for (var i = 0; i < 20; i++) {
 			final var y = i * 70 + 1;
