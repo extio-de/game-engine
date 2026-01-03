@@ -165,7 +165,7 @@ class LocalizationManagerTest {
 		
 		String result = this.localizationManager.translate("unknown");
 		
-		assertTrue(result.startsWith(LocalizationServiceImpl.NOT_FOUND_PREFIX));
+		assertEquals("unknown", result);
 	}
 	
 	@Test
