@@ -196,6 +196,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		}
 		else if (this.positionModified) {
 			this.safeInvoke(() -> this.textComponent.setLocation(this.x, this.y));
+			this.updateScrollBarArea();
 			this.positionModified = false;
 		}
 		
@@ -254,10 +255,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			this.safeInvoke(() -> ((CustomJTextArea) this.textComponent).setLineWrap(true));
 			this.safeInvoke(() -> ((CustomJTextArea) this.textComponent).setWrapStyleWord(true));
 			
-			this.scrollbar.setX(this.x + this.width - 30);
-			this.scrollbar.setY(this.y);
-			this.scrollbar.setWidth(30);
-			this.scrollbar.setHeight(this.height);
+			this.updateScrollBarArea();
 			this.scrollbar.setScaleFactor(this.scaleFactor);
 			this.scrollbar.setEnabled(this.enabled);
 			this.scrollbar.setVisible(this.visible);
@@ -316,6 +314,13 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		catch (final Exception exc) {
 			this.modified = true;
 		}
+	}
+
+	private void updateScrollBarArea() {
+		this.scrollbar.setX(this.x + this.width - 30);
+		this.scrollbar.setY(this.y);
+		this.scrollbar.setWidth(30);
+		this.scrollbar.setHeight(this.height);
 	}
 	
 	private void onScroll(final double value) {
