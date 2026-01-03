@@ -13,6 +13,7 @@ import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
+import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DLabelControlImpl;
@@ -52,7 +53,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	private String controlGroup;
 	
-	private int fontSize = 18;
+	private int fontSize = G2DDrawFont.FONT_SIZE_DEFAULT;
 	
 	private Object customData;
 	
@@ -387,7 +388,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.clazz = null;
 		this.caption = null;
 		this.controlGroup = null;
-		this.fontSize = 16;
+		this.fontSize = G2DDrawFont.FONT_SIZE_DEFAULT;
 		this.customData = null;
 		this.customData2 = null;
 		this.customData3 = null;

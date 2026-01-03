@@ -28,9 +28,9 @@ import de.extio.game_engine.spatial2.model.MutableCoordI2;
 @Component
 public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRenderingBo {
 	
-	private final static float FONT_SIZE_MIN = 12.0F;
+	public final static float FONT_SIZE_MIN = 12.0F;
 	
-	private final static int FONT_SIZE_DEFAULT = 18;
+	public final static int FONT_SIZE_DEFAULT = 18;
 	
 	private static Font baseFont;
 	
