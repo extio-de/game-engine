@@ -177,9 +177,9 @@ public class CustomLabel extends Component {
 		}
 		
 		if (!this.enabled) {
-			h = theme.getTextDisabled().getHue();
-			s = theme.getTextDisabled().getSaturation();
-			b = theme.getTextDisabled().getBrightness();
+			// h = theme.getTextDisabled().getHue();
+			// s = theme.getTextDisabled().getSaturation();
+			// b = theme.getTextDisabled().getBrightness();
 		}
 		else if ((this.state & STATE_PRESSED) != 0) {
 			h = theme.getSelectionPrimary().getHue();
@@ -204,42 +204,63 @@ public class CustomLabel extends Component {
 		g2d.setColor(Color.getHSBColor(h, s, b));
 		
 		final var alignment = this.textAlignment == null ? HorizontalAlignment.CENTER : this.textAlignment;
-		final var textDim = G2DDrawFont.getTextDimensions(this.caption, g2d, this.fontSize, this.scaleFactor);
-		switch (alignment) {
-			case LEFT: {
-				G2DDrawFont.renderText(g2d,
-						this.scaleFactor,
-						1,
-						(int) ((this.getHeight() - (textDim.getY())) / 2 / this.scaleFactor),
-						this.fontSize,
-						this.caption);
-				break;
+		
+		final var lines = this.caption != null && this.caption.contains("\n") ? this.caption.split("\n", -1) : new String[] { this.caption == null ? "" : this.caption };
+		final var lineHeight = G2DDrawFont.getTextDimensions("M", g2d, this.fontSize, 1.0).getY() + (int) (Math.max(G2DDrawFont.FONT_SIZE_MIN, this.fontSize) * 0.5);
+		final CoordI2[] lineDims = new CoordI2[lines.length];
+		int maxLineWidth = 0;
+		for (int i = 0; i < lines.length; i++) {
+			lineDims[i] = G2DDrawFont.getTextDimensions(lines[i], g2d, this.fontSize, 1.0);
+			if (lineDims[i].getX() > maxLineWidth) {
+				maxLineWidth = lineDims[i].getX();
 			}
+		}
+		
+		final int totalTextHeight = lineHeight * lines.length;
+		final int startY = ((int) (this.getHeight() / this.scaleFactor) - totalTextHeight) / 2;
+		
+		for (int i = 0; i < lines.length; i++) {
+			final var line = lines[i];
+			final var yOffset = startY + i * lineHeight;
+			final var textDimScaled = ImmutableCoordI2.create((int) (lineDims[i].getX() * this.scaleFactor), (int) (lineDims[i].getY() * this.scaleFactor));
 			
-			case CENTER: {
-				G2DDrawFont.renderText(g2d,
-						textDim,
-						this.scaleFactor,
-						(int) ((this.getWidth() - (textDim.getX())) / 2 / this.scaleFactor),
-						(int) ((this.getHeight() - (textDim.getY())) / 2 / this.scaleFactor),
-						this.fontSize,
-						this.caption);
-				break;
+			switch (alignment) {
+				case LEFT: {
+					G2DDrawFont.renderText(g2d,
+							textDimScaled,
+							this.scaleFactor,
+							1,
+							yOffset,
+							this.fontSize,
+							line);
+					break;
+				}
+				
+				case CENTER: {
+					G2DDrawFont.renderText(g2d,
+							textDimScaled,
+							this.scaleFactor,
+							((int) (this.getWidth() / this.scaleFactor) - lineDims[i].getX()) / 2,
+							yOffset,
+							this.fontSize,
+							line);
+					break;
+				}
+				
+				case RIGHT: {
+					G2DDrawFont.renderText(g2d,
+							textDimScaled,
+							this.scaleFactor,
+							(int) (this.getWidth() / this.scaleFactor) - lineDims[i].getX(),
+							yOffset,
+							this.fontSize,
+							line);
+					break;
+				}
+				
+				default:
+					break;
 			}
-			
-			case RIGHT: {
-				G2DDrawFont.renderText(g2d,
-						textDim,
-						this.scaleFactor,
-						(int) ((this.getWidth() - textDim.getX()) / this.scaleFactor),
-						(int) ((this.getHeight() - (textDim.getY())) / 2 / this.scaleFactor),
-						this.fontSize,
-						this.caption);
-				break;
-			}
-			
-			default:
-				break;
 		}
 	}
 	
