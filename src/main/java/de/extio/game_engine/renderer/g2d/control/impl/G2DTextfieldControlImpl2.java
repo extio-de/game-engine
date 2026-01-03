@@ -256,7 +256,6 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 			this.safeInvoke(() -> ((CustomJTextArea) this.textComponent).setWrapStyleWord(true));
 			
 			this.updateScrollBarArea();
-			this.scrollbar.setScaleFactor(this.scaleFactor);
 			this.scrollbar.setEnabled(this.enabled);
 			this.scrollbar.setVisible(this.visible);
 		}
@@ -321,6 +320,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		this.scrollbar.setY(this.y);
 		this.scrollbar.setWidth(30);
 		this.scrollbar.setHeight(this.height);
+		this.scrollbar.setScaleFactor(this.scaleFactor);
 	}
 	
 	private void onScroll(final double value) {
