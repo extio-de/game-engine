@@ -168,7 +168,7 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	}
 	
 	public G2DBaseControlImpl setScaleFactor(final double scaleFactor) {
-		this.modified = this.scaleFactor != scaleFactor;
+		this.modified |= this.scaleFactor != scaleFactor;
 		this.scaleFactor = scaleFactor;
 		return this;
 	}
