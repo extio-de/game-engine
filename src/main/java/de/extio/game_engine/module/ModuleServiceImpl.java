@@ -183,29 +183,33 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 							if (module instanceof final AbstractClientModule clientModule && clientModule.isAlwaysDisplay()) {
 								this.changeDisplayState(clientModule.getId(), true);
 							}
-							this.modulesActive.add(module);
-							this.sortModules(this.modulesActive);
-							synchronized (this.modulesActive) {
-								this.modulesActiveView = List.copyOf(this.modulesActive);
-								this.modulesActiveClientModulesView = this.modulesActive.stream()
-										.filter(m -> m instanceof AbstractClientModule)
-										.map(m -> (AbstractClientModule) m)
-										.toList();
-							}
-							synchronized (this.executorCallbackMap) {
-								final var subscriptions = module.executorCallbackSubscriptions();
-								if (subscriptions != null) {
-									for (final var subscription : subscriptions) {
-										executorCallbackMap.computeIfAbsent(subscription, k -> Collections.synchronizedList(new ArrayList<>())).add(module);
-									}
-								}
-							}
-							this.invokeSafe(module, AbstractModule::onActivate);
-							
-							LOGGER.info("Activated {}", id);
+							this.doActivateModule(id, module);
 						}
 					}
 				});
+	}
+
+	private void doActivateModule(final String id, final AbstractModule module) {
+		this.modulesActive.add(module);
+		this.sortModules(this.modulesActive);
+		synchronized (this.modulesActive) {
+			this.modulesActiveView = List.copyOf(this.modulesActive);
+			this.modulesActiveClientModulesView = this.modulesActive.stream()
+					.filter(m -> m instanceof AbstractClientModule)
+					.map(m -> (AbstractClientModule) m)
+					.toList();
+		}
+		synchronized (this.executorCallbackMap) {
+			final var subscriptions = module.executorCallbackSubscriptions();
+			if (subscriptions != null) {
+				for (final var subscription : subscriptions) {
+					executorCallbackMap.computeIfAbsent(subscription, k -> Collections.synchronizedList(new ArrayList<>())).add(module);
+				}
+			}
+		}
+		this.invokeSafe(module, AbstractModule::onActivate);
+		
+		LOGGER.info("Activated {}", id);
 	}
 	
 	@Override
@@ -225,6 +229,10 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 				
 				final boolean doDisplay = display || clientModule.isAlwaysDisplay();
 				if (doDisplay && !curDisplayed) {
+					if (this.modulesActiveView.stream().noneMatch(mod -> mod.getId().equals(id))) {
+						this.doActivateModule(id, clientModule);
+					}
+					
 					this.modulesDisplayed.add(clientModule);
 					clientModule.setDisplayed(true);
 					LOGGER.info("Displayed {}", id);
