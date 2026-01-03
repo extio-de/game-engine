@@ -9,6 +9,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
+import java.util.ArrayList;
+import java.util.List;
 
 import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
@@ -205,7 +207,57 @@ public class CustomLabel extends Component {
 		
 		final var alignment = this.textAlignment == null ? HorizontalAlignment.CENTER : this.textAlignment;
 		
-		final var lines = this.caption != null && this.caption.contains("\n") ? this.caption.split("\n", -1) : new String[] { this.caption == null ? "" : this.caption };
+		final var rawLines = this.caption != null && this.caption.contains("\n") ? this.caption.split("\n", -1) : new String[] { this.caption == null ? "" : this.caption };
+		final var availableWidth = (int) (this.getWidth() / this.scaleFactor);
+		final List<String> wrappedLines = new ArrayList<>();
+		
+		for (final var rawLine : rawLines) {
+			if (rawLine.isEmpty()) {
+				wrappedLines.add("");
+				continue;
+			}
+			
+			final var lineWidth = G2DDrawFont.getTextDimensions(rawLine, g2d, this.fontSize, 1.0).getX();
+			if (lineWidth <= availableWidth) {
+				wrappedLines.add(rawLine);
+			}
+			else {
+				final var words = rawLine.split(" ");
+				final var currentLine = new StringBuilder();
+				
+				for (final var word : words) {
+					final var testLine = currentLine.isEmpty() ? word : currentLine + " " + word;
+					final var testWidth = G2DDrawFont.getTextDimensions(testLine, g2d, this.fontSize, 1.0).getX();
+					
+					if (testWidth <= availableWidth) {
+						if (!currentLine.isEmpty()) {
+							currentLine.append(" ");
+						}
+						currentLine.append(word);
+					}
+					else {
+						if (!currentLine.isEmpty()) {
+							wrappedLines.add(currentLine.toString());
+							currentLine.setLength(0);
+						}
+						
+						final var wordWidth = G2DDrawFont.getTextDimensions(word, g2d, this.fontSize, 1.0).getX();
+						if (wordWidth <= availableWidth) {
+							currentLine.append(word);
+						}
+						else {
+							wrappedLines.add(word);
+						}
+					}
+				}
+				
+				if (!currentLine.isEmpty()) {
+					wrappedLines.add(currentLine.toString());
+				}
+			}
+		}
+		
+		final var lines = wrappedLines.toArray(new String[0]);
 		final var lineHeight = G2DDrawFont.getTextDimensions("M", g2d, this.fontSize, 1.0).getY() + (int) (Math.max(G2DDrawFont.FONT_SIZE_MIN, this.fontSize) * 0.5);
 		final CoordI2[] lineDims = new CoordI2[lines.length];
 		int maxLineWidth = 0;
