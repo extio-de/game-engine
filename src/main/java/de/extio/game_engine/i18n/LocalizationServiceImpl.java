@@ -20,8 +20,9 @@ public class LocalizationServiceImpl implements LocalizationService {
 	public final static String NOT_FOUND_PREFIX = "{i18n.";
 	
 	private static final List<String> LANGUAGE_STORAGE_PATH = List.of("gameEngine");
+	
 	private static final String LANGUAGE_STORAGE_NAME = "currentLanguage";
-
+	
 	private final StorageService storageService;
 	
 	private Localizations localizations = new Localizations();
@@ -33,7 +34,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 	LocalizationServiceImpl(final StorageService storageService) {
 		this.storageService = storageService;
 	}
-
+	
 	@Override
 	public void resetEntries() {
 		this.localizations.getLanguages().forEach((lang, mapping) -> mapping.clear());
@@ -122,14 +123,17 @@ public class LocalizationServiceImpl implements LocalizationService {
 		if (this.currentLanguage == null) {
 			return NOT_FOUND_PREFIX + id + "}";
 		}
-		return this.currentLanguage.computeIfAbsent(id, key -> NOT_FOUND_PREFIX + key + "}");
+		return this.currentLanguage.computeIfAbsent(id, key -> key);
 	}
 	
 	@Override
 	public String translate(final String id, final String defaultText) {
-		String result = this.translate(id);
-		if (result.startsWith(NOT_FOUND_PREFIX)) {
-			result = defaultText;
+		if (this.currentLanguage == null) {
+			return defaultText;
+		}
+		var result = this.currentLanguage.get(id);
+		if (result == null) {
+			return defaultText;
 		}
 		return result;
 	}
@@ -205,7 +209,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 			LOGGER.warn("Could not persist current language name", e);
 		}
 	}
-
+	
 	private void loadPersistedLanguageName() {
 		if (this.storageService == null) {
 			return;
