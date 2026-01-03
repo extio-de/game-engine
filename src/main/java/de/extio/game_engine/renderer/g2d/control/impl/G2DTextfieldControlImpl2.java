@@ -72,10 +72,12 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	}
 	
 	private void setMultiLine(final boolean multiLine) {
-		if (this.textComponent != null) {
-			throw new UnsupportedOperationException("Multiline property is read-only after initial control creation");
+		if (this.textComponent == null) {
+			this.multiLine = multiLine;
 		}
-		this.multiLine = multiLine;
+		else {
+			// throw new UnsupportedOperationException("Multiline property is read-only after initial control creation");
+		}
 	}
 	
 	private boolean isReadonly() {
