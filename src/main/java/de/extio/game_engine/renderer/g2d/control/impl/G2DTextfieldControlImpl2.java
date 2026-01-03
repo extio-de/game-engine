@@ -130,8 +130,12 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		else {
 			this.textComponent = new CustomJTextField();
 			((JTextField) this.textComponent).addActionListener(event -> {
-				// Simulate pressing enter
+				// Simulate pressing enter and reset caption
 				this.rendererData.getEventService().fire(new UiControlEvent(this.id, (this.lastText == null ? "" : this.lastText) + "\n"));
+				this.caption = null;
+				this.lastCaption = "";
+				this.lastText = "";
+				this.textComponent.setText("");
 			});
 		}
 		this.textComponent.setName(this.id);
@@ -163,7 +167,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	@Override
 	public void render() {
 		final var curComponentText = this.textComponent.getText();
-		if (!curComponentText.equals(this.lastText) && !(this.lastText == null || this.lastText.isEmpty() || curComponentText == null || curComponentText.isEmpty())) {
+		if (!curComponentText.equals(this.lastText)) {
 			this.lastText = curComponentText;
 			this.rendererData.getEventService().fire(new UiControlEvent(this.id, this.lastText));
 		}
@@ -233,6 +237,10 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	}
 	
 	private void initControl() {
+		if (this.multiLine && !this.readonly) {
+			throw new UnsupportedOperationException("Multiline property can only be set for readonly textfields");
+		}
+		
 		final ThemeManager themeManager = (G2DThemeManager) this.rendererData.getThemeManager();
 		final Color bgColor;
 		if (this.backgroundColor != null) {
