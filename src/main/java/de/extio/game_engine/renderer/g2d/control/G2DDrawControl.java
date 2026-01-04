@@ -246,7 +246,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			else {
 				if (this.customControlConfigurations != null) {
 					for (final var customControlConfiguration : this.customControlConfigurations) {
-						if (customControlConfiguration.getControlInterface().equals(this.clazz)) {
+						if (customControlConfiguration.getControlClass().equals(this.clazz)) {
 							control = customControlConfiguration.createControl();
 							break;
 						}
@@ -341,7 +341,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		else {
 			if (this.customControlConfigurations != null) {
 				for (final var customControlConfiguration : this.customControlConfigurations) {
-					if (customControlConfiguration.getControlInterface().equals(this.clazz)) {
+					if (customControlConfiguration.getControlClass().equals(this.clazz)) {
 						((CustomControlConfiguration) customControlConfiguration).setCustomData(control, this.customData);
 						break;
 					}

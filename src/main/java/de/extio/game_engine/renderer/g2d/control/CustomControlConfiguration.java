@@ -4,7 +4,7 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
 
 public interface CustomControlConfiguration<T extends G2DBaseControlImpl> {
 	
-	Class<T> getControlInterface();
+	Class<T> getControlClass();
 	
 	T createControl();
 	
