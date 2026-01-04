@@ -71,6 +71,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private TableData tableData;
 	
 	private SetFocusData setFocusData;
+
+	private Object customData;
 	
 	private boolean visible;
 	
@@ -83,9 +85,12 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private Area2 controlArea = null;
 	
 	private final Area2 tempArea = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
+
+	private final List<CustomControlConfiguration<? extends G2DBaseControlImpl>> customControlConfigurations;
 	
-	public G2DDrawControl() {
+	public G2DDrawControl(final List<CustomControlConfiguration<? extends G2DBaseControlImpl>> customControlConfigurations) {
 		super(RenderingBoLayer.UI0);
+		this.customControlConfigurations = customControlConfigurations;
 	}
 	
 	@Override
@@ -144,6 +149,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		else if (data instanceof final SetFocusData setFocusData) {
 			this.setFocusData = setFocusData;
 		}
+		else {
+			this.customData = data;
+		}
 		return this;
 	}
 	
@@ -198,14 +206,17 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		
 		var control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);
 		if (control == null) {
-			if (this.clazz == ButtonControl.class) {
+			if (this.clazz == null) {
+				LOGGER.warn("G2DDrawControl: control type not specified for control id {}", this.id);
+				return;
+			}			
+			else if (this.clazz == ButtonControl.class) {
 				control = new G2DButtonControlImpl();
 			}
 			else if (this.clazz == LabelControl.class) {
 				control = new G2DLabelControlImpl();
 			}
 			else if (this.clazz == TextfieldControl.class) {
-				//				control = new G2DTextfieldControlImpl();
 				control = new G2DTextfieldControlImpl2();
 			}
 			else if (this.clazz == ToggleButtonControl.class) {
@@ -232,12 +243,19 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			else if (this.clazz == TooltipControl.class) {
 				control = new G2DTooltipControl();
 			}
-			else if (this.clazz == null) {
-				LOGGER.warn("G2DDrawControl: control type not specified for control id {}", this.id);
-				return;
-			}
 			else {
-				throw new UnsupportedOperationException("Not implemented " + this.clazz.getName());
+				if (this.customControlConfigurations != null) {
+					for (final var customControlConfiguration : this.customControlConfigurations) {
+						if (customControlConfiguration.getControlInterface().equals(this.clazz)) {
+							control = customControlConfiguration.createControl();
+							break;
+						}
+					}
+				}
+				
+				if (control == null) {
+					throw new IllegalArgumentException("Control type not registered: " + this.clazz.getName());
+				}
 			}
 			
 			control.setScaleFactor(scaleFactor)
@@ -320,6 +338,16 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		else if (this.clazz == TextfieldControl.class && this.textfieldData != null) {
 			((TextfieldControl) control).setCustomData(this.textfieldData);
 		}
+		else {
+			if (this.customControlConfigurations != null) {
+				for (final var customControlConfiguration : this.customControlConfigurations) {
+					if (customControlConfiguration.getControlInterface().equals(this.clazz)) {
+						((CustomControlConfiguration) customControlConfiguration).setCustomData(control, this.customData);
+						break;
+					}
+				}
+			}
+		}
 	}
 	
 	@Override
@@ -342,6 +370,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.sliderData = o.sliderData;
 			this.tableData = o.tableData;
 			this.setFocusData = o.setFocusData;
+			this.customData = o.customData;
 			this.visible = o.visible;
 			this.enabled = o.enabled;
 			this.tooltip = o.tooltip;
@@ -369,6 +398,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.sliderData = null;
 		this.tableData = null;
 		this.setFocusData = null;
+		this.customData = null;
 		this.visible = false;
 		this.enabled = true;
 		this.tooltip = null;
