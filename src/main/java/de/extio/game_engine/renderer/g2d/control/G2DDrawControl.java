@@ -86,11 +86,10 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	private final Area2 tempArea = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
 
-	private final List<CustomControlConfiguration<? extends G2DBaseControlImpl>> customControlConfigurations;
+	private List<CustomControlConfiguration<? extends G2DBaseControlImpl>> customControlConfigurations;
 	
-	public G2DDrawControl(final List<CustomControlConfiguration<? extends G2DBaseControlImpl>> customControlConfigurations) {
+	public G2DDrawControl() {
 		super(RenderingBoLayer.UI0);
-		this.customControlConfigurations = customControlConfigurations;
 	}
 	
 	@Override
@@ -203,6 +202,10 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				return;
 			}
 		}
+
+		if (this.customControlConfigurations == null) {
+			this.customControlConfigurations = List.copyOf( this.rendererData.getApplicationContext().getBeansOfType(CustomControlConfiguration.class).values());
+		}
 		
 		var control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);
 		if (control == null) {
@@ -244,12 +247,10 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				control = new G2DTooltipControl();
 			}
 			else {
-				if (this.customControlConfigurations != null) {
-					for (final var customControlConfiguration : this.customControlConfigurations) {
-						if (customControlConfiguration.getControlClass().equals(this.clazz)) {
-							control = customControlConfiguration.createControl();
-							break;
-						}
+				for (final var customControlConfiguration : this.customControlConfigurations) {
+					if (customControlConfiguration.getControlClass().equals(this.clazz)) {
+						control = customControlConfiguration.createControl();
+						break;
 					}
 				}
 				
@@ -339,12 +340,10 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			((TextfieldControl) control).setCustomData(this.textfieldData);
 		}
 		else {
-			if (this.customControlConfigurations != null) {
-				for (final var customControlConfiguration : this.customControlConfigurations) {
-					if (customControlConfiguration.getControlClass().equals(this.clazz)) {
-						((CustomControlConfiguration) customControlConfiguration).setCustomData(control, this.customData);
-						break;
-					}
+			for (final var customControlConfiguration : this.customControlConfigurations) {
+				if (customControlConfiguration.getControlClass().equals(this.clazz)) {
+					((CustomControlConfiguration) customControlConfiguration).setCustomData(control, this.customData);
+					break;
 				}
 			}
 		}
@@ -376,6 +375,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.tooltip = o.tooltip;
 			this.visibleArea = o.visibleArea;
 			this.controlArea = o.controlArea;
+			this.customControlConfigurations = o.customControlConfigurations;
 		}
 	}
 	
@@ -404,6 +404,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.tooltip = null;
 		this.visibleArea = null;
 		this.controlArea = null;
+		this.customControlConfigurations = null;
 	}
 	
 	@Override
