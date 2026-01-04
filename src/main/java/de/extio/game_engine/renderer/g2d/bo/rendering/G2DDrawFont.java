@@ -7,6 +7,7 @@ import java.awt.Shape;
 import java.awt.font.TextAttribute;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.atomic.AtomicReference;
 
 import org.springframework.context.annotation.Conditional;
 import org.springframework.stereotype.Component;
@@ -214,6 +215,8 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		graphics.drawString(text, (int) (x * scaleFactor), (int) (y * scaleFactor) + textDim.getY());
 	}
 	
+	private static final AtomicReference<Font> cachedFontRef = new AtomicReference<>();
+
 	public static CoordI2 getTextDimensions(final String text, final Graphics graphics, final int size_, final double scaleFactor) {
 		if (text == null) {
 			return ImmutableCoordI2.one();
@@ -221,7 +224,12 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		
 		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
 		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
-		final var font = baseFont.deriveFont(sizeScaled);
+		final var font = cachedFontRef.updateAndGet(existingFont -> {
+			if (existingFont == null || existingFont.getSize2D() != sizeScaled) {
+				return baseFont.deriveFont(sizeScaled);
+			}
+			return existingFont;
+		});
 		final var gv = font.layoutGlyphVector(((Graphics2D) graphics).getFontRenderContext(), text.toCharArray(), 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
 		final var pixBounds = gv.getPixelBounds(((Graphics2D) graphics).getFontRenderContext(), 0, 0);
 		return MutableCoordI2.create(pixBounds.x + pixBounds.width, pixBounds.height - (int) pixBounds.getMaxY());
