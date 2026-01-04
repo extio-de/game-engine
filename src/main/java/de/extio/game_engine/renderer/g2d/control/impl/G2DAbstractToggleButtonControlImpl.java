@@ -35,19 +35,11 @@ public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonContro
 		}
 	}
 	
-	private boolean isToggled() {
-		return this.control.isToggled();
-	}
-	
 	private void setToggled(final boolean toggled) {
 		if (this.control != null && toggled != this.control.isToggled()) {
 			this.control.setToggled(toggled);
 			this.manageCtrlGroupToggleState();
 		}
-	}
-	
-	private boolean isDrawBorder() {
-		return this.drawBorder;
 	}
 	
 	private void setDrawBorder(final boolean draw) {

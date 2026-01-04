@@ -23,17 +23,9 @@ public class G2DWindowPanelControlImpl extends G2DBaseControlImpl implements Win
 		}
 	}
 	
-	private boolean isThickBorder() {
-		return this.thickBorder;
-	}
-	
 	private void setThickBorder(final boolean thickBorder) {
 		this.modified |= thickBorder != this.thickBorder;
 		this.thickBorder = thickBorder;
-	}
-	
-	private RgbaColor getColor() {
-		return this.color;
 	}
 	
 	private void setColor(final RgbaColor color) {

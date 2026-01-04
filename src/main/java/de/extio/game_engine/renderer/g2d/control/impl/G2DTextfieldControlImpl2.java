@@ -58,17 +58,9 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		});
 	}
 	
-	private RgbaColor getBackgroundColor() {
-		return this.backgroundColor;
-	}
-	
 	private void setBackgroundColor(final RgbaColor color) {
 		this.modified |= (color == null) ? this.backgroundColor != null : !color.equals(this.backgroundColor);
 		this.backgroundColor = color;
-	}
-	
-	private boolean isMultiLine() {
-		return this.multiLine;
 	}
 	
 	private void setMultiLine(final boolean multiLine) {
@@ -78,10 +70,6 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		else {
 			// throw new UnsupportedOperationException("Multiline property is read-only after initial control creation");
 		}
-	}
-	
-	private boolean isReadonly() {
-		return this.readonly;
 	}
 	
 	private void setReadonly(final boolean readonly) {

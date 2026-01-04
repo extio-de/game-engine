@@ -1,6 +1,5 @@
 package de.extio.game_engine.renderer.g2d.control.impl;
 
-import java.awt.Color;
 import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.Font;
@@ -258,34 +257,18 @@ public class G2DTableControlImpl extends G2DBaseControlImpl implements TableCont
 		return super.setControlId(id);
 	}
 	
-	private List<Object> getData() {
-		return this.data;
-	}
-	
 	private void setData(final List<Object> data) {
 		this.data = data;
-	}
-	
-	private int getRows() {
-		return this.rows;
 	}
 	
 	private void setRows(final int rows) {
 		this.rows = rows;
 	}
 	
-	private long getVersion() {
-		return this.version;
-	}
-	
 	private void setVersion(final long version) {
 		this.modified |= version != this.version;
 		this.dataModified |= version != this.version;
 		this.version = version;
-	}
-	
-	private boolean isFirstColDoubleSize() {
-		return this.firstColDoubleSize;
 	}
 	
 	private void setFirstColDoubleSize(final boolean firstColDoubleSize) {

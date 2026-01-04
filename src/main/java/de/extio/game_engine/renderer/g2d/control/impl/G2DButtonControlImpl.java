@@ -106,14 +106,6 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 		this.iconResource = iconResource;
 	}
 	
-	private StaticResource getIconResource() {
-		return this.iconResource;
-	}
-	
-	private RgbaColor getBackgroundColor() {
-		return this.backgroundColor;
-	}
-	
 	private void setBackgroundColor(final RgbaColor backgroundColor) {
 		this.modified |= !Objects.equals(this.backgroundColor, backgroundColor);
 		this.backgroundColor = backgroundColor;

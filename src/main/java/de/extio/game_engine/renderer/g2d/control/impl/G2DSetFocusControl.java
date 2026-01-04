@@ -15,10 +15,6 @@ public class G2DSetFocusControl extends G2DBaseControlImpl implements SetFocusCo
 		}
 	}
 	
-	private String getFocusId() {
-		return this.focusId;
-	}
-	
 	private void setFocusId(final String id) {
 		this.focusId = id;
 	}

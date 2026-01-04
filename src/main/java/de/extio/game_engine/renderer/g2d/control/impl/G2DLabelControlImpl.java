@@ -27,17 +27,9 @@ public class G2DLabelControlImpl extends G2DBaseControlImpl implements LabelCont
 		}
 	}
 	
-	private RgbaColor getBackgroundColor() {
-		return this.backgroundColor;
-	}
-	
 	private void setBackgroundColor(final RgbaColor color) {
 		this.modified |= (color == null) ? this.backgroundColor != null : !color.equals(this.backgroundColor);
 		this.backgroundColor = color;
-	}
-	
-	private RgbaColor getForegroundColor() {
-		return this.foregroundColor;
 	}
 	
 	private void setForegroundColor(final RgbaColor color) {
