@@ -2,15 +2,9 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 
 import java.awt.Graphics2D;
 
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
-
-import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.DrawTestRenderingBo;
 
-@Conditional(G2DRendererCondition.class)
-@Component
 public class G2DDrawTest extends G2DAbstractRenderingBo implements DrawTestRenderingBo {
 	
 	//	private static BufferedImage TILE;

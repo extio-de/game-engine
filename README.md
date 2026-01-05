@@ -39,7 +39,7 @@ The engine is structured around the following key subsystems:
 - `menu/` - Menu system components
 - `util/` - Core utilities for serialization, buffers, and RNG
 
-The engine uses Spring's auto-configuration mechanism to wire components together, making it easy to extend and customize behavior through standard Spring configuration patterns. Each subsystem can be independently enabled/disabled via configuration properties, allowing developers to use only the components they need.
+The engine is built as a Spring Boot starter library using auto-configuration exclusively - all beans are defined in AutoConfiguration classes rather than relying on component scanning. This approach provides explicit, discoverable bean definitions and makes it easy to extend and customize behavior through standard Spring configuration patterns. Each subsystem can be independently enabled/disabled via configuration properties, allowing developers to use only the components they need.
 
 ### Demo Module
 
@@ -245,10 +245,14 @@ The core rendering infrastructure is auto-configured by `RendererAutoConfigurati
 **Properties**:
 - `game-engine.renderer.strategy` (default: `g2d`) - Must be set to "g2d" to enable
 - `game-engine.renderer.title` - Optional window title
+- `game-engine.renderer.default-theme` (default: `urbanTheme`) - Default theme, see the ThemeManager section below
 
-The `G2DAutoConfiguration` provides the default Java2D-based renderer implementation, which is enabled when the renderer strategy is set to "g2d" (the default).
+The `G2DAutoConfiguration` provides the default Java2D-based renderer implementation, which is enabled when the renderer strategy is set to "g2d" (the default). This configuration class also registers all G2D rendering components as Spring beans, including:
 
-- `game-engine.renderer.default-theme` (default: `urbanTheme`) - Default theme, see the ThemeManager section below.
+- **Rendering Business Objects**: `G2DDrawBackground`, `G2DDrawEffect`, `G2DDrawFont`, `G2DDrawFpsHistory`, `G2DDrawImage`, `G2DDrawTest`, `G2DDrawControl`, `G2DDrawControlTooltip`
+- **Pattern Renderers**: All theme pattern renderers (`BevelPatternRenderer`, `BlueprintPatternRenderer`, `ChroniclePatternRenderer`, `ContemporaryPatternRenderer`, `DreamPatternRenderer`, `FantasyPatternRenderer`, `MetroPatternRenderer`, `ModernPatternRenderer`, `SpacecraftPatternRenderer`, `SteampunkPatternRenderer`, `UrbanPatternRenderer`, `VintagePatternRenderer`)
+
+All rendering components are registered with `@ConditionalOnMissingBean`, allowing custom implementations to override the defaults.
 
 #### Exposed Spring Beans
 - **`Renderer`**: Main rendering interface (provided by G2DRenderer or custom implementation)
@@ -557,9 +561,18 @@ Themes loaded from storage or static resources are automatically registered into
 ### Container System
 
 #### Purpose and Overview
-The Container System provides a windowing framework for building complex, composable UIs. Windows are Spring-managed modules that can contain components, be dragged, resized to viewport changes, and managed with z-index stacking. The system supports parent-child window relationships and automatic cleanup when modules are deactivated.
+The Container System provides a windowing framework for building complex, composable UIs. Windows are Spring-managed prototype-scoped beans that can contain components, be dragged, resized to viewport changes, and managed with z-index stacking. The system supports parent-child window relationships and automatic cleanup when modules are deactivated.
 
 Windows use normalized coordinates relative to a reference resolution (1920x1080), with automatic alignment for different viewport sizes. This ensures consistent UI layouts across various screen resolutions and aspect ratios.
+
+#### Setup / Autoconfiguration
+Container components are auto-configured by `RendererAutoConfiguration` when the renderer is enabled.
+
+**Exposed Container Beans** (all prototype-scoped):
+- **`Window`**: Main container component for building UI windows
+- **`ScrollArea`**: Scrollable content area with automatic scrollbar management
+
+These beans are created via `ApplicationContext.getBean()` when needed, ensuring each instance is independently managed.
 
 #### Core Components
 

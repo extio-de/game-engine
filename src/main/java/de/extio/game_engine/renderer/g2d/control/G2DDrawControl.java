@@ -8,10 +8,7 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
 
-import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
@@ -34,8 +31,6 @@ import de.extio.game_engine.spatial2.model.Area2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
-@Conditional(G2DRendererCondition.class)
-@Component
 public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRenderingBo {
 	
 	private final static Logger LOGGER = LoggerFactory.getLogger(G2DDrawControl.class);
@@ -204,7 +199,10 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		}
 
 		if (this.customControlConfigurations == null) {
-			this.customControlConfigurations = List.copyOf( this.rendererData.getApplicationContext().getBeansOfType(CustomControlConfiguration.class).values());
+			@SuppressWarnings("unchecked")
+			final
+			var beans = (java.util.Collection<CustomControlConfiguration<? extends G2DBaseControlImpl>>) (java.util.Collection<?>) this.rendererData.getApplicationContext().getBeansOfType(CustomControlConfiguration.class).values();
+			this.customControlConfigurations = List.copyOf(beans);
 		}
 		
 		var control = (G2DBaseControlImpl) CACHED_CONTROLS.get(this.id);

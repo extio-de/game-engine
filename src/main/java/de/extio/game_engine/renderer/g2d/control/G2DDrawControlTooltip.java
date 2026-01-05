@@ -3,18 +3,13 @@ package de.extio.game_engine.renderer.g2d.control;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
-
-import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DAbstractRenderingBo;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.color.MutableRgbaColor;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
-@Conditional(G2DRendererCondition.class)
-@Component
+
 public class G2DDrawControlTooltip extends G2DAbstractRenderingBo {
 	
 	public static record TooltipRecord(CoordI2 position, String text) {

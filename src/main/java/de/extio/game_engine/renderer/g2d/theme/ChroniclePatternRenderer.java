@@ -8,15 +8,9 @@ import java.awt.RenderingHints;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
-
-import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
-@Conditional(G2DRendererCondition.class)
-@Component
 public class ChroniclePatternRenderer implements PatternRenderer {
 	
 	@Override

@@ -9,11 +9,14 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Scope;
 
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.keyboard.KeycodeRegistry;
 import de.extio.game_engine.module.ModuleExecutor;
 import de.extio.game_engine.module.ModuleService;
+import de.extio.game_engine.renderer.container.ScrollArea;
+import de.extio.game_engine.renderer.container.Window;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.work.RendererWorkingSet;
 import de.extio.game_engine.renderer.work.RendererWorkingSetImpl;
@@ -72,6 +75,18 @@ public class RendererAutoConfiguration {
 	@Bean
 	RendererLauncher rendererLauncher(final ApplicationContext applicationContext, final RendererData rendererData) {
 		return new RendererLauncher(applicationContext, rendererData);
+	}
+
+	@Bean
+	@Scope("prototype")
+	Window window(final ModuleService moduleService, final RenderingBoPool renderingBoPool, final RendererControl rendererControl, final EventService eventService, final RendererWorkingSet rendererWorkingSet) {
+		return new Window(moduleService, renderingBoPool, rendererControl, eventService, rendererWorkingSet);
+	}
+
+	@Bean
+	@Scope("prototype")
+	ScrollArea scrollArea(final RenderingBoPool renderingBoPool, final EventService eventService) {
+		return new ScrollArea(renderingBoPool, eventService);
 	}
 
 }

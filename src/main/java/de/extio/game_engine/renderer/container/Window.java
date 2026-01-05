@@ -10,8 +10,6 @@ import java.util.Objects;
 import java.util.Set;
 
 import org.springframework.beans.factory.InitializingBean;
-import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.module.AbstractClientModule;
@@ -39,8 +37,6 @@ import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
-@Component
-@Scope("prototype")
 public class Window extends AbstractClientModule implements InitializingBean {
 	
 	public static final int MARGIN_TOP = 30;

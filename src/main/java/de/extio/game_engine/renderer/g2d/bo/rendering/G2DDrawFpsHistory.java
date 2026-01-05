@@ -4,15 +4,9 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Collection;
 
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
-
-import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 
-@Conditional(G2DRendererCondition.class)
-@Component
 public class G2DDrawFpsHistory extends G2DAbstractRenderingBo {
 	
 	private Collection<Integer> history;

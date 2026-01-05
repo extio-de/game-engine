@@ -4,14 +4,8 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 
-import org.springframework.context.annotation.Conditional;
-import org.springframework.stereotype.Component;
-
-import de.extio.game_engine.renderer.g2d.G2DRendererCondition;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
-@Conditional(G2DRendererCondition.class)
-@Component
 public class UrbanPatternRenderer implements PatternRenderer {
 	
 	@Override
