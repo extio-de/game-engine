@@ -25,11 +25,9 @@ import de.extio.game_engine.spatial2.model.MutableCoordI2;
 
 public class ScrollArea implements WindowComponent {
 	
-	private final static Logger LOGGER = LoggerFactory.getLogger(ScrollArea.class);
+	public static final int SCROLLBAR_WIDTH = 20;
 	
-	protected static final int SCROLLBAR_WIDTH = 20;
-	
-	protected static final int SCROLLBAR_WIDTH_WITH_MARGIN = 25;
+	public static final int SCROLLBAR_WIDTH_WITH_MARGIN = 25;
 	
 	protected final RenderingBoPool renderingBoPool;
 	
@@ -111,8 +109,8 @@ public class ScrollArea implements WindowComponent {
 				this.contentDimension.setY(Math.max(this.contentDimension.getY(), bo.getLocalY() + boWithDim.getHeight()));
 			}
 		}
-		final var needsHorizontalScrollbar = this.contentDimension.getX() > this.relativeArea.getDimension().getX();
-		final var needsVerticalScrollbar = this.contentDimension.getY() > this.relativeArea.getDimension().getY();
+		final var needsHorizontalScrollbar = this.contentDimension.getX() > this.relativeArea.getDimension().getX() - SCROLLBAR_WIDTH_WITH_MARGIN;
+		final var needsVerticalScrollbar = this.contentDimension.getY() > this.relativeArea.getDimension().getY() - SCROLLBAR_WIDTH_WITH_MARGIN;
 		
 		if (needsHorizontalScrollbar || needsVerticalScrollbar) {
 			for (final var bo : renderingBos) {
@@ -180,8 +178,8 @@ public class ScrollArea implements WindowComponent {
 	}
 	
 	public void setScrollPositionVertical(final double scrollPositionVertical) {
-		// this.scrollPositionVertical = Math.max(0.0, Math.min(1.0, scrollPositionVertical));
-		// this.draw();
+		this.scrollPositionVertical = Math.max(0.0, Math.min(1.0, scrollPositionVertical));
+		this.draw();
 	}
 	
 	public double getScrollPositionHorizontal() {
@@ -189,8 +187,8 @@ public class ScrollArea implements WindowComponent {
 	}
 	
 	public void setScrollPositionHorizontal(final double scrollPositionHorizontal) {
-		// this.scrollPositionHorizontal = Math.max(0.0, Math.min(1.0, scrollPositionHorizontal));
-		// this.draw();
+		this.scrollPositionHorizontal = Math.max(0.0, Math.min(1.0, scrollPositionHorizontal));
+		this.draw();
 	}
 	
 	@Override
