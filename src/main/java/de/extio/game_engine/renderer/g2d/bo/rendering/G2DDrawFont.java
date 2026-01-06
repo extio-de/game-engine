@@ -26,7 +26,11 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	public final static float FONT_SIZE_MIN = 12.0F;
 	
 	public final static int FONT_SIZE_DEFAULT = 18;
-	
+
+	public final static double FONT_LEADING = 1.6;
+
+	private static final AtomicReference<Font> cachedFontRef = new AtomicReference<>();
+
 	private static Font baseFont;
 	
 	static {
@@ -85,7 +89,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		graphics.setColor(this.color == null ? this.rendererData.getThemeManager().getCurrentTheme().getTextNormal().toColor() : this.color.toAwtColor());
 		
 		final var lines = this.text.contains("\n") ? this.text.split("\n", -1) : new String[] { this.text };
-		final var lineHeight = getTextDimensions("M", graphics, this.size, 1.0).getY() + (int) (Math.max(FONT_SIZE_MIN, this.size) * 0.5);
+		final var lineHeight = (int) (getTextDimensions("M", graphics, this.size, 1.0).getY() * FONT_LEADING); //+ (int) (Math.max(FONT_SIZE_MIN, this.size) * 0.5);
 		final CoordI2[] lineDims = new CoordI2[lines.length];
 		int maxLineWidth = 0;
 		for (int i = 0; i < lines.length; i++) {
@@ -166,7 +170,12 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	public static Font getFont(final double scaleFactor, final int size_) {
 		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
 		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
-		return baseFont.deriveFont(sizeScaled);
+		return cachedFontRef.updateAndGet(existingFont -> {
+			if (existingFont == null || existingFont.getSize2D() != sizeScaled) {
+				return baseFont.deriveFont(sizeScaled);
+			}
+			return existingFont;
+		});		
 	}
 	
 	public static void renderText(final Graphics graphics, final double scaleFactor, final int x, final int y, final int size_, final String text) {
@@ -180,7 +189,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		
 		if (text.contains("\n")) {
 			final var lines = text.split("\n", -1);
-			final var lineHeight = getTextDimensions("M", graphics, size_, scaleFactor).getY();
+			final var lineHeight = (int) (getTextDimensions("M", graphics, size_, scaleFactor).getY() * FONT_LEADING);
 			
 			for (int i = 0; i < lines.length; i++) {
 				renderText(graphics, null, scaleFactor, x, y + i * lineHeight, size_, lines[i]);
@@ -195,9 +204,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 			return;
 		}
 		
-		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
-		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
-		final var font = baseFont.deriveFont(sizeScaled);
+		final var font = getFont(scaleFactor, size_);
 		CoordI2 textDim;
 		if (textDim_ == null) {
 			textDim = getTextDimensions(text, graphics, size_, scaleFactor);
@@ -209,21 +216,12 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		graphics.drawString(text, (int) (x * scaleFactor), (int) (y * scaleFactor) + textDim.getY());
 	}
 	
-	private static final AtomicReference<Font> cachedFontRef = new AtomicReference<>();
-
 	public static CoordI2 getTextDimensions(final String text, final Graphics graphics, final int size_, final double scaleFactor) {
 		if (text == null) {
 			return ImmutableCoordI2.one();
 		}
 		
-		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
-		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
-		final var font = cachedFontRef.updateAndGet(existingFont -> {
-			if (existingFont == null || existingFont.getSize2D() != sizeScaled) {
-				return baseFont.deriveFont(sizeScaled);
-			}
-			return existingFont;
-		});
+		final var font = getFont(scaleFactor, size_);
 		final var gv = font.layoutGlyphVector(((Graphics2D) graphics).getFontRenderContext(), text.toCharArray(), 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
 		final var pixBounds = gv.getPixelBounds(((Graphics2D) graphics).getFontRenderContext(), 0, 0);
 		return MutableCoordI2.create(pixBounds.x + pixBounds.width, pixBounds.height - (int) pixBounds.getMaxY());
