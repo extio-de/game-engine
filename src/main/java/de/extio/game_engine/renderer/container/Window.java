@@ -303,6 +303,10 @@ public class Window extends AbstractClientModule implements InitializingBean {
 	public Map<String, RenderingBo> getRenderingBos() {
 		return this.rendererWorkingSet.getUncommittedWork(this.id);
 	}
+
+	public <T extends RenderingBo> T getRenderingBo(final String renderingBoId, final Class<T> type) {
+		return this.rendererWorkingSet.get(this.id, renderingBoId, type);
+	}
 	
 	public void putRenderingBo(final RenderingBo renderingBo) {
 		this.rendererWorkingSet.put(this.id, renderingBo);
