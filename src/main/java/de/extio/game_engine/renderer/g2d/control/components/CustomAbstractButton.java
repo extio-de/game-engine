@@ -10,6 +10,8 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import javax.imageio.ImageIO;
 
@@ -20,6 +22,20 @@ import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 @SuppressWarnings("serial")
 public abstract class CustomAbstractButton extends Component {
+	
+	private static final int MAX_ICON_CACHE_SIZE = 10;
+	
+	private final Map<String, BufferedImage> iconCache = new LinkedHashMap<>(MAX_ICON_CACHE_SIZE, 0.75f, true) {
+		
+		@Override
+		protected boolean removeEldestEntry(final Map.Entry<String, BufferedImage> eldest) {
+			final boolean shouldRemove = this.size() > MAX_ICON_CACHE_SIZE;
+			if (shouldRemove && eldest.getValue() != null) {
+				eldest.getValue().flush();
+			}
+			return shouldRemove;
+		}
+	};
 	
 	protected static final int STATE_NORMAL = 0;
 	
@@ -183,37 +199,44 @@ public abstract class CustomAbstractButton extends Component {
 	}
 	
 	public void close() {
-		this.flushIcon();
+		this.icon = null;
+		for (final var cachedIcon : this.iconCache.values()) {
+			if (cachedIcon != null) {
+				cachedIcon.flush();
+			}
+		}
+		this.iconCache.clear();
 	}
 	
 	@SuppressWarnings("resource")
 	protected void loadIcon() {
 		if (this.iconResource != null && this.staticResourceService != null) {
 			this.loadedIconResource = this.iconResource;
-			this.flushIcon();
+			this.icon = null;
 			
-			final var in = this.staticResourceService.loadStreamByPath(this.iconResource);
-			if (in.isPresent()) {
-				try (var stream = in.get()) {
-					if (stream != null) {
-						this.icon = ImageIO.read(stream);
-					}
-				}
-				catch (final IOException e) {
-					throw new RuntimeException(e);
-				}
-			}
+			final String iconKey = this.iconResource.toString();
+			
+			this.icon = this.iconCache.get(iconKey);
 			
 			if (this.icon == null) {
-				throw new RuntimeException("Resource not found: " + this.iconResource);
+				final var in = this.staticResourceService.loadStreamByPath(this.iconResource);
+				if (in.isPresent()) {
+					try (var stream = in.get()) {
+						if (stream != null) {
+							this.icon = ImageIO.read(stream);
+						}
+					}
+					catch (final IOException e) {
+						throw new RuntimeException(e);
+					}
+				}
+				
+				if (this.icon == null) {
+					throw new RuntimeException("Resource not found: " + this.iconResource);
+				}
+				
+				this.iconCache.put(iconKey, this.icon);
 			}
-		}
-	}
-	
-	protected void flushIcon() {
-		if (this.icon != null) {
-			this.icon.flush();
-			this.icon = null;
 		}
 	}
 	
