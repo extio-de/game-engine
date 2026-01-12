@@ -265,10 +265,17 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 	}
 	
 	protected void rebuildBufferedImage() {
-		this.disposeBufferedImage();
-		this.bufferedImage = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().getGraphicsConfiguration().createCompatibleImage(Math.max(1, this.width), Math.max(1, this.height), Transparency.TRANSLUCENT);
-		this.bufferedImageGraphics = this.bufferedImage.createGraphics();
-		this.bufferedImageGraphics.setRenderingHints(G2DRenderingHintFactory.createDefault());
+		final int width = Math.max(1, this.width);
+		final int height = Math.max(1, this.height);
+		if (this.bufferedImage != null && this.bufferedImage.getWidth() == width && this.bufferedImage.getHeight() == height) {
+			this.bufferedImageGraphics.clearRect(0, 0, width, height);
+		}
+		else {
+			this.disposeBufferedImage();
+			this.bufferedImage = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().getGraphicsConfiguration().createCompatibleImage(Math.max(1, this.width), Math.max(1, this.height), Transparency.TRANSLUCENT);
+			this.bufferedImageGraphics = this.bufferedImage.createGraphics();
+			this.bufferedImageGraphics.setRenderingHints(G2DRenderingHintFactory.createDefault());
+		}
 	}
 	
 	protected void disposeBufferedImage() {
