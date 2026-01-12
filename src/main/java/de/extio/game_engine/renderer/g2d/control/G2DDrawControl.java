@@ -42,6 +42,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private Class<? extends BaseControl> clazz;
 	
 	private String caption;
+
+	private long lastCaptionUpdateTime;
 	
 	private String controlGroup;
 	
@@ -96,6 +98,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	@Override
 	public ControlRenderingBo setCaption(final String caption) {
 		this.caption = caption;
+		this.lastCaptionUpdateTime = System.currentTimeMillis();
 		return this;
 	}
 	
@@ -336,6 +339,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		}
 		else if (this.clazz == TextfieldControl.class && this.textfieldData != null) {
 			((TextfieldControl) control).setCustomData(this.textfieldData);
+			if (control instanceof final G2DTextfieldControlImpl2 tfc2) {
+				tfc2.setLastCaptionUpdateTime(this.lastCaptionUpdateTime);
+			}
 		}
 		else {
 			for (final var customControlConfiguration : this.customControlConfigurations) {
@@ -355,6 +361,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.id = o.id;
 			this.clazz = o.clazz;
 			this.caption = o.caption;
+			this.lastCaptionUpdateTime = o.lastCaptionUpdateTime;
 			this.controlGroup = o.controlGroup;
 			this.fontSize = o.fontSize;
 			this.labelData = o.labelData;
@@ -384,6 +391,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.id = null;
 		this.clazz = null;
 		this.caption = null;
+		this.lastCaptionUpdateTime = 0L;
 		this.controlGroup = null;
 		this.fontSize = G2DDrawFont.FONT_SIZE_DEFAULT;
 		this.labelData = null;

@@ -34,6 +34,10 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 	private boolean readonly;
 	
 	private String lastCaption = "";
+
+	private long lastCaptionUpdateTime;
+
+	private long lastCaptionUpdateTimeInternal;
 	
 	private String lastText = "";
 	
@@ -82,14 +86,18 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		if (this.multiLine) {
 			this.modified |= caption != null && !caption.equals(this.caption);
 		}
-		else {
-			this.modified |= caption != null && (!caption.equals(this.caption) || !caption.equals(this.textComponent.getText()));
-		}
 		if (caption != null) {
 			this.lastCaption = caption;
 		}
 		this.caption = caption;
 		return this;
+	}
+
+	public void setLastCaptionUpdateTime(final long lastCaptionUpdateTime) {
+		if (! this.multiLine) {
+			this.modified |= this.lastCaptionUpdateTime != lastCaptionUpdateTime;
+		}
+		this.lastCaptionUpdateTime = lastCaptionUpdateTime;
 	}
 	
 	@Override
@@ -301,7 +309,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 				}
 			}
 			else {
-				if (this.caption != null && !this.textComponent.getText().equals(this.caption)) {
+				if (this.caption != null && !this.textComponent.getText().equals(this.caption) && (this.lastCaptionUpdateTimeInternal == 0L || this.lastCaptionUpdateTimeInternal < this.lastCaptionUpdateTime)) {
 					final var pos = this.textComponent.getCaretPosition();
 					this.safeInvoke(() -> this.textComponent.setText(this.caption));
 					if (pos < this.textComponent.getText().length()) {
@@ -309,6 +317,7 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 					}
 					
 					this.lastText = this.caption;
+					this.lastCaptionUpdateTimeInternal = this.lastCaptionUpdateTime;
 				}
 			}
 		}
@@ -382,5 +391,4 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		this.scrollbar.setControlId(id + "_scroll");
 		return super.setControlId(id);
 	}
-	
 }
