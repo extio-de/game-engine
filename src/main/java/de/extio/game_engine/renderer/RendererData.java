@@ -1,5 +1,6 @@
 package de.extio.game_engine.renderer;
 
+import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicLong;
 
 import org.springframework.context.ApplicationContext;
@@ -30,6 +31,8 @@ public class RendererData {
 	private final VideoOptions videoOptions = new VideoOptions();
 	
 	private final AtomicLong frame = new AtomicLong();
+
+	private final AtomicBoolean skipDisplayFrame = new AtomicBoolean(false);
 
 	private final KeycodeRegistry keycodeRegistry;
 
@@ -86,6 +89,14 @@ public class RendererData {
 
 	public long nextFrame() {
 		return this.frame.incrementAndGet();
+	}
+
+	public boolean isSkipDisplayFrame() {
+		return this.skipDisplayFrame.get();
+	}
+
+	public boolean setSkipDisplayFrame(final boolean skipDisplayFrame) {
+		return this.skipDisplayFrame.getAndSet(skipDisplayFrame);
 	}
 	
 	public Renderer getRenderer() {

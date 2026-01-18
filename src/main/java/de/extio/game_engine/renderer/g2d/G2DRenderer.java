@@ -225,7 +225,10 @@ public class G2DRenderer implements Renderer {
 					// Rendering cycle START
 					//
 					
-					bufferStrategy.show();
+					final var skipDisplay = this.rendererData.setSkipDisplayFrame(false);
+					if (! skipDisplay) {
+						bufferStrategy.show();
+					}
 					Toolkit.getDefaultToolkit().sync();
 				}
 				finally {
