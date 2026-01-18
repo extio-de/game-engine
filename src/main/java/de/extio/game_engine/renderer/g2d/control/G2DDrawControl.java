@@ -23,6 +23,7 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowPanelControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DPopupMenuControlImpl;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
@@ -66,6 +67,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private SliderData sliderData;
 	
 	private TableData tableData;
+	
+	private PopupMenuData popupMenuData;
 	
 	private SetFocusData setFocusData;
 
@@ -142,6 +145,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		}
 		else if (data instanceof final TableData tableData) {
 			this.tableData = tableData;
+		}
+		else if (data instanceof final PopupMenuData popupMenuData) {
+			this.popupMenuData = popupMenuData;
 		}
 		else if (data instanceof final SetFocusData setFocusData) {
 			this.setFocusData = setFocusData;
@@ -241,6 +247,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			else if (this.clazz == TableControl.class) {
 				control = new G2DTableControlImpl();
 			}
+			else if (this.clazz == PopupMenuControl.class) {
+				control = new G2DPopupMenuControlImpl();
+			}
 			else if (this.clazz == SetFocusControl.class) {
 				control = new G2DSetFocusControl();
 			}
@@ -334,6 +343,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		else if (this.clazz == TableControl.class && this.tableData != null) {
 			((TableControl) control).setCustomData(this.tableData);
 		}
+		else if (this.clazz == PopupMenuControl.class && this.popupMenuData != null) {
+			((PopupMenuControl) control).setCustomData(this.popupMenuData);
+		}
 		else if (this.clazz == SetFocusControl.class && this.setFocusData != null) {
 			((SetFocusControl) control).setCustomData(this.setFocusData);
 		}
@@ -373,6 +385,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.textfieldData = o.textfieldData;
 			this.sliderData = o.sliderData;
 			this.tableData = o.tableData;
+			this.popupMenuData = o.popupMenuData;
 			this.setFocusData = o.setFocusData;
 			this.customData = o.customData;
 			this.visible = o.visible;
@@ -403,6 +416,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.textfieldData = null;
 		this.sliderData = null;
 		this.tableData = null;
+		this.popupMenuData = null;
 		this.setFocusData = null;
 		this.customData = null;
 		this.visible = false;

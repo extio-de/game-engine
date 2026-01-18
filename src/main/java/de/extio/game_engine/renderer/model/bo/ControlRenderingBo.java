@@ -30,6 +30,10 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	
 	record TableData(List<Object> data, int rows, long version, boolean firstColDoubleSize) {}
 	
+	record PopupMenuItem(String id, String label, boolean enabled) {}
+	
+	record PopupMenuData(List<PopupMenuItem> items, RgbaColor backgroundColor, RgbaColor foregroundColor, RgbaColor selectionColor, int rowHeight, int padding) {}
+	
 	record SetFocusData(String focusId) {}
 	
 	/**
@@ -174,6 +178,12 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	public static interface TableControl extends BaseControl {
 		
 		void setCustomData(TableData data);
+		
+	}
+	
+	public static interface PopupMenuControl extends BaseControl {
+		
+		void setCustomData(PopupMenuData data);
 		
 	}
 	

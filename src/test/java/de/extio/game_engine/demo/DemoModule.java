@@ -22,6 +22,9 @@ import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonData;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelData;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.PopupMenuControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.PopupMenuData;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.PopupMenuItem;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SwitchControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonControl;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
@@ -63,6 +66,8 @@ public class DemoModule extends AbstractClientModule {
 	private Window scrollAreaWindow;
 	
 	private Window languageSelectionWindow;
+	
+	private String welcomePopupMenuId;
 	
 	private ScrollArea scrollArea;
 	
@@ -140,6 +145,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.languageSelectionWindow.getId(), false);
+		this.hideWelcomePopupMenu();
 	}
 	
 	@Override
@@ -155,6 +161,7 @@ public class DemoModule extends AbstractClientModule {
 		this.getModuleService().changeActiveState(this.themeSelectionWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.scrollAreaWindow.getId(), false);
 		this.getModuleService().changeActiveState(this.languageSelectionWindow.getId(), false);
+		this.hideWelcomePopupMenu();
 		this.audioController.stopMusic();
 	}
 	
@@ -166,9 +173,7 @@ public class DemoModule extends AbstractClientModule {
 			
 			case "DemoModule_MainWindow_Label_Welcome" -> {
 				this.audioController.play(new StaticResource(List.of("audio"), "contact0.ogg"));
-				this.setupSecondaryWindow();
-				this.getModuleService().changeActiveState(this.secondaryWindow.getId(), true);
-				this.getModuleService().changeDisplayState(this.secondaryWindow.getId(), true);
+				this.showWelcomePopupMenu();
 			}
 			
 			case "DemoModule_MainWindow_Label_Start" -> {
@@ -197,6 +202,13 @@ public class DemoModule extends AbstractClientModule {
 				this.getModuleService().changeActiveState(this.secondaryWindow.getId(), false);
 			}
 			
+			case "DemoModule_MainWindow_PopupMenu_Welcome" -> {
+				this.hideWelcomePopupMenu();
+				this.setupSecondaryWindow();
+				this.getModuleService().changeActiveState(this.secondaryWindow.getId(), true);
+				this.getModuleService().changeDisplayState(this.secondaryWindow.getId(), true);
+			}
+			
 			default -> {
 				final var themeName = this.themeSelectionByControlId.get(event.getId());
 				if (themeName != null) {
@@ -218,6 +230,51 @@ public class DemoModule extends AbstractClientModule {
 				}
 			}
 		}
+	}
+	
+	private void showWelcomePopupMenu() {
+		this.welcomePopupMenuId = "DemoModule_MainWindow_PopupMenu_Welcome";
+		this.mainWindow.removeRenderingBo(this.welcomePopupMenuId);
+		
+		final var items = List.of(
+				new PopupMenuItem("entry-1", "Open", true),
+				new PopupMenuItem("entry-2", "Details", true),
+				new PopupMenuItem("entry-3", "Cancel", true));
+		final var rowHeight = 36;
+		final var padding = 8;
+		final var width = 260;
+		final var height = (rowHeight * items.size()) + (padding * 2);
+		
+		// Center the popup menu on the welcome label
+		final var labelX = Window.MARGIN_LEFT;
+		final var labelY = 100;
+		final var labelWidth = RendererControl.REFERENCE_RESOLUTION.divide(9).multiply(7).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX();
+		final var labelHeight = 60;
+		final var labelCenterX = labelX + labelWidth / 2;
+		final var labelCenterY = labelY + labelHeight / 2;
+		final var x = labelCenterX - width / 2;
+		final var y = labelCenterY - height / 2;
+		
+		final var data = new PopupMenuData(items, null, null, null, rowHeight, padding);
+		final var bo = this.renderingBoPool.acquire(this.welcomePopupMenuId, ControlRenderingBo.class)
+				.setType(PopupMenuControl.class)
+				.setFontSize(24)
+				.setVisible(true)
+				.setEnabled(true)
+				.setControlData(data)
+				.withDimensionAbsolute(width, height)
+				.setLayer(RenderingBoLayer.UI1)
+				.withPositionRelative(x, y);
+		this.mainWindow.putRenderingBo(bo);
+		this.mainWindow.draw();
+	}
+	
+	private void hideWelcomePopupMenu() {
+		if (this.welcomePopupMenuId == null) {
+			return;
+		}
+		this.mainWindow.removeRenderingBo(this.welcomePopupMenuId);
+		this.mainWindow.draw();
 	}
 	
 	private void setupMainWindow() {
