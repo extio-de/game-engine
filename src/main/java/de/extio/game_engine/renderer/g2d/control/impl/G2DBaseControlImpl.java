@@ -1,5 +1,6 @@
 package de.extio.game_engine.renderer.g2d.control.impl;
 
+import java.awt.AlphaComposite;
 import java.awt.Graphics2D;
 import java.awt.Transparency;
 import java.awt.image.BufferedImage;
@@ -268,7 +269,10 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 		final int width = Math.max(1, this.width);
 		final int height = Math.max(1, this.height);
 		if (this.bufferedImage != null && this.bufferedImage.getWidth() == width && this.bufferedImage.getHeight() == height) {
-			this.bufferedImageGraphics.clearRect(0, 0, width, height);
+			final var oldComposite = this.bufferedImageGraphics.getComposite();
+			this.bufferedImageGraphics.setComposite(AlphaComposite.Clear);
+			this.bufferedImageGraphics.fillRect(0, 0, width, height);
+			this.bufferedImageGraphics.setComposite(oldComposite);			
 		}
 		else {
 			this.disposeBufferedImage();
