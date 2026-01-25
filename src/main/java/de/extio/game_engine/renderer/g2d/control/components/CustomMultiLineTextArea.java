@@ -76,6 +76,8 @@ public class CustomMultiLineTextArea extends Component {
 	private int cachedLineHeight = 0;
 	
 	private int cachedFontSize = 0;
+
+	private int cachedSpaceWidth = 0;
 	
 	private final ThemeManager themeManager;
 	
@@ -294,6 +296,14 @@ public class CustomMultiLineTextArea extends Component {
 					}
 				}
 				e.consume();
+			}
+			
+			@Override
+			public void mouseClicked(final MouseEvent e) {
+				if (e.getClickCount() == 2 && !isInScrollbarArea(e.getX(), e.getY())) {
+					selectWordAtCaret();
+					e.consume();
+				}
 			}
 			
 			@Override
@@ -522,6 +532,22 @@ public class CustomMultiLineTextArea extends Component {
 		this.cachedLineHeight = height;
 		this.cachedFontSize = this.fontSize;
 		return height;
+	}
+
+	private int getSpaceWidth() {
+		if (this.cachedSpaceWidth > 0 && this.cachedFontSize == this.fontSize) {
+			return this.cachedSpaceWidth;
+		}
+		
+		if (this.getGraphics() == null) {
+			return 10;
+		}
+		
+		final int width0 = (int) G2DDrawFont.getTextDimensions("MM", this.getGraphics(), this.fontSize, 1.0).getX();
+		final int width1 = (int) G2DDrawFont.getTextDimensions("M M", this.getGraphics(), this.fontSize, 1.0).getX();
+		this.cachedSpaceWidth = width1 - width0;
+		this.cachedFontSize = this.fontSize;
+		return this.cachedSpaceWidth;
 	}
 	
 	private void updateCaretPosition(final int mouseX, final int mouseY) {
@@ -835,6 +861,33 @@ public class CustomMultiLineTextArea extends Component {
 		this.dirty = true;
 	}
 	
+	private void selectWordAtCaret() {
+		if (this.text.isEmpty()) {
+			return;
+		}
+		
+		int start = this.caretPosition;
+		int end = this.caretPosition;
+		
+		while (start > 0 && isWordCharacter(this.text.charAt(start - 1))) {
+			start--;
+		}
+		
+		while (end < this.text.length() && isWordCharacter(this.text.charAt(end))) {
+			end++;
+		}
+		
+		if (start < end) {
+			this.selectionAnchor = start;
+			this.caretPosition = end;
+			this.dirty = true;
+		}
+	}
+	
+	private boolean isWordCharacter(final char ch) {
+		return Character.isLetterOrDigit(ch) || ch == '_';
+	}
+	
 	@Override
 	public void update(final Graphics g) {
 	}
@@ -956,8 +1009,9 @@ public class CustomMultiLineTextArea extends Component {
 								? caretWrappedLine.substring(0, caretPosInWrappedLine)
 								: "";
 						final var textDim = G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
+						final int spaceWidth = beforeCaret.endsWith(" ") ? getSpaceWidth() : 0;
 						final int textHeight = textDim.getY();
-						final int caretX = textDim.getX() + 2;
+						final int caretX = textDim.getX() + 2 + (int) (spaceWidth * this.scaleFactor);
 						final int caretY = (int) ((wrappedLineIndex * lineHeight - this.scrollOffsetY) * this.scaleFactor);
 						
 						if (caretY >= 0 && caretY < this.getHeight()) {
