@@ -4,6 +4,10 @@ import java.awt.Color;
 import java.awt.Component;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Toolkit;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.DataFlavor;
+import java.awt.datatransfer.StringSelection;
 import java.awt.event.FocusEvent;
 import java.awt.event.FocusListener;
 import java.awt.event.KeyEvent;
@@ -36,6 +40,8 @@ public class CustomMultiLineTextArea extends Component {
 	private String text = "";
 	
 	private int caretPosition = 0;
+	
+	private int selectionAnchor = 0;
 	
 	private int scrollOffsetY = 0;
 	
@@ -78,6 +84,7 @@ public class CustomMultiLineTextArea extends Component {
 	public void setText(final String text) {
 		this.text = text == null ? "" : text;
 		this.caretPosition = Math.min(this.caretPosition, this.text.length());
+		this.selectionAnchor = this.caretPosition;
 		this.dirty = true;
 	}
 	
@@ -142,9 +149,11 @@ public class CustomMultiLineTextArea extends Component {
 				
 				final char ch = e.getKeyChar();
 				if (!Character.isISOControl(ch)) {
+					deleteSelection();
 					insertChar(ch);
 				}
 				else if (ch == '\n' || ch == '\r') {
+					deleteSelection();
 					insertChar('\n');
 				}
 				else if (ch == '\b') {
@@ -158,10 +167,16 @@ public class CustomMultiLineTextArea extends Component {
 					return;
 				}
 				
+				final boolean shiftPressed = e.isShiftDown();
+				final boolean ctrlPressed = e.isControlDown();
+				
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_LEFT:
 						if (CustomMultiLineTextArea.this.caretPosition > 0) {
 							CustomMultiLineTextArea.this.caretPosition--;
+							if (!shiftPressed) {
+								CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+							}
 							ensureCaretVisible();
 							CustomMultiLineTextArea.this.dirty = true;
 						}
@@ -169,28 +184,87 @@ public class CustomMultiLineTextArea extends Component {
 					case KeyEvent.VK_RIGHT:
 						if (CustomMultiLineTextArea.this.caretPosition < CustomMultiLineTextArea.this.text.length()) {
 							CustomMultiLineTextArea.this.caretPosition++;
+							if (!shiftPressed) {
+								CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+							}
 							ensureCaretVisible();
 							CustomMultiLineTextArea.this.dirty = true;
 						}
 						break;
 					case KeyEvent.VK_UP:
 						moveCaretUp();
+						if (!shiftPressed) {
+							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+						}
 						break;
 					case KeyEvent.VK_DOWN:
 						moveCaretDown();
+						if (!shiftPressed) {
+							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+						}
 						break;
 					case KeyEvent.VK_HOME:
 						moveCaretToLineStart();
+						if (!shiftPressed) {
+							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+						}
 						break;
 					case KeyEvent.VK_END:
 						moveCaretToLineEnd();
+						if (!shiftPressed) {
+							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+						}
 						break;
 					case KeyEvent.VK_DELETE:
-						if (!CustomMultiLineTextArea.this.readonly && CustomMultiLineTextArea.this.caretPosition < CustomMultiLineTextArea.this.text.length()) {
-							CustomMultiLineTextArea.this.text = CustomMultiLineTextArea.this.text.substring(0, CustomMultiLineTextArea.this.caretPosition) +
-									CustomMultiLineTextArea.this.text.substring(CustomMultiLineTextArea.this.caretPosition + 1);
-							notifyTextChanged();
-							CustomMultiLineTextArea.this.dirty = true;
+						if (!CustomMultiLineTextArea.this.readonly) {
+							if (hasSelection()) {
+								if (e.isShiftDown()) {
+									cut();
+								}
+								else {
+									deleteSelection();
+								}
+							}
+							else if (CustomMultiLineTextArea.this.caretPosition < CustomMultiLineTextArea.this.text.length()) {
+								CustomMultiLineTextArea.this.text = CustomMultiLineTextArea.this.text.substring(0, CustomMultiLineTextArea.this.caretPosition) +
+										CustomMultiLineTextArea.this.text.substring(CustomMultiLineTextArea.this.caretPosition + 1);
+								notifyTextChanged();
+								CustomMultiLineTextArea.this.dirty = true;
+							}
+						}
+						break;
+					case KeyEvent.VK_C:
+						if (ctrlPressed) {
+							copy();
+							e.consume();
+						}
+						break;
+					case KeyEvent.VK_X:
+						if (ctrlPressed && !CustomMultiLineTextArea.this.readonly) {
+							cut();
+							e.consume();
+						}
+						break;
+					case KeyEvent.VK_V:
+						if (ctrlPressed && !CustomMultiLineTextArea.this.readonly) {
+							paste();
+							e.consume();
+						}
+						break;
+					case KeyEvent.VK_INSERT:
+						if (ctrlPressed) {
+							copy();
+							e.consume();
+						}
+						else if (shiftPressed && !CustomMultiLineTextArea.this.readonly) {
+							paste();
+							e.consume();
+						}
+						break;
+					case KeyEvent.VK_A:
+						if (ctrlPressed) {
+							selectAll();
+							e.consume();
 						}
 						break;
 				}
@@ -215,6 +289,9 @@ public class CustomMultiLineTextArea extends Component {
 				}
 				else {
 					updateCaretPosition(e.getX(), e.getY());
+					if (!e.isShiftDown()) {
+						CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+					}
 				}
 				e.consume();
 			}
@@ -236,6 +313,10 @@ public class CustomMultiLineTextArea extends Component {
 			public void mouseDragged(final MouseEvent e) {
 				if (CustomMultiLineTextArea.this.scrollbarDragging) {
 					handleScrollbarDrag(e.getY());
+					e.consume();
+				}
+				else if (!isInScrollbarArea(e.getX(), e.getY())) {
+					updateCaretPosition(e.getX(), e.getY());
 					e.consume();
 				}
 			}
@@ -272,15 +353,20 @@ public class CustomMultiLineTextArea extends Component {
 	private void insertChar(final char ch) {
 		this.text = this.text.substring(0, this.caretPosition) + ch + this.text.substring(this.caretPosition);
 		this.caretPosition++;
+		this.selectionAnchor = this.caretPosition;
 		ensureCaretVisible();
 		notifyTextChanged();
 		this.dirty = true;
 	}
 	
 	private void backspace() {
-		if (this.caretPosition > 0) {
+		if (hasSelection()) {
+			deleteSelection();
+		}
+		else if (this.caretPosition > 0) {
 			this.text = this.text.substring(0, this.caretPosition - 1) + this.text.substring(this.caretPosition);
 			this.caretPosition--;
+			this.selectionAnchor = this.caretPosition;
 			ensureCaretVisible();
 			notifyTextChanged();
 			this.dirty = true;
@@ -442,7 +528,12 @@ public class CustomMultiLineTextArea extends Component {
 		final List<String> wrappedLines = getWrappedLines();
 		final List<String> rawLines = getLines();
 		final int lineHeight = getLineHeight();
-		final int clickedWrappedLine = Math.max(0, Math.min(wrappedLines.size() - 1, (mouseY + this.scrollOffsetY) / lineHeight));
+		
+		// Convert mouse coordinates from screen pixels to logical coordinates
+		final int logicalMouseX = (int) (mouseX / this.scaleFactor);
+		final int logicalMouseY = (int) (mouseY / this.scaleFactor);
+		
+		final int clickedWrappedLine = Math.max(0, Math.min(wrappedLines.size() - 1, (logicalMouseY + this.scrollOffsetY) / lineHeight));
 		
 		int rawLineIndex = 0;
 		int wrappedLineCount = 0;
@@ -492,7 +583,7 @@ public class CustomMultiLineTextArea extends Component {
 				for (int j = 0; j <= clickedLine.length(); j++) {
 					final String substr = clickedLine.substring(0, j);
 					final int textWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
-					final int dist = Math.abs((int) (textWidth * this.scaleFactor) - mouseX);
+					final int dist = Math.abs(textWidth - (logicalMouseX - 2)); // Account for 2px text offset
 					if (dist < bestDist) {
 						bestDist = dist;
 						bestPos = j;
@@ -661,6 +752,89 @@ public class CustomMultiLineTextArea extends Component {
 		this.dirty = true;
 	}
 	
+	private boolean hasSelection() {
+		return this.caretPosition != this.selectionAnchor;
+	}
+	
+	private int getSelectionStart() {
+		return Math.min(this.caretPosition, this.selectionAnchor);
+	}
+	
+	private int getSelectionEnd() {
+		return Math.max(this.caretPosition, this.selectionAnchor);
+	}
+	
+	private String getSelectedText() {
+		if (!hasSelection()) {
+			return "";
+		}
+		return this.text.substring(getSelectionStart(), getSelectionEnd());
+	}
+	
+	private void deleteSelection() {
+		if (!hasSelection()) {
+			return;
+		}
+		
+		final int start = getSelectionStart();
+		final int end = getSelectionEnd();
+		this.text = this.text.substring(0, start) + this.text.substring(end);
+		this.caretPosition = start;
+		this.selectionAnchor = start;
+		notifyTextChanged();
+		this.dirty = true;
+	}
+	
+	private void copy() {
+		if (!hasSelection()) {
+			return;
+		}
+		
+		final String selectedText = getSelectedText();
+		final StringSelection selection = new StringSelection(selectedText);
+		final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+		clipboard.setContents(selection, null);
+	}
+	
+	private void cut() {
+		if (!hasSelection() || this.readonly) {
+			return;
+		}
+		
+		copy();
+		deleteSelection();
+	}
+	
+	private void paste() {
+		if (this.readonly) {
+			return;
+		}
+		
+		try {
+			final Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
+			if (clipboard.isDataFlavorAvailable(DataFlavor.stringFlavor)) {
+				final String clipboardText = (String) clipboard.getData(DataFlavor.stringFlavor);
+				if (clipboardText != null && !clipboardText.isEmpty()) {
+					deleteSelection();
+					this.text = this.text.substring(0, this.caretPosition) + clipboardText + this.text.substring(this.caretPosition);
+					this.caretPosition += clipboardText.length();
+					this.selectionAnchor = this.caretPosition;
+					ensureCaretVisible();
+					notifyTextChanged();
+					this.dirty = true;
+				}
+			}
+		}
+		catch (final Exception ex) {
+		}
+	}
+	
+	private void selectAll() {
+		this.selectionAnchor = 0;
+		this.caretPosition = this.text.length();
+		this.dirty = true;
+	}
+	
 	@Override
 	public void update(final Graphics g) {
 	}
@@ -685,7 +859,6 @@ public class CustomMultiLineTextArea extends Component {
 		final int lineHeight = getLineHeight();
 		
 		final Color fgColor = this.foregroundColor != null ? this.foregroundColor : theme.getTextNormal().toColor();
-		g2d.setColor(fgColor);
 		
 		final var oldClip = g2d.getClip();
 		g2d.setClip(0, 0, (int) (textAreaWidth * this.scaleFactor), this.getHeight());
@@ -693,13 +866,52 @@ public class CustomMultiLineTextArea extends Component {
 		final int startLine = Math.max(0, this.scrollOffsetY / lineHeight);
 		final int endLine = Math.min(wrappedLines.size(), (this.scrollOffsetY + visibleHeight) / lineHeight + 2);
 		
+		final boolean hasSelection = hasSelection();
+		final int selStart = hasSelection ? getSelectionStart() : 0;
+		final int selEnd = hasSelection ? getSelectionEnd() : 0;
+		
 		for (int i = startLine; i < endLine; i++) {
 			final String line = wrappedLines.get(i);
 			final int yPos = i * lineHeight - this.scrollOffsetY;
 			if (yPos + lineHeight >= 0 && yPos < visibleHeight) {
-				final var textDim = G2DDrawFont.getTextDimensions(line, g2d, this.fontSize, 1.0);
-				final var textDimScaled = ImmutableCoordI2.create((int) (textDim.getX() * this.scaleFactor), (int) (textDim.getY() * this.scaleFactor));
-				G2DDrawFont.renderText(g2d, textDimScaled, this.scaleFactor, 2, yPos, this.fontSize, line);
+				final int charOffset = getCharOffsetForWrappedLine(i, wrappedLines);
+				
+				if (hasSelection && charOffset < selEnd && charOffset + line.length() > selStart) {
+					final int lineSelStart = Math.max(0, selStart - charOffset);
+					final int lineSelEnd = Math.min(line.length(), selEnd - charOffset);
+					
+					if (lineSelStart > 0) {
+						final String beforeSel = line.substring(0, lineSelStart);
+						final var textDim = G2DDrawFont.getTextDimensions(beforeSel, g2d, this.fontSize, 1.0);
+						final var textDimScaled = ImmutableCoordI2.create((int) (textDim.getX() * this.scaleFactor), (int) (textDim.getY() * this.scaleFactor));
+						g2d.setColor(fgColor);
+						G2DDrawFont.renderText(g2d, textDimScaled, this.scaleFactor, 2, yPos, this.fontSize, beforeSel);
+					}
+					
+					final String selected = line.substring(lineSelStart, lineSelEnd);
+					final String beforeSelText = lineSelStart > 0 ? line.substring(0, lineSelStart) : "";
+					final var beforeSelTextDim = G2DDrawFont.getTextDimensions(beforeSelText, g2d, this.fontSize, this.scaleFactor);
+					final int selX = beforeSelTextDim.getX() + 2;
+					final var selDim = G2DDrawFont.getTextDimensions(selected, g2d, this.fontSize, this.scaleFactor);
+					
+					g2d.setColor(theme.getSelectionPrimary().toColor());
+					g2d.fillRect(selX, (int) (yPos * this.scaleFactor), selDim.getX(), (int) (lineHeight * this.scaleFactor));
+					
+					g2d.setColor(theme.getBackgroundNormal().toColor());
+					G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int)(selX / this.scaleFactor), yPos, this.fontSize, selected);
+					
+					if (lineSelEnd < line.length()) {
+						final String afterSel = line.substring(lineSelEnd);
+						g2d.setColor(fgColor);
+						G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int)((selX + selDim.getX()) / this.scaleFactor), yPos, this.fontSize, afterSel);
+					}
+				}
+				else {
+					final var textDim = G2DDrawFont.getTextDimensions(line, g2d, this.fontSize, 1.0);
+					final var textDimScaled = ImmutableCoordI2.create((int) (textDim.getX() * this.scaleFactor), (int) (textDim.getY() * this.scaleFactor));
+					g2d.setColor(fgColor);
+					G2DDrawFont.renderText(g2d, textDimScaled, this.scaleFactor, 2, yPos, this.fontSize, line);
+				}
 			}
 		}
 		
@@ -743,9 +955,10 @@ public class CustomMultiLineTextArea extends Component {
 						final String beforeCaret = caretPosInWrappedLine > 0 && caretPosInWrappedLine <= caretWrappedLine.length()
 								? caretWrappedLine.substring(0, caretPosInWrappedLine)
 								: "";
-						final int caretX = (int) (G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, 1.0).getX() * this.scaleFactor) + 2;
+						final var textDim = G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
+						final int textHeight = textDim.getY();
+						final int caretX = textDim.getX() + 2;
 						final int caretY = (int) ((wrappedLineIndex * lineHeight - this.scrollOffsetY) * this.scaleFactor);
-						final int textHeight = (int) (G2DDrawFont.getTextDimensions("M", g2d, this.fontSize, 1.0).getY() * this.scaleFactor);
 						
 						if (caretY >= 0 && caretY < this.getHeight()) {
 							g2d.setColor((currentTime % 1000 < 500) ? theme.getSelectionPrimary().toColor() : theme.getSelectionSecondary().toColor());
@@ -822,5 +1035,16 @@ public class CustomMultiLineTextArea extends Component {
 		g2d.setColor(theme.getSelectionPrimary().toColor());
 		g2d.fillRect((int) ((scrollbarX + 2) * this.scaleFactor), (int) (this.scrollbarThumbY * this.scaleFactor),
 				(int) ((SCROLLBAR_WIDTH - 4) * this.scaleFactor), (int) (this.scrollbarThumbHeight * this.scaleFactor));
+	}
+	
+	private int getCharOffsetForWrappedLine(final int wrappedLineIndex, final List<String> wrappedLines) {
+		int charOffset = 0;
+		for (int i = 0; i < wrappedLineIndex && i < wrappedLines.size(); i++) {
+			charOffset += wrappedLines.get(i).length();
+			if (i < wrappedLineIndex - 1 || (i < wrappedLines.size() - 1 && wrappedLines.get(i).endsWith(" "))) {
+				charOffset++;
+			}
+		}
+		return charOffset;
 	}
 }
