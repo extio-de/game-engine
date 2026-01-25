@@ -24,7 +24,9 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	
 	record WindowPanelData(boolean thickBorder, RgbaColor color) {}
 	
-	record TextfieldData(boolean multiLine, boolean readonly, RgbaColor backgroundColor) {}
+	record TextfieldData(boolean readonly, RgbaColor backgroundColor) {}
+	
+	record MultiLineTextAreaData(boolean readonly, RgbaColor backgroundColor) {}
 	
 	record SliderData(boolean horizontal, double value, double value2, RgbaColor color) {}
 	
@@ -160,6 +162,15 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	public static interface TextfieldControl extends BaseControl {
 		
 		void setCustomData(TextfieldData data);
+		
+	}
+	
+	/**
+	 * Multi-line text area (Java2D-based, no Swing)
+	 */
+	public static interface MultiLineTextAreaControl extends BaseControl {
+		
+		void setCustomData(MultiLineTextAreaData data);
 		
 	}
 	

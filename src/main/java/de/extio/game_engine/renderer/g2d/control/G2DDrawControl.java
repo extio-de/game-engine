@@ -14,6 +14,7 @@ import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DLabelControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DMultiLineTextAreaControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSetFocusControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSliderControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSwitchControlImpl;
@@ -63,6 +64,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private WindowPanelData windowPanelData;
 	
 	private TextfieldData textfieldData;
+	
+	private MultiLineTextAreaData multiLineTextAreaData;
 	
 	private SliderData sliderData;
 	
@@ -139,6 +142,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		}
 		else if (data instanceof final TextfieldData textfieldData) {
 			this.textfieldData = textfieldData;
+		}
+		else if (data instanceof final MultiLineTextAreaData multiLineTextAreaData) {
+			this.multiLineTextAreaData = multiLineTextAreaData;
 		}
 		else if (data instanceof final SliderData sliderData) {
 			this.sliderData = sliderData;
@@ -228,6 +234,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			}
 			else if (this.clazz == TextfieldControl.class) {
 				control = new G2DTextfieldControlImpl2();
+			}
+			else if (this.clazz == MultiLineTextAreaControl.class) {
+				control = new G2DMultiLineTextAreaControlImpl();
 			}
 			else if (this.clazz == ToggleButtonControl.class) {
 				control = new G2DToggleButtonControlImpl();
@@ -355,6 +364,12 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				tfc2.setLastCaptionUpdateTime(this.lastCaptionUpdateTime);
 			}
 		}
+		else if (this.clazz == MultiLineTextAreaControl.class && this.multiLineTextAreaData != null) {
+			((MultiLineTextAreaControl) control).setCustomData(this.multiLineTextAreaData);
+			if (control instanceof final G2DMultiLineTextAreaControlImpl mtac) {
+				mtac.setLastCaptionUpdateTime(this.lastCaptionUpdateTime);
+			}
+		}
 		else {
 			for (final var customControlConfiguration : this.customControlConfigurations) {
 				if (customControlConfiguration.getControlClass().equals(this.clazz)) {
@@ -383,6 +398,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.windowCloseButtonData = o.windowCloseButtonData;
 			this.windowPanelData = o.windowPanelData;
 			this.textfieldData = o.textfieldData;
+			this.multiLineTextAreaData = o.multiLineTextAreaData;
 			this.sliderData = o.sliderData;
 			this.tableData = o.tableData;
 			this.popupMenuData = o.popupMenuData;
@@ -414,6 +430,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.windowCloseButtonData = null;
 		this.windowPanelData = null;
 		this.textfieldData = null;
+		this.multiLineTextAreaData = null;
 		this.sliderData = null;
 		this.tableData = null;
 		this.popupMenuData = null;
