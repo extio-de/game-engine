@@ -30,6 +30,7 @@ public class CustomJTextField extends JTextField implements G2DControlHasExclusi
 		this.putClientProperty("AATextInfoPropertyKey", null);
 		this.setDoubleBuffered(false);
 		RepaintManager.currentManager(this).setDoubleBufferingEnabled(false);
+		this.setFocusable(true);
 	}
 	
 	@Override
