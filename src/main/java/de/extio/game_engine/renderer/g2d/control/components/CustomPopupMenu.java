@@ -65,19 +65,23 @@ public class CustomPopupMenu extends Component {
 			@Override
 			public void mousePressed(final MouseEvent e) {
 				CustomPopupMenu.this.dirty = true;
+				e.consume();
 			}
 			
 			@Override
 			public void mouseReleased(final MouseEvent e) {
 				if (!CustomPopupMenu.this.enabled) {
+					e.consume();
 					return;
 				}
 				final var index = CustomPopupMenu.this.getHoveredIndex();
 				if (index < 0 || index >= CustomPopupMenu.this.items.size()) {
+					e.consume();
 					return;
 				}
 				final var item = CustomPopupMenu.this.items.get(index);
 				if (item == null || !item.enabled()) {
+					e.consume();
 					return;
 				}
 				CustomPopupMenu.this.lastSelectedItemId = item.id();
@@ -85,18 +89,21 @@ public class CustomPopupMenu extends Component {
 					CustomPopupMenu.this.actionListener.actionPerformed(new ActionEvent(this, 0, item.id()));
 				}
 				CustomPopupMenu.this.dirty = true;
+				e.consume();
 			}
 			
 			@Override
 			public void mouseEntered(final MouseEvent e) {
 				CustomPopupMenu.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				CustomPopupMenu.this.updateHover(e.getY());
+				e.consume();
 			}
 			
 			@Override
 			public void mouseExited(final MouseEvent e) {
 				CustomPopupMenu.this.lastMousePosition = null;
 				CustomPopupMenu.this.setHoveredIndex(-1);
+				e.consume();
 			}
 		});
 		
@@ -106,12 +113,14 @@ public class CustomPopupMenu extends Component {
 			public void mouseMoved(final MouseEvent e) {
 				CustomPopupMenu.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				CustomPopupMenu.this.updateHover(e.getY());
+				e.consume();
 			}
 			
 			@Override
 			public void mouseDragged(final MouseEvent e) {
 				CustomPopupMenu.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				CustomPopupMenu.this.updateHover(e.getY());
+				e.consume();
 			}
 		});
 	}

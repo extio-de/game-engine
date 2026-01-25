@@ -108,6 +108,7 @@ public class CustomLabel extends Component {
 			public void mousePressed(final MouseEvent e) {
 				CustomLabel.this.state |= STATE_PRESSED;
 				CustomLabel.this.dirty = true;
+				e.consume();
 			}
 			
 			@Override
@@ -115,6 +116,7 @@ public class CustomLabel extends Component {
 				CustomLabel.this.state &= ~STATE_PRESSED;
 				listener.actionPerformed(new ActionEvent(this, 0, null));
 				CustomLabel.this.dirty = true;
+				e.consume();
 			}
 			
 			@Override
@@ -122,6 +124,7 @@ public class CustomLabel extends Component {
 				CustomLabel.this.state |= STATE_HOVERED;
 				CustomLabel.this.dirty = true;
 				CustomLabel.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
 			}
 			
 			@Override
@@ -129,6 +132,7 @@ public class CustomLabel extends Component {
 				CustomLabel.this.state &= ~STATE_HOVERED;
 				CustomLabel.this.dirty = true;
 				CustomLabel.this.lastMousePosition = null;
+				e.consume();
 			}
 		});
 		
@@ -137,11 +141,13 @@ public class CustomLabel extends Component {
 			@Override
 			public void mouseMoved(final MouseEvent e) {
 				CustomLabel.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
 			}
 			
 			@Override
 			public void mouseDragged(final MouseEvent e) {
 				CustomLabel.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
 			}
 		});
 	}

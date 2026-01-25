@@ -138,16 +138,19 @@ public abstract class CustomAbstractButton extends Component {
 			@Override
 			public void mousePressed(final MouseEvent e) {
 				if (!CustomAbstractButton.this.isEnabled()) {
+					e.consume();
 					return;
 				}
 				
 				CustomAbstractButton.this.state |= STATE_PRESSED;
 				CustomAbstractButton.this.dirty = true;
+				e.consume();
 			}
 			
 			@Override
 			public void mouseReleased(final MouseEvent e) {
 				if (!CustomAbstractButton.this.isEnabled()) {
+					e.consume();
 					return;
 				}
 				
@@ -158,17 +161,20 @@ public abstract class CustomAbstractButton extends Component {
 				CustomAbstractButton.this.dirty = true;
 				
 				listener.actionPerformed(new ActionEvent(this, CustomAbstractButton.this.state & STATE_TOGGLED, null));
+				e.consume();
 			}
 			
 			@Override
 			public void mouseEntered(final MouseEvent e) {
 				if (!CustomAbstractButton.this.isEnabled()) {
+					e.consume();
 					return;
 				}
 				
 				CustomAbstractButton.this.state |= STATE_HOVERED;
 				CustomAbstractButton.this.dirty = true;
 				CustomAbstractButton.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
 			}
 			
 			@Override
@@ -176,6 +182,7 @@ public abstract class CustomAbstractButton extends Component {
 				CustomAbstractButton.this.lastMousePosition = null;
 				CustomAbstractButton.this.state &= ~STATE_HOVERED;
 				CustomAbstractButton.this.dirty = true;
+				e.consume();
 			}
 		});
 		
@@ -184,11 +191,13 @@ public abstract class CustomAbstractButton extends Component {
 			@Override
 			public void mouseMoved(final MouseEvent e) {
 				CustomAbstractButton.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
 			}
 			
 			@Override
 			public void mouseDragged(final MouseEvent e) {
 				CustomAbstractButton.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
 			}
 		});
 	}

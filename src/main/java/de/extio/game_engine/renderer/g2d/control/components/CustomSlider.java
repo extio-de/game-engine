@@ -106,12 +106,14 @@ public class CustomSlider extends Component {
 			@Override
 			public void mousePressed(final MouseEvent e) {
 				CustomSlider.this.dirty = true;
+				e.consume();
 			}
 			
 			@Override
 			public void mouseReleased(final MouseEvent e) {
 				CustomSlider.this.dirty = true;
 				CustomSlider.this.action(e);
+				e.consume();
 			}
 			
 			@Override
@@ -119,6 +121,7 @@ public class CustomSlider extends Component {
 				CustomSlider.this.state |= STATE_HOVERED;
 				CustomSlider.this.dirty = true;
 				CustomSlider.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
 			}
 			
 			@Override
@@ -126,6 +129,7 @@ public class CustomSlider extends Component {
 				CustomSlider.this.state &= ~STATE_HOVERED;
 				CustomSlider.this.dirty = true;
 				CustomSlider.this.lastMousePosition = null;
+				e.consume();
 			}
 			
 		});
@@ -136,6 +140,7 @@ public class CustomSlider extends Component {
 			public void mouseMoved(final MouseEvent e) {
 				CustomSlider.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				CustomSlider.this.dirty = true;
+				e.consume();
 			}
 			
 			@Override
@@ -143,6 +148,7 @@ public class CustomSlider extends Component {
 				CustomSlider.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				CustomSlider.this.dirty = true;
 				CustomSlider.this.action(e);
+				e.consume();
 			}
 		});
 	}
