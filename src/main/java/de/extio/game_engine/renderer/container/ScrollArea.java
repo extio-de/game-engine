@@ -83,6 +83,10 @@ public class ScrollArea implements WindowComponent {
 	
 	protected void onMouseWheelEvent(final MouseClickEvent event) {
 		if (event.getButton() == 4 || event.getButton() == 5) {
+			if (Window.getContainerUnderCursor(event) != this.parent) {
+				return;
+			}
+			
 			if (!SpatialUtils2.intersects(
 					this.relativeArea.getPosition().add(this.parent.getAbsolutePosition()),
 					this.relativeArea.getDimension(),

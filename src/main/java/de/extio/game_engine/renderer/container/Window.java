@@ -213,7 +213,7 @@ public class Window extends AbstractClientModule implements InitializingBean {
 	}
 	
 	protected void onMouseClickEvent(final MouseClickEvent event) {
-		final Window containerUnderCursor = this.getContainerUnderCursor(event);
+		final Window containerUnderCursor = getContainerUnderCursor(event);
 		if (containerUnderCursor == this) {
 			if (event.isPressed() && !this.dragging) {
 				this.zIndexToTop();
@@ -355,7 +355,7 @@ public class Window extends AbstractClientModule implements InitializingBean {
 		return this.normalizedArea.getDimension().toImmutableCoordI2();
 	}
 	
-	private Window getContainerUnderCursor(final MouseEvent event) {
+	public static Window getContainerUnderCursor(final MouseEvent event) {
 		Window containerUnderCursor = null;
 		synchronized (DISPLAYED_CONTAINERS) {
 			short zIndexHighest = -1;

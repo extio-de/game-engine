@@ -92,6 +92,7 @@ public class CustomWindowPanel extends Component {
 			public void mouseWheelMoved(final MouseWheelEvent e) {
 				if (CustomWindowPanel.this.getParent() instanceof final G2DMainFrame mainFrame) {
 					mainFrame.handleWheelMoved(e, ImmutableCoordI2.create(CustomWindowPanel.this.getX(), CustomWindowPanel.this.getY()));
+					e.consume();
 				}
 			}
 		});
