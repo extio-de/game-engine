@@ -97,6 +97,8 @@ public class CustomMultiLineTextArea extends Component {
 	public void setFontSize(final int fontSize) {
 		if (this.fontSize != fontSize) {
 			this.cachedLineHeight = 0;
+			this.cachedSpaceWidth = 0;
+			this.cachedFontSize = 0;
 		}
 		this.fontSize = fontSize;
 		this.dirty = true;
