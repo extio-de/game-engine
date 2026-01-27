@@ -76,7 +76,7 @@ public class CustomMultiLineTextArea extends Component {
 	private int cachedLineHeight = 0;
 	
 	private int cachedFontSize = 0;
-
+	
 	private int cachedSpaceWidth = 0;
 	
 	private final ThemeManager themeManager;
@@ -535,7 +535,7 @@ public class CustomMultiLineTextArea extends Component {
 		this.cachedFontSize = this.fontSize;
 		return height;
 	}
-
+	
 	private int getSpaceWidth() {
 		if (this.cachedSpaceWidth > 0 && this.cachedFontSize == this.fontSize) {
 			return this.cachedSpaceWidth;
@@ -563,7 +563,6 @@ public class CustomMultiLineTextArea extends Component {
 		
 		final int clickedWrappedLine = Math.max(0, Math.min(wrappedLines.size() - 1, (logicalMouseY + this.scrollOffsetY) / lineHeight));
 		
-		int rawLineIndex = 0;
 		int wrappedLineCount = 0;
 		int charOffset = 0;
 		
@@ -602,7 +601,6 @@ public class CustomMultiLineTextArea extends Component {
 			}
 			
 			if (clickedWrappedLine >= wrappedLineCount && clickedWrappedLine < wrappedLineCount + linesForThisRaw) {
-				rawLineIndex = i;
 				final String clickedLine = wrappedLines.get(clickedWrappedLine);
 				
 				int bestPos = 0;
@@ -653,7 +651,6 @@ public class CustomMultiLineTextArea extends Component {
 				final int posInRaw = this.caretPosition - charCount;
 				
 				int currentPos = 0;
-				int wrappedOffset = 0;
 				
 				while (wrappedLineIndex < wrappedLines.size()) {
 					final String wrappedLine = wrappedLines.get(wrappedLineIndex);
@@ -665,7 +662,6 @@ public class CustomMultiLineTextArea extends Component {
 					
 					currentPos += wrappedLen + 1;
 					wrappedLineIndex++;
-					wrappedOffset++;
 				}
 				break;
 			}
@@ -953,12 +949,12 @@ public class CustomMultiLineTextArea extends Component {
 					g2d.fillRect(selX, (int) (yPos * this.scaleFactor), selDim.getX(), (int) (lineHeight * this.scaleFactor));
 					
 					g2d.setColor(theme.getBackgroundNormal().toColor());
-					G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int)(selX / this.scaleFactor), yPos, this.fontSize, selected);
+					G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int) (selX / this.scaleFactor), yPos, this.fontSize, selected);
 					
 					if (lineSelEnd < line.length()) {
 						final String afterSel = line.substring(lineSelEnd);
 						g2d.setColor(fgColor);
-						G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int)((selX + selDim.getX()) / this.scaleFactor), yPos, this.fontSize, afterSel);
+						G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int) ((selX + selDim.getX()) / this.scaleFactor), yPos, this.fontSize, afterSel);
 					}
 				}
 				else {
