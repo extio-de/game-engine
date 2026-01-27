@@ -26,7 +26,7 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	
 	record TextfieldData(boolean readonly, RgbaColor backgroundColor) {}
 	
-	record MultiLineTextAreaData(boolean readonly, RgbaColor backgroundColor) {}
+	record MultiLineTextAreaData(boolean readonly, RgbaColor backgroundColor, boolean requestFocus) {}
 	
 	record SliderData(boolean horizontal, double value, double value2, RgbaColor color) {}
 	

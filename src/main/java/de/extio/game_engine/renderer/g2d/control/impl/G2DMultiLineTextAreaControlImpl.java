@@ -27,11 +27,14 @@ public class G2DMultiLineTextAreaControlImpl extends G2DBaseControlImpl implemen
 	
 	private boolean scrollPositionModified;
 	
+	private boolean requestFocus;
+	
 	@Override
 	public void setCustomData(final MultiLineTextAreaData data) {
 		if (data != null) {
 			this.setReadonly(data.readonly());
 			this.setBackgroundColor(data.backgroundColor());
+			this.setRequestFocus(data.requestFocus());
 		}
 	}
 	
@@ -46,6 +49,11 @@ public class G2DMultiLineTextAreaControlImpl extends G2DBaseControlImpl implemen
 	private void setReadonly(final boolean readonly) {
 		this.modified |= readonly != this.readonly;
 		this.readonly = readonly;
+	}
+	
+	private void setRequestFocus(final boolean requestFocus) {
+		this.modified |= requestFocus != this.requestFocus;
+		this.requestFocus = requestFocus;
 	}
 	
 	@Override
@@ -76,6 +84,10 @@ public class G2DMultiLineTextAreaControlImpl extends G2DBaseControlImpl implemen
 		final var mainFrame = ((G2DRenderer) this.rendererData.getRenderer()).getMainFrame();
 		mainFrame.add(this.textArea);
 		this.updateAllComponentZOrder();
+		
+		if (this.requestFocus) {
+			this.textArea.requestFocus();
+		}
 	}
 	
 	@Override
