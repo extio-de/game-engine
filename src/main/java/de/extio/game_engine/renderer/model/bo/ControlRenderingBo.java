@@ -117,6 +117,8 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	public static interface ButtonControl extends BaseControl {
 		
 		void setCustomData(ButtonData data);
+
+		void setLastControlDataUpdateTime(long time);
 		
 	}
 	

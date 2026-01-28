@@ -18,7 +18,11 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	
 	protected StaticResource iconResource;
 	
-	private RgbaColor backgroundColor;
+	protected RgbaColor backgroundColor;
+
+	protected long lastControlDataUpdateTime;
+
+	protected long lastControlDataUpdateTimeInternal;
 	
 	@Override
 	public void setCustomData(final ButtonData data) {
@@ -26,6 +30,11 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 			this.setBackgroundColor(data.backgroundColor());
 			this.setIconResource(data.iconResource());
 		}
+	}
+	
+	@Override
+	public void setLastControlDataUpdateTime(final long time) {
+		this.lastControlDataUpdateTime = time;
 	}
 	
 	@Override
@@ -110,5 +119,5 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 		this.modified |= !Objects.equals(this.backgroundColor, backgroundColor);
 		this.backgroundColor = backgroundColor;
 	}
-	
+
 }

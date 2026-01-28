@@ -21,6 +21,7 @@ public class G2DSwitchControlImpl extends G2DAbstractToggleButtonControlImpl {
 	protected void createControl() {
 		this.control = new CustomSwitch(true, event -> this.performAction(), (G2DThemeManager) this.rendererData.getThemeManager());
 		this.control.setName(this.id);
+		this.lastControlDataUpdateTimeInternal = 0;
 	}
 	
 	@Override

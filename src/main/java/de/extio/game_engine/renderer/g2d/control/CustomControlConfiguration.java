@@ -9,5 +9,7 @@ public interface CustomControlConfiguration<T extends G2DBaseControlImpl> {
 	T createControl();
 	
 	void setCustomData(T controlImpl, Object data);
+
+	void setLastControlDataUpdateTime(T controlImpl, long time);
 	
 }

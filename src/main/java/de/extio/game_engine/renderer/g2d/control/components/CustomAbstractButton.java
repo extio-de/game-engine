@@ -60,6 +60,8 @@ public abstract class CustomAbstractButton extends Component {
 	protected StaticResourceService staticResourceService;
 	
 	protected CoordI2 lastMousePosition;
+
+	protected long lastControlDataUpdateTime;
 	
 	public void setCaption(final String caption) {
 		this.caption = caption;
@@ -112,6 +114,10 @@ public abstract class CustomAbstractButton extends Component {
 			this.lastMousePosition = null;
 		}
 		super.setEnabled(b);
+	}
+
+	public void setLastControlDataUpdateTime(final long time) {
+		this.lastControlDataUpdateTime = time;
 	}
 	
 	public CustomAbstractButton(final boolean toggle, final ActionListener listener) {

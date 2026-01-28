@@ -76,6 +76,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private SetFocusData setFocusData;
 
 	private Object customData;
+
+	private long lastControlDataUpdateTime;
 	
 	private boolean visible;
 	
@@ -122,6 +124,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	@Override
 	public ControlRenderingBo setControlData(final Object data) {
+		this.lastControlDataUpdateTime = System.currentTimeMillis();
 		if (data instanceof final LabelData labelData) {
 			this.labelData = labelData;
 		}
@@ -332,12 +335,15 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			((LabelControl) control).setCustomData(this.labelData);
 		}
 		else if (this.clazz == ToggleButtonControl.class && this.toggleButtonData != null) {
+			((ToggleButtonControl) control).setLastControlDataUpdateTime(this.lastControlDataUpdateTime);
 			((ToggleButtonControl) control).setCustomData(this.toggleButtonData);
 		}
 		else if (this.clazz == SwitchControl.class && this.switchData != null) {
+			((SwitchControl) control).setLastControlDataUpdateTime(this.lastControlDataUpdateTime);
 			((SwitchControl) control).setCustomData(this.switchData);
 		}
 		else if (this.clazz == ButtonControl.class && this.buttonData != null) {
+			((ButtonControl) control).setLastControlDataUpdateTime(this.lastControlDataUpdateTime);
 			((ButtonControl) control).setCustomData(this.buttonData);
 		}
 		else if (this.clazz == WindowCloseButtonControl.class && this.windowCloseButtonData != null) {
@@ -373,6 +379,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		else {
 			for (final var customControlConfiguration : this.customControlConfigurations) {
 				if (customControlConfiguration.getControlClass().equals(this.clazz)) {
+					((CustomControlConfiguration) customControlConfiguration).setLastControlDataUpdateTime(control, this.lastControlDataUpdateTime);
 					((CustomControlConfiguration) customControlConfiguration).setCustomData(control, this.customData);
 					break;
 				}
@@ -410,6 +417,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			this.visibleArea = o.visibleArea;
 			this.controlArea = o.controlArea;
 			this.customControlConfigurations = o.customControlConfigurations;
+			this.lastControlDataUpdateTime = o.lastControlDataUpdateTime;
 		}
 	}
 	
@@ -442,6 +450,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		this.visibleArea = null;
 		this.controlArea = null;
 		this.customControlConfigurations = null;
+		this.lastControlDataUpdateTime = 0L;
 	}
 	
 	@Override

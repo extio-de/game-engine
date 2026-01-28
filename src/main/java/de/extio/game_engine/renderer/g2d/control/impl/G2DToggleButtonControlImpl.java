@@ -21,6 +21,7 @@ public class G2DToggleButtonControlImpl extends G2DAbstractToggleButtonControlIm
 	protected void createControl() {
 		this.control = new CustomButton(true, event -> this.performAction(), (G2DThemeManager) this.rendererData.getThemeManager());
 		this.control.setName(this.id);
+		this.lastControlDataUpdateTimeInternal = 0;
 	}
 	
 }

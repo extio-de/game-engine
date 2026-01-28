@@ -14,14 +14,20 @@ public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonContro
 	
 	protected void applyToggleButtonData(final ToggleButtonData data) {
 		if (data != null) {
-			this.setToggled(data.toggled());
+			if (this.lastControlDataUpdateTimeInternal < this.lastControlDataUpdateTime) {
+				this.setToggled(data.toggled());
+				this.lastControlDataUpdateTimeInternal = this.lastControlDataUpdateTime;
+			}
 			this.setIconResource(data.iconResource());
 		}
 	}
 	
 	protected void applySwitchData(final SwitchData data) {
 		if (data != null) {
-			this.setToggled(data.toggled());
+			if (this.lastControlDataUpdateTimeInternal < this.lastControlDataUpdateTime) {
+				this.setToggled(data.toggled());
+				this.lastControlDataUpdateTimeInternal = this.lastControlDataUpdateTime;
+			}
 			this.setIconResource(data.iconResource());
 			this.setDrawBorder(data.drawBorder());
 		}
