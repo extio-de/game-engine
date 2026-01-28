@@ -29,7 +29,7 @@ public class CustomButton extends CustomAbstractButton {
 		final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
 		
 		if (patternRenderer != null) {
-			patternRenderer.drawButton(g2d, 0, 0, this.getWidth(), this.getHeight(), this.isEnabled(), this.state, this.backgroundColor, this.scaleFactor, theme);
+			patternRenderer.drawButton(g2d, 0, 0, this.getWidth(), this.getHeight(), this.isEnabled(), this.state.isPressed(), this.state.isHovered(), this.state.isToggled(), this.backgroundColor, this.scaleFactor, theme);
 		}
 		
 		final var bgrStrength = (this.getWidth() < 48 || this.getHeight() < 48) ? 0 : 2;
@@ -41,10 +41,10 @@ public class CustomButton extends CustomAbstractButton {
 			g2d.drawImage(this.icon, 4 + bgrStrength, 4 + bgrStrength, this.getWidth() - 4 - bgrStrength, this.getHeight() - 4 - bgrStrength, 0, 0, this.icon.getWidth(), this.icon.getHeight(), null);
 		}
 		else if (this.caption != null) {
-			if ((this.state & STATE_HOVERED) != 0) {
+			if (this.state.isHovered()) {
 				g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 			}
-			else if ((this.state & STATE_TOGGLED) != 0) {
+			else if (this.state.isToggled()) {
 				g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 			}
 			else if (this.isEnabled()) {

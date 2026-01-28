@@ -37,17 +37,9 @@ public abstract class CustomAbstractButton extends Component {
 		}
 	};
 	
-	protected static final int STATE_NORMAL = 0;
-	
-	protected static final int STATE_TOGGLED = 1;
-	
-	protected static final int STATE_PRESSED = 2;
-	
-	protected static final int STATE_HOVERED = 4;
-	
 	protected String caption;
 	
-	protected int state = STATE_NORMAL;
+	protected final ButtonState state = new ButtonState();
 	
 	protected int fontSize;
 	
@@ -82,17 +74,11 @@ public abstract class CustomAbstractButton extends Component {
 	}
 	
 	public boolean isToggled() {
-		return (this.state & STATE_TOGGLED) != 0;
+		return this.state.isToggled();
 	}
 	
 	public void setToggled(final boolean toggled) {
-		if (toggled) {
-			this.state |= STATE_TOGGLED;
-		}
-		else {
-			this.state &= ~STATE_TOGGLED;
-		}
-		
+		this.state.setToggled(toggled);
 		this.dirty = true;
 	}
 	
@@ -142,7 +128,7 @@ public abstract class CustomAbstractButton extends Component {
 					return;
 				}
 				
-				CustomAbstractButton.this.state |= STATE_PRESSED;
+				CustomAbstractButton.this.state.setPressed(true);
 				CustomAbstractButton.this.dirty = true;
 				e.consume();
 			}
@@ -154,13 +140,13 @@ public abstract class CustomAbstractButton extends Component {
 					return;
 				}
 				
-				CustomAbstractButton.this.state &= ~STATE_PRESSED;
+				CustomAbstractButton.this.state.setPressed(false);
 				if (CustomAbstractButton.this.toggle) {
-					CustomAbstractButton.this.state ^= STATE_TOGGLED;
+					CustomAbstractButton.this.state.toggleToggled();
 				}
 				CustomAbstractButton.this.dirty = true;
 				
-				listener.actionPerformed(new ActionEvent(this, CustomAbstractButton.this.state & STATE_TOGGLED, null));
+				listener.actionPerformed(new ActionEvent(this, CustomAbstractButton.this.state.isToggled() ? 1 : 0, null));
 				e.consume();
 			}
 			
@@ -171,7 +157,7 @@ public abstract class CustomAbstractButton extends Component {
 					return;
 				}
 				
-				CustomAbstractButton.this.state |= STATE_HOVERED;
+				CustomAbstractButton.this.state.setHovered(true);
 				CustomAbstractButton.this.dirty = true;
 				CustomAbstractButton.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				e.consume();
@@ -180,7 +166,7 @@ public abstract class CustomAbstractButton extends Component {
 			@Override
 			public void mouseExited(final MouseEvent e) {
 				CustomAbstractButton.this.lastMousePosition = null;
-				CustomAbstractButton.this.state &= ~STATE_HOVERED;
+				CustomAbstractButton.this.state.setHovered(false);
 				CustomAbstractButton.this.dirty = true;
 				e.consume();
 			}

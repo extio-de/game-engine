@@ -48,13 +48,8 @@ public class ModernPatternRenderer implements PatternRenderer {
 	}
 	
 	@Override
-	public void drawCloseButton(final Graphics2D g2d, final int width, final int height, final boolean enabled, final int state, final Color backgroundColor, final double scaleFactor, final Theme theme) {
-		final var STATE_HOVERED = 4;
-		final var STATE_TOGGLED = 1;
-		final var STATE_PRESSED = 2;
-		
-		final var highlight = (state & (STATE_HOVERED | STATE_TOGGLED)) != 0;
-		final var pressed = (state & STATE_PRESSED) != 0;
+	public void drawCloseButton(final Graphics2D g2d, final int width, final int height, final boolean enabled, final boolean pressed, final boolean hovered, final boolean toggled, final Color backgroundColor, final double scaleFactor, final Theme theme) {
+		final var highlight = (hovered || toggled);
 		
 		Color bgColor = backgroundColor;
 		if (bgColor == null) {
@@ -133,27 +128,19 @@ public class ModernPatternRenderer implements PatternRenderer {
 	}
 
 	@Override
-	public void drawButton(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean enabled, final int state, final Color backgroundColor, final double scaleFactor, final Theme theme) {
-		final int STATE_TOGGLED = 1;
-		final int STATE_PRESSED = 2;
-		final int STATE_HOVERED = 4;
-		
-		final boolean toggled = (state & STATE_TOGGLED) != 0;
-		final boolean pressed = (state & STATE_PRESSED) != 0;
-		final boolean hovered = (state & STATE_HOVERED) != 0;
-		
+	public void drawButton(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean enabled, final boolean pressed, final boolean hovered, final boolean toggled, final Color backgroundColor, final double scaleFactor, final Theme theme) {
 		float h, s, b;
 		
 		if (backgroundColor == null) {
-			final var baseColor = (state & STATE_TOGGLED) == 0 ? theme.getBackgroundNormal() : theme.getBackgroundSelected();
+			final var baseColor = !toggled ? theme.getBackgroundNormal() : theme.getBackgroundSelected();
 			h = baseColor.getHue();
 			s = baseColor.getSaturation();
 			b = baseColor.getBrightness();
 			
-			if ((state & STATE_PRESSED) != 0) {
+			if (pressed) {
 				b += theme.getPressedBrightnessAdjustment();
 			}
-			else if ((state & STATE_HOVERED) != 0) {
+			else if (hovered) {
 				b += theme.getHoverBrightnessAdjustment();
 			}
 		}
@@ -163,16 +150,16 @@ public class ModernPatternRenderer implements PatternRenderer {
 			h = hsb[0];
 			s = hsb[1];
 			
-			if ((state & STATE_TOGGLED) == 0) {
+			if (!toggled) {
 				b = 0.30F;
 			}
 			else {
 				b = 0.50F;
 			}
-			if ((state & STATE_PRESSED) != 0) {
+			if (pressed) {
 				b += theme.getPressedBrightnessAdjustment();
 			}
-			else if ((state & STATE_HOVERED) != 0) {
+			else if (hovered) {
 				b += theme.getHoverBrightnessAdjustment();
 			}
 		}

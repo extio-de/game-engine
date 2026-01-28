@@ -32,21 +32,21 @@ public class CustomSwitch extends CustomAbstractButton {
 		final var dimY = this.getHeight() - 1;
 		final var dimX = (int) (dimY * 1.5);
 		
-		if ((this.state & STATE_TOGGLED) == 0) {
+		if (!this.state.isToggled()) {
 			if (patternRenderer != null) {
-				patternRenderer.drawButton(g2d, 6, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, this.isEnabled(), this.state, null, this.scaleFactor, theme);
+				patternRenderer.drawButton(g2d, 6, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, this.isEnabled(), this.state.isPressed(), this.state.isHovered(), this.state.isToggled(), null, this.scaleFactor, theme);
 			}
 		}
 		else {
 			if (patternRenderer != null) {
-				patternRenderer.drawButton(g2d, dimX - (int) (dimX / 1.5) - 3, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, this.isEnabled(), this.state, null, this.scaleFactor, theme);
+				patternRenderer.drawButton(g2d, dimX - (int) (dimX / 1.5) - 3, 4, (int) (dimX / 1.5) - 6, this.getHeight() - 9, this.isEnabled(), this.state.isPressed(), this.state.isHovered(), this.state.isToggled(), null, this.scaleFactor, theme);
 			}
 		}
 		
-		if ((this.state & STATE_HOVERED) != 0) {
+		if (this.state.isHovered()) {
 			g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 		}
-		else if ((this.state & STATE_TOGGLED) != 0) {
+		else if (this.state.isToggled()) {
 			g2d.setColor(theme.getTextNormal().adjustBrightness(theme.getHoverBrightnessAdjustment()).toColor());
 		}
 		else if (this.isEnabled()) {
@@ -65,7 +65,7 @@ public class CustomSwitch extends CustomAbstractButton {
 				this.caption);
 		
 		if (this.drawBorder) {
-			final var borderColor1 = (this.state & STATE_HOVERED) != 0 ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
+			final var borderColor1 = this.state.isHovered() ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
 			if (patternRenderer != null) {
 				patternRenderer.drawDecorativeBorder(g2d, 0, 0, this.getWidth() - 1, this.getHeight() - 1, 2, borderColor1);
 				

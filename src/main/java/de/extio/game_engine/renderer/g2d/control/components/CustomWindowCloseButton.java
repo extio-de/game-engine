@@ -27,7 +27,7 @@ public class CustomWindowCloseButton extends CustomAbstractButton {
 		final var patternRenderer = this.themeManager.getPatternRenderer(theme.getPatternRendererName());
 		
 		if (patternRenderer != null) {
-			patternRenderer.drawCloseButton(g2d, this.getWidth(), this.getHeight(), this.isEnabled(), this.state, this.backgroundColor, this.scaleFactor, theme);
+			patternRenderer.drawCloseButton(g2d, this.getWidth(), this.getHeight(), this.isEnabled(), this.state.isPressed(), this.state.isHovered(), this.state.isToggled(), this.backgroundColor, this.scaleFactor, theme);
 		}
 	}
 	

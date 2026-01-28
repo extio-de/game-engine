@@ -60,12 +60,14 @@ public interface PatternRenderer {
 	 * @param width           Width of the button
 	 * @param height          Height of the button
 	 * @param enabled         Whether the button is enabled
-	 * @param state           Button state flags (hovered, pressed, toggled)
+	 * @param pressed         Whether the button is pressed
+	 * @param hovered         Whether the button is hovered
+	 * @param toggled         Whether the button is toggled
 	 * @param backgroundColor Optional background color override (null to use theme defaults)
 	 * @param scaleFactor     UI scale factor
 	 * @param theme           Theme to use for colors
 	 */
-	void drawCloseButton(Graphics2D g2d, int width, int height, boolean enabled, int state, Color backgroundColor, double scaleFactor, Theme theme);
+	void drawCloseButton(Graphics2D g2d, int width, int height, boolean enabled, boolean pressed, boolean hovered, boolean toggled, Color backgroundColor, double scaleFactor, Theme theme);
 
 	/**
 	 * Draws a background pattern for the UI on layer BACKGROUND1
@@ -85,10 +87,12 @@ public interface PatternRenderer {
 	 * @param width           Width of the button
 	 * @param height          Height of the button
 	 * @param enabled         Whether the button is enabled
-	 * @param state           Button state flags (normal, hovered, pressed, toggled)
+	 * @param pressed         Whether the button is pressed
+	 * @param hovered         Whether the button is hovered
+	 * @param toggled         Whether the button is toggled
 	 * @param backgroundColor Optional background color override (null to use theme defaults)
 	 * @param scaleFactor     UI scale factor
 	 * @param theme           Theme to use for colors
 	 */
-	void drawButton(Graphics2D g2d, int x, int y, int width, int height, boolean enabled, int state, Color backgroundColor, double scaleFactor, Theme theme);
+	void drawButton(Graphics2D g2d, int x, int y, int width, int height, boolean enabled, boolean pressed, boolean hovered, boolean toggled, Color backgroundColor, double scaleFactor, Theme theme);
 }
