@@ -32,7 +32,10 @@ import de.extio.game_engine.renderer.g2d.theme.SpacecraftPatternRenderer;
 import de.extio.game_engine.renderer.g2d.theme.SteampunkPatternRenderer;
 import de.extio.game_engine.renderer.g2d.theme.UrbanPatternRenderer;
 import de.extio.game_engine.renderer.g2d.theme.VintagePatternRenderer;
+import de.extio.game_engine.renderer.g2d.theme.TerminalPatternRenderer;
+import de.extio.game_engine.renderer.g2d.theme.AsciiPatternRenderer;
 import de.extio.game_engine.renderer.g2d.theme.BevelDarkThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.AsciiThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.BevelLightThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.BlueprintThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.ChronicleThemeFactoryBean;
@@ -47,6 +50,7 @@ import de.extio.game_engine.renderer.g2d.theme.SteampunkThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.Theme;
 import de.extio.game_engine.renderer.g2d.theme.UrbanThemeFactoryBean;
 import de.extio.game_engine.renderer.g2d.theme.VintageThemeFactoryBean;
+import de.extio.game_engine.renderer.g2d.theme.TerminalThemeFactoryBean;
 import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.storage.StorageService;
 
@@ -153,6 +157,16 @@ public class G2DAutoConfiguration {
 	@Bean
 	FactoryBean<Theme> steampunkTheme() {
 		return new SteampunkThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> asciiTheme() {
+		return new AsciiThemeFactoryBean();
+	}
+
+	@Bean
+	FactoryBean<Theme> terminalTheme() {
+		return new TerminalThemeFactoryBean();
 	}
 
 	@Bean
@@ -273,6 +287,18 @@ public class G2DAutoConfiguration {
 	@ConditionalOnMissingBean
 	VintagePatternRenderer vintagePatternRenderer() {
 		return new VintagePatternRenderer();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	AsciiPatternRenderer asciiPatternRenderer() {
+		return new AsciiPatternRenderer();
+	}
+
+	@Bean
+	@ConditionalOnMissingBean
+	TerminalPatternRenderer terminalPatternRenderer() {
+		return new TerminalPatternRenderer();
 	}
 
 }
