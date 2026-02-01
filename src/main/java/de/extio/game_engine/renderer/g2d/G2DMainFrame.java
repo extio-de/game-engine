@@ -397,13 +397,28 @@ public class G2DMainFrame extends Frame {
 	}
 	
 	private void applyReferenceWindowGeometry() {
-		// final var mode = this.getGraphicsConfiguration().getDevice().getDisplayMode();
-		// final var size = ImmutableCoordI2.create(Math.min(mode.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), Math.min(mode.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
-		// this.setLocation(mode.getWidth() / 2 - size.getX() / 2, mode.getHeight() / 2 - size.getY() / 2);
 		final var ge = GraphicsEnvironment.getLocalGraphicsEnvironment();
 		final var bounds = ge.getDefaultScreenDevice().getDefaultConfiguration().getBounds();
-		this.setLocation(bounds.x, bounds.y);
-		this.setSize((int) Math.min(bounds.getWidth(), RendererControl.REFERENCE_RESOLUTION.getX()), (int) Math.min(bounds.getHeight(), RendererControl.REFERENCE_RESOLUTION.getY()));
+		final int screenW = (int) bounds.getWidth();
+		final int screenH = (int) bounds.getHeight();
+		final int refW = RendererControl.REFERENCE_RESOLUTION.getX();
+		final int refH = RendererControl.REFERENCE_RESOLUTION.getY();
+
+		int width;
+		int height;
+		if (screenW > refW || screenH > refH) {
+			width = Math.max((int) Math.round(screenW * 2.0 / 3.0), refW);
+			height = Math.max((int) Math.round(screenH * 2.0 / 3.0), refH);
+		}
+		else {
+			width = Math.min(screenW, refW);
+			height = Math.min(screenH, refH);
+		}
+
+		final int x = bounds.x + (bounds.width - width) / 2;
+		final int y = bounds.y + (bounds.height - height) / 2;
+		this.setLocation(x, y);
+		this.setSize(width, height);
 	}
 	
 	public void handleMouseReleased(final MouseEvent e, final CoordI2 offset) {

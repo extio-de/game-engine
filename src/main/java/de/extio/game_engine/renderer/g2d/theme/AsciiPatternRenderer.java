@@ -77,10 +77,10 @@ public class AsciiPatternRenderer implements PatternRenderer {
 
 		Color bgColor = backgroundColor;
 		if (bgColor == null) {
-			bgColor = theme.getBorderInner().toColor();
+			bgColor = theme.getBackgroundNormal().toColor();
 		}
 		if (highlight) {
-			bgColor = theme.getBackgroundNormal().toColor();
+			bgColor = theme.getBorderInner().toColor();
 		}
 		if (pressed) {
 			bgColor = theme.getSelectionPrimary().toColor();
@@ -101,10 +101,10 @@ public class AsciiPatternRenderer implements PatternRenderer {
 			textColor = theme.getTextNormal().toColor();
 		}
 		else if (highlight) {
-			textColor = theme.getSelectionSecondary().toColor();
+			textColor = theme.getTextDisabled().toColor();
 		}
 		else {
-			textColor = theme.getTextDisabled().toColor();
+			textColor = theme.getSelectionSecondary().toColor();
 		}
 		g2d.setColor(textColor);
 
