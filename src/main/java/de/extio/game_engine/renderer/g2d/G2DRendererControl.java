@@ -1,6 +1,7 @@
 package de.extio.game_engine.renderer.g2d;
 
 import java.awt.EventQueue;
+import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
 import java.lang.reflect.InvocationTargetException;
 import java.util.List;
@@ -126,6 +127,18 @@ public class G2DRendererControl implements RendererControl {
 	@Override
 	public long getVideoOptionsAppliedAt() {
 		return this.videoOptionsAppliedAt;
+	}
+	
+	@Override
+	public void reset() {
+		this.renderer.reset();
+	}
+
+	@Override
+	public int getScreenDevicesCount() {
+		final var graphicsEnv = GraphicsEnvironment.getLocalGraphicsEnvironment();
+		final var screenDevices = graphicsEnv.getScreenDevices();
+		return screenDevices.length;
 	}
 	
 	@Override

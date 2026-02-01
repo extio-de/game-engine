@@ -23,6 +23,10 @@ public interface RendererControl {
 	void applyVideoOptions();
 	
 	long getVideoOptionsAppliedAt();
+	
+	void reset();
+
+	int getScreenDevicesCount();
 
 	UiOptions getUiOptions();
 	
