@@ -14,7 +14,6 @@ public class TerminalPatternRenderer implements PatternRenderer {
 	@Override
 	public void drawDecorativeBorder(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final Color color) {
 		final var s = Math.max(1, strength);
-		final var tick = Math.max(1, s * 2);
 		final var glyph = Math.max(1, s);
 		
 		g2d.setColor(color);
@@ -22,23 +21,20 @@ public class TerminalPatternRenderer implements PatternRenderer {
 		final var seg = glyph * 2;
 		
 		for (int gx = x; gx <= x + width - seg; gx += step) {
-			g2d.fillRect(gx, y, seg, s);
-			g2d.fillRect(gx + glyph, y + s, glyph, s);
-			g2d.fillRect(gx, y + height - s, seg, s);
-			g2d.fillRect(gx + glyph, y + height - s - s, glyph, s);
+			g2d.drawString("══", gx, y + glyph);
+			g2d.drawString("═", gx + glyph, y + s + glyph);
+			g2d.drawString("══", gx, y + height);
+			g2d.drawString("═", gx + glyph, y + height - s);
 		}
 		
 		for (int gy = y; gy <= y + height - seg; gy += step) {
-			g2d.fillRect(x, gy, s, seg);
-			g2d.fillRect(x + s, gy + glyph, s, glyph);
-			g2d.fillRect(x + width - s, gy, s, seg);
-			g2d.fillRect(x + width - s - s, gy + glyph, s, glyph);
+			g2d.drawString("│", x, gy + glyph);
+			g2d.drawString("│", x, gy + glyph + glyph);
+			g2d.drawString("│", x + s, gy + glyph + glyph);
+			g2d.drawString("│", x + width - glyph, gy + glyph);
+			g2d.drawString("│", x + width - glyph, gy + glyph + glyph);
+			g2d.drawString("│", x + width - s - glyph, gy + glyph + glyph);
 		}
-		
-		g2d.fillRect(x + s, y + s, tick, s);
-		g2d.fillRect(x + width - s - tick, y + s, tick, s);
-		g2d.fillRect(x + s, y + height - s - s, tick, s);
-		g2d.fillRect(x + width - s - tick, y + height - s - s, tick, s);
 		
 		final var innerLeft = x + s + glyph * 3;
 		final var innerRight = x + width - s - glyph * 3;
@@ -46,17 +42,19 @@ public class TerminalPatternRenderer implements PatternRenderer {
 		final var innerBottom = y + height - s - glyph * 2;
 		
 		for (int gx = innerLeft; gx <= innerRight; gx += glyph * 6) {
-			g2d.fillRect(gx, y + s, glyph * 2, glyph);
-			g2d.fillRect(gx + glyph * 3, y + s, glyph, glyph);
-			g2d.fillRect(gx, y + height - s - glyph, glyph * 2, glyph);
-			g2d.fillRect(gx + glyph * 3, y + height - s - glyph, glyph, glyph);
+			g2d.drawString("══", gx, y + s + glyph);
+			g2d.drawString("═", gx + glyph * 3, y + s + glyph);
+			g2d.drawString("══", gx, y + height - s);
+			g2d.drawString("═", gx + glyph * 3, y + height - s);
 		}
 		
 		for (int gy = innerTop; gy <= innerBottom; gy += glyph * 6) {
-			g2d.fillRect(x + s, gy, glyph, glyph * 2);
-			g2d.fillRect(x + s, gy + glyph * 3, glyph, glyph);
-			g2d.fillRect(x + width - s - glyph, gy, glyph, glyph * 2);
-			g2d.fillRect(x + width - s - glyph, gy + glyph * 3, glyph, glyph);
+			g2d.drawString("│", x + s, gy + glyph);
+			g2d.drawString("│", x + s, gy + glyph + glyph);
+			g2d.drawString("│", x + s, gy + glyph * 3 + glyph);
+			g2d.drawString("│", x + width - s - glyph, gy + glyph);
+			g2d.drawString("│", x + width - s - glyph, gy + glyph + glyph);
+			g2d.drawString("│", x + width - s - glyph, gy + glyph * 3 + glyph);
 		}
 	}
 	
@@ -80,44 +78,62 @@ public class TerminalPatternRenderer implements PatternRenderer {
 	
 	@Override
 	public void drawCloseButton(final Graphics2D g2d, final int width, final int height, final boolean enabled, final boolean pressed, final boolean hovered, final boolean toggled, final Color backgroundColor, final double scaleFactor, final Theme theme) {
-		final var highlight = (hovered || toggled);
 		
-		Color bgColor = backgroundColor;
-		if (bgColor == null) {
-			bgColor = theme.getBorderInner().toColor();
-		}
-		if (highlight) {
-			bgColor = theme.getBackgroundNormal().toColor();
-		}
-		if (pressed) {
-			bgColor = theme.getSelectionPrimary().toColor();
-		}
-		
-		g2d.setColor(bgColor);
+		// Button background
+		final Color btnBg = backgroundColor != null ? backgroundColor : theme.getBackgroundNormal().toColor();
+		g2d.setColor(btnBg);
 		g2d.fillRect(0, 0, width, height);
 		
-		final var s = Math.max(1, (int) (1 * scaleFactor));
-		this.drawDecorativeBorder(g2d, 0, 0, width, height, s, theme.getBorderOuter().toColor());
+		// Button bevel
+		int bevelStrength = (int) (2 * scaleFactor);
+		if (bevelStrength < 1)
+			bevelStrength = 1;
 		
-		if (!enabled) {
-			return;
-		}
+		final Color highlight = theme.getBorderOuter().toColor();
+		final Color shadow = theme.getBorderInner().toColor();
 		
-		final Color textColor;
 		if (pressed) {
-			textColor = theme.getTextNormal().toColor();
-		}
-		else if (highlight) {
-			textColor = theme.getSelectionSecondary().toColor();
+			drawBevel(g2d, 0, 0, width, height, bevelStrength, false, highlight, shadow);
 		}
 		else {
-			textColor = theme.getTextDisabled().toColor();
+			drawBevel(g2d, 0, 0, width, height, bevelStrength, true, highlight, shadow);
 		}
-		g2d.setColor(textColor);
 		
-		final var fontSize = (int) (12 * scaleFactor);
-		final var textDim = G2DDrawFont.getTextDimensions("X", g2d, 12, scaleFactor);
-		G2DDrawFont.renderText(g2d, textDim, 1.0, ((width - textDim.getX()) / 2), ((height - textDim.getY()) / 2), fontSize, "X");
+		// X icon
+		if (enabled) {
+			g2d.setColor(theme.getTextNormal().toColor());
+			final int offset = pressed ? 1 : 0;
+			
+			// Draw a simple X
+			final int padding = (int) (4 * scaleFactor);
+			final int x1 = padding + offset;
+			final int y1 = padding + offset;
+			final int x2 = width - padding + offset;
+			final int y2 = height - padding + offset;
+			
+			final Graphics2D g2 = (Graphics2D) g2d.create();
+			g2.setStroke(new java.awt.BasicStroke((float) (2 * scaleFactor)));
+			g2.drawLine(x1, y1, x2, y2);
+			g2.drawLine(x1, y2, x2, y1);
+			g2.dispose();
+		}
+	}
+
+	private void drawBevel(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final boolean raised, final Color light, final Color dark) {
+		final Color bottomRight = raised ? light : dark;
+		final Color topLeft = raised ? dark : light;
+		
+		g2d.setColor(topLeft);
+		for (int i = 0; i < strength; i++) {
+			g2d.drawLine(x + i, y + i, x + width - 1 - i, y + i); // Top
+			g2d.drawLine(x + i, y + i, x + i, y + height - 1 - i); // Left
+		}
+		
+		g2d.setColor(bottomRight);
+		for (int i = 0; i < strength; i++) {
+			g2d.drawLine(x + i, y + height - 1 - i, x + width - 1 - i, y + height - 1 - i); // Bottom
+			g2d.drawLine(x + width - 1 - i, y + i, x + width - 1 - i, y + height - 1 - i); // Right
+		}
 	}
 	
 	private BufferedImage getPatternCache() {
@@ -183,10 +199,13 @@ public class TerminalPatternRenderer implements PatternRenderer {
 	
 	@Override
 	public void drawButton(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean enabled, final boolean pressed, final boolean hovered, final boolean toggled, final Color backgroundColor, final double scaleFactor, final Theme theme) {
-		Color bgColor;
+		float h, s, b;
+		
 		if (backgroundColor == null) {
 			final var baseColor = !toggled ? theme.getBackgroundNormal() : theme.getBackgroundSelected();
-			float b = baseColor.getBrightness();
+			h = baseColor.getHue();
+			s = baseColor.getSaturation();
+			b = baseColor.getBrightness();
 			
 			if (pressed) {
 				b += theme.getPressedBrightnessAdjustment();
@@ -194,42 +213,41 @@ public class TerminalPatternRenderer implements PatternRenderer {
 			else if (hovered) {
 				b += theme.getHoverBrightnessAdjustment();
 			}
-			
-			b = Math.max(0.0f, Math.min(1.0f, b));
-			bgColor = Color.getHSBColor(baseColor.getHue(), baseColor.getSaturation(), b);
 		}
 		else {
 			final var hsb = new float[3];
 			Color.RGBtoHSB(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), hsb);
+			h = hsb[0];
+			s = hsb[1];
 			
-			float b = !toggled ? 0.20F : 0.40F;
+			if (!toggled) {
+				b = 0.30F;
+			}
+			else {
+				b = 0.50F;
+			}
 			if (pressed) {
 				b += theme.getPressedBrightnessAdjustment();
 			}
 			else if (hovered) {
 				b += theme.getHoverBrightnessAdjustment();
 			}
-			
-			b = Math.max(0.0f, Math.min(1.0f, b));
-			bgColor = Color.getHSBColor(hsb[0], hsb[1], b);
 		}
 		
-		if (!enabled) {
-			final var hsb = Color.RGBtoHSB(bgColor.getRed(), bgColor.getGreen(), bgColor.getBlue(), null);
-			bgColor = Color.getHSBColor(hsb[0], Math.min(1.0f, hsb[1] * 0.15f), Math.min(1.0f, hsb[2] * 0.45f));
-		}
-		
+		b = Math.max(0.0f, Math.min(1.0f, b));
+		final var bgColor = Color.getHSBColor(h, s, b);
 		g2d.setColor(bgColor);
 		g2d.fillRect(x, y, width, height);
 		
-		final var borderStrength = Math.max(1, (int) (1 * scaleFactor));
-		final var outer = hovered || toggled ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
-		final var inner = enabled ? theme.getBorderInner().toColor() : theme.getBorderInnerDisabled().toColor();
-		this.drawDecorativeBorder(g2d, x, y, width, height, borderStrength, outer);
+		int bevelStrength = (int) (2 * scaleFactor);
+		if (bevelStrength < 1)
+			bevelStrength = 1;
 		
-		final var inset = Math.max(1, borderStrength);
-		if (width > inset * 3 && height > inset * 3) {
-			this.drawDecorativeBorder(g2d, x + inset, y + inset, width - inset * 2, height - inset * 2, Math.max(1, borderStrength), inner);
-		}
+		final Color highlight = hovered ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
+		final Color shadow = enabled ? 
+				hovered ? theme.getSelectionSecondary().toColor() : theme.getBorderInner().toColor() : 
+				theme.getBorderInnerDisabled().toColor();
+		
+		drawBevel(g2d, x, y, width, height, bevelStrength, !pressed, highlight, shadow);
 	}
 }
