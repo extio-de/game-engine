@@ -57,6 +57,10 @@ public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonContro
 	}
 	
 	private void manageCtrlGroupToggleState() {
+		if (this.controlGroup == null || this.controlGroup.isEmpty()) {
+			return;
+		}
+		
 		final var controls = G2DDrawControl.CONTROL_GROUPS.get(this.controlGroup);
 		if (controls != null && !controls.isEmpty()) {
 			var controlInGroupToggled = false;

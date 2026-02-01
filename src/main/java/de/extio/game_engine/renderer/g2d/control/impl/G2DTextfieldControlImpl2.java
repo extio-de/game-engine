@@ -1,11 +1,7 @@
 package de.extio.game_engine.renderer.g2d.control.impl;
 
 import java.awt.Color;
-import java.awt.Graphics2D;
 
-import javax.swing.JTextField;
-
-import de.extio.game_engine.renderer.RendererData;
 import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
@@ -170,28 +166,4 @@ public class G2DTextfieldControlImpl2 extends G2DBaseControlImpl implements Text
 		}
 	}
 	
-	@Override
-	public G2DBaseControlImpl setScaleFactor(final double scaleFactor) {
-		return super.setScaleFactor(scaleFactor);
-	}
-	
-	@Override
-	public BaseControl setControlGroup(final String controlGroup) {
-		return super.setControlGroup(controlGroup);
-	}
-	
-	@Override
-	public BaseControl setRendererData(final RendererData RendererData) {
-		return super.setRendererData(RendererData);
-	}
-	
-	@Override
-	public G2DBaseControlImpl setMainFrameGraphics(final Graphics2D graphics) {
-		return super.setMainFrameGraphics(graphics);
-	}
-	
-	@Override
-	public BaseControl setControlId(final String id) {
-		return super.setControlId(id);
-	}
 }
