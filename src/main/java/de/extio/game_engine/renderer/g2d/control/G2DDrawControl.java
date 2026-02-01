@@ -2,9 +2,9 @@ package de.extio.game_engine.renderer.g2d.control;
 
 import java.awt.Graphics2D;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -15,6 +15,7 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DBaseControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DLabelControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DMultiLineTextAreaControlImpl;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DPopupMenuControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSetFocusControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSliderControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSwitchControlImpl;
@@ -24,7 +25,6 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowPanelControlImpl;
-import de.extio.game_engine.renderer.g2d.control.impl.G2DPopupMenuControlImpl;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo;
@@ -37,14 +37,14 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	
 	private final static Logger LOGGER = LoggerFactory.getLogger(G2DDrawControl.class);
 	
-	public static Map<String, BaseControl> CACHED_CONTROLS = new HashMap<>();
+	public static Map<String, BaseControl> CACHED_CONTROLS = new ConcurrentHashMap<>();
 	
-	public static Map<String, List<BaseControl>> CONTROL_GROUPS = new HashMap<>();
+	public static Map<String, List<BaseControl>> CONTROL_GROUPS = new ConcurrentHashMap<>();
 	
 	private Class<? extends BaseControl> clazz;
 	
 	private String caption;
-
+	
 	private long lastCaptionUpdateTime;
 	
 	private String controlGroup;
@@ -74,9 +74,9 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private PopupMenuData popupMenuData;
 	
 	private SetFocusData setFocusData;
-
+	
 	private Object customData;
-
+	
 	private long lastControlDataUpdateTime;
 	
 	private boolean visible;
@@ -90,7 +90,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 	private Area2 controlArea = null;
 	
 	private final Area2 tempArea = new Area2(MutableCoordI2.create(), MutableCoordI2.create());
-
+	
 	private List<CustomControlConfiguration<? extends G2DBaseControlImpl>> customControlConfigurations;
 	
 	public G2DDrawControl() {
@@ -215,11 +215,10 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				return;
 			}
 		}
-
+		
 		if (this.customControlConfigurations == null) {
 			@SuppressWarnings("unchecked")
-			final
-			var beans = (java.util.Collection<CustomControlConfiguration<? extends G2DBaseControlImpl>>) (java.util.Collection<?>) this.rendererData.getApplicationContext().getBeansOfType(CustomControlConfiguration.class).values();
+			final var beans = (java.util.Collection<CustomControlConfiguration<? extends G2DBaseControlImpl>>) (java.util.Collection<?>) this.rendererData.getApplicationContext().getBeansOfType(CustomControlConfiguration.class).values();
 			this.customControlConfigurations = List.copyOf(beans);
 		}
 		
@@ -228,7 +227,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			if (this.clazz == null) {
 				LOGGER.warn("G2DDrawControl: control type not specified for control id {}", this.id);
 				return;
-			}			
+			}
 			else if (this.clazz == ButtonControl.class) {
 				control = new G2DButtonControlImpl();
 			}
