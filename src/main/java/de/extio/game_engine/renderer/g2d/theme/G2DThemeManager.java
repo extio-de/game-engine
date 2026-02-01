@@ -23,16 +23,21 @@ public class G2DThemeManager implements ThemeManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(G2DThemeManager.class);
 	
 	private static final List<String> THEME_STORAGE_PATH = List.of("gameEngine");
+	
 	private static final String THEME_STORAGE_NAME = "lastTheme";
 	
 	private G2DRenderer g2dRenderer;
+	
 	private G2DRendererControl g2dRendererControl;
-
+	
 	private final StaticResourceService staticResourceService;
+	
 	private final StorageService storageService;
 	
 	private final Map<String, PatternRenderer> patternRenderers;
+	
 	private final Map<String, Theme> themes;
+	
 	private final Theme defaultTheme;
 	
 	private Theme currentTheme;
@@ -64,7 +69,7 @@ public class G2DThemeManager implements ThemeManager {
 				.sorted()
 				.toList();
 	}
-
+	
 	@Override
 	public Optional<Theme> loadThemeFromStorage(final String themeName) {
 		if (themeName == null || themeName.isBlank()) {
@@ -102,20 +107,20 @@ public class G2DThemeManager implements ThemeManager {
 		loaded.ifPresent(this::registerTheme);
 		return loaded;
 	}
-
+	
 	@Override
 	public void setCurrentTheme(final String themeName) {
 		if (themeName == null || themeName.isBlank()) {
 			this.applyLastUsedOrDefault();
 			return;
 		}
-
+		
 		final var direct = this.themes.get(themeName);
 		if (direct != null) {
 			this.setCurrentTheme(direct);
 			return;
 		}
-
+		
 		final var byDisplayName = this.themes.values().stream()
 				.filter(theme -> theme != null && theme.getName() != null && theme.getName().equalsIgnoreCase(themeName))
 				.findFirst()
@@ -124,7 +129,7 @@ public class G2DThemeManager implements ThemeManager {
 			this.setCurrentTheme(byDisplayName);
 			return;
 		}
-
+		
 		this.setCurrentTheme(this.loadTheme(themeName));
 	}
 	
@@ -161,7 +166,7 @@ public class G2DThemeManager implements ThemeManager {
 		LOGGER.warn("Theme '{}' not found in storage. Using default theme.", themeName);
 		return this.defaultTheme;
 	}
-
+	
 	private void applyLastUsedOrDefault() {
 		try {
 			final Optional<Theme> persistedTheme = this.storageService.loadByPath(Theme.class, THEME_STORAGE_PATH, THEME_STORAGE_NAME);
@@ -171,7 +176,7 @@ public class G2DThemeManager implements ThemeManager {
 				LOGGER.info("Loaded last used theme: {}", this.currentTheme.getName());
 				return;
 			}
-
+			
 			this.applyTheme(this.defaultTheme);
 			LOGGER.info("Loaded default theme: {}", this.currentTheme.getName());
 		}
@@ -179,13 +184,13 @@ public class G2DThemeManager implements ThemeManager {
 			LOGGER.warn("Could not load last used theme. Using default.", e);
 		}
 	}
-
+	
 	private void applyTheme(Theme theme) {
 		this.currentTheme = theme;
 		this.g2dRendererControl.getUiOptions().setFontResource(new StaticResource(List.of("renderer"), this.currentTheme.getFont()));
 		this.g2dRenderer.reset();
 	}
-
+	
 	private void registerTheme(final Theme theme) {
 		if (theme == null || theme.getName() == null || theme.getName().isBlank()) {
 			return;
@@ -204,20 +209,27 @@ public class G2DThemeManager implements ThemeManager {
 			LOGGER.warn("Could not persist last used theme", e);
 		}
 	}
-
+	
 	public void setG2dRenderer(final G2DRenderer g2dRenderer) {
 		this.g2dRenderer = g2dRenderer;
 	}
-
+	
 	public void setG2dRendererControl(G2DRendererControl g2dRendererControl) {
 		this.g2dRendererControl = g2dRendererControl;
 	}
-
+	
 	public PatternRenderer getPatternRenderer(final String rendererName) {
 		return this.patternRenderers.get(rendererName);
 	}
-
+	
 	public PatternRenderer getCurrentPatternRenderer() {
 		return this.patternRenderers.get(this.currentTheme.getPatternRendererName());
+	}
+	
+	@Override
+	public List<String> getPatternRendererNames() {
+		return this.patternRenderers.keySet().stream()
+				.sorted()
+				.toList();
 	}
 }

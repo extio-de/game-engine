@@ -9,6 +9,8 @@ import de.extio.game_engine.renderer.g2d.theme.Theme;
 public interface ThemeManager {
 	
 	List<String> getAvailableThemeNames();
+
+	List<String> getPatternRendererNames();
 	
 	Optional<Theme> loadThemeFromStorage(String themeName);
 	

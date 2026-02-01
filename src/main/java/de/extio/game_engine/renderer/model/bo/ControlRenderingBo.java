@@ -16,9 +16,9 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	
 	record ButtonData(RgbaColor backgroundColor, StaticResource iconResource) {}
 	
-	record ToggleButtonData(boolean toggled, StaticResource iconResource) {}
+	record ToggleButtonData(boolean toggled, boolean allowNoneToggledInGroup, StaticResource iconResource) {}
 	
-	record SwitchData(boolean toggled, StaticResource iconResource, boolean drawBorder) {}
+	record SwitchData(boolean toggled, boolean allowNoneToggledInGroup, StaticResource iconResource, boolean drawBorder) {}
 	
 	record WindowCloseButtonData(boolean thickBorder) {}
 	

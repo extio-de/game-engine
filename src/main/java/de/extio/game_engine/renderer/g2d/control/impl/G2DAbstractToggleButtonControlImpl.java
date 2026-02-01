@@ -11,10 +11,13 @@ import de.extio.game_engine.renderer.model.event.UiControlEvent;
 public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonControlImpl implements ToggleButtonControl, SwitchControl {
 	
 	protected boolean drawBorder = true;
+
+	protected boolean allowNoneToggledInGroup;
 	
 	protected void applyToggleButtonData(final ToggleButtonData data) {
 		if (data != null) {
 			if (this.lastControlDataUpdateTimeInternal < this.lastControlDataUpdateTime) {
+				this.allowNoneToggledInGroup = data.allowNoneToggledInGroup();
 				this.setToggled(data.toggled());
 				this.lastControlDataUpdateTimeInternal = this.lastControlDataUpdateTime;
 			}
@@ -70,7 +73,7 @@ public abstract class G2DAbstractToggleButtonControlImpl extends G2DButtonContro
 				}
 			}
 			
-			if (!controlInGroupToggled) {
+			if (!controlInGroupToggled && !this.allowNoneToggledInGroup) {
 				this.control.setToggled(true);
 			}
 		}
