@@ -23,15 +23,25 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 	protected double lastValue2;
 	
 	protected Consumer<Double> actionConsumer;
+
+	protected long lastControlDataUpdateTime;
+
+	protected long lastControlDataUpdateTimeInternal;
 	
 	@Override
 	public void setCustomData(final SliderData data) {
-		if (data != null) {
+		if (data != null && this.lastControlDataUpdateTimeInternal < this.lastControlDataUpdateTime) {
 			this.setColor(data.color());
 			this.setHorizontal(data.horizontal());
 			this.setValue(data.value());
 			this.setValue2(data.value2());
+			this.lastControlDataUpdateTimeInternal = this.lastControlDataUpdateTime;
 		}
+	}
+
+	@Override
+	public void setLastControlDataUpdateTime(final long time) {
+		this.lastControlDataUpdateTime = time;
 	}
 	
 	public G2DSliderControlImpl() {
@@ -140,7 +150,7 @@ public class G2DSliderControlImpl extends G2DBaseControlImpl implements SliderCo
 	
 	protected void createControl() {
 		this.control = new CustomSlider(event -> {
-			this.lastValue = Double.parseDouble(event.getActionCommand());
+			this.setValue(Double.parseDouble(event.getActionCommand()));
 			if (this.enabled) {
 				this.performAction();
 			}

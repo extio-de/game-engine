@@ -352,6 +352,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 			((WindowPanelControl) control).setCustomData(this.windowPanelData);
 		}
 		else if (this.clazz == SliderControl.class && this.sliderData != null) {
+			((SliderControl) control).setLastControlDataUpdateTime(this.lastControlDataUpdateTime);
 			((SliderControl) control).setCustomData(this.sliderData);
 		}
 		else if (this.clazz == TableControl.class && this.tableData != null) {

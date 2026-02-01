@@ -182,6 +182,8 @@ public interface ControlRenderingBo extends RenderingBoHasDimension {
 	public static interface SliderControl extends BaseControl {
 		
 		void setCustomData(SliderData data);
+
+		void setLastControlDataUpdateTime(long time);
 		
 	}
 	
