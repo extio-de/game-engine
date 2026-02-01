@@ -61,7 +61,7 @@ public class MetroPatternRenderer implements PatternRenderer {
 		final var s = Math.max((thickBorder ? 4 : 2), (int) ((thickBorder ? 6 : 3) * scaleFactor));
 		final var s2 = s * 2;
 		
-		final var bg = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 175);
+		final var bg = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 200);
 		
 		this.drawDecorativeBorderFilled(g2d, x, y, width, height, s, innerBorderColor, bg);
 		this.drawDecorativeBordersMain(g2d, x + s, y + s, width - s2, height - s2, s, false, outerBorderColor);

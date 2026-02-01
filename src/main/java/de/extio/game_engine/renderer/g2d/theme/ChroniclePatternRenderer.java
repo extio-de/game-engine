@@ -74,7 +74,7 @@ public class ChroniclePatternRenderer implements PatternRenderer {
 		final int s2 = s * 2;
 		final int arc = Math.max(12, (int) (18 * scaleFactor));
 		
-		final var bg = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 210);
+		final var bg = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 200);
 		final Object aaOld = g2d.getRenderingHint(RenderingHints.KEY_ANTIALIASING);
 		try {
 			g2d.setRenderingHint(RenderingHints.KEY_ANTIALIASING, RenderingHints.VALUE_ANTIALIAS_ON);

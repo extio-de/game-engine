@@ -57,7 +57,7 @@ public class SpacecraftPatternRenderer implements PatternRenderer {
 	public void drawWindowPanel(final Graphics2D g2d, final int x, final int y, final int width, final int height, final boolean thickBorder, final Color innerBorderColor, final Color outerBorderColor, final Color backgroundColor, final double scaleFactor) {
 		final var strength = Math.max((thickBorder ? 4 : 2), (int) ((thickBorder ? 6 : 3) * scaleFactor));
 		final var strength2 = strength * 2;
-		final var backgroundTransparency = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 180);
+		final var backgroundTransparency = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 200);
 		
 		drawDecorativeBorderFilled(g2d, x + strength, y + strength, width - strength2, height - strength2, strength, innerBorderColor, backgroundTransparency);
 		drawDecorativeBorder(g2d, x, y, width, height, strength, outerBorderColor);

@@ -42,7 +42,7 @@ public class ModernPatternRenderer implements PatternRenderer {
 		final var s = Math.max((thickBorder ? 3 : 2), (int) ((thickBorder ? 5 : 3) * scaleFactor));
 		final var s2 = s * 2;
 		
-		final var bg = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 210);
+		final var bg = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 200);
 		this.drawDecorativeBorderFilled(g2d, x + s, y + s, width - s2, height - s2, s, innerBorderColor, bg);
 		this.drawDecorativeBorder(g2d, x, y, width, height, s, outerBorderColor);
 	}
