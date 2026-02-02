@@ -50,7 +50,7 @@ public class VintagePatternRenderer implements PatternRenderer {
 		innerBorderColor.getRGBColorComponents(baseColor);
 		Color.RGBtoHSB((int) (baseColor[0] * 255), (int) (baseColor[1] * 255), (int) (baseColor[2] * 255), baseColor);
 		
-		final var backgroundTransparency = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 200);
+		final var backgroundTransparency = new Color(backgroundColor.getRed(), backgroundColor.getGreen(), backgroundColor.getBlue(), 220);
 		g2d.setColor(backgroundTransparency);
 		g2d.fillRect(x, y + size, width, height - size * 3);
 		g2d.fillRect(x + size, y + height - size * 2, width - size * 2, size);
