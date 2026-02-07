@@ -27,7 +27,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	
 	public final static int FONT_SIZE_DEFAULT = 18;
 
-	public final static double FONT_LEADING = 1.6;
+	public final static double FONT_LEADING = 1.75;
 
 	private static final AtomicReference<Font> cachedFontRef = new AtomicReference<>();
 
