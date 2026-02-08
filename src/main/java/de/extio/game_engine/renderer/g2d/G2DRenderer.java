@@ -394,5 +394,10 @@ public class G2DRenderer implements Renderer {
 	}
 	
 	public static class G2DRendererModule extends AbstractClientModule {
+
+		@Override
+		public boolean isAlwaysDisplay() {
+			return true;
+		}
 	}
 }
