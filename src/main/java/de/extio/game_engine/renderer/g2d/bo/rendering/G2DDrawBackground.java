@@ -5,24 +5,18 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import java.awt.image.VolatileImage;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 
 import javax.imageio.ImageIO;
 
-import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
-import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
-import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.spatial2.model.CoordI2;
-import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.spatial2.model.MutableCoordI2;
-import de.extio.game_engine.util.rng.ThreadLocalXorShift128Random;
 
 public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	
@@ -51,7 +45,7 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 	@Override
 	public void apply(final RenderingBo other) {
 		super.apply(other);
-
+		
 		if (other instanceof final G2DDrawBackground o) {
 			this.bgrOffset.setXY(o.bgrOffset);
 			this.sourceOffset.setXY(o.sourceOffset);
@@ -60,11 +54,11 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 			this.overflow.setXY(o.overflow);
 		}
 	}
-
+	
 	@Override
 	public void close() throws Exception {
 		super.close();
-
+		
 		this.bgrOffset.setXY(0, 0);
 		this.sourceOffset.setXY(0, 0);
 		this.destPosition.setXY(0, 0);
@@ -98,6 +92,17 @@ public class G2DDrawBackground extends G2DAbstractRenderingBo {
 		}
 		else if (BACKGROUND_IMAGE.validate(graphics.getDeviceConfiguration()) != VolatileImage.IMAGE_OK) {
 			this.createVolatileBackgroundImage(graphics, index);
+		}
+		
+		final var uiOptions = this.rendererData.getUiOptions();
+		if (uiOptions.getBackgroundMode0() == UiOptions.BackgroundMode.SCALING) {
+			graphics.drawImage(G2DDrawBackground.BACKGROUND_IMAGE,
+					0, 0,
+					viewPort.getX(), viewPort.getY(),
+					0, 0,
+					G2DDrawBackground.BACKGROUND_IMAGE.getWidth(), G2DDrawBackground.BACKGROUND_IMAGE.getHeight(),
+					null);
+			return;
 		}
 		
 		this.sourceOffset.setXY(Math.floorMod(offset.getX(), G2DDrawBackground.BACKGROUND_IMAGE.getWidth()), Math.floorMod(offset.getY(), G2DDrawBackground.BACKGROUND_IMAGE.getHeight()));

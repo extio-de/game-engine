@@ -96,6 +96,21 @@ public final class UiOptions {
 		this.backgroundOffset1 = backgroundOffset1;
 	}
 	
+	public static enum BackgroundMode {
+		TILING,
+		SCALING
+	}
+	
+	private BackgroundMode backgroundMode0 = BackgroundMode.TILING;
+	
+	public BackgroundMode getBackgroundMode0() {
+		return this.backgroundMode0;
+	}
+	
+	public void setBackgroundMode0(final BackgroundMode backgroundMode0) {
+		this.backgroundMode0 = backgroundMode0;
+	}
+	
 	public StaticResource getFontResource() {
 		return fontResource;
 	}
