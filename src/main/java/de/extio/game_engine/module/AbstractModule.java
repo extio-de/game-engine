@@ -24,6 +24,10 @@ public abstract class AbstractModule {
 	public String getId() {
 		return this.id;
 	}
+
+	public boolean isProtected() {
+		return false;
+	}
 	
 	public void onLoad() {
 		

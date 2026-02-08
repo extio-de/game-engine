@@ -117,6 +117,10 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 				LOGGER.debug("AbstractModule not loaded: " + id);
 				return;
 			}
+			if (module.isProtected() && this.modulesActiveView.stream().anyMatch(m -> m.getId().equals(id))) {
+				LOGGER.info("Cannot unload protected active module {}", id);
+				return;
+			}
 			
 			this.changeActiveState(id, false);
 			this.modulesAll.remove(module);
@@ -147,6 +151,9 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 				.findAny()
 				.ifPresentOrElse(module -> {
 					if (!active) {
+						if (module.isProtected()) {
+							return;
+						}
 						if (module instanceof final AbstractClientModule clientModule) {
 							this.changeDisplayState(clientModule.getId(), false);
 						}
