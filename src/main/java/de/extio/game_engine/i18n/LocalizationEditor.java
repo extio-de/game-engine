@@ -60,10 +60,6 @@ public class LocalizationEditor extends JFrame {
 	
 	private JTable table;
 	
-	private JLabel lblDefaultDescre;
-	
-	private JTextField textField;
-	
 	private JMenuBar menuBar;
 	
 	private JMenu mnFile;
@@ -398,7 +394,7 @@ public class LocalizationEditor extends JFrame {
 		gbc_panel.gridx = 0;
 		gbc_panel.gridy = 0;
 		this.contentPane.add(panel, gbc_panel);
-		panel.setLayout(new GridLayout(1, 6, 0, 0));
+		panel.setLayout(new GridLayout(1, 5, 0, 0));
 		
 		this.btnAdd = new JButton("Add");
 		this.btnAdd.setFont(baseFont);
@@ -421,8 +417,6 @@ public class LocalizationEditor extends JFrame {
 						LocalizationEditor.this.localizationManagerImpl.put(lang.getShortName(), idStr, value);
 					}
 				}
-				
-				LocalizationEditor.this.localizationManagerImpl.getLocalizations().getDescriptions().put(idStr, LocalizationEditor.this.textField.getText() == null ? "" : LocalizationEditor.this.textField.getText());
 				
 				((AbstractTableModel) LocalizationEditor.this.table.getModel()).fireTableDataChanged();
 			}
@@ -464,23 +458,10 @@ public class LocalizationEditor extends JFrame {
 					LocalizationEditor.this.localizationManagerImpl.put(lang.getShortName(), idStr, value);
 				}
 				
-				final String oldDescr = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getDescriptions().get(oldId);
-				LocalizationEditor.this.localizationManagerImpl.getLocalizations().getDescriptions().put(idStr, oldDescr);
-				
 				((AbstractTableModel) LocalizationEditor.this.table.getModel()).fireTableDataChanged();
 			}
 		});
 		panel.add(this.btnClone);
-		
-		this.lblDefaultDescre = new JLabel("Description:");
-		this.lblDefaultDescre.setFont(baseFont);
-		this.lblDefaultDescre.setHorizontalAlignment(SwingConstants.RIGHT);
-		panel.add(this.lblDefaultDescre);
-		
-		this.textField = new JTextField();
-		this.textField.setFont(baseFont);
-		panel.add(this.textField);
-		this.textField.setColumns(10);
 		
 		this.lblPrefix = new JLabel("Prefix:");
 		this.lblPrefix.setFont(baseFont);
@@ -517,12 +498,7 @@ public class LocalizationEditor extends JFrame {
 					return id;
 				}
 				
-				if (columnIndex == 1) {
-					final var desc = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getDescriptions().get(id);
-					return desc == null ? "" : desc;
-				}
-				
-				final String lang = LocalizationEditor.this.localizationManagerImpl.getLanguages().get(columnIndex - 2).getShortName();
+				final String lang = LocalizationEditor.this.localizationManagerImpl.getLanguages().get(columnIndex - 1).getShortName();
 				final String value = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().entrySet().stream()
 						.filter(entry -> entry.getKey().equals(lang))
 						.map(entry -> entry.getValue().getOrDefault(id, ""))
@@ -538,7 +514,7 @@ public class LocalizationEditor extends JFrame {
 			
 			@Override
 			public int getColumnCount() {
-				return LocalizationEditor.this.localizationManagerImpl.getLanguages().size() + 2;
+				return LocalizationEditor.this.localizationManagerImpl.getLanguages().size() + 1;
 			}
 			
 			@Override
@@ -546,11 +522,8 @@ public class LocalizationEditor extends JFrame {
 				if (arg0 == 0) {
 					return "id";
 				}
-				else if (arg0 == 1) {
-					return "description";
-				}
 				
-				return LocalizationEditor.this.localizationManagerImpl.getLanguages().get(arg0 - 2).getName() + " " + LocalizationEditor.this.localizationManagerImpl.getLanguages().get(arg0 - 2).getShortName();
+				return LocalizationEditor.this.localizationManagerImpl.getLanguages().get(arg0 - 1).getName() + " " + LocalizationEditor.this.localizationManagerImpl.getLanguages().get(arg0 - 1).getShortName();
 			}
 			
 			@Override
@@ -568,12 +541,7 @@ public class LocalizationEditor extends JFrame {
 					return;
 				}
 				
-				if (columnIndex == 1) {
-					LocalizationEditor.this.localizationManagerImpl.getLocalizations().getDescriptions().put(id, String.valueOf(aValue));
-					return;
-				}
-				
-				final String langShortName = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().keySet().stream().skip(columnIndex - 2).findFirst().orElse(null);
+				final String langShortName = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().keySet().stream().skip(columnIndex - 1).findFirst().orElse(null);
 				if (langShortName == null) {
 					return;
 				}

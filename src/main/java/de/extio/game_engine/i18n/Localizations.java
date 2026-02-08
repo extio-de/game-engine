@@ -1,6 +1,5 @@
 package de.extio.game_engine.i18n;
 
-import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -15,8 +14,6 @@ public final class Localizations {
 	private Map<String, Map<String, String>> languages = new LinkedHashMap<>();
 	
 	private Map<String, Language> languagesInfo = new LinkedHashMap<>();
-	
-	private Map<String, String> descriptions = new HashMap<>();
 	
 	private int curId;
 	
@@ -33,7 +30,6 @@ public final class Localizations {
 		for (final Entry<String, Language> entry : other.languagesInfo.entrySet()) {
 			this.languagesInfo.put(entry.getKey(), new Language(entry.getValue()));
 		}
-		this.descriptions = new HashMap<>(other.descriptions);
 		this.curId = other.curId;
 		this.prefix = other.prefix;
 	}
@@ -43,7 +39,7 @@ public final class Localizations {
 	}
 	
 	public void setLanguages(final Map<String, Map<String, String>> languages) {
-		this.languages = languages;
+		this.languages = new LinkedHashMap<>(languages);
 	}
 	
 	public Map<String, Language> getLanguagesInfo() {
@@ -51,7 +47,7 @@ public final class Localizations {
 	}
 	
 	public void setLanguagesInfo(final Map<String, Language> languagesInfo) {
-		this.languagesInfo = languagesInfo;
+		this.languagesInfo = new LinkedHashMap<>(languagesInfo);
 	}
 	
 	public int getCurId() {
@@ -60,14 +56,6 @@ public final class Localizations {
 	
 	public void setCurId(final int curId) {
 		this.curId = curId;
-	}
-	
-	public Map<String, String> getDescriptions() {
-		return this.descriptions;
-	}
-	
-	public void setDescriptions(final Map<String, String> descriptions) {
-		this.descriptions = descriptions;
 	}
 	
 	public String getPrefix() {

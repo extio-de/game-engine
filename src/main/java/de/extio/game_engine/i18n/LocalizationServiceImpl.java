@@ -68,7 +68,6 @@ public class LocalizationServiceImpl implements LocalizationService {
 				}
 			});
 			this.localizations.getLanguagesInfo().putAll(localizations.getLanguagesInfo());
-			this.localizations.getDescriptions().putAll(localizations.getDescriptions());
 			
 			int maxId = 0;
 			for (final Map<String, String> entries : this.localizations.getLanguages().values()) {
@@ -83,7 +82,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 			
 			this.localizations.setPrefix(localizations.getPrefix());
 			
-			LOGGER.info("Loaded {} localizations for {} languages", localizations.getDescriptions().size(), localizations.getLanguages().size());
+			LOGGER.info("Loaded localizations for {} languages", localizations.getLanguages().size());
 		}
 		
 		this.loadPersistedLanguageName();
@@ -131,7 +130,7 @@ public class LocalizationServiceImpl implements LocalizationService {
 		if (this.currentLanguage == null) {
 			return defaultText;
 		}
-		var result = this.currentLanguage.get(id);
+		final var result = this.currentLanguage.get(id);
 		if (result == null) {
 			return defaultText;
 		}
