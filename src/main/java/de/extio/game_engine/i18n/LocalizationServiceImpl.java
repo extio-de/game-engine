@@ -1,6 +1,7 @@
 package de.extio.game_engine.i18n;
 
 import java.io.InputStream;
+import java.util.ConcurrentModificationException;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -122,7 +123,13 @@ public class LocalizationServiceImpl implements LocalizationService {
 		if (this.currentLanguage == null) {
 			return NOT_FOUND_PREFIX + id + "}";
 		}
-		return this.currentLanguage.computeIfAbsent(id, key -> key);
+		try {
+			return this.currentLanguage.computeIfAbsent(id, key -> key);
+		}
+		catch (final ConcurrentModificationException e) {
+			LOGGER.warn("Concurrent modification while translating id '{}'", id, e);
+			return NOT_FOUND_PREFIX + id + "}";
+		}
 	}
 	
 	@Override
