@@ -297,6 +297,7 @@ public class CustomMultiLineTextArea extends Component {
 			public void mousePressed(final MouseEvent e) {
 				CustomMultiLineTextArea.this.requestFocus();
 				if (!CustomMultiLineTextArea.this.enabled) {
+					e.consume();
 					return;
 				}
 				
@@ -314,6 +315,10 @@ public class CustomMultiLineTextArea extends Component {
 			
 			@Override
 			public void mouseClicked(final MouseEvent e) {
+				if (!CustomMultiLineTextArea.this.enabled) {
+					e.consume();
+					return;
+				}
 				if (e.getClickCount() == 2 && !isInScrollbarArea(e.getX(), e.getY())) {
 					selectWordAtCaret();
 					e.consume();
@@ -322,6 +327,10 @@ public class CustomMultiLineTextArea extends Component {
 			
 			@Override
 			public void mouseReleased(final MouseEvent e) {
+				if (!CustomMultiLineTextArea.this.enabled) {
+					e.consume();
+					return;
+				}				
 				CustomMultiLineTextArea.this.scrollbarDragging = false;
 				e.consume();
 			}
@@ -331,10 +340,15 @@ public class CustomMultiLineTextArea extends Component {
 			
 			@Override
 			public void mouseMoved(final MouseEvent e) {
+				e.consume();
 			}
 			
 			@Override
 			public void mouseDragged(final MouseEvent e) {
+				if (!CustomMultiLineTextArea.this.enabled) {
+					e.consume();
+					return;
+				}				
 				if (CustomMultiLineTextArea.this.scrollbarDragging) {
 					handleScrollbarDrag(e.getY());
 					e.consume();
@@ -350,9 +364,6 @@ public class CustomMultiLineTextArea extends Component {
 			
 			@Override
 			public void mouseWheelMoved(final MouseWheelEvent e) {
-				if (!CustomMultiLineTextArea.this.enabled) {
-					return;
-				}
 				final int lineHeight = getLineHeight();
 				final int scrollAmount = e.getWheelRotation() * SCROLL_WHEEL_LINES * lineHeight;
 				scroll(scrollAmount);
