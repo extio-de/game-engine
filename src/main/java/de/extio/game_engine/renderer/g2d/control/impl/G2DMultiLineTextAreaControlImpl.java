@@ -71,6 +71,11 @@ public class G2DMultiLineTextAreaControlImpl extends G2DBaseControlImpl implemen
 		this.textArea = new CustomMultiLineTextArea(this.rendererData.getThemeManager(), text -> {
 			this.lastText = text;
 			this.lastCaptionUpdateTimeInternal = System.currentTimeMillis();
+			try {
+				Thread.sleep(2); // Ensure that the next caption update time (e.g. reacting on UiControlEvent) is always after the last caption update time internal to trigger the caption update in the render method
+			}
+			catch (final InterruptedException e) {
+			}
 			this.rendererData.getEventService().fire(new UiControlEvent(this.id, text));
 		});
 		
