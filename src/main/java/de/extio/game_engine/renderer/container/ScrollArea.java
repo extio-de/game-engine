@@ -171,6 +171,10 @@ public class ScrollArea implements WindowComponent {
 		this.renderingBoIds.add(renderingBo.getId());
 		this.parent.putRenderingBo(renderingBo);
 	}
+
+	public <T extends RenderingBo> T getRenderingBo(final String renderingBoId, final Class<T> type) {
+		return this.parent.getRenderingBo(renderingBoId, type);
+	}
 	
 	public void removeRenderingBo(final String renderingBoId) {
 		this.renderingBoIds.remove(renderingBoId);
