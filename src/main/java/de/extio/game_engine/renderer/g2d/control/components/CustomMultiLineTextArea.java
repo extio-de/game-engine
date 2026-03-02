@@ -81,6 +81,8 @@ public class CustomMultiLineTextArea extends Component {
 	
 	private int cachedFontSize = 0;
 	
+	private int cachedRawFontHeight = 0;
+	
 	private int cachedSpaceWidth = 0;
 	
 	private List<String> cachedWrappedLines = null;
@@ -108,6 +110,7 @@ public class CustomMultiLineTextArea extends Component {
 			this.cachedLineHeight = 0;
 			this.cachedSpaceWidth = 0;
 			this.cachedFontSize = 0;
+			this.cachedRawFontHeight = 0;
 			this.cachedWrappedLines = null;
 		}
 		this.fontSize = fontSize;
@@ -934,6 +937,10 @@ public class CustomMultiLineTextArea extends Component {
 		
 		final List<String> wrappedLines = getWrappedLines();
 		final int lineHeight = getLineHeight();
+		if (this.cachedRawFontHeight == 0) {
+			this.cachedRawFontHeight = G2DDrawFont.getTextDimensions("ÄÖÜABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzgjpqy", g2d, this.fontSize, 1.0).getY();
+		}
+		final int rawFontHeight = this.cachedRawFontHeight;
 		
 		final Color fgColor = this.foregroundColor != null ? this.foregroundColor : theme.getTextNormal().toColor();
 		
@@ -1008,15 +1015,15 @@ public class CustomMultiLineTextArea extends Component {
 				final String beforeCaret = caretPosInWrappedLine > 0 && caretPosInWrappedLine <= caretWrappedLine.length()
 						? caretWrappedLine.substring(0, caretPosInWrappedLine)
 						: "";
-				final var textDim = beforeCaret.isEmpty() ? ImmutableCoordI2.create(0, (int) (this.fontSize * this.scaleFactor)) : G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
+				final var textDim = beforeCaret.isEmpty() ? ImmutableCoordI2.create(0, 0) : G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
 				final int spaceWidth = beforeCaret.endsWith(" ") ? getSpaceWidth() : 0;
-				final int textHeight = textDim.getY();
 				final int caretX = textDim.getX() + TEXT_PADDING + (int) (spaceWidth * this.scaleFactor);
 				final int caretY = (int) ((caretWrappedLineIndex * lineHeight - this.scrollOffsetY) * this.scaleFactor);
+				final int caretHeight = (int) (rawFontHeight * this.scaleFactor);
 				
 				if (caretY >= 0 && caretY < this.getHeight()) {
 					g2d.setColor((currentTime % 1000 < 500) ? theme.getSelectionPrimary().toColor() : theme.getSelectionSecondary().toColor());
-					g2d.fillRect(caretX, caretY, 2, textHeight);
+					g2d.fillRect(caretX, caretY, 2, caretHeight);
 				}
 			}
 		}

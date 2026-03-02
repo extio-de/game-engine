@@ -20,7 +20,7 @@ import de.extio.game_engine.renderer.g2d.control.impl.G2DSetFocusControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSliderControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DSwitchControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTableControlImpl;
-import de.extio.game_engine.renderer.g2d.control.impl.G2DTextfieldControlImpl2;
+import de.extio.game_engine.renderer.g2d.control.impl.G2DSingleLineTextfieldControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DToggleButtonControlImpl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DTooltipControl;
 import de.extio.game_engine.renderer.g2d.control.impl.G2DWindowCloseButtonControlImpl;
@@ -235,7 +235,7 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				control = new G2DLabelControlImpl();
 			}
 			else if (this.clazz == TextfieldControl.class) {
-				control = new G2DTextfieldControlImpl2();
+				control = new G2DSingleLineTextfieldControlImpl();
 			}
 			else if (this.clazz == MultiLineTextAreaControl.class) {
 				control = new G2DMultiLineTextAreaControlImpl();
@@ -366,8 +366,8 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 		}
 		else if (this.clazz == TextfieldControl.class && this.textfieldData != null) {
 			((TextfieldControl) control).setCustomData(this.textfieldData);
-			if (control instanceof final G2DTextfieldControlImpl2 tfc2) {
-				tfc2.setLastCaptionUpdateTime(this.lastCaptionUpdateTime);
+			if (control instanceof final G2DSingleLineTextfieldControlImpl tfc) {
+				tfc.setLastCaptionUpdateTime(this.lastCaptionUpdateTime);
 			}
 		}
 		else if (this.clazz == MultiLineTextAreaControl.class && this.multiLineTextAreaData != null) {
