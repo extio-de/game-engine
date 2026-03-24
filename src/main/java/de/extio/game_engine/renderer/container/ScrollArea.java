@@ -4,9 +4,6 @@ import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-
 import de.extio.game_engine.event.EventService;
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoHasDimension;
@@ -50,6 +47,8 @@ public class ScrollArea implements WindowComponent {
 	protected double scrollPositionVertical = 1.0;
 	
 	protected double scrollPositionHorizontal = 0.0;
+
+	protected int verticalScrollInputRevision = 0;
 	
 	public ScrollArea(final RenderingBoPool renderingBoPool, final EventService eventService) {
 		this.renderingBoPool = renderingBoPool;
@@ -71,7 +70,7 @@ public class ScrollArea implements WindowComponent {
 	protected void onScrollbarControlEvent(final UiControlEvent event) {
 		if (this.verticalScrollbarName.equals(event.getId())) {
 			final double rawValue = ((Double) event.getPayload()).doubleValue();
-			this.scrollPositionVertical = rawValue;
+			this.updateVerticalScrollPosition(rawValue, true);
 			this.parent.draw();
 		}
 		else if (this.horizontalScrollbarName.equals(event.getId())) {
@@ -97,7 +96,7 @@ public class ScrollArea implements WindowComponent {
 			
 			final double scrollIncrement = Math.max(0.00001, Math.min(1.0, (double)this.relativeArea.getDimension().getY() / this.contentDimension.getY() / 5));
 			final double delta = event.getButton() == 4 ? scrollIncrement : -scrollIncrement;
-			this.scrollPositionVertical = Math.max(0.0, Math.min(1.0, this.scrollPositionVertical + delta));
+			this.updateVerticalScrollPosition(this.scrollPositionVertical + delta, true);
 			this.parent.draw();
 		}
 	}
@@ -184,10 +183,46 @@ public class ScrollArea implements WindowComponent {
 	public double getScrollPositionVertical() {
 		return this.scrollPositionVertical;
 	}
+
+	public int getVerticalScrollOffset() {
+		final int maxOffset = this.getMaxVerticalScrollOffset();
+		if (maxOffset <= 0) {
+			return 0;
+		}
+		return (int) ((1.0 - this.scrollPositionVertical) * maxOffset);
+	}
+
+	public int getMaxVerticalScrollOffset() {
+		return Math.max(0, this.contentDimension.getY() - this.relativeArea.getDimension().getY() + SCROLLBAR_WIDTH_WITH_MARGIN);
+	}
+
+	public int getVerticalScrollInputRevision() {
+		return this.verticalScrollInputRevision;
+	}
+
+	public void setVerticalScrollOffset(final int verticalScrollOffset) {
+		final int maxOffset = this.getMaxVerticalScrollOffset();
+		if (maxOffset <= 0) {
+			this.updateVerticalScrollPosition(1.0, false);
+			this.draw();
+			return;
+		}
+		final int clampedOffset = Math.max(0, Math.min(maxOffset, verticalScrollOffset));
+		this.updateVerticalScrollPosition(1.0 - (double) clampedOffset / maxOffset, false);
+		this.draw();
+	}
 	
 	public void setScrollPositionVertical(final double scrollPositionVertical) {
-		this.scrollPositionVertical = Math.max(0.0, Math.min(1.0, scrollPositionVertical));
+		this.updateVerticalScrollPosition(scrollPositionVertical, false);
 		this.draw();
+	}
+
+	protected void updateVerticalScrollPosition(final double scrollPositionVertical, final boolean userInput) {
+		final double clampedScrollPositionVertical = Math.max(0.0, Math.min(1.0, scrollPositionVertical));
+		if (userInput && Double.compare(clampedScrollPositionVertical, this.scrollPositionVertical) != 0) {
+			this.verticalScrollInputRevision++;
+		}
+		this.scrollPositionVertical = clampedScrollPositionVertical;
 	}
 	
 	public double getScrollPositionHorizontal() {
