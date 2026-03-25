@@ -19,7 +19,7 @@ import java.util.function.Consumer;
 
 import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 @SuppressWarnings("serial")

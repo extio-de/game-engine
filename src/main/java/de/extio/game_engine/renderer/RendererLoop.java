@@ -8,8 +8,7 @@ import org.slf4j.LoggerFactory;
 
 import de.extio.game_engine.keyboard.KeyModifiers;
 import de.extio.game_engine.keyboard.KeycodeRegistration;
-import de.extio.game_engine.renderer.g2d.theme.Theme;
-import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.renderer.model.options.VideoOptions;
 
 public class RendererLoop implements Runnable {

@@ -18,6 +18,8 @@ import org.junit.jupiter.api.Test;
 
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
+import de.extio.game_engine.renderer.model.Theme;
+import de.extio.game_engine.renderer.model.color.HSBColor;
 import de.extio.game_engine.renderer.model.options.UiOptions;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.resource.StaticResourceService;

@@ -9,6 +9,7 @@ import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
 public class ChroniclePatternRenderer implements PatternRenderer {

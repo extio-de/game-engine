@@ -1,7 +1,9 @@
-package de.extio.game_engine.renderer.g2d.theme;
+package de.extio.game_engine.renderer.model;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+
+import de.extio.game_engine.renderer.model.color.HSBColor;
 
 /**
  * Represents a complete UI theme with all color definitions and pattern renderer.

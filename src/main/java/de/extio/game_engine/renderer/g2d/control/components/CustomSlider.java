@@ -11,7 +11,7 @@ import java.awt.event.MouseEvent;
 import java.awt.event.MouseMotionListener;
 
 import de.extio.game_engine.renderer.ThemeManager;
-import de.extio.game_engine.renderer.g2d.theme.Theme;
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 

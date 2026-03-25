@@ -2,6 +2,9 @@ package de.extio.game_engine.renderer.g2d.theme;
 
 import org.springframework.beans.factory.FactoryBean;
 
+import de.extio.game_engine.renderer.model.Theme;
+import de.extio.game_engine.renderer.model.color.HSBColor;
+
 public class BevelDarkThemeFactoryBean implements FactoryBean<Theme> {
 	
 	@Override

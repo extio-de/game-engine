@@ -7,6 +7,7 @@ import java.util.List;
 
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.renderer.model.color.ImmutableRgbaColor;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
 import de.extio.game_engine.spatial2.model.CoordI2;

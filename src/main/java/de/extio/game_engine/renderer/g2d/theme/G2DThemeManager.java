@@ -14,6 +14,7 @@ import org.slf4j.LoggerFactory;
 import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.G2DRenderer;
 import de.extio.game_engine.renderer.g2d.G2DRendererControl;
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.resource.StaticResource;
 import de.extio.game_engine.resource.StaticResourceService;
 import de.extio.game_engine.storage.StorageService;

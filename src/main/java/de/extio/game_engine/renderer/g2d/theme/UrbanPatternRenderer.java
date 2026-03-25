@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.GradientPaint;
 import java.awt.Graphics2D;
 
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
 public class UrbanPatternRenderer implements PatternRenderer {

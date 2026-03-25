@@ -11,8 +11,8 @@ import java.awt.event.MouseWheelEvent;
 import java.awt.event.MouseWheelListener;
 
 import de.extio.game_engine.renderer.g2d.G2DMainFrame;
-import de.extio.game_engine.renderer.g2d.theme.Theme;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class CustomWindowPanel extends Component {

@@ -6,7 +6,7 @@ import java.awt.Graphics2D;
 import java.awt.Stroke;
 import java.awt.image.BufferedImage;
 
-
+import de.extio.game_engine.renderer.model.Theme;
 import de.extio.game_engine.spatial2.model.CoordI2;
 
 public class BlueprintPatternRenderer implements PatternRenderer {

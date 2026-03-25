@@ -1,4 +1,4 @@
-package de.extio.game_engine.renderer.g2d.theme;
+package de.extio.game_engine.renderer.model.color;
 
 import java.awt.Color;
 import java.util.Objects;
@@ -42,6 +42,10 @@ public final class HSBColor {
 		final var hsb = Color.RGBtoHSB(color.getRed(), color.getGreen(), color.getBlue(), null);
 		return new HSBColor(hsb[0], hsb[1], hsb[2]);
 	}
+
+	public static HSBColor fromColor(final RgbaColor color) {
+		return fromColor(color.toAwtColor());
+	}
 	
 	/**
 	 * Converts this HSB color to an AWT Color.
@@ -50,6 +54,10 @@ public final class HSBColor {
 	 */
 	public Color toColor() {
 		return Color.getHSBColor(this.hue, this.saturation, this.brightness);
+	}
+
+	public RgbaColor toRgbaColor() {
+		return new ImmutableRgbaColor(this.toColor());
 	}
 	
 	/**

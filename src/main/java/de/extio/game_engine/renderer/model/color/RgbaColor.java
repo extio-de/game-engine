@@ -73,6 +73,10 @@ public interface RgbaColor {
 	int getA();
 	
 	Color toAwtColor();
+
+	default HSBColor toHSBColor() {
+		return HSBColor.fromColor(this);
+	}
 	
 	ImmutableRgbaColor toImmutable();
 	

@@ -5,8 +5,8 @@ import java.awt.Graphics2D;
 import java.awt.event.ActionListener;
 
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
-import de.extio.game_engine.renderer.g2d.theme.Theme;
 import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
+import de.extio.game_engine.renderer.model.Theme;
 
 @SuppressWarnings("serial")
 public class CustomSwitch extends CustomAbstractButton {
