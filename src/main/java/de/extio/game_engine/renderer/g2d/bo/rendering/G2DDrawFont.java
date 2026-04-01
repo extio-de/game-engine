@@ -3,8 +3,11 @@ package de.extio.game_engine.renderer.g2d.bo.rendering;
 import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.GraphicsEnvironment;
 import java.awt.Shape;
 import java.awt.font.TextAttribute;
+import java.awt.font.TextLayout;
+import java.text.AttributedString;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
@@ -26,11 +29,13 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	public final static float FONT_SIZE_MIN = 12.0F;
 	
 	public final static int FONT_SIZE_DEFAULT = 18;
-
+	
 	public final static double FONT_LEADING = 1.75;
-
+	
 	private static final AtomicReference<Font> cachedFontRef = new AtomicReference<>();
-
+	
+	private static final AtomicReference<Font> cachedFallbackFontRef = new AtomicReference<>();
+	
 	private static Font baseFont;
 	
 	static {
@@ -44,7 +49,10 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		staticResourceService.loadStreamByPath(resource).ifPresent(stream -> {
 			try (var in = stream) {
 				final var font = Font.createFont(Font.TRUETYPE_FONT, in);
+				GraphicsEnvironment.getLocalGraphicsEnvironment().registerFont(font);
 				G2DDrawFont.baseFont = font;
+				G2DDrawFont.cachedFontRef.set(null);
+				G2DDrawFont.cachedFallbackFontRef.set(null);
 			}
 			catch (final Exception e) {
 				LOGGER.warn(e.getMessage(), e);
@@ -121,7 +129,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 				final var line = lines[i];
 				final var yOffset = this.y + i * lineHeight;
 				
-				final var textDimScaled = ImmutableCoordI2.create((int)(lineDims[i].getX() * scaleFactor), (int)(lineDims[i].getY() * scaleFactor));
+				final var textDimScaled = ImmutableCoordI2.create((int) (lineDims[i].getX() * scaleFactor), (int) (lineDims[i].getY() * scaleFactor));
 				switch (this.alignment) {
 					case LEFT: {
 						renderSingleLine(graphics, textDimScaled, scaleFactor, this.x, yOffset, this.size, line);
@@ -175,7 +183,18 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 				return baseFont.deriveFont(sizeScaled);
 			}
 			return existingFont;
-		});		
+		});
+	}
+	
+	private static Font getFallbackFont(final double scaleFactor, final int size_) {
+		final var size = size_ == 0 ? FONT_SIZE_DEFAULT : size_;
+		final var sizeScaled = Math.max(FONT_SIZE_MIN, (float) (size * scaleFactor));
+		return cachedFallbackFontRef.updateAndGet(existingFont -> {
+			if (existingFont == null || existingFont.getSize2D() != sizeScaled) {
+				return new Font(Font.DIALOG, baseFont.getStyle(), Math.max(1, Math.round(sizeScaled)));
+			}
+			return existingFont;
+		});
 	}
 	
 	public static void renderText(final Graphics graphics, final double scaleFactor, final int x, final int y, final int size_, final String text) {
@@ -200,11 +219,10 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	}
 	
 	private static void renderSingleLine(final Graphics graphics, final CoordI2 textDim_, final double scaleFactor, final int x, final int y, final int size_, final String text) {
-		if (text == null) {
+		if (text == null || text.isEmpty()) {
 			return;
 		}
 		
-		final var font = getFont(scaleFactor, size_);
 		CoordI2 textDim;
 		if (textDim_ == null) {
 			textDim = getTextDimensions(text, graphics, size_, scaleFactor);
@@ -212,8 +230,8 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		else {
 			textDim = textDim_;
 		}
-		graphics.setFont(font);
-		graphics.drawString(text, (int) (x * scaleFactor), (int) (y * scaleFactor) + textDim.getY());
+		final var textLayout = createTextLayout(text, graphics, size_, scaleFactor);
+		textLayout.draw((Graphics2D) graphics, (float) (x * scaleFactor), (float) ((y * scaleFactor) + textDim.getY()));
 	}
 	
 	public static CoordI2 getTextDimensions(final String text, final Graphics graphics, final int size_, final double scaleFactor) {
@@ -221,10 +239,42 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 			return ImmutableCoordI2.one();
 		}
 		
-		final var font = getFont(scaleFactor, size_);
-		final var gv = font.layoutGlyphVector(((Graphics2D) graphics).getFontRenderContext(), text.toCharArray(), 0, text.length(), Font.LAYOUT_LEFT_TO_RIGHT);
-		final var pixBounds = gv.getPixelBounds(((Graphics2D) graphics).getFontRenderContext(), 0, 0);
+		if (text.isEmpty()) {
+			final var fontMetrics = graphics.getFontMetrics(getFont(scaleFactor, size_));
+			return MutableCoordI2.create(0, fontMetrics.getAscent());
+		}
+		
+		final var textLayout = createTextLayout(text, graphics, size_, scaleFactor);
+		final var pixBounds = textLayout.getPixelBounds(((Graphics2D) graphics).getFontRenderContext(), 0, 0);
 		return MutableCoordI2.create(pixBounds.x + pixBounds.width, pixBounds.height - (int) pixBounds.getMaxY());
+	}
+	
+	private static TextLayout createTextLayout(final String text, final Graphics graphics, final int size_, final double scaleFactor) {
+		final var attributedString = createAttributedString(text, size_, scaleFactor);
+		return new TextLayout(attributedString.getIterator(), ((Graphics2D) graphics).getFontRenderContext());
+	}
+	
+	private static AttributedString createAttributedString(final String text, final int size_, final double scaleFactor) {
+		final var primaryFont = getFont(scaleFactor, size_);
+		final var fallbackFont = getFallbackFont(scaleFactor, size_);
+		final var attributedString = new AttributedString(text);
+		var index = 0;
+		while (index < text.length()) {
+			final var codePoint = text.codePointAt(index);
+			final var runFont = primaryFont.canDisplay(codePoint) ? primaryFont : fallbackFont;
+			final var runStart = index;
+			index += Character.charCount(codePoint);
+			while (index < text.length()) {
+				final var nextCodePoint = text.codePointAt(index);
+				final var nextFont = primaryFont.canDisplay(nextCodePoint) ? primaryFont : fallbackFont;
+				if (!runFont.equals(nextFont)) {
+					break;
+				}
+				index += Character.charCount(nextCodePoint);
+			}
+			attributedString.addAttribute(TextAttribute.FONT, runFont, runStart, index);
+		}
+		return attributedString;
 	}
 	
 }
