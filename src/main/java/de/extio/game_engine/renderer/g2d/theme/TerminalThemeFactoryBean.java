@@ -18,7 +18,7 @@ public class TerminalThemeFactoryBean implements FactoryBean<Theme> {
 				.borderInnerDisabled(new HSBColor(0.10f, 0.15f, 0.25f))
 				.backgroundNormal(new HSBColor(0.08f, 0.65f, 0.12f))
 				.backgroundSelected(new HSBColor(0.12f, 0.70f, 0.35f))
-				.textNormal(new HSBColor(0.12f, 0.85f, 0.95f))
+				.textNormal(new HSBColor(0.12f, 0.85f, 0.85f))
 				.textDisabled(new HSBColor(0.12f, 0.45f, 0.60f))
 				.selectionPrimary(new HSBColor(0.10f, 0.75f, 0.55f))
 				.selectionSecondary(new HSBColor(0.14f, 0.80f, 0.85f))

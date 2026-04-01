@@ -20,7 +20,7 @@ public class SpacecraftThemeFactoryBean implements FactoryBean<Theme> {
 				.backgroundSelected(new HSBColor(0.199f, 0.83f, 0.50f))
 				.textNormal(new HSBColor(0.0f, 0.0f, 0.80f))
 				.textDisabled(new HSBColor(0.0f, 0.0f, 0.50f))
-				.selectionPrimary(new HSBColor(0.199f, 0.83f, 0.50f))
+				.selectionPrimary(new HSBColor(0.5f, 0.83f, 0.7f))
 				.selectionSecondary(new HSBColor(0.199f, 0.83f, 0.90f))
 				.windowBackground(new HSBColor(0.71f, 0.6f, 0.05f))
 				.hoverBrightnessAdjustment(0.25f)

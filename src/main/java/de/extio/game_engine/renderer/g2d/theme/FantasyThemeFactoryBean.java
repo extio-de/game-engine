@@ -18,7 +18,7 @@ public class FantasyThemeFactoryBean implements FactoryBean<Theme> {
 				.borderInnerDisabled(new HSBColor(0.12f, 0.25f, 0.25f))
 				.backgroundNormal(new HSBColor(0.32f, 0.60f, 0.22f))
 				.backgroundSelected(new HSBColor(0.13f, 0.65f, 0.68f))
-				.textNormal(new HSBColor(0.12f, 0.10f, 0.96f))
+				.textNormal(new HSBColor(0.12f, 0.10f, 0.86f))
 				.textDisabled(new HSBColor(0.12f, 0.05f, 0.65f))
 				.selectionPrimary(new HSBColor(0.13f, 0.65f, 0.70f))
 				.selectionSecondary(new HSBColor(0.58f, 0.35f, 0.88f))

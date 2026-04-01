@@ -18,7 +18,7 @@ public class NoirThemeFactoryBean implements FactoryBean<Theme> {
 				.borderInnerDisabled(new HSBColor(0.00f, 0.00f, 0.12f))
 				.backgroundNormal(new HSBColor(0.62f, 0.20f, 0.08f))
 				.backgroundSelected(new HSBColor(0.12f, 0.15f, 0.85f))
-				.textNormal(new HSBColor(0.00f, 0.00f, 0.92f))
+				.textNormal(new HSBColor(0.00f, 0.00f, 0.85f))
 				.textDisabled(new HSBColor(0.00f, 0.00f, 0.55f))
 				.selectionPrimary(new HSBColor(0.12f, 0.15f, 0.85f))
 				.selectionSecondary(new HSBColor(0.58f, 0.12f, 0.75f))

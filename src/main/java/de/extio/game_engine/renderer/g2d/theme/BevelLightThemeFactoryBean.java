@@ -24,7 +24,7 @@ public class BevelLightThemeFactoryBean implements FactoryBean<Theme> {
 				// Selected Background (Blueish)
 				.backgroundSelected(new HSBColor(0.6f, 0.5f, 0.9f))
 				// Text (Black)
-				.textNormal(new HSBColor(0.0f, 0.0f, 0.05f))
+				.textNormal(new HSBColor(0.0f, 0.0f, 0.0f))
 				// Text Disabled (Grey)
 				.textDisabled(new HSBColor(0.0f, 0.0f, 0.5f))
 				// Selection Primary (Blue)
@@ -32,7 +32,7 @@ public class BevelLightThemeFactoryBean implements FactoryBean<Theme> {
 				// Selection Secondary (Lighter Blue)
 				.selectionSecondary(new HSBColor(0.6f, 0.15f, 0.4f))
 				// Window Background (Light Grey)
-				.windowBackground(new HSBColor(0.0f, 0.0f, 0.55f))
+				.windowBackground(new HSBColor(0.0f, 0.0f, 0.5f))
 				.hoverBrightnessAdjustment(0.1f)
 				.pressedBrightnessAdjustment(0.2f)
 				.build();

@@ -18,7 +18,7 @@ public class DreamThemeFactoryBean implements FactoryBean<Theme> {
 				.borderInnerDisabled(new HSBColor(0.74f, 0.10f, 0.35f))
 				.backgroundNormal(new HSBColor(0.74f, 0.55f, 0.16f))
 				.backgroundSelected(new HSBColor(0.78f, 0.35f, 0.65f))
-				.textNormal(new HSBColor(0.12f, 0.03f, 0.96f))
+				.textNormal(new HSBColor(0.12f, 0.03f, 0.86f))
 				.textDisabled(new HSBColor(0.12f, 0.02f, 0.70f))
 				.selectionPrimary(new HSBColor(0.78f, 0.35f, 0.65f))
 				.selectionSecondary(new HSBColor(0.55f, 0.30f, 0.95f))

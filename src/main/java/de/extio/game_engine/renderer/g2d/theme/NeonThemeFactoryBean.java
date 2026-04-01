@@ -18,7 +18,7 @@ public class NeonThemeFactoryBean implements FactoryBean<Theme> {
 				.borderInnerDisabled(new HSBColor(0.83f, 0.20f, 0.25f))
 				.backgroundNormal(new HSBColor(0.74f, 0.80f, 0.09f))
 				.backgroundSelected(new HSBColor(0.52f, 0.85f, 0.92f))
-				.textNormal(new HSBColor(0.00f, 0.00f, 0.98f))
+				.textNormal(new HSBColor(0.00f, 0.00f, 0.85f))
 				.textDisabled(new HSBColor(0.00f, 0.00f, 0.70f))
 				.selectionPrimary(new HSBColor(0.52f, 0.85f, 0.92f))
 				.selectionSecondary(new HSBColor(0.16f, 0.85f, 0.95f))

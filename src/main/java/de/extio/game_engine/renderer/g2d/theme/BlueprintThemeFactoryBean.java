@@ -24,7 +24,7 @@ public class BlueprintThemeFactoryBean implements FactoryBean<Theme> {
 				// Selected Background (Lighter Blue)
 				.backgroundSelected(new HSBColor(0.62f, 0.70f, 0.60f))
 				// Text (White)
-				.textNormal(new HSBColor(0.0f, 0.0f, 1.0f))
+				.textNormal(new HSBColor(0.0f, 0.0f, 0.85f))
 				// Text Disabled (Light Blue)
 				.textDisabled(new HSBColor(0.6f, 0.3f, 0.7f))
 				// Selection Primary (Cyan)
@@ -32,7 +32,7 @@ public class BlueprintThemeFactoryBean implements FactoryBean<Theme> {
 				// Selection Secondary (White)
 				.selectionSecondary(new HSBColor(0.0f, 0.0f, 1.0f))
 				// Window Background (Deep Blueprint Blue)
-				.windowBackground(new HSBColor(0.62f, 0.90f, 0.40f))
+				.windowBackground(new HSBColor(0.62f, 0.90f, 0.30f))
 				.hoverBrightnessAdjustment(0.15f)
 				.pressedBrightnessAdjustment(0.30f)
 				.build();

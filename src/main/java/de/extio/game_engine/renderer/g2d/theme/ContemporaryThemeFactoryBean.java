@@ -18,7 +18,7 @@ public class ContemporaryThemeFactoryBean implements FactoryBean<Theme> {
 				.borderInnerDisabled(new HSBColor(0.88f, 0.06f, 0.42f))
 				.backgroundNormal(new HSBColor(0.92f, 0.55f, 0.22f))
 				.backgroundSelected(new HSBColor(0.92f, 0.35f, 0.70f))
-				.textNormal(new HSBColor(0.08f, 0.04f, 0.94f))
+				.textNormal(new HSBColor(0.08f, 0.04f, 0.84f))
 				.textDisabled(new HSBColor(0.08f, 0.02f, 0.62f))
 				.selectionPrimary(new HSBColor(0.92f, 0.35f, 0.70f))
 				.selectionSecondary(new HSBColor(0.58f, 0.25f, 0.95f))

@@ -16,10 +16,6 @@ public class ChroniclePatternRenderer implements PatternRenderer {
 	
 	@Override
 	public void drawDecorativeBorder(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final Color color) {
-		drawDecorativeBorder(g2d, x, y, width, height, strength, color, true);
-	}
-
-	private void drawDecorativeBorder(final Graphics2D g2d, final int x, final int y, final int width, final int height, final int strength, final Color color, final boolean extraDecoration) {
 		final int s = Math.max(1, strength);
 		final int arc = Math.max(10, s * 8);
 		
@@ -30,17 +26,6 @@ public class ChroniclePatternRenderer implements PatternRenderer {
 			g2d.setColor(color);
 			g2d.setStroke(new BasicStroke(Math.max(1, s), BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 			g2d.drawRoundRect(x, y, Math.max(0, width - 1), Math.max(0, height - 1), arc, arc);
-			
-			if (extraDecoration) {
-				final int curl = Math.max(6, s * 6);
-				final int pad = Math.max(2, s * 2);
-				if (width > curl + pad * 2 && height > curl + pad * 2) {
-					g2d.drawArc(x + pad, y + pad, curl, curl, 180, 90);
-					g2d.drawArc(x + width - pad - curl, y + pad, curl, curl, 270, 90);
-					g2d.drawArc(x + pad, y + height - pad - curl, curl, curl, 90, 90);
-					g2d.drawArc(x + width - pad - curl, y + height - pad - curl, curl, curl, 0, 90);
-				}
-			}
 		}
 		finally {
 			g2d.setStroke(strokeOld);
@@ -88,8 +73,8 @@ public class ChroniclePatternRenderer implements PatternRenderer {
 			}
 		}
 		
-		this.drawDecorativeBorder(g2d, x + s, y + s, width - s2, height - s2, s, outerBorderColor, false);
-		this.drawDecorativeBorder(g2d, x, y, width, height, s, innerBorderColor, false);
+		this.drawDecorativeBorder(g2d, x + s, y + s, width - s2, height - s2, s, outerBorderColor);
+		this.drawDecorativeBorder(g2d, x, y, width, height, s, innerBorderColor);
 	}
 	
 	@Override
@@ -129,7 +114,7 @@ public class ChroniclePatternRenderer implements PatternRenderer {
 		
 		final int s = Math.max(1, (int) (2 * scaleFactor));
 		final var border = hovered ? theme.getSelectionPrimary().toColor() : theme.getBorderOuter().toColor();
-		this.drawDecorativeBorder(g2d, 0, 0, width, height, s, border, false);
+		this.drawDecorativeBorder(g2d, 0, 0, width, height, s, border);
 		
 		if (!enabled) {
 			return;
