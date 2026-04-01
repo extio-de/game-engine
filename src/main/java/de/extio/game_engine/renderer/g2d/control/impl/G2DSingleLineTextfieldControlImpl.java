@@ -118,6 +118,7 @@ public class G2DSingleLineTextfieldControlImpl extends G2DBaseControlImpl implem
 			this.updateAllComponentZOrder();
 		}
 
+		this.tooltipMousePosition = this.textField.getLastMousePosition();
 		this.textField.paint(this.bufferedImageGraphics);
 
 		super.render();

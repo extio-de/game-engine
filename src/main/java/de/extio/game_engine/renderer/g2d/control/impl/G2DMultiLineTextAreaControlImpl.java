@@ -123,6 +123,7 @@ public class G2DMultiLineTextAreaControlImpl extends G2DBaseControlImpl implemen
 			this.updateAllComponentZOrder();
 		}
 		
+		this.tooltipMousePosition = this.textArea.getLastMousePosition();
 		this.textArea.paint(this.bufferedImageGraphics);
 		
 		super.render();

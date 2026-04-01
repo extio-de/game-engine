@@ -24,6 +24,7 @@ import java.util.function.Consumer;
 import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.model.Theme;
+import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 @SuppressWarnings("serial")
@@ -72,6 +73,8 @@ public class CustomMultiLineTextArea extends Component {
 	private int scrollbarThumbHeight = 0;
 	
 	private boolean scrollbarDragging = false;
+
+	private CoordI2 lastMousePosition;
 	
 	private int scrollbarDragStartY = 0;
 	
@@ -149,6 +152,10 @@ public class CustomMultiLineTextArea extends Component {
 	
 	public void setDirty(final boolean dirty) {
 		this.dirty = dirty;
+	}
+
+	public CoordI2 getLastMousePosition() {
+		return this.lastMousePosition;
 	}
 	
 	public CustomMultiLineTextArea(final ThemeManager themeManager, final Consumer<String> onTextChanged) {
@@ -295,9 +302,16 @@ public class CustomMultiLineTextArea extends Component {
 		});
 		
 		this.addMouseListener(new MouseAdapter() {
+
+			@Override
+			public void mouseEntered(final MouseEvent e) {
+				CustomMultiLineTextArea.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
+			}
 			
 			@Override
 			public void mousePressed(final MouseEvent e) {
+				CustomMultiLineTextArea.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				CustomMultiLineTextArea.this.requestFocus();
 				if (!CustomMultiLineTextArea.this.enabled) {
 					e.consume();
@@ -337,17 +351,25 @@ public class CustomMultiLineTextArea extends Component {
 				CustomMultiLineTextArea.this.scrollbarDragging = false;
 				e.consume();
 			}
+
+			@Override
+			public void mouseExited(final MouseEvent e) {
+				CustomMultiLineTextArea.this.lastMousePosition = null;
+				e.consume();
+			}
 		});
 		
 		this.addMouseMotionListener(new MouseMotionListener() {
 			
 			@Override
 			public void mouseMoved(final MouseEvent e) {
+				CustomMultiLineTextArea.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				e.consume();
 			}
 			
 			@Override
 			public void mouseDragged(final MouseEvent e) {
+				CustomMultiLineTextArea.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				if (!CustomMultiLineTextArea.this.enabled) {
 					e.consume();
 					return;

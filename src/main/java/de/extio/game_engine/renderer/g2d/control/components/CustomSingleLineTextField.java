@@ -20,6 +20,7 @@ import java.util.function.Consumer;
 import de.extio.game_engine.renderer.ThemeManager;
 import de.extio.game_engine.renderer.g2d.bo.rendering.G2DDrawFont;
 import de.extio.game_engine.renderer.model.Theme;
+import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 @SuppressWarnings("serial")
@@ -54,6 +55,8 @@ public class CustomSingleLineTextField extends Component {
 	private long lastBlinkTime = 0;
 
 	private boolean caretVisible = true;
+
+	private CoordI2 lastMousePosition;
 
 	private int cachedRawFontHeight = 0;
 
@@ -113,6 +116,10 @@ public class CustomSingleLineTextField extends Component {
 
 	public void setDirty(final boolean dirty) {
 		this.dirty = dirty;
+	}
+
+	public CoordI2 getLastMousePosition() {
+		return this.lastMousePosition;
 	}
 
 	public CustomSingleLineTextField(final ThemeManager themeManager, final Consumer<String> onTextChanged, final Runnable onSubmit) {
@@ -256,7 +263,14 @@ public class CustomSingleLineTextField extends Component {
 		this.addMouseListener(new MouseAdapter() {
 
 			@Override
+			public void mouseEntered(final MouseEvent e) {
+				CustomSingleLineTextField.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
+				e.consume();
+			}
+
+			@Override
 			public void mousePressed(final MouseEvent e) {
+				CustomSingleLineTextField.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				CustomSingleLineTextField.this.requestFocus();
 				if (!CustomSingleLineTextField.this.enabled) {
 					e.consume();
@@ -285,17 +299,25 @@ public class CustomSingleLineTextField extends Component {
 			public void mouseReleased(final MouseEvent e) {
 				e.consume();
 			}
+
+			@Override
+			public void mouseExited(final MouseEvent e) {
+				CustomSingleLineTextField.this.lastMousePosition = null;
+				e.consume();
+			}
 		});
 
 		this.addMouseMotionListener(new MouseMotionListener() {
 
 			@Override
 			public void mouseMoved(final MouseEvent e) {
+				CustomSingleLineTextField.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				e.consume();
 			}
 
 			@Override
 			public void mouseDragged(final MouseEvent e) {
+				CustomSingleLineTextField.this.lastMousePosition = ImmutableCoordI2.create(e.getX(), e.getY());
 				if (!CustomSingleLineTextField.this.enabled) {
 					e.consume();
 					return;
