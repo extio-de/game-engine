@@ -1140,13 +1140,29 @@ None (utility classes)
 ### Menu System
 
 #### Purpose and Overview
-Framework for building in-game menus and UI screens as modules. Provides base components for menu rendering and interaction handling.
+Framework for building in-game menus and UI screens as modules. Provides reusable menu infrastructure, including a generic options dialog with auto-discovered tabs, a theme editor, and an HSB color picker dialog.
 
 #### Setup / Autoconfiguration
-Integrated with the module system. Menu components are implemented as `AbstractClientModule` instances.
+**Configuration Class**: `MenuAutoConfiguration`
+
+**Properties**:
+- `game-engine.menu.enabled` (default: `true`)
+- `game-engine.menu.options.enabled` (default: `true`)
+- `game-engine.menu.theme-editor.enabled` (default: `true`)
+- `game-engine.menu.hsb-color-picker.enabled` (default: `true`)
+
+The menu subsystem is auto-configured through explicit bean definitions, matching the rest of the engine. The options dialog auto-discovers all `OptionsTab` beans, so applications can contribute additional tabs from their own codebase without modifying the library. The theme editor implements `OptionsThemeEditorSupport`, and the reusable themes tab will use it when present.
+
+`ThemeEditorModule` depends on `HsbColorPickerModule`, so disabling `game-engine.menu.hsb-color-picker.enabled` also prevents theme editor registration.
 
 #### Exposed Spring Beans
-None (menu implementations are modules)
+- `OptionsModule` when `game-engine.menu.options.enabled=true`
+- `OptionsAudioTab`, `OptionsVideoTab`, `OptionsKeyboardTab`, and `OptionsThemesTab` when `game-engine.menu.options.enabled=true`
+- `ThemeEditorModule` when `game-engine.menu.theme-editor.enabled=true`
+- `HsbColorPickerModule` when `game-engine.menu.hsb-color-picker.enabled=true`
+
+#### Integration Notes
+All menu implementations are still regular `AbstractClientModule` modules at runtime. The auto-configuration only controls bean registration.
 
 ---
 
