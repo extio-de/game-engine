@@ -30,7 +30,7 @@ public class OptionsModule extends AbstractClientModule implements OptionsModule
 	private static final String TAB_GROUP = "OptionsModule_TabGroup";
 	private static final int TAB_BUTTON_HEIGHT = 60;
 	private static final int TAB_BUTTON_WIDTH = 220;
-	private static final int CONTENT_START_Y = 140;
+	private static final int CONTENT_START_Y = 100;
 
 	private final ApplicationContext applicationContext;
 
