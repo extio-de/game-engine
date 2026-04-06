@@ -23,4 +23,12 @@ public interface OptionsTab {
 
 	default void onContentCleared(final OptionsModuleContext context) {
 	}
+
+	default void onTabOpen(final OptionsModuleContext context) {
+		
+	}
+
+	default void onTabClose(final OptionsModuleContext context, final Runnable closeTab) {
+		closeTab.run();
+	}
 }

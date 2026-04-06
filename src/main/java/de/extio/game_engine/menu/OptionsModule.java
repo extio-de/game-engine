@@ -80,6 +80,7 @@ public class OptionsModule extends AbstractClientModule implements OptionsModule
 
 	@Override
 	public void onActivate() {
+		this.activeTab().onTabOpen(this);
 		this.setupOptionsWindow();
 		this.getModuleService().changeActiveState(this.optionsWindow.getId(), true);
 		this.getModuleService().hideExcept(this.getId(), this.optionsWindow.getId());
@@ -249,8 +250,11 @@ public class OptionsModule extends AbstractClientModule implements OptionsModule
 
 		final var selectedTab = this.tabsByControlId.get(controlId);
 		if (selectedTab != null) {
-			this.activeTabId = selectedTab.tabId();
-			this.setupOptionsWindow();
+			this.activeTab().onTabClose(this, () -> {
+				this.activeTabId = selectedTab.tabId();
+				this.activeTab().onTabOpen(this);
+				this.setupOptionsWindow();
+			});			
 			return;
 		}
 
@@ -267,8 +271,10 @@ public class OptionsModule extends AbstractClientModule implements OptionsModule
 	}
 
 	private void closeOptions() {
-		this.getModuleService().changeActiveState(this.getId(), false);
-		this.getModuleService().changeDisplayState(this.getId(), false);
+		this.activeTab().onTabClose(this, () -> {
+			this.getModuleService().changeActiveState(this.getId(), false);
+			this.getModuleService().changeDisplayState(this.getId(), false);
+		});
 	}
 
 	private static ImmutableCoordI2 centeredPosition(final CoordI2 dimension) {
