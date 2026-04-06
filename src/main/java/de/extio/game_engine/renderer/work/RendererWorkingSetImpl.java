@@ -147,7 +147,9 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 		final var previousLiveSet = previousLiveRef.get();
 		if (previousLiveSet != null) {
 			if (clone) {
-				previousLiveSet.values().forEach(this.rendererBoPool::returnToPool);
+				synchronized (previousLiveSet) {
+					previousLiveSet.values().forEach(this.rendererBoPool::returnToPool);
+				}
 			}
 			this.returnMapToPool(previousLiveSet);
 		}
@@ -158,16 +160,22 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	@Override
 	public void clearNext(final String producerId) {
 		final var next = this.getWorkingSetByProducer(producerId).next();
-		next.values().forEach(this.rendererBoPool::returnToPool);
-		next.clear();
+		synchronized (next) {
+			next.values().forEach(this.rendererBoPool::returnToPool);
+			next.clear();
+		}
 	}
 	
 	@Override
 	public void clear(final String producerId) {
 		final RendererWork rendererWork = this.workingSet.remove(producerId);
 		if (rendererWork != null) {
-			rendererWork.live().values().forEach(this.rendererBoPool::returnToPool);
-			rendererWork.next().values().forEach(this.rendererBoPool::returnToPool);
+			synchronized (rendererWork.live()) {
+				rendererWork.live().values().forEach(this.rendererBoPool::returnToPool);
+			}
+			synchronized (rendererWork.next()) {
+				rendererWork.next().values().forEach(this.rendererBoPool::returnToPool);
+			}
 		}
 	}
 	
@@ -175,7 +183,9 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	public void getLiveSet(final List<RenderingBo> combinedLiveSet, final Predicate<String> filter) {
 		this.workingSet.forEach((producer, rendererWork) -> {
 			if (filter == null || filter.test(producer)) {
-				combinedLiveSet.addAll(rendererWork.live().values());
+				synchronized (rendererWork.live()) {
+					combinedLiveSet.addAll(rendererWork.live().values());
+				}
 			}
 		});
 	}
