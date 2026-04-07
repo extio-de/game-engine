@@ -231,6 +231,9 @@ public class Window extends AbstractClientModule implements InitializingBean {
 	}
 	
 	public void draw() {
+		if (!this.isDisplayed()) {
+			return;
+		}
 		if (this.area.getDimension().getX() <= 0 || this.area.getDimension().getY() <= 0) {
 			return;
 		}
