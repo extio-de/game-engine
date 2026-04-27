@@ -389,7 +389,17 @@ public class CustomMultiLineTextArea extends Component {
 			
 			@Override
 			public void mouseWheelMoved(final MouseWheelEvent e) {
+				if (!CustomMultiLineTextArea.this.enabled) {
+					return;
+				}
+				
 				final int lineHeight = getLineHeight();
+				final int visibleHeight = getVisibleHeight();
+				final int totalContentHeight = getWrappedLines().size() * lineHeight;
+				if (totalContentHeight <= visibleHeight) {
+					return;
+				}
+				
 				final int scrollAmount = e.getWheelRotation() * SCROLL_WHEEL_LINES * lineHeight;
 				scroll(scrollAmount);
 				e.consume();
