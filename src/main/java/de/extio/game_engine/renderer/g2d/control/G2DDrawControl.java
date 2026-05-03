@@ -331,7 +331,10 @@ public class G2DDrawControl extends G2DAbstractRenderingBo implements ControlRen
 				(int) (this.visibleAreaHeight * scaleFactor));
 		
 		if (this.clazz == LabelControl.class && this.labelData != null) {
-			((LabelControl) control).setCustomData(this.labelData);
+			final var labelForegroundColor = this.labelData != null && this.labelData.foregroundColor() != null
+					? this.labelData.foregroundColor()
+					: this.color;			
+			((LabelControl) control).setCustomData(new LabelData(this.labelData.backgroundColor(), labelForegroundColor, this.labelData.textAlignment()));
 		}
 		else if (this.clazz == ToggleButtonControl.class && this.toggleButtonData != null) {
 			((ToggleButtonControl) control).setLastControlDataUpdateTime(this.lastControlDataUpdateTime);
