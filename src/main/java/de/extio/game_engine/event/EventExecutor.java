@@ -3,13 +3,11 @@ package de.extio.game_engine.event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.concurrent.Callable;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
-import java.util.concurrent.StructuredTaskScope;
-import java.util.concurrent.StructuredTaskScope.FailedException;
-import java.util.concurrent.StructuredTaskScope.Joiner;
-import java.util.concurrent.StructuredTaskScope.Subtask;
-import java.util.concurrent.StructuredTaskScope.Subtask.State;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -18,9 +16,11 @@ import org.slf4j.LoggerFactory;
 public class EventExecutor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventExecutor.class);
+	private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final BlockingQueue<QueuedEvent> eventQueue = new LinkedBlockingQueue<>();
 	
+	@SuppressWarnings("unused")
 	private final Thread processorThread;
 	
 	private final EventHandlerRegistry registry;
@@ -31,7 +31,7 @@ public class EventExecutor {
 				.daemon(true)
 				.name("Events-Processor")
 				.start(() -> {
-					final var tasks = new ArrayList<Subtask<Object>>();
+					final var tasks = new ArrayList<Callable<Void>>();
 					while (!Thread.currentThread().isInterrupted()) {
 						try {
 							final QueuedEvent queuedEvent = this.eventQueue.take();
@@ -49,7 +49,8 @@ public class EventExecutor {
 		this.eventQueue.offer(new QueuedEvent(event.getClass(), event));
 	}
 	
-	private void processEvent(final List<Subtask<Object>> tasks, final Class<? extends Event> eventClass, final Event event) throws InterruptedException {
+	private void processEvent(final List<Callable<Void>> tasks, final Class<? extends Event> eventClass, final Event event) throws InterruptedException {
+		tasks.clear();
 		final var consumers = this.registry.getHandlers(eventClass);
 		if (consumers != null) {
 			switch (consumers.size()) {
@@ -58,7 +59,8 @@ public class EventExecutor {
 				
 				case 1:
 					try {
-						((Consumer<Event>) consumers.getFirst().consumer()).accept(event);
+						@SuppressWarnings("unchecked") final Consumer<Event> consumer = (Consumer<Event>) consumers.getFirst().consumer();
+						consumer.accept(event);
 					}
 					catch (final NoSuchElementException e) {
 						return;
@@ -69,30 +71,25 @@ public class EventExecutor {
 					return;
 				
 				default:
-					try (var scope = StructuredTaskScope.open(Joiner.awaitAll())) {
-						tasks.clear();
-						for (final var consumer : consumers) {
-							tasks.add(scope.fork(() -> {
-								((Consumer<Event>) consumer.consumer()).accept(event);
-							}));
-						}
-						
-						scope.join();
-						
-						for (final var task : tasks) {
-							if (task.state() == State.FAILED) {
-								LOGGER.error("Event consumer failed", task.exception());
+					for (final var consumer : consumers) {
+						tasks.add(() -> {
+							@SuppressWarnings("unchecked") final Consumer<Event> eventConsumer = (Consumer<Event>) consumer.consumer();
+							eventConsumer.accept(event);
+							return null;
+						});
+					}
+					try {
+						for (final var future : EXECUTOR.invokeAll(tasks)) {
+							try {
+								future.get();
+							}
+							catch (final Exception e) {
+								LOGGER.error("Event consumer failed", e.getCause() == null ? e : e.getCause());
 							}
 						}
 					}
 					catch (final InterruptedException e) {
 						throw e;
-					}
-					catch (final FailedException e) {
-						LOGGER.error("One or more event consumers failed", e);
-					}
-					catch (final Exception e) {
-						LOGGER.error("Unexpected error while processing event", e);
 					}
 			}
 		}

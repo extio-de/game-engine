@@ -1,7 +1,10 @@
 package de.extio.game_engine.module;
 
-import java.util.concurrent.StructuredTaskScope;
-import java.util.concurrent.StructuredTaskScope.Joiner;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -11,6 +14,7 @@ import org.slf4j.LoggerFactory;
 public class ModuleExecutorImpl implements ModuleExecutor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleExecutorImpl.class);
+	private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final ModuleService moduleManager;
 	
@@ -50,16 +54,25 @@ public class ModuleExecutorImpl implements ModuleExecutor {
 			return;
 		}
 
-		try (var scope = StructuredTaskScope.open(Joiner.awaitAll())) {
-			synchronized (subscribers) {
-				for (final var module : subscribers) {
-					final var task = taskSupplier.apply(module);
-					if (task != null) {
-						scope.fork(task);
-					}
+		final List<Callable<Void>> tasks = new ArrayList<>();
+		synchronized (subscribers) {
+			for (final var module : subscribers) {
+				final var task = taskSupplier.apply(module);
+				if (task != null) {
+					tasks.add(() -> {
+						task.run();
+						return null;
+					});
 				}
 			}
-			scope.join();
+		}
+
+		if (tasks.isEmpty()) {
+			return;
+		}
+
+		try {
+			EXECUTOR.invokeAll(tasks);
 		}
 		catch (final InterruptedException e) {
 			Thread.currentThread().interrupt();
