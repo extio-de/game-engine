@@ -1016,7 +1016,7 @@ Requires `StaticResourceService` and `StorageService` to be available.
 ### Internationalization (i18n)
 
 #### Purpose and Overview
-A YAML-based localization system supporting multiple languages. Localizations are loaded from a structured YAML file containing translation entries organized by language code. The system supports both integer and string-based translation keys and provides fallback to default text when translations are missing.
+A YAML-based localization system supporting multiple languages. Localizations are loaded from a directory bundle with one metadata file and one file per language, allowing metadata and translation entries to evolve independently. The system supports both integer and string-based translation keys and provides fallback to default text when translations are missing.
 
 Includes an integrated `LocalizationEditor` - a Swing-based GUI tool for managing translations, adding new languages, and editing localization entries during development.
 
@@ -1026,7 +1026,7 @@ Includes an integrated `LocalizationEditor` - a Swing-based GUI tool for managin
 **Properties**:
 - `game-engine.i18n.enabled` (default: `true`)
 - `game-engine.i18n.load-on-start` (default: `true`) - Auto-load localizations on startup
-- `game-engine.i18n.resource` (default: `i18n/i18n.yaml`) - Path to localization resource
+- `game-engine.i18n.resource` (default: `i18n/metadata.yaml`) - Path to the localization metadata resource; sibling `*.yaml` files are loaded as individual languages
 
 #### Exposed Spring Beans
 - **`LocalizationService`**: Main interface for translation, language management, and localization editing

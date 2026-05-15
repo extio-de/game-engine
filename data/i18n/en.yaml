@@ -1,0 +1,13 @@
+---
+shortName: "en"
+entries:
+  test-1: "hello"
+  test-2: "world"
+  test-3: "Welcome to Exo's Game Engine Demo!"
+  test-4: "Select Theme"
+  test-5: "This is a message\\n123...\\nHave a nice day!"
+  test-6: "OK"
+  test-7: "Toggle Audio"
+  test-8: "ScrollArea Demo"
+  test-9: "Select Language"
+  test-10: "Current: "

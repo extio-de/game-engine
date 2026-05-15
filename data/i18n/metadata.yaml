@@ -1,0 +1,9 @@
+---
+languagesInfo:
+  en:
+    name: "English"
+    shortName: "en"
+  de:
+    name: "Deutsch"
+    shortName: "de"
+prefix: "test"

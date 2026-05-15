@@ -1,6 +1,7 @@
 package de.extio.game_engine.i18n;
 
 import java.io.InputStream;
+import java.nio.file.Path;
 import java.util.List;
 
 public interface LocalizationService {
@@ -9,7 +10,7 @@ public interface LocalizationService {
 	
 	void reset();
 	
-	void load(InputStream stream);
+	void load(Path metaDataPath);
 	
 	void setLanguage(String lang);
 	

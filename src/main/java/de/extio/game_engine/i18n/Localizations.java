@@ -9,61 +9,64 @@ import java.util.Map.Entry;
  */
 public final class Localizations {
 	
-	private String prefix;
+	private LocalizationMetadata metadata = new LocalizationMetadata();
 	
-	private Map<String, Map<String, String>> languages = new LinkedHashMap<>();
-	
-	private Map<String, Language> languagesInfo = new LinkedHashMap<>();
-	
-	private int curId;
+	private Map<String, LocalizationLanguage> languageFiles = new LinkedHashMap<>();
 	
 	public Localizations() {
 		
 	}
 	
 	public Localizations(final Localizations other) {
-		this.languages = new LinkedHashMap<>();
-		for (final Entry<String, Map<String, String>> entry : other.languages.entrySet()) {
-			this.languages.put(entry.getKey(), new LinkedHashMap<>(entry.getValue()));
+		this.metadata = new LocalizationMetadata(other.metadata);
+		this.languageFiles = new LinkedHashMap<>();
+		for (final Entry<String, LocalizationLanguage> entry : other.languageFiles.entrySet()) {
+			this.languageFiles.put(entry.getKey(), new LocalizationLanguage(entry.getValue()));
 		}
-		this.languagesInfo = new LinkedHashMap<>();
-		for (final Entry<String, Language> entry : other.languagesInfo.entrySet()) {
-			this.languagesInfo.put(entry.getKey(), new Language(entry.getValue()));
+	}
+	
+	public LocalizationMetadata getMetadata() {
+		return this.metadata;
+	}
+	
+	public void setMetadata(final LocalizationMetadata metadata) {
+		this.metadata = metadata == null ? new LocalizationMetadata() : new LocalizationMetadata(metadata);
+	}
+	
+	public Map<String, LocalizationLanguage> getLanguageFiles() {
+		return this.languageFiles;
+	}
+	
+	public void setLanguageFiles(final Map<String, LocalizationLanguage> languageFiles) {
+		this.languageFiles = new LinkedHashMap<>();
+		for (final Entry<String, LocalizationLanguage> entry : languageFiles.entrySet()) {
+			this.languageFiles.put(entry.getKey(), new LocalizationLanguage(entry.getValue()));
 		}
-		this.curId = other.curId;
-		this.prefix = other.prefix;
-	}
-	
-	public Map<String, Map<String, String>> getLanguages() {
-		return this.languages;
-	}
-	
-	public void setLanguages(final Map<String, Map<String, String>> languages) {
-		this.languages = new LinkedHashMap<>(languages);
-	}
-	
-	public Map<String, Language> getLanguagesInfo() {
-		return this.languagesInfo;
-	}
-	
-	public void setLanguagesInfo(final Map<String, Language> languagesInfo) {
-		this.languagesInfo = new LinkedHashMap<>(languagesInfo);
-	}
-	
-	public int getCurId() {
-		return this.curId;
-	}
-	
-	public void setCurId(final int curId) {
-		this.curId = curId;
 	}
 	
 	public String getPrefix() {
-		return this.prefix;
+		return this.metadata.getPrefix();
 	}
 	
 	public void setPrefix(final String prefix) {
-		this.prefix = prefix;
+		this.metadata.setPrefix(prefix);
+	}
+	
+	public Map<String, Language> getLanguagesInfo() {
+		return this.metadata.getLanguagesInfo();
+	}
+	
+	public LocalizationLanguage getLanguageFile(final String shortName) {
+		return this.languageFiles.get(shortName);
+	}
+	
+	public LocalizationLanguage ensureLanguageFile(final String shortName) {
+		return this.languageFiles.computeIfAbsent(shortName, key -> new LocalizationLanguage(key));
+	}
+	
+	public Map<String, String> getLanguageEntries(final String shortName) {
+		final var languageFile = this.getLanguageFile(shortName);
+		return languageFile == null ? null : languageFile.getEntries();
 	}
 	
 }

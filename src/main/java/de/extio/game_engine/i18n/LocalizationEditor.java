@@ -13,13 +13,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.OutputStream;
+import java.nio.file.Path;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
 import javax.swing.JButton;
@@ -40,8 +36,6 @@ import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
-
-import de.extio.game_engine.util.ObjectSerialization;
 
 @SuppressWarnings("serial")
 public class LocalizationEditor extends JFrame {
@@ -133,7 +127,7 @@ public class LocalizationEditor extends JFrame {
 	 * Create the frame.
 	 */
 	public LocalizationEditor() {
-		this.localizationManagerImpl = new LocalizationServiceImpl(null);
+		this.localizationManagerImpl = new LocalizationServiceImpl(null, null);
 		
 		this.setTitle("i18n Editor");
 		this.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
@@ -169,20 +163,9 @@ public class LocalizationEditor extends JFrame {
 				final File cwd = new File(".");
 				final JFileChooser chooser = new JFileChooser();
 				chooser.setCurrentDirectory(cwd);
-				chooser.setFileFilter(new FileFilter() {
-					
-					@Override
-					public String getDescription() {
-						return "*.yaml";
-					}
-					
-					@Override
-					public boolean accept(final File f) {
-						return !f.isFile() || f.getName().endsWith("yaml");
-					}
-				});
+				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 				
-				final int ret = chooser.showDialog(null, "Select file to import");
+				final int ret = chooser.showDialog(null, "Select localization directory");
 				if (ret == JFileChooser.CANCEL_OPTION) {
 					return;
 				}
@@ -191,10 +174,9 @@ public class LocalizationEditor extends JFrame {
 				
 				LocalizationEditor.this.localizationManagerImpl.reset();
 				try {
-					LocalizationEditor.this.localizationManagerImpl.reset();
-					LocalizationEditor.this.localizationManagerImpl.load(new FileInputStream(fileName));
+					LocalizationEditor.this.localizationManagerImpl.loadWoService(Path.of(fileName));
 				}
-				catch (final FileNotFoundException e1) {
+				catch (final Exception e1) {
 					JOptionPane.showMessageDialog(null, "An exception occured while loading: " + e1.toString());
 					return;
 				}
@@ -239,10 +221,7 @@ public class LocalizationEditor extends JFrame {
 			public void actionPerformed(final ActionEvent e) {
 				try {
 					LocalizationEditor.this.localizationManagerImpl.getLocalizations().setPrefix(LocalizationEditor.this.txtTextprefix.getText());
-					
-					try (OutputStream output = new FileOutputStream(LocalizationEditor.this.lastFileName)) {
-						ObjectSerialization.serialize(LocalizationEditor.this.localizationManagerImpl.getLocalizations(), output, false, false, false, null, null);
-					}
+					LocalizationEditor.this.localizationManagerImpl.save(Path.of(LocalizationEditor.this.lastFileName));
 				}
 				catch (final Exception exc) {
 					JOptionPane.showMessageDialog(null, "An exception occured while saving: " + exc.toString());
@@ -263,18 +242,7 @@ public class LocalizationEditor extends JFrame {
 				final File cwd = new File(".");
 				final JFileChooser chooser = new JFileChooser();
 				chooser.setCurrentDirectory(cwd);
-				chooser.setFileFilter(new FileFilter() {
-					
-					@Override
-					public String getDescription() {
-						return "*.yaml";
-					}
-					
-					@Override
-					public boolean accept(final File f) {
-						return !f.isFile() || f.getName().endsWith("yaml");
-					}
-				});
+				chooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
 				final int ret = chooser.showSaveDialog(null);
 				if (ret == JFileChooser.CANCEL_OPTION) {
@@ -286,9 +254,7 @@ public class LocalizationEditor extends JFrame {
 				LocalizationEditor.this.localizationManagerImpl.getLocalizations().setPrefix(LocalizationEditor.this.txtTextprefix.getText());
 				
 				try {
-					try (OutputStream output = new FileOutputStream(fileName)) {
-						ObjectSerialization.serialize(LocalizationEditor.this.localizationManagerImpl.getLocalizations(), output, false, false, false, null, null);
-					}
+					LocalizationEditor.this.localizationManagerImpl.save(Path.of(fileName));
 				}
 				catch (final Exception exc) {
 					JOptionPane.showMessageDialog(null, "An exception occured while saving: " + exc.toString());
@@ -339,7 +305,7 @@ public class LocalizationEditor extends JFrame {
 			public void actionPerformed(final ActionEvent e) {
 				final String idStr = JOptionPane.showInputDialog(LocalizationEditor.this, "Enter localization id");
 				
-				final Map<String, String> mapping = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().values().iterator().next();
+				final Map<String, String> mapping = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageFiles().values().iterator().next().getEntries();
 				int idx = 0;
 				for (final String mid : mapping.keySet()) {
 					if (mid.equals(idStr)) {
@@ -361,10 +327,10 @@ public class LocalizationEditor extends JFrame {
 			public void actionPerformed(final ActionEvent e) {
 				final String search = JOptionPane.showInputDialog(LocalizationEditor.this, "Enter search term");
 				
-				final Iterator<Map<String, String>> it = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().values().iterator();
+				final Iterator<LocalizationLanguage> it = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageFiles().values().iterator();
 				while (it.hasNext()) {
 					int idx = 0;
-					for (final String text : it.next().values()) {
+					for (final String text : it.next().getEntries().values()) {
 						if (text.toLowerCase().contains(search.toLowerCase())) {
 							LocalizationEditor.this.table.changeSelection(idx, 0, false, false);
 							LocalizationEditor.this.table.scrollRectToVisible(LocalizationEditor.this.table.getCellRect(idx, 0, true));
@@ -454,7 +420,7 @@ public class LocalizationEditor extends JFrame {
 				}
 				
 				for (final Language lang : LocalizationEditor.this.localizationManagerImpl.getLanguages()) {
-					final String value = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().get(lang.getShortName()).get(oldId);
+					final String value = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageEntries(lang.getShortName()).get(oldId);
 					LocalizationEditor.this.localizationManagerImpl.put(lang.getShortName(), idStr, value);
 				}
 				
@@ -490,8 +456,9 @@ public class LocalizationEditor extends JFrame {
 			
 			@Override
 			public Object getValueAt(final int rowIndex, final int columnIndex) {
-				final String id = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().values().stream()
+				final String id = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageFiles().values().stream()
 						.findFirst()
+						.map(LocalizationLanguage::getEntries)
 						.map(mapping -> mapping.keySet().stream().skip(rowIndex).findFirst().orElse("-1"))
 						.orElse("-1");
 				if (columnIndex == 0) {
@@ -499,9 +466,9 @@ public class LocalizationEditor extends JFrame {
 				}
 				
 				final String lang = LocalizationEditor.this.localizationManagerImpl.getLanguages().get(columnIndex - 1).getShortName();
-				final String value = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().entrySet().stream()
+				final String value = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageFiles().entrySet().stream()
 						.filter(entry -> entry.getKey().equals(lang))
-						.map(entry -> entry.getValue().getOrDefault(id, ""))
+						.map(entry -> entry.getValue().getEntries().getOrDefault(id, ""))
 						.findFirst()
 						.orElse("");
 				return value;
@@ -509,7 +476,7 @@ public class LocalizationEditor extends JFrame {
 			
 			@Override
 			public int getRowCount() {
-				return LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().values().stream().findFirst().map(mapping -> Integer.valueOf(mapping.size())).orElse(Integer.valueOf(0));
+				return LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageFiles().values().stream().findFirst().map(LocalizationLanguage::getEntries).map(mapping -> Integer.valueOf(mapping.size())).orElse(Integer.valueOf(0));
 			}
 			
 			@Override
@@ -533,15 +500,16 @@ public class LocalizationEditor extends JFrame {
 			
 			@Override
 			public void setValueAt(final Object aValue, final int rowIndex, final int columnIndex) {
-				final String id = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().values().stream()
+				final String id = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageFiles().values().stream()
 						.findFirst()
+						.map(LocalizationLanguage::getEntries)
 						.map(mapping -> mapping.keySet().stream().skip(rowIndex).findFirst().orElse(null))
 						.orElse(null);
 				if (id == null) {
 					return;
 				}
 				
-				final String langShortName = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguages().keySet().stream().skip(columnIndex - 1).findFirst().orElse(null);
+				final String langShortName = LocalizationEditor.this.localizationManagerImpl.getLocalizations().getLanguageFiles().keySet().stream().skip(columnIndex - 1).findFirst().orElse(null);
 				if (langShortName == null) {
 					return;
 				}
@@ -572,7 +540,7 @@ public class LocalizationEditor extends JFrame {
 		}
 		final Language result = new Language(name, lang);
 		this.localizationManagerImpl.getLocalizations().getLanguagesInfo().put(result.getShortName(), result);
-		this.localizationManagerImpl.getLocalizations().getLanguages().put(result.getShortName(), new LinkedHashMap<>());
+		this.localizationManagerImpl.getLocalizations().ensureLanguageFile(result.getShortName());
 		
 		((AbstractTableModel) this.table.getModel()).fireTableStructureChanged();
 		
