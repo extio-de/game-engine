@@ -51,7 +51,7 @@ class StaticResourceServiceImplTest {
 			Files.createDirectories(resourceFile.getParent());
 			
 			final String content = "Hello, World!";
-			Files.write(resourceFile, ObjectSerialization.serialize(content, true, false, false, new byte[0], ignored -> {
+			Files.write(resourceFile, ObjectSerialization.serialize(content, false, false, false, new byte[0], ignored -> {
 			}));
 			
 			final Optional<String> result = service.loadByPath(String.class, null, "test.txt");
@@ -65,7 +65,7 @@ class StaticResourceServiceImplTest {
 			Files.createDirectories(resourceFile.getParent());
 			
 			final String content = "Nested content";
-			Files.write(resourceFile, ObjectSerialization.serialize(content, true, false, false, new byte[0], ignored -> {
+			Files.write(resourceFile, ObjectSerialization.serialize(content, false, false, false, new byte[0], ignored -> {
 			}));
 			
 			final Optional<String> result = service.loadByPath(String.class, List.of("path", "to"), "resource.txt");

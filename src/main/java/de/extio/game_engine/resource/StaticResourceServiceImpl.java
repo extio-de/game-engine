@@ -86,7 +86,7 @@ public class StaticResourceServiceImpl implements StaticResourceService {
 		
 		try {
 			try (final var in = Files.newInputStream(filePath)) {
-				final T obj = ObjectSerialization.deserialize(clazz, in, true, false, null, null, null);
+				final T obj = ObjectSerialization.deserialize(clazz, in, false, false, null, null, null);
 				if (obj != null) {
 					LOGGER.info("Loaded resource from {}", filePath);
 				}
