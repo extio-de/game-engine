@@ -101,6 +101,7 @@ public class CustomMultiLineTextArea extends Component {
 		this.caretPosition = Math.min(this.caretPosition, this.text.length());
 		this.selectionAnchor = this.caretPosition;
 		this.cachedWrappedLines = null;
+		this.recalculateScrollOffset();
 		this.dirty = true;
 	}
 	
@@ -123,6 +124,7 @@ public class CustomMultiLineTextArea extends Component {
 	public void setScaleFactor(final double scaleFactor) {
 		this.scaleFactor = scaleFactor;
 		this.cachedWrappedLines = null;
+		this.recalculateScrollOffset();
 		this.dirty = true;
 	}
 	
@@ -446,9 +448,17 @@ public class CustomMultiLineTextArea extends Component {
 	}
 	
 	private void notifyTextChanged() {
+		this.recalculateScrollOffset();
 		if (this.onTextChanged != null) {
 			this.onTextChanged.accept(this.text);
 		}
+	}
+
+	private void recalculateScrollOffset() {
+		final var lineHeight = this.getLineHeight();
+		final var totalContentHeight = this.getWrappedLines().size() * lineHeight;
+		final var maxScroll = Math.max(0, totalContentHeight - this.getVisibleHeight());
+		this.scrollOffsetY = Math.max(0, Math.min(maxScroll, this.scrollOffsetY));
 	}
 	
 	private void moveCaretUp() {
