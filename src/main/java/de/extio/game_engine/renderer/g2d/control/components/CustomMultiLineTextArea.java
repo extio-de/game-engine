@@ -974,6 +974,11 @@ public class CustomMultiLineTextArea extends Component {
 		g2d.setColor(bgColor);
 		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 		
+		g2d.setColor(theme.getBorderOuter().toColor());
+		g2d.drawRect(0, 0, this.getWidth() - 1, this.getHeight() - 1);
+		g2d.setColor(theme.getBorderInner().toColor());
+		g2d.drawRect(1, 1, this.getWidth() - 2, this.getHeight() - 2);
+		
 		final int textAreaWidth = toScreenCoord(getTextAreaWidth() + TEXT_AREA_PADDING);
 		final int visibleHeight = getVisibleHeight();
 		

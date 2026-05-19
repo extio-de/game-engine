@@ -550,6 +550,11 @@ public class CustomSingleLineTextField extends Component {
 		g2d.setColor(bgColor);
 		g2d.fillRect(0, 0, this.getWidth(), this.getHeight());
 
+		g2d.setColor(theme.getBorderOuter().toColor());
+		g2d.drawRect(0, 0, this.getWidth() - 1, this.getHeight() - 1);
+		g2d.setColor(theme.getBorderInner().toColor());
+		g2d.drawRect(1, 1, this.getWidth() - 2, this.getHeight() - 2);
+
 		if (this.cachedRawFontHeight == 0) {
 			this.cachedRawFontHeight = G2DDrawFont.getTextDimensions("ÄÖÜABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyzgjpqy", g2d, this.fontSize, 1.0).getY();
 		}
