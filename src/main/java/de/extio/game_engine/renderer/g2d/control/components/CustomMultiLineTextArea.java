@@ -38,7 +38,7 @@ public class CustomMultiLineTextArea extends Component {
 	
 	private static final int CARET_BLINK_INTERVAL = 500;
 	
-	private static final int TEXT_PADDING = 2;
+	private static final int CONTENT_MARGIN = 5;
 	
 	private static final int TEXT_AREA_PADDING = 4;
 	
@@ -522,7 +522,7 @@ public class CustomMultiLineTextArea extends Component {
 	}
 	
 	private int getTextAreaWidth() {
-		return (int) ((this.getWidth() / this.scaleFactor) - SCROLLBAR_WIDTH - TEXT_AREA_PADDING);
+		return Math.max(0, (int) ((this.getWidth() / this.scaleFactor) - SCROLLBAR_WIDTH - TEXT_AREA_PADDING - (CONTENT_MARGIN * 2)));
 	}
 	
 	private List<String> wrapLine(final String line, final int maxWidth) {
@@ -678,7 +678,7 @@ public class CustomMultiLineTextArea extends Component {
 		final int logicalMouseX = toLogicalCoord(mouseX);
 		final int logicalMouseY = toLogicalCoord(mouseY);
 		
-		final int clickedWrappedLine = Math.max(0, Math.min(wrappedLines.size() - 1, (logicalMouseY + this.scrollOffsetY) / lineHeight));
+		final int clickedWrappedLine = Math.max(0, Math.min(wrappedLines.size() - 1, (Math.max(0, logicalMouseY - CONTENT_MARGIN) + this.scrollOffsetY) / lineHeight));
 		
 		int wrappedLineCount = 0;
 		int charOffset = 0;
@@ -697,7 +697,7 @@ public class CustomMultiLineTextArea extends Component {
 				for (int j = 0; j <= clickedLine.length(); j++) {
 					final String substr = clickedLine.substring(0, j);
 					final int textWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
-					final int dist = Math.abs(textWidth - (logicalMouseX - TEXT_PADDING));
+					final int dist = Math.abs(textWidth - (logicalMouseX - CONTENT_MARGIN));
 					if (dist < bestDist) {
 						bestDist = dist;
 						bestPos = j;
@@ -775,7 +775,7 @@ public class CustomMultiLineTextArea extends Component {
 	}
 	
 	private int getVisibleHeight() {
-		return (int) (this.getHeight() / this.scaleFactor);
+		return Math.max(0, (int) (this.getHeight() / this.scaleFactor) - (CONTENT_MARGIN * 2));
 	}
 	
 	private int toLogicalCoord(final int screenCoord) {
@@ -785,14 +785,52 @@ public class CustomMultiLineTextArea extends Component {
 	private int toScreenCoord(final int logicalCoord) {
 		return (int) (logicalCoord * this.scaleFactor);
 	}
+
+	private int getLogicalTextWidth(final Graphics2D g2d, final String text) {
+		if (text == null || text.isEmpty()) {
+			return 0;
+		}
+		return G2DDrawFont.getTextDimensions(text, g2d, this.fontSize, 1.0).getX();
+	}
+
+	private void renderTextSegment(final Graphics2D g2d, final Color color, final int x, final int y, final String text) {
+		if (text == null || text.isEmpty()) {
+			return;
+		}
+		g2d.setColor(color);
+		G2DDrawFont.renderText(g2d, null, this.scaleFactor, x, y, this.fontSize, text);
+	}
+
+	private void renderSelectedLine(final Graphics2D g2d, final Theme theme, final Color fgColor, final int x, final int y, final int lineHeight,
+			final String line, final int lineSelStart, final int lineSelEnd) {
+		final var beforeSelection = line.substring(0, lineSelStart);
+		final var throughSelection = line.substring(0, lineSelEnd);
+		final var selectionStartX = x + this.getLogicalTextWidth(g2d, beforeSelection);
+		final var selectionEndX = x + this.getLogicalTextWidth(g2d, throughSelection);
+		final var selectionWidth = Math.max(0, selectionEndX - selectionStartX);
+
+		this.renderTextSegment(g2d, fgColor, x, y, line);
+		if (selectionWidth == 0) {
+			return;
+		}
+
+		g2d.setColor(theme.getSelectionPrimary().toColor());
+		g2d.fillRect(this.toScreenCoord(selectionStartX), this.toScreenCoord(y), this.toScreenCoord(selectionWidth), this.toScreenCoord(lineHeight));
+
+		final var previousClip = g2d.getClip();
+		g2d.clipRect(this.toScreenCoord(selectionStartX), this.toScreenCoord(y), this.toScreenCoord(selectionWidth), this.toScreenCoord(lineHeight));
+		this.renderTextSegment(g2d, theme.getBackgroundNormal().toColor(), x, y, line);
+		g2d.setClip(previousClip);
+	}
 	
 	private boolean isInScrollbarArea(final int mouseX, final int mouseY) {
-		final int scrollbarX = toScreenCoord(getTextAreaWidth() + TEXT_AREA_PADDING);
+		final int scrollbarX = toScreenCoord(CONTENT_MARGIN + getTextAreaWidth() + TEXT_AREA_PADDING);
 		return mouseX >= scrollbarX;
 	}
 	
 	private void handleScrollbarClick(final int mouseY) {
-		final int scaledY = toLogicalCoord(mouseY);
+		final int scrollbarHeight = getVisibleHeight();
+		final int scaledY = Math.max(0, Math.min(scrollbarHeight, toLogicalCoord(mouseY) - CONTENT_MARGIN));
 		if (scaledY >= this.scrollbarThumbY && scaledY < this.scrollbarThumbY + this.scrollbarThumbHeight) {
 			this.scrollbarDragging = true;
 			this.scrollbarDragStartY = scaledY;
@@ -804,7 +842,6 @@ public class CustomMultiLineTextArea extends Component {
 			final int clickedThumbY = scaledY - this.scrollbarThumbHeight / 2;
 			final int totalContentHeight = getWrappedLines().size() * lineHeight;
 			final int maxScroll = Math.max(0, totalContentHeight - visibleHeight);
-			final int scrollbarHeight = getVisibleHeight();
 			final int maxThumbY = scrollbarHeight - this.scrollbarThumbHeight;
 			
 			if (maxThumbY > 0) {
@@ -816,13 +853,13 @@ public class CustomMultiLineTextArea extends Component {
 	}
 	
 	private void handleScrollbarDrag(final int mouseY) {
-		final int scaledY = toLogicalCoord(mouseY);
+		final int scrollbarHeight = getVisibleHeight();
+		final int scaledY = Math.max(0, Math.min(scrollbarHeight, toLogicalCoord(mouseY) - CONTENT_MARGIN));
 		final int deltaY = scaledY - this.scrollbarDragStartY;
 		final int lineHeight = getLineHeight();
 		final int visibleHeight = getVisibleHeight();
 		final int totalContentHeight = getWrappedLines().size() * lineHeight;
 		final int maxScroll = Math.max(0, totalContentHeight - visibleHeight);
-		final int scrollbarHeight = getVisibleHeight();
 		final int maxThumbY = scrollbarHeight - this.scrollbarThumbHeight;
 		
 		if (maxThumbY > 0) {
@@ -979,7 +1016,8 @@ public class CustomMultiLineTextArea extends Component {
 		g2d.setColor(theme.getBorderInner().toColor());
 		g2d.drawRect(1, 1, this.getWidth() - 2, this.getHeight() - 2);
 		
-		final int textAreaWidth = toScreenCoord(getTextAreaWidth() + TEXT_AREA_PADDING);
+		final int textAreaX = toScreenCoord(CONTENT_MARGIN);
+		final int textAreaWidth = toScreenCoord(getTextAreaWidth());
 		final int visibleHeight = getVisibleHeight();
 		
 		final List<String> wrappedLines = getWrappedLines();
@@ -992,7 +1030,7 @@ public class CustomMultiLineTextArea extends Component {
 		final Color fgColor = this.foregroundColor != null ? this.foregroundColor : theme.getTextNormal().toColor();
 		
 		final var oldClip = g2d.getClip();
-		g2d.setClip(0, 0, textAreaWidth, this.getHeight());
+		g2d.setClip(textAreaX, 0, textAreaWidth, this.getHeight());
 		
 		final int startLine = Math.max(0, this.scrollOffsetY / lineHeight);
 		final int endLine = Math.min(wrappedLines.size(), (this.scrollOffsetY + visibleHeight) / lineHeight + 2);
@@ -1003,45 +1041,18 @@ public class CustomMultiLineTextArea extends Component {
 		
 		for (int i = startLine; i < endLine; i++) {
 			final String line = wrappedLines.get(i);
-			final int yPos = i * lineHeight - this.scrollOffsetY;
-			if (yPos + lineHeight >= 0 && yPos < visibleHeight) {
+			final int yPos = CONTENT_MARGIN + i * lineHeight - this.scrollOffsetY;
+			if (yPos + lineHeight >= CONTENT_MARGIN && yPos < CONTENT_MARGIN + visibleHeight) {
 				final int charOffset = getCharOffsetForWrappedLine(i, wrappedLines);
+				final int lineX = CONTENT_MARGIN;
 				
 				if (hasSelection && charOffset < selEnd && charOffset + line.length() > selStart) {
 					final int lineSelStart = Math.max(0, selStart - charOffset);
 					final int lineSelEnd = Math.min(line.length(), selEnd - charOffset);
-					
-					if (lineSelStart > 0) {
-						final String beforeSel = line.substring(0, lineSelStart);
-						final var textDim = G2DDrawFont.getTextDimensions(beforeSel, g2d, this.fontSize, 1.0);
-						final var textDimScaled = ImmutableCoordI2.create((int) (textDim.getX() * this.scaleFactor), (int) (textDim.getY() * this.scaleFactor));
-						g2d.setColor(fgColor);
-						G2DDrawFont.renderText(g2d, textDimScaled, this.scaleFactor, TEXT_PADDING, yPos, this.fontSize, beforeSel);
-					}
-					
-					final String selected = line.substring(lineSelStart, lineSelEnd);
-					final String beforeSelText = lineSelStart > 0 ? line.substring(0, lineSelStart) : "";
-					final var beforeSelTextDim = G2DDrawFont.getTextDimensions(beforeSelText, g2d, this.fontSize, this.scaleFactor);
-					final int selX = beforeSelTextDim.getX() + TEXT_PADDING;
-					final var selDim = G2DDrawFont.getTextDimensions(selected, g2d, this.fontSize, this.scaleFactor);
-					
-					g2d.setColor(theme.getSelectionPrimary().toColor());
-					g2d.fillRect(selX, (int) (yPos * this.scaleFactor), selDim.getX(), (int) (lineHeight * this.scaleFactor));
-					
-					g2d.setColor(theme.getBackgroundNormal().toColor());
-					G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int) (selX / this.scaleFactor), yPos, this.fontSize, selected);
-					
-					if (lineSelEnd < line.length()) {
-						final String afterSel = line.substring(lineSelEnd);
-						g2d.setColor(fgColor);
-						G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int) ((selX + selDim.getX()) / this.scaleFactor), yPos, this.fontSize, afterSel);
-					}
+					this.renderSelectedLine(g2d, theme, fgColor, lineX, yPos, lineHeight, line, lineSelStart, lineSelEnd);
 				}
 				else {
-					final var textDim = G2DDrawFont.getTextDimensions(line, g2d, this.fontSize, 1.0);
-					final var textDimScaled = ImmutableCoordI2.create((int) (textDim.getX() * this.scaleFactor), (int) (textDim.getY() * this.scaleFactor));
-					g2d.setColor(fgColor);
-					G2DDrawFont.renderText(g2d, textDimScaled, this.scaleFactor, TEXT_PADDING, yPos, this.fontSize, line);
+					renderTextSegment(g2d, fgColor, lineX, yPos, line);
 				}
 			}
 		}
@@ -1064,11 +1075,11 @@ public class CustomMultiLineTextArea extends Component {
 						: "";
 				final var textDim = beforeCaret.isEmpty() ? ImmutableCoordI2.create(0, 0) : G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
 				final int spaceWidth = beforeCaret.endsWith(" ") ? getSpaceWidth() : 0;
-				final int caretX = textDim.getX() + TEXT_PADDING + (int) (spaceWidth * this.scaleFactor);
-				final int caretY = (int) ((caretWrappedLineIndex * lineHeight - this.scrollOffsetY) * this.scaleFactor);
+				final int caretX = textDim.getX() + toScreenCoord(CONTENT_MARGIN) + (int) (spaceWidth * this.scaleFactor);
+				final int caretY = (int) ((CONTENT_MARGIN + caretWrappedLineIndex * lineHeight - this.scrollOffsetY) * this.scaleFactor);
 				final int caretHeight = (int) (rawFontHeight * this.scaleFactor);
 				
-				if (caretY >= 0 && caretY < this.getHeight()) {
+				if (caretY >= toScreenCoord(CONTENT_MARGIN) && caretY < toScreenCoord(CONTENT_MARGIN + visibleHeight)) {
 					g2d.setColor((currentTime % 1000 < 500) ? theme.getSelectionPrimary().toColor() : theme.getSelectionSecondary().toColor());
 					g2d.fillRect(caretX, caretY, 2, caretHeight);
 				}
@@ -1084,11 +1095,12 @@ public class CustomMultiLineTextArea extends Component {
 	}
 	
 	private void drawScrollbar(final Graphics2D g2d, final Theme theme, final int visibleHeight, final int totalContentHeight) {
-		final int scrollbarX = toLogicalCoord(this.getWidth()) - SCROLLBAR_WIDTH;
+		final int scrollbarX = CONTENT_MARGIN + getTextAreaWidth() + TEXT_AREA_PADDING;
+		final int scrollbarY = CONTENT_MARGIN;
 		final int scrollbarHeight = getVisibleHeight();
 		
 		g2d.setColor(theme.getBackgroundNormal().toColor().darker());
-		g2d.fillRect(toScreenCoord(scrollbarX), 0, toScreenCoord(SCROLLBAR_WIDTH), this.getHeight());
+		g2d.fillRect(toScreenCoord(scrollbarX), toScreenCoord(scrollbarY), toScreenCoord(SCROLLBAR_WIDTH), toScreenCoord(scrollbarHeight));
 		
 		final double visibleRatio = Math.min(1.0, (double) visibleHeight / totalContentHeight);
 		this.scrollbarThumbHeight = Math.max(SCROLLBAR_MIN_THUMB_HEIGHT, (int) (scrollbarHeight * visibleRatio));
@@ -1103,7 +1115,7 @@ public class CustomMultiLineTextArea extends Component {
 		}
 		
 		g2d.setColor(theme.getSelectionPrimary().toColor());
-		g2d.fillRect(toScreenCoord(scrollbarX + 2), toScreenCoord(this.scrollbarThumbY),
+		g2d.fillRect(toScreenCoord(scrollbarX + 2), toScreenCoord(scrollbarY + this.scrollbarThumbY),
 				toScreenCoord(SCROLLBAR_WIDTH - 4), toScreenCoord(this.scrollbarThumbHeight));
 	}
 	
