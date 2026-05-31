@@ -16,7 +16,7 @@ public class BevelDarkThemeFactoryBean implements FactoryBean<Theme> {
 				// Highlight (Light Grey)
 				.borderOuter(new HSBColor(0.0f, 0.0f, 0.6f)) 
 				// Shadow (Black)
-				.borderInner(new HSBColor(0.0f, 0.0f, 0.0f)) 
+				.borderInner(new HSBColor(0.0f, 0.0f, 0.35f)) 
 				// Disabled Shadow
 				.borderInnerDisabled(new HSBColor(0.0f, 0.0f, 0.3f))
 				// Background (Dark Grey)
