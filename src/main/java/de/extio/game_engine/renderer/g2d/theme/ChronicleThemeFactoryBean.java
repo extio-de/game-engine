@@ -22,7 +22,7 @@ public class ChronicleThemeFactoryBean implements FactoryBean<Theme> {
 				.textDisabled(new HSBColor(0.07f, 0.08f, 0.5f))
 				.selectionPrimary(new HSBColor(0.11f, 0.35f, 0.75f))
 				.selectionSecondary(new HSBColor(0.12f, 0.20f, 0.85f))
-				.windowBackground(new HSBColor(0.11f, 0.18f, 0.25f))
+				.windowBackground(new HSBColor(0.11f, 0.18f, 0.20f))
 				.hoverBrightnessAdjustment(0.12f)
 				.pressedBrightnessAdjustment(0.24f)
 				.build();
