@@ -38,11 +38,6 @@ final class OptionsKeyboardTab extends AbstractOptionsTab implements OptionsTab 
 	}
 
 	@Override
-	public boolean visibleInNavigation() {
-		return false;
-	}
-
-	@Override
 	public void render(final OptionsModuleContext context) {
 		final var keycodeRegistrations = this.keycodeRegistry().getAll();
 

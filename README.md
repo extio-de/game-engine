@@ -1146,23 +1146,35 @@ Framework for building in-game menus and UI screens as modules. Provides reusabl
 **Configuration Class**: `MenuAutoConfiguration`
 
 **Properties**:
-- `game-engine.menu.enabled` (default: `true`)
-- `game-engine.menu.options.enabled` (default: `true`)
-- `game-engine.menu.theme-editor.enabled` (default: `true`)
-- `game-engine.menu.hsb-color-picker.enabled` (default: `true`)
+- `game-engine.menu.enabled` (default: `true`) — Master switch for the menu subsystem
+- `game-engine.menu.options.enabled` (default: `true`) — Enables the `OptionsModule`
+- `game-engine.menu.options.audio.enabled` (default: `true`) — Enables the audio options tab (also requires `game-engine.audio.enabled`)
+- `game-engine.menu.options.video.enabled` (default: `true`) — Enables the video options tab
+- `game-engine.menu.options.video.scaleFactor.enabled` (default: `true`) - Enables changing the global scale factor in video options tab
+- `game-engine.menu.options.keyboard.enabled` (default: `true`) — Enables the keyboard options tab (also requires `game-engine.keycode-registry.enabled`)
+- `game-engine.menu.options.themes.enabled` (default: `true`) — Enables the themes tab; also required by `HsbColorPickerModule` and `ThemeEditorModule`
+- `game-engine.menu.theme-editor.enabled` (default: `true`) — Enables the theme editor
+- `game-engine.menu.hsb-color-picker.enabled` (default: `true`) — Enables the HSB color picker
 
-The menu subsystem is auto-configured through explicit bean definitions, matching the rest of the engine. The options dialog auto-discovers all `OptionsTab` beans, so applications can contribute additional tabs from their own codebase without modifying the library. The theme editor implements `OptionsThemeEditorSupport`, and the reusable themes tab will use it when present.
+The menu subsystem requires the renderer to be enabled (`game-engine.renderer.enabled`). Each options tab can be independently toggled via its own property, replacing the previous single `game-engine.menu.options.enabled` gate.
 
-`ThemeEditorModule` depends on `HsbColorPickerModule`, so disabling `game-engine.menu.hsb-color-picker.enabled` also prevents theme editor registration.
+The options dialog auto-discovers all `OptionsTab` beans, so applications can contribute additional tabs from their own codebase without modifying the library. The theme editor implements `OptionsThemeEditorSupport`, and the reusable themes tab will use it when present.
+
+`ThemeEditorModule` depends on both `HsbColorPickerModule` and the themes tab (`game-engine.menu.options.themes.enabled`). `HsbColorPickerModule` also requires the themes tab to be enabled.
 
 #### Exposed Spring Beans
 - `OptionsModule` when `game-engine.menu.options.enabled=true`
-- `OptionsAudioTab`, `OptionsVideoTab`, `OptionsKeyboardTab`, and `OptionsThemesTab` when `game-engine.menu.options.enabled=true`
-- `ThemeEditorModule` when `game-engine.menu.theme-editor.enabled=true`
-- `HsbColorPickerModule` when `game-engine.menu.hsb-color-picker.enabled=true`
+- `OptionsAudioTab` when `game-engine.menu.options.audio.enabled=true` and `game-engine.audio.enabled=true`
+- `OptionsVideoTab` when `game-engine.menu.options.video.enabled=true`
+- `OptionsKeyboardTab` when `game-engine.menu.options.keyboard.enabled=true` and `game-engine.keycode-registry.enabled=true`
+- `OptionsThemesTab` when `game-engine.menu.options.themes.enabled=true`
+- `HsbColorPickerModule` when `game-engine.menu.options.themes.enabled=true` and `game-engine.menu.hsb-color-picker.enabled=true`
+- `ThemeEditorModule` when `game-engine.menu.options.themes.enabled=true`, `game-engine.menu.theme-editor.enabled=true`, and `game-engine.menu.hsb-color-picker.enabled=true`
 
 #### Integration Notes
 All menu implementations are still regular `AbstractClientModule` modules at runtime. The auto-configuration only controls bean registration.
+
+`AbstractOptionsTab` injects `AudioControl` and `KeycodeRegistry` as optional (`@Autowired(required = false)`), so subclasses are safe to use even when audio or keyboard subsystems are disabled — the corresponding `keycodeRegistry()` and `audioControl()` accessors return `null` in that case.
 
 ---
 

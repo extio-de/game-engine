@@ -22,6 +22,12 @@ final class OptionsVideoTab extends AbstractOptionsTab implements OptionsTab {
 	private final Map<String, Integer> screenSelectionByControlId = new HashMap<>();
 	private final Map<String, Double> scaleFactorSelectionByControlId = new HashMap<>();
 
+	private final boolean scaleFactorOptionEnabled;
+
+	public OptionsVideoTab(final boolean scaleFactorOptionEnabled) {
+		this.scaleFactorOptionEnabled = scaleFactorOptionEnabled;
+	}
+
 	@Override
 	public String tabId() {
 		return TAB_ID;
@@ -146,43 +152,45 @@ final class OptionsVideoTab extends AbstractOptionsTab implements OptionsTab {
 
 		yPos += 100;
 
-		bo = this.renderingBoPool().acquire("OptionsModule_Video_Label_ScaleFactor", ControlRenderingBo.class)
-				.setCaption(this.localizationService().translate("ecyoa-95", "Scale Factor:"))
-				.setFontSize(48)
-				.setType(LabelControl.class)
-				.setControlData(new LabelData(null, null, HorizontalAlignment.LEFT))
-				.setVisible(true)
-				.setEnabled(false)
-				.withDimensionAbsolute(800, 80)
-				.withPositionRelative(10, yPos);
-		this.contentScrollArea(context).putRenderingBo(bo);
-
-		yPos += 90;
-
-		final var currentScaleFactor = this.rendererControl().getVideoOptions().getScaleFactorModifier();
-		final var scaleFactors = List.of(0.75, 0.90, 1.00, 1.15, 1.25);
-
-		var scaleXPos = 10;
-		for (final var scaleFactor : scaleFactors) {
-			final var controlId = "OptionsModule_Video_ScaleFactor_" + (int) (scaleFactor * 100);
-			this.scaleFactorSelectionByControlId.put(controlId, scaleFactor);
-
-			bo = this.renderingBoPool().acquire(controlId, ControlRenderingBo.class)
-					.setCaption((int) (scaleFactor * 100) + "%")
-					.setFontSize(42)
-					.setType(ToggleButtonControl.class)
-					.setControlGroup("OptionsModule_ScaleFactorGroup")
-					.setControlData(new ToggleButtonData(Math.abs(currentScaleFactor - scaleFactor) < 0.01, false, null))
+		if (scaleFactorOptionEnabled) {
+			bo = this.renderingBoPool().acquire("OptionsModule_Video_Label_ScaleFactor", ControlRenderingBo.class)
+					.setCaption(this.localizationService().translate("ecyoa-95", "Scale Factor:"))
+					.setFontSize(48)
+					.setType(LabelControl.class)
+					.setControlData(new LabelData(null, null, HorizontalAlignment.LEFT))
 					.setVisible(true)
-					.setEnabled(true)
-					.withDimensionAbsolute(150, 60)
-					.withPositionRelative(scaleXPos, yPos);
+					.setEnabled(false)
+					.withDimensionAbsolute(800, 80)
+					.withPositionRelative(10, yPos);
 			this.contentScrollArea(context).putRenderingBo(bo);
 
-			scaleXPos += 160;
-		}
+			yPos += 90;
 
-		yPos += 100;
+			final var currentScaleFactor = this.rendererControl().getVideoOptions().getScaleFactorModifier();
+			final var scaleFactors = List.of(0.75, 0.90, 1.00, 1.15, 1.25);
+
+			var scaleXPos = 10;
+			for (final var scaleFactor : scaleFactors) {
+				final var controlId = "OptionsModule_Video_ScaleFactor_" + (int) (scaleFactor * 100);
+				this.scaleFactorSelectionByControlId.put(controlId, scaleFactor);
+
+				bo = this.renderingBoPool().acquire(controlId, ControlRenderingBo.class)
+						.setCaption((int) (scaleFactor * 100) + "%")
+						.setFontSize(42)
+						.setType(ToggleButtonControl.class)
+						.setControlGroup("OptionsModule_ScaleFactorGroup")
+						.setControlData(new ToggleButtonData(Math.abs(currentScaleFactor - scaleFactor) < 0.01, false, null))
+						.setVisible(true)
+						.setEnabled(true)
+						.withDimensionAbsolute(150, 60)
+						.withPositionRelative(scaleXPos, yPos);
+				this.contentScrollArea(context).putRenderingBo(bo);
+
+				scaleXPos += 160;
+			}
+
+			yPos += 100;
+		}
 
 		bo = this.renderingBoPool().acquire("OptionsModule_Video_Label_Framerate", ControlRenderingBo.class)
 				.setCaption(this.localizationService().translate("ecyoa-96", "Target Framerate:"))

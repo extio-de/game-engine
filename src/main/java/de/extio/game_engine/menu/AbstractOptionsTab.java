@@ -31,7 +31,7 @@ public abstract class AbstractOptionsTab {
 	@Autowired
 	private RendererControl rendererControl;
 
-	@Autowired
+	@Autowired(required = false)
 	private AudioControl audioControl;
 
 	@Autowired
@@ -40,7 +40,7 @@ public abstract class AbstractOptionsTab {
 	@Autowired
 	private StorageService storageService;
 
-	@Autowired
+	@Autowired(required = false)
 	private KeycodeRegistry keycodeRegistry;
 
 	protected final ApplicationContext applicationContext() {
