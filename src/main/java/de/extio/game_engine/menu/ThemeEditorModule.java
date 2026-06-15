@@ -560,7 +560,7 @@ public class ThemeEditorModule extends AbstractClientModule implements OptionsTh
 				.setEnabled(true)
 				.setControlData(data)
 				.withDimensionAbsolute(width, height)
-				.setLayer(RenderingBoLayer.UI1)
+				.setLayer(RenderingBoLayer.UI2)
 				.withPositionRelative(x, y);
 		this.editorWindow.putRenderingBo(popup);
 		this.editorWindow.draw();
