@@ -93,7 +93,7 @@ public class DreamPatternRenderer implements PatternRenderer {
 	
 	private java.awt.image.BufferedImage getPatternCache() {
 		if (this.patternCache == null) {
-			final int cellSize = 100;
+			final int cellSize = 250;
 			this.patternCache = new BufferedImage(cellSize, cellSize, java.awt.image.BufferedImage.TYPE_INT_ARGB);
 			final Graphics2D g2d = this.patternCache.createGraphics();
 			
@@ -102,7 +102,7 @@ public class DreamPatternRenderer implements PatternRenderer {
 			g2d.clearRect(0, 0, cellSize, cellSize);
 			
 			// Draw pattern
-			g2d.setColor(new Color(255, 255, 255, 35));
+			g2d.setColor(new Color(255, 255, 255, 25));
 			g2d.fillOval(20, 20, 40, 40);
 			g2d.fillOval(70, 80, 15, 15);
 			

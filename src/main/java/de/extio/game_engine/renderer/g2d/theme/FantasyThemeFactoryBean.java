@@ -11,7 +11,7 @@ public class FantasyThemeFactoryBean implements FactoryBean<Theme> {
 	public Theme getObject() {
 		return Theme.builder()
 				.name("Fantasy")
-				.font("CrimsonText-Regular.ttf")
+				.font("PTSerif-Regular.ttf")
 				.patternRendererName("fantasyPatternRenderer")
 				.borderOuter(new HSBColor(0.12f, 0.55f, 0.48f))
 				.borderInner(new HSBColor(0.14f, 0.25f, 0.72f))
