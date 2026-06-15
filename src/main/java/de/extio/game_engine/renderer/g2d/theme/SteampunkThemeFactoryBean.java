@@ -16,7 +16,7 @@ public class SteampunkThemeFactoryBean implements FactoryBean<Theme> {
 				.borderOuter(new HSBColor(0.08f, 0.5f, 0.2f))
 				.borderInner(new HSBColor(0.12f, 0.8f, 0.6f))
 				.borderInnerDisabled(new HSBColor(0.08f, 0.3f, 0.3f))
-				.backgroundNormal(new HSBColor(0.08f, 0.4f, 0.3f))
+				.backgroundNormal(new HSBColor(0.08f, 0.4f, 0.25f))
 				.backgroundSelected(new HSBColor(0.12f, 0.6f, 0.7f))
 				.textNormal(new HSBColor(0.0f, 0.0f, 0.85f))
 				.textDisabled(new HSBColor(0.0f, 0.0f, 0.5f))
