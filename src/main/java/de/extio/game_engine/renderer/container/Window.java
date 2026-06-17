@@ -378,7 +378,7 @@ public class Window extends AbstractClientModule implements InitializingBean {
 		return containerUnderCursor;
 	}
 	
-	private void zIndexToTop() {
+	public void zIndexToTop() {
 		if (!this.draggable) {
 			return;
 		}
