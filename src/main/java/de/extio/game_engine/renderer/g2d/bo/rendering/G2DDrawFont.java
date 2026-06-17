@@ -8,9 +8,14 @@ import java.awt.Shape;
 import java.awt.font.TextAttribute;
 import java.awt.font.TextLayout;
 import java.text.AttributedString;
+import java.time.Duration;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicReference;
+
+import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.Caffeine;
+import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
@@ -37,6 +42,11 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	private static final AtomicReference<Font> cachedFallbackFontRef = new AtomicReference<>();
 	
 	private static Font baseFont;
+
+	private static final Cache<TextLayoutParameters, TextLayout> textLayoutCache = Caffeine.newBuilder()
+			.maximumSize(250)
+			.expireAfterAccess(Duration.ofMinutes(1))
+			.build();
 	
 	static {
 		final Map<TextAttribute, Object> attributes = new HashMap<>();
@@ -250,8 +260,11 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 	}
 	
 	private static TextLayout createTextLayout(final String text, final Graphics graphics, final int size_, final double scaleFactor) {
-		final var attributedString = createAttributedString(text, size_, scaleFactor);
-		return new TextLayout(attributedString.getIterator(), ((Graphics2D) graphics).getFontRenderContext());
+		final var cacheKey = new TextLayoutParameters(text, size_, scaleFactor);
+		return textLayoutCache.get(cacheKey, key -> {
+			final var attributedString = createAttributedString(key.text, key.size_, key.scaleFactor);
+			return new TextLayout(attributedString.getIterator(), ((Graphics2D) graphics).getFontRenderContext());
+		});
 	}
 	
 	private static AttributedString createAttributedString(final String text, final int size_, final double scaleFactor) {
@@ -275,6 +288,9 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 			attributedString.addAttribute(TextAttribute.FONT, runFont, runStart, index);
 		}
 		return attributedString;
+	}
+
+	private record TextLayoutParameters(String text, int size_, double scaleFactor) {
 	}
 	
 }

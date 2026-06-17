@@ -4,7 +4,7 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>de.extio</groupId>
     <artifactId>game-engine</artifactId>
-    <version>1.0.20</version>
+    <version>1.0.21</version>
 
     <properties>
         <java.version>25</java.version>
@@ -39,6 +39,10 @@
             <artifactId>spring-boot-starter-jackson</artifactId>
         </dependency>
 
+        <dependency>
+            <groupId>com.github.ben-manes.caffeine</groupId>
+            <artifactId>caffeine</artifactId>
+        </dependency>
         <dependency>
             <groupId>com.github.luben</groupId>
             <artifactId>zstd-jni</artifactId>
