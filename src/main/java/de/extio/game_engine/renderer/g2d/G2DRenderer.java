@@ -255,6 +255,8 @@ public class G2DRenderer implements Renderer {
 	
 	private void drawStatistics() {
 		if (!this.rendererData.getUiOptions().isDrawFps()) {
+			this.rendererData.getRendererWorkingSet().remove(this.rendererModuleId, "g2DRenderer_fpsText");
+			this.rendererData.getRendererWorkingSet().remove(this.rendererModuleId, "g2DRenderer_fpsHistory");
 			return;
 		}
 		
