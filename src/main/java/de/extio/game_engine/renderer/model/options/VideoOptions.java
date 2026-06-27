@@ -1,14 +1,25 @@
 package de.extio.game_engine.renderer.model.options;
 
+import java.util.Objects;
+
 public final class VideoOptions {
 	
-	private VideoOptionsVideoMode videoMode = VideoOptionsVideoMode.WINDOW;
+	private VideoOptionsVideoMode videoMode;
 	
 	private int fullScreenNumber = -1;
 	
 	private double scaleFactorModifier = 1.0;
 	
 	private int frameRateTarget = 60;
+	
+	public VideoOptions() {
+		if (Objects.requireNonNullElse(System.getProperty("os.name"), "").toLowerCase().contains("windows")) {
+			videoMode = VideoOptionsVideoMode.BORDERLESS;
+		}
+		else {
+			videoMode = VideoOptionsVideoMode.FULLSCREEN;
+		}
+	}
 	
 	public void apply(final VideoOptions other) {
 		this.setVideoMode(other.getVideoMode());
