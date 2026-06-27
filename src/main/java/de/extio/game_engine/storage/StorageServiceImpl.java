@@ -40,12 +40,17 @@ public class StorageServiceImpl implements StorageService {
 				final URL url = StorageServiceImpl.class.getProtectionDomain().getCodeSource().getLocation();
 				Path parent;
 				if (url.toString().startsWith("jar:nested:")) {
-					parent = Paths.get(url.toString().substring("jar:nested:".length(), url.toString().indexOf("/!"))).getParent();
+					if (Objects.requireNonNullElse(System.getProperty("os.name"), "").toLowerCase().contains("windows")) {
+						parent = Paths.get(url.toString().substring("jar:nested:/".length(), url.toString().indexOf("/!"))).getParent();
+					}
+					else {
+						parent = Paths.get(url.toString().substring("jar:nested:".length(), url.toString().indexOf("/!"))).getParent();
+					}
 				}
 				else {
-					parent = url.toURI().toPath().getParent();
+					parent = Paths.get(url.toURI()).getParent();
 				}
-				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : url.toURI().toPath().toAbsolutePath().normalize();
+				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : Paths.get(url.toURI()).toAbsolutePath().normalize();
 				
 				final String currentSubDir = jarPath.getFileName().toString();
 				if ("bin".equals(currentSubDir) || "target".equals(currentSubDir)) {
