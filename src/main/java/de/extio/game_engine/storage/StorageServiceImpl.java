@@ -13,11 +13,11 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import de.extio.game_engine.util.ObjectSerialization;
-import de.extio.game_engine.util.rng.FastRandomUUID;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import de.extio.game_engine.util.ObjectSerialization;
+import de.extio.game_engine.util.rng.FastRandomUUID;
 
 public class StorageServiceImpl implements StorageService {
 	
@@ -43,9 +43,9 @@ public class StorageServiceImpl implements StorageService {
 					parent = Paths.get(url.toString().substring("jar:nested:".length(), url.toString().indexOf("/!"))).getParent();
 				}
 				else {
-					parent = Paths.get(url.toURI()).getParent();
+					parent = url.toURI().toPath().getParent();
 				}
-				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : Paths.get(url.toURI()).toAbsolutePath().normalize();
+				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : url.toURI().toPath().toAbsolutePath().normalize();
 				
 				final String currentSubDir = jarPath.getFileName().toString();
 				if ("bin".equals(currentSubDir) || "target".equals(currentSubDir)) {
@@ -348,17 +348,17 @@ public class StorageServiceImpl implements StorageService {
 				private boolean closed = false;
 				
 				@Override
-				public void write(int b) throws IOException {
+				public void write(final int b) throws IOException {
 					outputStream.write(b);
 				}
 				
 				@Override
-				public void write(byte[] b) throws IOException {
+				public void write(final byte[] b) throws IOException {
 					outputStream.write(b);
 				}
 				
 				@Override
-				public void write(byte[] b, int off, int len) throws IOException {
+				public void write(final byte[] b, final int off, final int len) throws IOException {
 					outputStream.write(b, off, len);
 				}
 				

@@ -33,9 +33,9 @@ public class StaticResourceServiceImpl implements StaticResourceService {
 					parent = Paths.get(url.toString().substring("jar:nested:".length(), url.toString().indexOf("/!"))).getParent();
 				}
 				else {
-					parent = Paths.get(url.toURI()).getParent();
+					parent = url.toURI().toPath().getParent();
 				}
-				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : Paths.get(url.toURI()).toAbsolutePath().normalize();
+				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : url.toURI().toPath().toAbsolutePath().normalize();
 				
 				final String currentSubDir = jarPath.getFileName().toString();
 				if ("bin".equals(currentSubDir) || "target".equals(currentSubDir)) {
