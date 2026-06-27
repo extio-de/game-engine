@@ -28,7 +28,13 @@ public class StaticResourceServiceImpl implements StaticResourceService {
 		if (location == null) {
 			try {
 				final URL url = StorageServiceImpl.class.getProtectionDomain().getCodeSource().getLocation();
-				final Path parent = Paths.get(url.toURI()).getParent();
+				Path parent;
+				if (url.toString().startsWith("jar:nested:")) {
+					parent = Paths.get(url.toString().substring("jar:nested:".length(), url.toString().indexOf("/!"))).getParent();
+				}
+				else {
+					parent = Paths.get(url.toURI()).getParent();
+				}
 				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : Paths.get(url.toURI()).toAbsolutePath().normalize();
 				
 				final String currentSubDir = jarPath.getFileName().toString();
