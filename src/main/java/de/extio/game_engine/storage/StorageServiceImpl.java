@@ -38,7 +38,8 @@ public class StorageServiceImpl implements StorageService {
 		if (location == null) {
 			try {
 				final URL url = StorageServiceImpl.class.getProtectionDomain().getCodeSource().getLocation();
-				final Path jarPath = Paths.get(url.toURI()).getParent().toAbsolutePath().normalize();
+				final Path parent = Paths.get(url.toURI()).getParent();
+				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : Paths.get(url.toURI()).toAbsolutePath().normalize();
 				
 				final String currentSubDir = jarPath.getFileName().toString();
 				if ("bin".equals(currentSubDir) || "target".equals(currentSubDir)) {
