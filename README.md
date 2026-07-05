@@ -1107,13 +1107,25 @@ No additional configuration required.
 #### Purpose and Overview
 Provides integration with the Steam platform API through a connector abstraction. Supports Steam features including user identity, Steam overlay, lobbies, achievements, and rich presence. The connector is designed as a singleton and can be optionally initialized when running on Steam.
 
-**Note**: This is an optional component that requires the Steamworks4J library and proper Steam initialization.
+**Note**: This is an optional component that requires the Steamworks4J library and proper Steam initialization. It is **disabled by default** and must be explicitly enabled via configuration property.
 
 #### Setup / Autoconfiguration
-No auto-configuration provided. Must be manually initialized by setting `SteamworksConnector.setInstance()` with a concrete implementation (e.g., `SteamworksConnectorImpl`).
+**Configuration Class**: `SteamworksAutoConfiguration`
+
+**Property**: `game-engine.steamworks.enabled` (default: `false`)
+
+The auto-configuration is guarded by two conditions:
+- `game-engine.steamworks.enabled=true` must be set
+- The `com.codedisaster.steamworks.SteamAPI` class must be present on the classpath (`@ConditionalOnClass`)
+
+When enabled, `SteamworksConnectorImpl` is instantiated, registered as the singleton via `SteamworksConnector.setInstance()`, and a `SteamworksRunner` thread (implementing `SmartLifecycle`) is started to drive the Steam callback loop. The runner has a phase of `Integer.MAX_VALUE` (starts last, stops first) and will gracefully shut down the Steam API on context close.
 
 #### Exposed Spring Beans
-None (managed as a singleton via static accessor)
+- **`SteamworksConnector`** (via `SteamworksConnectorImpl`): The Steam API connector singleton
+- **`SteamworksRunner`**: Lifecycle-managed callback runner thread
+
+#### Integration Notes
+If a custom `SteamworksConnector` bean is provided, the auto-configuration will not create `SteamworksConnectorImpl` but will still create the `SteamworksRunner` to drive callbacks. Both beans use `@ConditionalOnMissingBean`.
 
 ---
 

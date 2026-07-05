@@ -1,12 +1,8 @@
 package de.extio.game_engine.steamworks;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.concurrent.atomic.AtomicLong;
-import java.util.function.Consumer;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -17,7 +13,6 @@ import com.codedisaster.steamworks.SteamAuth.AuthSessionResponse;
 import com.codedisaster.steamworks.SteamAuthTicket;
 import com.codedisaster.steamworks.SteamFriends;
 import com.codedisaster.steamworks.SteamFriends.OverlayDialog;
-import com.codedisaster.steamworks.SteamFriends.OverlayToWebPageMode;
 import com.codedisaster.steamworks.SteamFriends.PersonaChange;
 import com.codedisaster.steamworks.SteamFriendsCallback;
 import com.codedisaster.steamworks.SteamID;
@@ -29,18 +24,9 @@ import com.codedisaster.steamworks.SteamMatchmaking.ChatMemberStateChange;
 import com.codedisaster.steamworks.SteamMatchmaking.ChatRoomEnterResponse;
 import com.codedisaster.steamworks.SteamMatchmaking.LobbyType;
 import com.codedisaster.steamworks.SteamMatchmakingCallback;
-import com.codedisaster.steamworks.SteamNativeHandle;
 import com.codedisaster.steamworks.SteamPublishedFileID;
-import com.codedisaster.steamworks.SteamRemoteStorage;
-import com.codedisaster.steamworks.SteamRemoteStorage.PublishedFileVisibility;
 import com.codedisaster.steamworks.SteamResult;
 import com.codedisaster.steamworks.SteamUGC;
-import com.codedisaster.steamworks.SteamUGC.ItemInstallInfo;
-import com.codedisaster.steamworks.SteamUGC.ItemUpdateInfo;
-import com.codedisaster.steamworks.SteamUGC.ItemUpdateStatus;
-import com.codedisaster.steamworks.SteamUGCCallback;
-import com.codedisaster.steamworks.SteamUGCDetails;
-import com.codedisaster.steamworks.SteamUGCQuery;
 import com.codedisaster.steamworks.SteamUGCUpdateHandle;
 import com.codedisaster.steamworks.SteamUser;
 import com.codedisaster.steamworks.SteamUserCallback;
@@ -115,11 +101,6 @@ public final class SteamworksConnectorImpl extends SteamworksConnector {
 	
 	@Override
 	public void runCallbacks() {
-
-
-		// TODO: Executor thread
-
-
 		if (!this.active) {
 			return;
 		}
