@@ -3,7 +3,6 @@ package de.extio.game_engine.storage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -16,6 +15,7 @@ import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import de.extio.game_engine.util.CodeSourceLocationResolver;
 import de.extio.game_engine.util.ObjectSerialization;
 import de.extio.game_engine.util.rng.FastRandomUUID;
 
@@ -37,22 +37,11 @@ public class StorageServiceImpl implements StorageService {
 		String location = System.getProperty("storagelocation");
 		if (location == null) {
 			try {
-				final URL url = StorageServiceImpl.class.getProtectionDomain().getCodeSource().getLocation();
-				Path parent;
-				if (url.toString().startsWith("jar:nested:")) {
-					if (Objects.requireNonNullElse(System.getProperty("os.name"), "").toLowerCase().contains("windows")) {
-						parent = Paths.get(url.toString().substring("jar:nested:/".length(), url.toString().indexOf("/!"))).getParent();
-					}
-					else {
-						parent = Paths.get(url.toString().substring("jar:nested:".length(), url.toString().indexOf("/!"))).getParent();
-					}
-				}
-				else {
-					parent = Paths.get(url.toURI()).getParent();
-				}
-				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : Paths.get(url.toURI()).toAbsolutePath().normalize();
+				final var codeSourcePath = CodeSourceLocationResolver.resolvePath(StorageServiceImpl.class);
+				final var parent = codeSourcePath.getParent();
+				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : codeSourcePath;
 				
-				final String currentSubDir = jarPath.getFileName().toString();
+				final String currentSubDir = jarPath.getFileName() != null ? jarPath.getFileName().toString() : "";
 				if ("bin".equals(currentSubDir) || "target".equals(currentSubDir)) {
 					location = jarPath.getParent().resolve("storage").toString();
 				}

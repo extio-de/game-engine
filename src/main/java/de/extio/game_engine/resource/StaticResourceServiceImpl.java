@@ -2,7 +2,6 @@ package de.extio.game_engine.resource;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -14,7 +13,7 @@ import java.util.stream.Stream;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import de.extio.game_engine.storage.StorageServiceImpl;
+import de.extio.game_engine.util.CodeSourceLocationResolver;
 import de.extio.game_engine.util.ObjectSerialization;
 
 public class StaticResourceServiceImpl implements StaticResourceService {
@@ -27,23 +26,13 @@ public class StaticResourceServiceImpl implements StaticResourceService {
 		String location = System.getProperty("datalocation");
 		if (location == null) {
 			try {
-				final URL url = StorageServiceImpl.class.getProtectionDomain().getCodeSource().getLocation();
+				final var url = StaticResourceServiceImpl.class.getProtectionDomain().getCodeSource().getLocation();
 				LOGGER.info("Code source location: {}", url);
-				Path parent;
-				if (url.toString().startsWith("jar:nested:")) {
-					if (Objects.requireNonNullElse(System.getProperty("os.name"), "").toLowerCase().contains("windows")) {
-						parent = Paths.get(url.toString().substring("jar:nested:/".length(), url.toString().indexOf("/!"))).getParent();
-					}
-					else {
-						parent = Paths.get(url.toString().substring("jar:nested:".length(), url.toString().indexOf("/!"))).getParent();
-					}
-				}
-				else {
-					parent = Paths.get(url.toURI()).getParent();
-				}
-				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : Paths.get(url.toURI()).toAbsolutePath().normalize();
+				final var codeSourcePath = CodeSourceLocationResolver.resolvePath(StaticResourceServiceImpl.class);
+				final var parent = codeSourcePath.getParent();
+				final Path jarPath = parent != null ? parent.toAbsolutePath().normalize() : codeSourcePath;
 				
-				final String currentSubDir = jarPath.getFileName().toString();
+				final String currentSubDir = jarPath.getFileName() != null ? jarPath.getFileName().toString() : "";
 				if ("bin".equals(currentSubDir) || "target".equals(currentSubDir)) {
 					location = jarPath.getParent().resolve("data").toString();
 				}
