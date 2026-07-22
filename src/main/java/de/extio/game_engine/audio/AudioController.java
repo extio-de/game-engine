@@ -9,6 +9,8 @@ import de.extio.game_engine.storage.StorageService;
 
 public final class AudioController implements AudioControl {
 	
+	private static final long AUDIO_OPTIONS_STORE_DELAY_MS = 333;
+	
 	private final StorageService storageService;
 
 	private final AudioOptions audioOptions; // Passed as reference to strategies
@@ -28,6 +30,8 @@ public final class AudioController implements AudioControl {
 	private boolean started;
 	
 	private boolean useSoftwareMixing;
+	
+	private long delayedAudioOptionsStoreAt = -1;
 	
 	public AudioController(final StaticResourceService resourceService, final StorageService storageService) {
 		this.storageService = storageService;
@@ -75,9 +79,15 @@ public final class AudioController implements AudioControl {
 		if (this.audioStrategy != null) {
 			this.audioStrategy.run();
 		}
+		if (this.consumeDelayedAudioOptionsStore()) {
+			this.storeAudioOptions();
+		}
 	}
 	
 	public void shutdown() {
+		if (this.consumePendingAudioOptionsStore()) {
+			this.storeAudioOptions();
+		}
 		this.audioControllerThread.interrupt();
 		this.stopStrategy();
 	}
@@ -169,9 +179,25 @@ public final class AudioController implements AudioControl {
 	}
 	
 	@Override
-	public void applyAudioOptions(final AudioOptions audioOptions) {
+	public synchronized void applyAudioOptions(final AudioOptions audioOptions) {
 		this.audioOptions.apply(audioOptions);
-		this.storeAudioOptions();
+		this.delayedAudioOptionsStoreAt = System.currentTimeMillis() + AUDIO_OPTIONS_STORE_DELAY_MS;
+	}
+	
+	private synchronized boolean consumeDelayedAudioOptionsStore() {
+		if (this.delayedAudioOptionsStoreAt < 0 || System.currentTimeMillis() < this.delayedAudioOptionsStoreAt) {
+			return false;
+		}
+		this.delayedAudioOptionsStoreAt = -1;
+		return true;
+	}
+	
+	private synchronized boolean consumePendingAudioOptionsStore() {
+		if (this.delayedAudioOptionsStoreAt < 0) {
+			return false;
+		}
+		this.delayedAudioOptionsStoreAt = -1;
+		return true;
 	}
 	
 	private List<StaticResource> wrapOpener(final StaticResource opener, final List<StaticResource> audioFileNames) {

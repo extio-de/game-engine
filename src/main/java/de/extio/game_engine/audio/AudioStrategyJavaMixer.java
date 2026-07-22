@@ -63,7 +63,6 @@ final class AudioStrategyJavaMixer implements AudioStrategy {
 					.name("Audio Music")
 					.daemon(true)
 					.start(musicAudioPlayer);
-			musicThread.start();
 			this.musicAudioPlayer = new AudioThread(musicThread, musicAudioPlayer);
 		}
 		

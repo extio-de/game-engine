@@ -171,32 +171,48 @@ final class OptionsAudioTab extends AbstractOptionsTab implements OptionsTab {
 			return false;
 		}
 
+		final var options = this.audioControl().getAudioOptions();
+
 		switch (controlId) {
 			case "OptionsModule_Audio_SFX_Enable" -> {
-				final var currentValue = this.audioControl().getAudioOptions().getSfxOptions().isEnable();
-				this.audioControl().getAudioOptions().getSfxOptions().setEnable(!currentValue);
-				this.audioControl().applyAudioOptions(this.audioControl().getAudioOptions());
+				final var currentValue = options.getSfxOptions().isEnable();
+				options.getSfxOptions().setEnable(!currentValue);
+				this.audioControl().applyAudioOptions(options);
 				this.refreshContent(context);
 				return true;
 			}
 			case "OptionsModule_Audio_Music_Enable" -> {
-				final var currentValue = this.audioControl().getAudioOptions().getMusicOptions().isEnable();
-				this.audioControl().getAudioOptions().getMusicOptions().setEnable(!currentValue);
-				this.audioControl().applyAudioOptions(this.audioControl().getAudioOptions());
+				final var currentValue = options.getMusicOptions().isEnable();
+				options.getMusicOptions().setEnable(!currentValue);
+				this.audioControl().applyAudioOptions(options);
 				this.refreshContent(context);
 				return true;
 			}
 			case "OptionsModule_Audio_SFX_SoftwareMixing" -> {
-				final var currentValue = this.audioControl().getAudioOptions().getSfxOptions().isSoftwareMixing();
-				this.audioControl().getAudioOptions().getSfxOptions().setSoftwareMixing(!currentValue);
-				this.audioControl().applyAudioOptions(this.audioControl().getAudioOptions());
+				final var currentValue = options.getSfxOptions().isSoftwareMixing();
+				options.getSfxOptions().setSoftwareMixing(!currentValue);
+				this.audioControl().applyAudioOptions(options);
 				this.refreshContent(context);
 				return true;
 			}
 			case "OptionsModule_Audio_Music_SoftwareMixing" -> {
-				final var currentValue = this.audioControl().getAudioOptions().getMusicOptions().isSoftwareMixing();
-				this.audioControl().getAudioOptions().getMusicOptions().setSoftwareMixing(!currentValue);
-				this.audioControl().applyAudioOptions(this.audioControl().getAudioOptions());
+				final var currentValue = options.getMusicOptions().isSoftwareMixing();
+				options.getMusicOptions().setSoftwareMixing(!currentValue);
+				this.audioControl().applyAudioOptions(options);
+				this.refreshContent(context);
+				return true;
+			}
+			case "OptionsModule_Audio_SFX_Volume_Slider" -> {
+				final var newVolume = (double) event.getPayload();
+				options.getSfxOptions().setVolume(newVolume);
+				this.audioControl().applyAudioOptions(options);
+				this.refreshContent(context);
+				return true;
+			}
+			case "OptionsModule_Audio_Music_Volume_Slider" -> {
+				final var newVolume = (double) event.getPayload();
+				options.getMusicOptions().setVolume(newVolume);
+				this.audioControl().applyAudioOptions(options);
 				this.refreshContent(context);
 				return true;
 			}
