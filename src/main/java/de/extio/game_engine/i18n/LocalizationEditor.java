@@ -13,8 +13,8 @@ import java.awt.event.ActionListener;
 import java.awt.event.ComponentAdapter;
 import java.awt.event.ComponentEvent;
 import java.io.File;
-import java.nio.file.Path;
 import java.lang.reflect.InvocationTargetException;
+import java.nio.file.Path;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -34,7 +34,6 @@ import javax.swing.ScrollPaneConstants;
 import javax.swing.SwingConstants;
 import javax.swing.WindowConstants;
 import javax.swing.border.EmptyBorder;
-import javax.swing.filechooser.FileFilter;
 import javax.swing.table.AbstractTableModel;
 
 @SuppressWarnings("serial")
