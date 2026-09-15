@@ -16,7 +16,9 @@ import java.util.function.Consumer;
 import com.github.luben.zstd.ZstdInputStream;
 import com.github.luben.zstd.ZstdOutputStream;
 
+import tools.jackson.databind.DeserializationFeature;
 import tools.jackson.databind.ObjectMapper;
+import tools.jackson.databind.cfg.EnumFeature;
 import tools.jackson.dataformat.yaml.YAMLMapper;
 
 public final class ObjectSerialization {
@@ -25,6 +27,13 @@ public final class ObjectSerialization {
 	
 	static {
 		OBJECT_MAPPER = YAMLMapper.builder()
+				.configure(DeserializationFeature.FAIL_ON_IGNORED_PROPERTIES, false)
+				.configure(DeserializationFeature.FAIL_ON_INVALID_SUBTYPE, false)
+				.configure(DeserializationFeature.FAIL_ON_MISSING_EXTERNAL_TYPE_ID_PROPERTY, false)
+				.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false)
+				.configure(DeserializationFeature.FAIL_ON_UNRESOLVED_OBJECT_IDS, false)
+				.configure(DeserializationFeature.FAIL_ON_NULL_FOR_PRIMITIVES, false)
+				.configure(EnumFeature.READ_UNKNOWN_ENUM_VALUES_AS_NULL, true)
 				.findAndAddModules()
 				.build();
 	}
