@@ -10,9 +10,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.ApplicationContext;
-import org.springframework.stereotype.Component;
 
 import de.extio.game_engine.event.Event;
 import de.extio.game_engine.event.EventService;
@@ -40,7 +38,6 @@ import de.extio.game_engine.storage.StorageItemDescriptor;
 import de.extio.game_engine.storage.StorageResource;
 import de.extio.game_engine.storage.StorageService;
 
-@Component
 public class FileSelectionDialogModule extends AbstractClientModule {
 	
 	public enum FileSelectionMode {
@@ -98,20 +95,23 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	
 	private static final String BUTTON_CANCEL = "FileSelectionDialog_Button_Cancel";
 	
-	@Autowired
-	private ApplicationContext applicationContext;
+	private final ApplicationContext applicationContext;
 	
-	@Autowired
-	private EventService eventService;
+	private final EventService eventService;
 	
-	@Autowired
-	private LocalizationService localizationService;
+	private final LocalizationService localizationService;
 	
-	@Autowired
-	private RenderingBoPool renderingBoPool;
+	private final RenderingBoPool renderingBoPool;
 	
-	@Autowired
-	private StorageService storageService;
+	private final StorageService storageService;
+
+	public FileSelectionDialogModule(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool, final StorageService storageService) {
+		this.applicationContext = applicationContext;
+		this.eventService = eventService;
+		this.localizationService = localizationService;
+		this.renderingBoPool = renderingBoPool;
+		this.storageService = storageService;
+	}
 	
 	private Window dialogWindow;
 	
