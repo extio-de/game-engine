@@ -1062,6 +1062,19 @@ Storage directory is created automatically at startup in the `storage/` folder r
 #### Exposed Spring Beans
 - **`StorageService`**: Main interface for storing and loading data by ID or path
 
+#### Reusable File Selection Dialog
+
+The engine includes a reusable `FileSelectionDialogModule` for browsing, selecting, creating, renaming, and deleting stored resources. It is a generic UI module built on the module and container systems, so applications can embed the same file picker flow for load, save, and management scenarios without duplicating dialog logic.
+
+Key capabilities:
+- **Modes**: `LOAD`, `SAVE`, and `MANAGE`
+- **Path navigation**: Browse virtual or stored directories, move up the hierarchy, and keep the current path in sync with the active storage context
+- **Filtering**: Optional pattern-based searching for narrow file discovery
+- **Creation and management**: Create folders, rename selected items, delete selected items, and resolve a final path/name for the selected resource
+- **Result contract**: Emits a structured `FileSelectionDialogResponse` event with the request ID, selection state, resource, path, and existing flag
+
+The dialog is designed for storage-backed workflows and can be opened with a parent window, an initial name, and optional modal behavior. This makes it a reusable library component for save-game prompts, configuration import/export, and other file-oriented UI flows.
+
 ---
 
 ### Resource Management
