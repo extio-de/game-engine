@@ -38,6 +38,7 @@ import de.extio.game_engine.storage.StorageItemDescriptor;
 import de.extio.game_engine.storage.StorageResource;
 import de.extio.game_engine.storage.StorageService;
 import de.extio.game_engine.storage.dialog.FileSelectionMoveDialogModule.FileSelectionMoveDialogResponse;
+import de.extio.game_engine.storage.dialog.FileSelectionNewFolderDialogModule.FileSelectionNewFolderDialogResponse;
 
 public class FileSelectionDialogModule extends AbstractClientModule {
 	
@@ -82,8 +83,6 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	
 	private static final String NAME_FIELD_ID = "FileSelectionDialog_NameField";
 	
-	private static final String NEW_FOLDER_FIELD_ID = "FileSelectionDialog_NewFolderField";
-	
 	private static final String BUTTON_NEW_FOLDER = "FileSelectionDialog_Button_NewFolder";
 	
 	private static final String BUTTON_NEW_ITEM = "FileSelectionDialog_Button_NewItem";
@@ -110,13 +109,16 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 
 	private final FileSelectionMoveDialogModule moveDialogModule;
 
-	public FileSelectionDialogModule(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool, final StorageService storageService, final FileSelectionMoveDialogModule moveDialogModule) {
+	private final FileSelectionNewFolderDialogModule newFolderDialogModule;
+
+	public FileSelectionDialogModule(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool, final StorageService storageService, final FileSelectionMoveDialogModule moveDialogModule, final FileSelectionNewFolderDialogModule newFolderDialogModule) {
 		this.applicationContext = applicationContext;
 		this.eventService = eventService;
 		this.localizationService = localizationService;
 		this.renderingBoPool = renderingBoPool;
 		this.storageService = storageService;
 		this.moveDialogModule = moveDialogModule;
+		this.newFolderDialogModule = newFolderDialogModule;
 	}
 	
 	private Window dialogWindow;
@@ -142,8 +144,6 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	private boolean selectionIsNew;
 	
 	private String nameFieldValue;
-	
-	private String newFolderValue;
 	
 	private final Map<String, List<String>> folderPathByControlId = new HashMap<>();
 	
@@ -189,6 +189,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	public void onShow() {
 		this.eventService.register(UiControlEvent.class, this.getId(), this::onUiControlEvent);
 		this.eventService.register(FileSelectionMoveDialogResponse.class, this.getId(), this::onMoveResponse);
+		this.eventService.register(FileSelectionNewFolderDialogResponse.class, this.getId(), this::onNewFolderResponse);
 		this.getModuleService().changeDisplayState(this.dialogWindow.getId(), true);
 		if (this.modal) {
 			this.getModuleService().hideExcept(this.getId(), this.dialogWindow.getId());
@@ -199,6 +200,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	public void onHide() {
 		this.eventService.unregister(UiControlEvent.class, this.getId());
 		this.eventService.unregister(FileSelectionMoveDialogResponse.class, this.getId());
+		this.eventService.unregister(FileSelectionNewFolderDialogResponse.class, this.getId());
 		this.getModuleService().changeDisplayState(this.dialogWindow.getId(), false);
 		if (this.modal) {
 			this.getModuleService().restoreVisibility();
@@ -217,7 +219,6 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		this.selectedDescriptor = null;
 		this.selectionIsNew = this.mode == FileSelectionMode.SAVE;
 		this.nameFieldValue = initialName != null && !initialName.isBlank() ? initialName.trim() : "";
-		this.newFolderValue = "";
 		this.virtualFolders.clear();
 		this.dialogWindow.setParent(parentWindow);
 		this.applyInitialSelection();
@@ -256,12 +257,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 					this.handleNameChanged(text);
 				}
 			}
-			case NEW_FOLDER_FIELD_ID -> {
-				if (event.getPayload() instanceof final String text) {
-					this.newFolderValue = text;
-				}
-			}
-			case BUTTON_NEW_FOLDER -> this.createFolder();
+			case BUTTON_NEW_FOLDER -> this.openNewFolderDialog();
 			case BUTTON_NEW_ITEM -> this.selectNewItem();
 			case BUTTON_RENAME -> this.renameSelection();
 			case BUTTON_DELETE -> this.deleteSelection();
@@ -355,33 +351,6 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		}
 		yOffset += FIELD_HEIGHT + SPACING;
 		
-		final boolean showFolderField = this.recursive;
-		if (showFolderField) {
-			final var folderLabel = this.renderingBoPool.acquire("FileSelectionDialog_Label_NewFolder", ControlRenderingBo.class)
-					.setType(LabelControl.class)
-					.setCaption(this.localizationService.translate("ecyoa-190") + ":")
-					.setFontSize(18)
-					.setVisible(true)
-					.setEnabled(false)
-					.withDimensionAbsolute(contentWidth, LABEL_HEIGHT)
-					.withPositionRelative(Window.MARGIN_LEFT, yOffset)
-					.setLayer(RenderingBoLayer.UI0);
-			this.dialogWindow.putRenderingBo(folderLabel);
-			yOffset += LABEL_HEIGHT + SPACING / 2;
-			
-			final var folderField = this.renderingBoPool.acquire(NEW_FOLDER_FIELD_ID, ControlRenderingBo.class)
-					.setType(TextfieldControl.class)
-					.setCaption(this.newFolderValue != null ? this.newFolderValue : "")
-					.setControlData(new TextfieldData(false, null))
-					.setVisible(true)
-					.setEnabled(true)
-					.withDimensionAbsolute(contentWidth, FIELD_HEIGHT)
-					.withPositionRelative(Window.MARGIN_LEFT, yOffset)
-					.setLayer(RenderingBoLayer.UI1);
-			this.dialogWindow.putRenderingBo(folderField);
-			yOffset += FIELD_HEIGHT + SPACING;
-		}
-		
 		final var bottomRowY = WINDOW_HEIGHT - Window.MARGIN_BOTTOM - BUTTON_HEIGHT;
 		final var scrollHeight = Math.max(120, bottomRowY - yOffset - SPACING);
 		this.itemsScrollArea.setRelativeArea(new Area2(ImmutableCoordI2.create(Window.MARGIN_LEFT, yOffset), ImmutableCoordI2.create(contentWidth, scrollHeight)));
@@ -422,16 +391,18 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		this.dialogWindow.putRenderingBo(deleteButton);
 		buttonX += BUTTON_WIDTH + SPACING;
 
-		final var moveButton = this.renderingBoPool.acquire(BUTTON_MOVE, ControlRenderingBo.class)
-				.setType(ButtonControl.class)
-				.setCaption(this.localizationService.translate("ecyoa-644"))
-				.setVisible(true)
-				.setEnabled(this.selectedDescriptor != null)
-				.withDimensionAbsolute(BUTTON_WIDTH, BUTTON_HEIGHT)
-				.withPositionRelative(buttonX, bottomRowY)
-				.setLayer(RenderingBoLayer.UI1);
-		this.dialogWindow.putRenderingBo(moveButton);
-		buttonX += BUTTON_WIDTH + SPACING;
+		if (this.recursive) {
+			final var moveButton = this.renderingBoPool.acquire(BUTTON_MOVE, ControlRenderingBo.class)
+					.setType(ButtonControl.class)
+					.setCaption(this.localizationService.translate("ecyoa-644"))
+					.setVisible(true)
+					.setEnabled(this.selectedDescriptor != null)
+					.withDimensionAbsolute(BUTTON_WIDTH, BUTTON_HEIGHT)
+					.withPositionRelative(buttonX, bottomRowY)
+					.setLayer(RenderingBoLayer.UI1);
+			this.dialogWindow.putRenderingBo(moveButton);
+			buttonX += BUTTON_WIDTH + SPACING;
+		}
 
 		final var okButton = this.renderingBoPool.acquire(BUTTON_OK, ControlRenderingBo.class)
 				.setType(ButtonControl.class)
@@ -585,18 +556,47 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		};
 	}
 
-	private void createFolder() {
-		if (!this.canCreateFolder()) {
+	private void openNewFolderDialog() {
+		if (!this.recursive) {
 			return;
 		}
-		final var newPath = this.appendPath(this.currentPath, this.newFolderValue.trim());
-		this.virtualFolders.add(newPath);
-		this.currentPath = newPath;
-		this.newFolderValue = "";
+		this.newFolderDialogModule.open(this.childFolderNames(), this.dialogWindow);
+	}
+
+	private void onNewFolderResponse(final FileSelectionNewFolderDialogResponse event) {
+		if (event == null || !event.confirmed() || event.name() == null || event.name().isBlank()) {
+			return;
+		}
+		final var name = event.name().trim();
+		final var targetPath = this.appendPath(this.currentPath, name);
+		if (this.virtualFolders.contains(targetPath) || this.folderExistsInStorage(name)) {
+			return;
+		}
+		this.virtualFolders.add(targetPath);
+		this.currentPath = targetPath;
 		this.selectedDescriptor = null;
 		this.selectionIsNew = false;
 		this.nameFieldValue = "";
 		this.buildDialog();
+	}
+
+	private Set<String> childFolderNames() {
+		final var names = new HashSet<String>();
+		for (final var descriptor : this.loadDescriptors()) {
+			if (descriptor == null) {
+				continue;
+			}
+			final var path = this.safePath(descriptor.path());
+			if (this.isPathPrefix(this.currentPath, path) && path.size() > this.currentPath.size()) {
+				names.add(path.get(this.currentPath.size()));
+			}
+		}
+		for (final var virtualPath : this.virtualFolders) {
+			if (this.isPathPrefix(this.currentPath, virtualPath) && virtualPath.size() > this.currentPath.size()) {
+				names.add(virtualPath.get(this.currentPath.size()));
+			}
+		}
+		return names;
 	}
 	
 	private void selectNewItem() {
@@ -685,7 +685,6 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		this.selectedDescriptor = null;
 		this.selectionIsNew = false;
 		this.nameFieldValue = "";
-		this.newFolderValue = "";
 		this.virtualFolders.clear();
 		this.folderPathByControlId.clear();
 		this.itemByControlId.clear();
@@ -699,15 +698,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	}
 	
 	private boolean canCreateFolder() {
-		if (!this.recursive) {
-			return false;
-		}
-		if (this.newFolderValue == null || this.newFolderValue.isBlank()) {
-			return false;
-		}
-		final var name = this.newFolderValue.trim();
-		final var targetPath = this.appendPath(this.currentPath, name);
-		return !this.virtualFolders.contains(targetPath) && !this.folderExistsInStorage(name);
+		return this.recursive;
 	}
 	
 	private boolean folderExistsInStorage(final String name) {

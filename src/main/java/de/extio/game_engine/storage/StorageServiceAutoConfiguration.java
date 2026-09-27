@@ -11,6 +11,7 @@ import de.extio.game_engine.i18n.LocalizationService;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.storage.dialog.FileSelectionDialogModule;
 import de.extio.game_engine.storage.dialog.FileSelectionMoveDialogModule;
+import de.extio.game_engine.storage.dialog.FileSelectionNewFolderDialogModule;
 
 @AutoConfiguration
 @ConditionalOnProperty(name = "game-engine.storage.enabled", havingValue = "true", matchIfMissing = true)
@@ -34,7 +35,15 @@ public class StorageServiceAutoConfiguration {
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(name = "game-engine.storage.dialog.enabled", havingValue = "true", matchIfMissing = true)
 	@ConditionalOnProperty(name = "game-engine.renderer.enabled", havingValue = "true", matchIfMissing = true)
-	FileSelectionDialogModule fileSelectionDialog(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool, final StorageService storageService, final FileSelectionMoveDialogModule fileSelectionMoveDialog) {
-		return new FileSelectionDialogModule(applicationContext, eventService, localizationService, renderingBoPool, storageService, fileSelectionMoveDialog);
+	FileSelectionNewFolderDialogModule fileSelectionNewFolderDialog(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool) {
+		return new FileSelectionNewFolderDialogModule(applicationContext, eventService, localizationService, renderingBoPool);
+	}
+	
+	@Bean
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "game-engine.storage.dialog.enabled", havingValue = "true", matchIfMissing = true)
+	@ConditionalOnProperty(name = "game-engine.renderer.enabled", havingValue = "true", matchIfMissing = true)
+	FileSelectionDialogModule fileSelectionDialog(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool, final StorageService storageService, final FileSelectionMoveDialogModule fileSelectionMoveDialog, final FileSelectionNewFolderDialogModule fileSelectionNewFolderDialog) {
+		return new FileSelectionDialogModule(applicationContext, eventService, localizationService, renderingBoPool, storageService, fileSelectionMoveDialog, fileSelectionNewFolderDialog);
 	}
 }
