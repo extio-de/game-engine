@@ -7,6 +7,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -127,6 +128,30 @@ public class StorageServiceImpl implements StorageService {
 	
 	private Path getFilePath(final UUID id) {
 		return DATA_LOCATION.resolve(id.toString());
+	}
+	
+	private StorageItemDescriptor withLastModified(final StorageItemDescriptor descriptor) {
+		if (descriptor == null) {
+			return null;
+		}
+		try {
+			final var lastModified = Files.getLastModifiedTime(this.getFilePath(descriptor.id())).toMillis();
+			return new StorageItemDescriptor(descriptor.id(), descriptor.name(), descriptor.path(), lastModified);
+		}
+		catch (final IOException e) {
+			return descriptor;
+		}
+	}
+	
+	private List<StorageItemDescriptor> withLastModified(final List<StorageItemDescriptor> descriptors) {
+		if (descriptors == null) {
+			return null;
+		}
+		final var result = new ArrayList<StorageItemDescriptor>(descriptors.size());
+		for (final var descriptor : descriptors) {
+			result.add(this.withLastModified(descriptor));
+		}
+		return result;
 	}
 	
 	private void addToIndexAndSave(final UUID id, final String name, final List<String> path) {
@@ -383,29 +408,29 @@ public class StorageServiceImpl implements StorageService {
 	@Override
 	public Optional<StorageItemDescriptor> searchById(final UUID id) {
 		Objects.requireNonNull(id, "id");
-		return this.index.getById(id);
+		return this.index.getById(id).map(this::withLastModified);
 	}
 	
 	@Override
 	public Optional<StorageItemDescriptor> searchByPath(final List<String> path, final String name) {
 		Objects.requireNonNull(name, "name");
-		return this.index.find(path, name);
+		return this.index.find(path, name).map(this::withLastModified);
 	}
 	
 	@Override
 	public List<StorageItemDescriptor> searchByPattern(final List<String> basePath, final String pattern, final boolean recursive) {
 		Objects.requireNonNull(pattern, "pattern");
-		return this.index.findByFilenamePattern(basePath, pattern, recursive);
+		return this.withLastModified(this.index.findByFilenamePattern(basePath, pattern, recursive));
 	}
 	
 	@Override
 	public List<StorageItemDescriptor> listPath(final List<String> path, final boolean recursive) {
-		return this.index.list(path, recursive);
+		return this.withLastModified(this.index.list(path, recursive));
 	}
 	
 	@Override
 	public List<StorageItemDescriptor> listAll() {
-		return this.index.listAll();
+		return this.withLastModified(this.index.listAll());
 	}
 	
 }

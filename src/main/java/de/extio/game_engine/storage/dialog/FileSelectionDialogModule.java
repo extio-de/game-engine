@@ -37,6 +37,7 @@ import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 import de.extio.game_engine.storage.StorageItemDescriptor;
 import de.extio.game_engine.storage.StorageResource;
 import de.extio.game_engine.storage.StorageService;
+import de.extio.game_engine.storage.dialog.FileSelectionMoveDialogModule.FileSelectionMoveDialogResponse;
 
 public class FileSelectionDialogModule extends AbstractClientModule {
 	
@@ -91,6 +92,8 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	
 	private static final String BUTTON_DELETE = "FileSelectionDialog_Button_Delete";
 	
+	private static final String BUTTON_MOVE = "FileSelectionDialog_Button_Move";
+	
 	private static final String BUTTON_OK = "FileSelectionDialog_Button_Ok";
 	
 	private static final String BUTTON_CANCEL = "FileSelectionDialog_Button_Cancel";
@@ -105,12 +108,15 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	
 	private final StorageService storageService;
 
-	public FileSelectionDialogModule(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool, final StorageService storageService) {
+	private final FileSelectionMoveDialogModule moveDialogModule;
+
+	public FileSelectionDialogModule(final ApplicationContext applicationContext, final EventService eventService, final LocalizationService localizationService, final RenderingBoPool renderingBoPool, final StorageService storageService, final FileSelectionMoveDialogModule moveDialogModule) {
 		this.applicationContext = applicationContext;
 		this.eventService = eventService;
 		this.localizationService = localizationService;
 		this.renderingBoPool = renderingBoPool;
 		this.storageService = storageService;
+		this.moveDialogModule = moveDialogModule;
 	}
 	
 	private Window dialogWindow;
@@ -182,6 +188,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	@Override
 	public void onShow() {
 		this.eventService.register(UiControlEvent.class, this.getId(), this::onUiControlEvent);
+		this.eventService.register(FileSelectionMoveDialogResponse.class, this.getId(), this::onMoveResponse);
 		this.getModuleService().changeDisplayState(this.dialogWindow.getId(), true);
 		if (this.modal) {
 			this.getModuleService().hideExcept(this.getId(), this.dialogWindow.getId());
@@ -191,6 +198,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	@Override
 	public void onHide() {
 		this.eventService.unregister(UiControlEvent.class, this.getId());
+		this.eventService.unregister(FileSelectionMoveDialogResponse.class, this.getId());
 		this.getModuleService().changeDisplayState(this.dialogWindow.getId(), false);
 		if (this.modal) {
 			this.getModuleService().restoreVisibility();
@@ -257,6 +265,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 			case BUTTON_NEW_ITEM -> this.selectNewItem();
 			case BUTTON_RENAME -> this.renameSelection();
 			case BUTTON_DELETE -> this.deleteSelection();
+			case BUTTON_MOVE -> this.openMoveDialog();
 			case BUTTON_OK -> this.onOk();
 			case BUTTON_CANCEL -> this.onCancel();
 			default -> {
@@ -346,7 +355,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		}
 		yOffset += FIELD_HEIGHT + SPACING;
 		
-		final boolean showFolderField = this.recursive && this.mode != FileSelectionMode.LOAD;
+		final boolean showFolderField = this.recursive;
 		if (showFolderField) {
 			final var folderLabel = this.renderingBoPool.acquire("FileSelectionDialog_Label_NewFolder", ControlRenderingBo.class)
 					.setType(LabelControl.class)
@@ -379,7 +388,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		this.buildItemsList(contentWidth);
 
 		var buttonX = Window.MARGIN_LEFT;
-		if (this.mode != FileSelectionMode.LOAD && this.recursive) {
+		if (this.recursive) {
 			final var newFolderButton = this.renderingBoPool.acquire(BUTTON_NEW_FOLDER, ControlRenderingBo.class)
 					.setType(ButtonControl.class)
 					.setCaption(this.localizationService.translate("ecyoa-190"))
@@ -411,6 +420,17 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 				.withPositionRelative(buttonX, bottomRowY)
 				.setLayer(RenderingBoLayer.UI1);
 		this.dialogWindow.putRenderingBo(deleteButton);
+		buttonX += BUTTON_WIDTH + SPACING;
+
+		final var moveButton = this.renderingBoPool.acquire(BUTTON_MOVE, ControlRenderingBo.class)
+				.setType(ButtonControl.class)
+				.setCaption(this.localizationService.translate("ecyoa-644"))
+				.setVisible(true)
+				.setEnabled(this.selectedDescriptor != null)
+				.withDimensionAbsolute(BUTTON_WIDTH, BUTTON_HEIGHT)
+				.withPositionRelative(buttonX, bottomRowY)
+				.setLayer(RenderingBoLayer.UI1);
+		this.dialogWindow.putRenderingBo(moveButton);
 		buttonX += BUTTON_WIDTH + SPACING;
 
 		final var okButton = this.renderingBoPool.acquire(BUTTON_OK, ControlRenderingBo.class)
@@ -464,7 +484,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		}
 		
 		final var sortedFolders = folderNames.stream().sorted(String::compareToIgnoreCase).toList();
-		currentItems.sort(Comparator.comparing(StorageItemDescriptor::name, String.CASE_INSENSITIVE_ORDER));
+		currentItems.sort(this.timestampThenNameComparator());
 		
 		final var entries = new ArrayList<DisplayEntry>();
 		if (this.recursive && this.currentPath.size() > this.basePath.size()) {
@@ -547,7 +567,24 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		}
 		return this.storageService.listPath(queryPath, this.recursive);
 	}
-	
+
+	private Comparator<StorageItemDescriptor> timestampThenNameComparator() {
+		return (a, b) -> {
+			final var timestampA = a.lastModified();
+			final var timestampB = b.lastModified();
+			if (timestampA != null && timestampB != null && !timestampA.equals(timestampB)) {
+				return Long.compare(timestampB, timestampA);
+			}
+			if (timestampA != null) {
+				return -1;
+			}
+			if (timestampB != null) {
+				return 1;
+			}
+			return String.CASE_INSENSITIVE_ORDER.compare(a.name(), b.name());
+		};
+	}
+
 	private void createFolder() {
 		if (!this.canCreateFolder()) {
 			return;
@@ -594,7 +631,25 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		this.nameFieldValue = "";
 		this.buildDialog();
 	}
-	
+
+	private void openMoveDialog() {
+		if (this.selectedDescriptor == null) {
+			return;
+		}
+		this.moveDialogModule.open(this.selectedDescriptor, this.basePath, this.dialogWindow);
+	}
+
+	private void onMoveResponse(final FileSelectionMoveDialogResponse event) {
+		if (event == null || !event.confirmed() || this.requestId == null || this.selectedDescriptor == null || event.targetPath() == null) {
+			return;
+		}
+		this.storageService.moveById(this.selectedDescriptor.id(), event.targetPath(), this.selectedDescriptor.name());
+		this.selectedDescriptor = null;
+		this.selectionIsNew = false;
+		this.nameFieldValue = "";
+		this.buildDialog();
+	}
+
 	private void onOk() {
 		if (!this.canConfirm()) {
 			return;
@@ -609,7 +664,9 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	}
 	
 	private void onCancel() {
-		this.eventService.fire(new FileSelectionDialogResponse(this.requestId, false, this.mode, null, null, null, null, false));
+		if (this.requestId != null) {
+			this.eventService.fire(new FileSelectionDialogResponse(this.requestId, false, this.mode, null, null, null, null, false));
+		}
 		this.close();
 	}
 	
@@ -642,7 +699,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	}
 	
 	private boolean canCreateFolder() {
-		if (!this.recursive || this.mode == FileSelectionMode.LOAD) {
+		if (!this.recursive) {
 			return false;
 		}
 		if (this.newFolderValue == null || this.newFolderValue.isBlank()) {
