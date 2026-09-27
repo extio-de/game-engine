@@ -94,7 +94,7 @@ public class ScrollArea implements WindowComponent {
 				return;
 			}
 			
-			final double scrollIncrement = Math.max(0.00001, Math.min(1.0, (double)this.relativeArea.getDimension().getY() / this.contentDimension.getY() / 5));
+			final double scrollIncrement = Math.max(0.00001, Math.min(1.0, (double)this.relativeArea.getDimension().getY() / this.contentDimension.getY() / 14.0));
 			final double delta = event.getButton() == 4 ? scrollIncrement : -scrollIncrement;
 			this.updateVerticalScrollPosition(this.scrollPositionVertical + delta, true);
 			this.parent.draw();
