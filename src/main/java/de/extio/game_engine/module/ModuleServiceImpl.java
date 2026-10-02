@@ -306,7 +306,9 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 			}
 			
 			for (final AbstractClientModule module : this.lastVisibleStates.pop()) {
-				this.changeDisplayState(module.getId(), true);
+				if (this.modulesActiveClientModulesView.contains(module)) {
+					this.changeDisplayState(module.getId(), true);
+				}
 			}
 		}
 	}
