@@ -14,12 +14,15 @@ public class RenderingBoLayer {
 	public static final short FOREGROUND5 = 1500;
 	public static final short FOREGROUND6 = 1600;
 
+	// Note: UI repeats layers per z-index up to TOP; Each layer can freely use the z-index range between its base UI_BGR and the next layer's base UI_TOP+1. The engine will translate the z-index to the correct range for rendering.
 	public static final short UI_BGR = 2000;
 	public static final short UI0 = 2100;
-	public static final short UI1 = 2200;
-	public static final short UI2 = 2300;
+	public static final short UI1 = 2150;
+	public static final short UI2 = 2200;
+	public static final short UI3 = 2250;
+	public static final short UI4 = 2300;
+	public static final short UI5 = 2350;
 	public static final short UI_TOP = 2499;
-	// Note: UI repeats layers per z-index up to TOP
 
 	public static final short TOP = 32000;
 
