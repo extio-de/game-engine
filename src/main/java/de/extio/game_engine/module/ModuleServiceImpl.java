@@ -3,12 +3,12 @@ package de.extio.game_engine.module;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.EnumMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Stack;
+import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
 import org.slf4j.Logger;
@@ -50,7 +50,7 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 	
 	private final Map<ModuleExecutorCallbacks, List<AbstractModule>> executorCallbackMap = Collections.synchronizedMap(new EnumMap<>(ModuleExecutorCallbacks.class));
 	
-	public ModuleServiceImpl(ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet, final EventService eventService) {
+	public ModuleServiceImpl(final ApplicationContext applicationContext, final RendererWorkingSet rendererWorkingSet, final EventService eventService) {
 		this.applicationContext = applicationContext;
 		this.rendererWorkingSet = rendererWorkingSet;
 		this.eventService = eventService;
@@ -58,7 +58,7 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 
 	
 	@Override
-	public void onApplicationEvent(ContextRefreshedEvent event) {
+	public void onApplicationEvent(final ContextRefreshedEvent event) {
 		final var modulesInitial = this.applicationContext.getBeansOfType(AbstractModule.class, false, false);
 		if (modulesInitial == null || modulesInitial.isEmpty()) {
 			return;
@@ -300,11 +300,11 @@ public class ModuleServiceImpl implements ModuleService, ApplicationListener<Con
 	
 	@Override
 	public void restoreVisibility() {
-		if (this.lastVisibleStates.isEmpty()) {
-			return;
-		}
-		
 		synchronized (this.lastVisibleStates) {
+			if (this.lastVisibleStates.isEmpty()) {
+				return;
+			}
+			
 			for (final AbstractClientModule module : this.lastVisibleStates.pop()) {
 				this.changeDisplayState(module.getId(), true);
 			}
