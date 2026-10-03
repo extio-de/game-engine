@@ -1,5 +1,6 @@
 package de.extio.game_engine.renderer.container;
 
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
@@ -38,15 +39,15 @@ public class ScrollArea implements WindowComponent {
 	
 	protected final MutableCoordI2 contentDimension = MutableCoordI2.create();
 	
-	protected final Set<String> renderingBoIds = new HashSet<>();
+	protected final Set<String> renderingBoIds = Collections.synchronizedSet(new HashSet<>());
 	
 	protected final Area2 relativeArea = new Area2(ImmutableCoordI2.zero(), ImmutableCoordI2.one());
 	
 	protected Window parent;
 	
-	protected double scrollPositionVertical = 1.0;
+	protected double scrollPositionVertical = 1.0; // 1.0 = top, 0.0 = bottom
 	
-	protected double scrollPositionHorizontal = 0.0;
+	protected double scrollPositionHorizontal = 0.0; // 0.0 = left, 1.0 = right
 
 	protected int verticalScrollInputRevision = 0;
 	
@@ -180,6 +181,11 @@ public class ScrollArea implements WindowComponent {
 		this.parent.removeRenderingBo(renderingBoId);
 	}
 	
+	/**
+	 * Returns the vertical scroll position of this scroll area.
+	 * 
+	 * @return the vertical scroll position, where 1.0 is the top and 0.0 is the bottom
+	 */
 	public double getScrollPositionVertical() {
 		return this.scrollPositionVertical;
 	}
@@ -212,6 +218,11 @@ public class ScrollArea implements WindowComponent {
 		this.draw();
 	}
 	
+	/**
+	 * Sets the vertical scroll position of this scroll area.
+	 * 
+	 * @param scrollPositionVertical the vertical scroll position, where 1.0 is the top and 0.0 is the bottom
+	 */
 	public void setScrollPositionVertical(final double scrollPositionVertical) {
 		this.updateVerticalScrollPosition(scrollPositionVertical, false);
 		this.draw();
