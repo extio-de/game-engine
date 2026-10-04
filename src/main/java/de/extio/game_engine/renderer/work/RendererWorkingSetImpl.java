@@ -18,6 +18,8 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	
 	private final ConcurrentMap<String, RendererWork> workingSet = new ConcurrentHashMap<>();
 	
+	private final ConcurrentMap<String, Object> commitLocks = new ConcurrentHashMap<>();
+	
 	private final BlockingQueue<Map<String, RenderingBo>> mapsPool = new ArrayBlockingQueue<>(100);
 	
 	private final RenderingBoPool rendererBoPool;
@@ -82,7 +84,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	public RenderingBo get(final String producerId, final String id) {
 		final var next = this.getWorkingSetByProducer(producerId).next();
 		synchronized (next) {
-			final var bo = this.getWorkingSetByProducer(producerId).next().get(id);
+			final var bo = next.get(id);
 			if (bo == null) {
 				return null;
 			}
@@ -99,7 +101,7 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	public <T extends RenderingBo> T get(final String producerId, final String id, final Class<T> type) {
 		final var next = this.getWorkingSetByProducer(producerId).next();
 		synchronized (next) {
-			final RenderingBo bo = this.getWorkingSetByProducer(producerId).next().get(id);
+			final RenderingBo bo = next.get(id);
 			if (bo == null) {
 				return null;
 			}
@@ -123,38 +125,38 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	
 	@Override
 	public Map<String, RenderingBo> commit(final String producerId, final boolean clone) {
-		final AtomicReference<Map<String, RenderingBo>> previousLiveRef = new AtomicReference<>();
-		final RendererWork rendererWork = this.workingSet.compute(producerId, (k, v) -> {
-			if (v == null) {
-				return new RendererWork(this.obtainMapFromPool(), this.obtainMapFromPool());
-			}
-			previousLiveRef.set(v.live());
-			if (clone) {
-				final Map<String, RenderingBo> newNext = this.obtainMapFromPool();
-				synchronized (v.next()) {
-					v.next().entrySet().forEach(e -> {
-						final RenderingBo copy = this.rendererBoPool.copy(e.getValue());
-						newNext.put(e.getKey(), copy);
-					});
+		synchronized (this.commitLockFor(producerId)) {
+			final AtomicReference<RendererWork> previousWorkRef = new AtomicReference<>();
+			final RendererWork rendererWork = this.workingSet.compute(producerId, (k, v) -> {
+				if (v == null) {
+					return new RendererWork(this.obtainMapFromPool(), this.obtainMapFromPool());
 				}
-				return new RendererWork(v.next(), newNext);
-			}
-			else {
+				previousWorkRef.set(v);
 				return new RendererWork(v.next(), this.obtainMapFromPool());
-			}
-		});
-		
-		final var previousLiveSet = previousLiveRef.get();
-		if (previousLiveSet != null) {
-			if (clone) {
-				synchronized (previousLiveSet) {
-					previousLiveSet.values().forEach(this.rendererBoPool::returnToPool);
+			});
+			
+			final var previousWork = previousWorkRef.get();
+			if (previousWork != null) {
+				if (clone) {
+					final var oldNext = previousWork.next();
+					synchronized (oldNext) {
+						oldNext.entrySet().forEach(e -> {
+							final RenderingBo copy = this.rendererBoPool.copy(e.getValue());
+							rendererWork.next().put(e.getKey(), copy);
+						});
+					}
 				}
+				final var previousLiveSet = previousWork.live();
+				if (clone) {
+					synchronized (previousLiveSet) {
+						previousLiveSet.values().forEach(this.rendererBoPool::returnToPool);
+					}
+				}
+				this.returnMapToPool(previousLiveSet);
 			}
-			this.returnMapToPool(previousLiveSet);
+			
+			return rendererWork.next();
 		}
-		
-		return rendererWork.next();
 	}
 	
 	@Override
@@ -168,15 +170,18 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	
 	@Override
 	public void clear(final String producerId) {
-		final RendererWork rendererWork = this.workingSet.remove(producerId);
-		if (rendererWork != null) {
-			synchronized (rendererWork.live()) {
-				rendererWork.live().values().forEach(this.rendererBoPool::returnToPool);
-			}
-			synchronized (rendererWork.next()) {
-				rendererWork.next().values().forEach(this.rendererBoPool::returnToPool);
+		synchronized (this.commitLockFor(producerId)) {
+			final RendererWork rendererWork = this.workingSet.remove(producerId);
+			if (rendererWork != null) {
+				synchronized (rendererWork.live()) {
+					rendererWork.live().values().forEach(this.rendererBoPool::returnToPool);
+				}
+				synchronized (rendererWork.next()) {
+					rendererWork.next().values().forEach(this.rendererBoPool::returnToPool);
+				}
 			}
 		}
+		this.commitLocks.remove(producerId);
 	}
 	
 	@Override
@@ -192,6 +197,10 @@ public class RendererWorkingSetImpl implements RendererWorkingSet {
 	
 	private RendererWork getWorkingSetByProducer(final String producerId) {
 		return this.workingSet.computeIfAbsent(producerId, k -> new RendererWork(this.obtainMapFromPool(), this.obtainMapFromPool()));
+	}
+	
+	private Object commitLockFor(final String producerId) {
+		return this.commitLocks.computeIfAbsent(producerId, k -> new Object());
 	}
 	
 	private Map<String, RenderingBo> obtainMapFromPool() {
