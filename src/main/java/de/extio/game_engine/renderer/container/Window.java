@@ -240,7 +240,7 @@ public class Window extends AbstractClientModule implements InitializingBean {
 		if (this.area.getPosition().getX() + this.area.getDimension().getX() < 0 || this.area.getPosition().getY() + this.area.getDimension().getY() < 0) {
 			return;
 		}
-		if (this.area.getPosition().getX() > this.rendererControl.getAbsoluteViewportDimension().getX() || this.area.getPosition().getY() > this.rendererControl.getAbsoluteViewportDimension().getY()) {
+		if (this.area.getPosition().getX() > this.rendererControl.getEffectiveViewportDimension().getX() || this.area.getPosition().getY() > this.rendererControl.getEffectiveViewportDimension().getY()) {
 			return;
 		}
 		
