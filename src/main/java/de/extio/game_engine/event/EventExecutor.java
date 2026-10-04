@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class EventExecutor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventExecutor.class);
-	private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4); //Executors.newVirtualThreadPerTaskExecutor();
+	private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final BlockingQueue<QueuedEvent> eventQueue = new LinkedBlockingQueue<>();
 	
