@@ -8,6 +8,7 @@ import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 
 import de.extio.game_engine.renderer.RendererControl;
 import de.extio.game_engine.renderer.RendererData;
@@ -18,13 +19,17 @@ import de.extio.game_engine.renderer.model.options.VideoOptions.VideoOptionsVide
 import de.extio.game_engine.spatial2.model.CoordI2;
 import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
-public class G2DRendererControl implements RendererControl {
+public class G2DRendererControl implements RendererControl, DisposableBean {
 	
 	protected static final Logger LOGGER = LoggerFactory.getLogger(G2DRendererControl.class);
 	
 	// private final static CoordI2 NO_SCALING_UPPER_LIMIT = ImmutableCoordI2.create(2560, 1440);
 	private final static CoordI2 NO_SCALING_UPPER_LIMIT = RendererControl.REFERENCE_RESOLUTION;
 	
+	private final Thread resizeProcessorThread;
+
+	private volatile ResizeQueuedEvent resizeQueuedEvent;
+
 	private final G2DRenderer renderer;
 	
 	private RendererData rendererData;
@@ -45,8 +50,40 @@ public class G2DRendererControl implements RendererControl {
 	
 	public G2DRendererControl(final G2DRenderer renderer) {
 		this.renderer = renderer;
+		this.resizeProcessorThread = Thread.ofPlatform()
+				.daemon(true)
+				.name("Resize-Processor")
+				.start(() -> {
+					long lastResizeEventMillis = 0;
+					while (!Thread.currentThread().isInterrupted()) {
+						try {
+							Thread.sleep(100);
+
+							synchronized (this) {
+								if (this.resizeQueuedEvent == null) {
+									continue;
+								}
+								final var currentMillis = System.currentTimeMillis();
+								if (this.resizeQueuedEvent.millis() + 500 < currentMillis || lastResizeEventMillis < currentMillis) {
+									this.resizeQueuedEvent = null;
+									lastResizeEventMillis = currentMillis;
+									this.updateViewPort(true, false);
+								}
+							}
+						}
+						catch (final InterruptedException e) {
+							Thread.currentThread().interrupt();
+							break;
+						}
+					}
+				});
 	}
 	
+	@Override
+	public void destroy() throws Exception {
+		resizeProcessorThread.interrupt();
+	}
+
 	@Override
 	public void setTitle(final String title) {
 		this.renderer.setTitle(title);
@@ -221,9 +258,9 @@ public class G2DRendererControl implements RendererControl {
 		
 		if (async) {
 			// EventQueue.invokeLater(run); // Using EventQueue here can clutter the AWT event queue with too many events when resizing on a system with high event rate
-			Thread.ofVirtual()
-				.name("G2DRendererControl-ViewportUpdater", 0)
-				.start(run);
+			synchronized (this) {
+				this.resizeQueuedEvent = new ResizeQueuedEvent(System.currentTimeMillis());
+			}
 		}
 		else {
 			run.run();
@@ -312,5 +349,8 @@ public class G2DRendererControl implements RendererControl {
 	}
 	
 	private static record G2DRendererControlOptions(double scaleFactorModifier) {
+	}
+
+	private static record ResizeQueuedEvent(long millis) {
 	}
 }
