@@ -223,6 +223,9 @@ public abstract class G2DBaseControlImpl implements BaseControl {
 				final var visibleArea = new Area2(ImmutableCoordI2.create(this.visibleAreaX, this.visibleAreaY), ImmutableCoordI2.create(this.visibleAreaWidth, this.visibleAreaHeight));
 				final var intersection = SpatialUtils2.intersectAreas(controlArea, visibleArea);
 				if (intersection != null) {
+
+					// FIXME: Although only the intersection is drawn, the underlying AWT component (to register clicks, etc.) is still the full size of the control for most controls. Only few controls handle resizing of the AWT component at the current time.
+
 					this.mainFrameGraphics.drawImage(
 							this.bufferedImage,
 							intersection.getPosition().getX(),
