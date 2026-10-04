@@ -14,7 +14,7 @@ import org.slf4j.LoggerFactory;
 public class ModuleExecutorImpl implements ModuleExecutor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleExecutorImpl.class);
-	private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+	private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4); // Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final ModuleService moduleManager;
 	

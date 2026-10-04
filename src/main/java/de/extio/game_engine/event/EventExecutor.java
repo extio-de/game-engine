@@ -3,8 +3,8 @@ package de.extio.game_engine.event;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
-import java.util.concurrent.Callable;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -16,7 +16,7 @@ import org.slf4j.LoggerFactory;
 public class EventExecutor {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventExecutor.class);
-	private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+	private static final ExecutorService EXECUTOR = Executors.newFixedThreadPool(4); //Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final BlockingQueue<QueuedEvent> eventQueue = new LinkedBlockingQueue<>();
 	
