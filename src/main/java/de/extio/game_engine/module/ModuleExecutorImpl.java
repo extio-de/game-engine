@@ -10,16 +10,23 @@ import java.util.function.Function;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 
-public class ModuleExecutorImpl implements ModuleExecutor {
+public class ModuleExecutorImpl implements ModuleExecutor, DisposableBean {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ModuleExecutorImpl.class);
-	private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+	
+	private final ExecutorService executor = Executors.newFixedThreadPool(4); // Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final ModuleService moduleManager;
 	
 	public ModuleExecutorImpl(final ModuleService moduleManager) {
 		this.moduleManager = moduleManager;
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		this.executor.shutdownNow();	
 	}
 	
 	@Override
@@ -72,7 +79,7 @@ public class ModuleExecutorImpl implements ModuleExecutor {
 		}
 
 		try {
-			EXECUTOR.invokeAll(tasks);
+			executor.invokeAll(tasks);
 		}
 		catch (final InterruptedException e) {
 			Thread.currentThread().interrupt();

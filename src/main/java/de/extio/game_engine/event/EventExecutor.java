@@ -12,15 +12,16 @@ import java.util.function.Consumer;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.DisposableBean;
 
-public class EventExecutor {
+public class EventExecutor implements DisposableBean {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(EventExecutor.class);
-	private static final ExecutorService EXECUTOR = Executors.newVirtualThreadPerTaskExecutor();
+	
+	private final ExecutorService executor = Executors.newFixedThreadPool(4); //Executors.newVirtualThreadPerTaskExecutor();
 	
 	private final BlockingQueue<QueuedEvent> eventQueue = new LinkedBlockingQueue<>();
 	
-	@SuppressWarnings("unused")
 	private final Thread processorThread;
 	
 	private final EventHandlerRegistry registry;
@@ -43,6 +44,12 @@ public class EventExecutor {
 						}
 					}
 				});
+	}
+
+	@Override
+	public void destroy() throws Exception {
+		this.processorThread.interrupt();
+		this.executor.shutdownNow();
 	}
 	
 	public void submit(final Event event) {
@@ -79,7 +86,7 @@ public class EventExecutor {
 						});
 					}
 					try {
-						for (final var future : EXECUTOR.invokeAll(tasks)) {
+						for (final var future : executor.invokeAll(tasks)) {
 							try {
 								future.get();
 							}
