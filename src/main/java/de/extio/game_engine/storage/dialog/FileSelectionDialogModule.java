@@ -692,7 +692,7 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	}
 	
 	private void clearScrollArea() {
-		for (final var boId : this.itemsScrollArea.getRenderingBoIds().toArray(new String[0])) {
+		for (final var boId : this.itemsScrollArea.getRenderingBoIds()) {
 			this.itemsScrollArea.removeRenderingBo(boId);
 		}
 	}

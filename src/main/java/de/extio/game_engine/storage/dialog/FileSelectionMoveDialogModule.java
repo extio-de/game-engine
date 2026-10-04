@@ -357,7 +357,7 @@ public class FileSelectionMoveDialogModule extends AbstractClientModule {
 	}
 
 	private void clearScrollArea() {
-		for (final var boId : this.folderScrollArea.getRenderingBoIds().toArray(new String[0])) {
+		for (final var boId : this.folderScrollArea.getRenderingBoIds()) {
 			this.folderScrollArea.removeRenderingBo(boId);
 		}
 	}

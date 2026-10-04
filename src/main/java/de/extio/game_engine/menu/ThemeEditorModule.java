@@ -222,7 +222,7 @@ public class ThemeEditorModule extends AbstractClientModule implements OptionsTh
 	
 	private void setupEditor() {
 		this.editorWindow.clearRenderingBos();
-		for (final var boId : this.scrollArea.getRenderingBoIds().toArray(new String[0])) {
+		for (final var boId : this.scrollArea.getRenderingBoIds()) {
 			this.scrollArea.removeRenderingBo(boId);
 		}
 		this.colorSlotByControlId.clear();

@@ -134,7 +134,7 @@ public class OptionsModule extends AbstractClientModule implements OptionsModule
 
 	@Override
 	public void refreshContent() {
-		for (final var boId : this.contentScrollArea.getRenderingBoIds().toArray(new String[0])) {
+		for (final var boId : this.contentScrollArea.getRenderingBoIds()) {
 			this.contentScrollArea.removeRenderingBo(boId);
 		}
 		for (final var tab : this.tabs) {

@@ -2,6 +2,7 @@ package de.extio.game_engine.renderer.container;
 
 import java.util.Collections;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Objects;
 import java.util.Set;
 
@@ -40,16 +41,20 @@ public class ScrollArea implements WindowComponent {
 	protected final MutableCoordI2 contentDimension = MutableCoordI2.create();
 	
 	protected final Set<String> renderingBoIds = Collections.synchronizedSet(new HashSet<>());
+
+	protected volatile Set<String> renderingBoIdsView = null;
+
+	protected volatile boolean renderingBoIdsViewDirty = true;
 	
 	protected final Area2 relativeArea = new Area2(ImmutableCoordI2.zero(), ImmutableCoordI2.one());
 	
-	protected Window parent;
+	protected volatile Window parent;
 	
-	protected double scrollPositionVertical = 1.0; // 1.0 = top, 0.0 = bottom
+	protected volatile double scrollPositionVertical = 1.0; // 1.0 = top, 0.0 = bottom
 	
-	protected double scrollPositionHorizontal = 0.0; // 0.0 = left, 1.0 = right
-
-	protected int verticalScrollInputRevision = 0;
+	protected volatile double scrollPositionHorizontal = 0.0; // 0.0 = left, 1.0 = right
+	
+	protected volatile int verticalScrollInputRevision = 0;
 	
 	public ScrollArea(final RenderingBoPool renderingBoPool, final EventService eventService) {
 		this.renderingBoPool = renderingBoPool;
@@ -95,7 +100,7 @@ public class ScrollArea implements WindowComponent {
 				return;
 			}
 			
-			final double scrollIncrement = Math.max(0.00001, Math.min(1.0, (double)this.relativeArea.getDimension().getY() / this.contentDimension.getY() / 14.0));
+			final double scrollIncrement = Math.max(0.00001, Math.min(1.0, (double) this.relativeArea.getDimension().getY() / this.contentDimension.getY() / 14.0));
 			final double delta = event.getButton() == 4 ? scrollIncrement : -scrollIncrement;
 			this.updateVerticalScrollPosition(this.scrollPositionVertical + delta, true);
 			this.parent.draw();
@@ -169,15 +174,17 @@ public class ScrollArea implements WindowComponent {
 	
 	public void putRenderingBo(final RenderingBo renderingBo) {
 		this.renderingBoIds.add(renderingBo.getId());
+		this.renderingBoIdsViewDirty = true;
 		this.parent.putRenderingBo(renderingBo);
 	}
-
+	
 	public <T extends RenderingBo> T getRenderingBo(final String renderingBoId, final Class<T> type) {
 		return this.parent.getRenderingBo(renderingBoId, type);
 	}
 	
 	public void removeRenderingBo(final String renderingBoId) {
 		this.renderingBoIds.remove(renderingBoId);
+		this.renderingBoIdsViewDirty = true;
 		this.parent.removeRenderingBo(renderingBoId);
 	}
 	
@@ -189,7 +196,7 @@ public class ScrollArea implements WindowComponent {
 	public double getScrollPositionVertical() {
 		return this.scrollPositionVertical;
 	}
-
+	
 	public int getVerticalScrollOffset() {
 		final int maxOffset = this.getMaxVerticalScrollOffset();
 		if (maxOffset <= 0) {
@@ -197,15 +204,15 @@ public class ScrollArea implements WindowComponent {
 		}
 		return (int) ((1.0 - this.scrollPositionVertical) * maxOffset);
 	}
-
+	
 	public int getMaxVerticalScrollOffset() {
 		return Math.max(0, this.contentDimension.getY() - this.relativeArea.getDimension().getY() + SCROLLBAR_WIDTH_WITH_MARGIN);
 	}
-
+	
 	public int getVerticalScrollInputRevision() {
 		return this.verticalScrollInputRevision;
 	}
-
+	
 	public void setVerticalScrollOffset(final int verticalScrollOffset) {
 		final int maxOffset = this.getMaxVerticalScrollOffset();
 		if (maxOffset <= 0) {
@@ -227,7 +234,7 @@ public class ScrollArea implements WindowComponent {
 		this.updateVerticalScrollPosition(scrollPositionVertical, false);
 		this.draw();
 	}
-
+	
 	protected void updateVerticalScrollPosition(final double scrollPositionVertical, final boolean userInput) {
 		final double clampedScrollPositionVertical = Math.max(0.0, Math.min(1.0, scrollPositionVertical));
 		if (userInput && Double.compare(clampedScrollPositionVertical, this.scrollPositionVertical) != 0) {
@@ -263,9 +270,21 @@ public class ScrollArea implements WindowComponent {
 		this.relativeArea.setDimension(relativeArea.getDimension().toImmutableCoordI2());
 	}
 	
+	/**
+	 * Returns an immutable copy of the rendering BO IDs currently in this scroll area.
+	 *
+	 * @return an immutable {@link List} containing all rendering BO IDs; safe to iterate
+	 *         while the scroll area is being modified
+	 */
 	@Override
 	public Set<String> getRenderingBoIds() {
-		return this.renderingBoIds;
+		synchronized (this.renderingBoIds) {
+			if (this.renderingBoIdsViewDirty) {
+				this.renderingBoIdsView = Collections.unmodifiableSet(new HashSet<>(this.renderingBoIds));
+				this.renderingBoIdsViewDirty = false;
+			}
+			return this.renderingBoIdsView;
+		}
 	}
 	
 	@Override
