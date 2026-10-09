@@ -22,10 +22,14 @@ import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonData;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.LabelData;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.MultiLineTextAreaControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.MultiLineTextAreaData;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.PopupMenuControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.PopupMenuData;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.PopupMenuItem;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.SwitchControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldControl;
+import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.TextfieldData;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonControl;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBo;
 import de.extio.game_engine.renderer.model.bo.DrawEffectRenderingBoEffects;
@@ -85,8 +89,9 @@ public class DemoModule extends AbstractClientModule {
 		this.mainWindow.setDraggable(true);
 		
 		this.secondaryWindow = this.applicationContext.getBean(Window.class);
-		this.secondaryWindow.setNormalizedDimension(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2));
-		this.secondaryWindow.setNormalizedPosition(centeredPosition(this.secondaryWindow.getNormalizedDimension()));
+		final var secondaryWindowDimension = ImmutableCoordI2.create(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).getX(), 430);
+		this.secondaryWindow.setNormalizedDimension(secondaryWindowDimension);
+		this.secondaryWindow.setNormalizedPosition(centeredPosition(secondaryWindowDimension));
 		this.secondaryWindow.setDraggable(true);
 		this.secondaryWindow.setCloseButton(true);
 		this.secondaryWindow.setParent(this.mainWindow);
@@ -385,12 +390,36 @@ public class DemoModule extends AbstractClientModule {
 	}
 	
 	private void setupSecondaryWindow() {
+		final var contentWidth = RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX();
+		
 		var bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Text", DrawFontRenderingBo.class)
 				.setText(this.localizationService.translate("test-5").replace("\\n", "\n"))
 				.setSize(32)
 				.setAlignment(HorizontalAlignment.CENTER)
-				.withDimensionAbsolute(RendererControl.REFERENCE_RESOLUTION.divide(7).multiply(2).substract(Window.MARGIN_LEFT + Window.MARGIN_RIGHT).getX(), 40)
+				.withDimensionAbsolute(contentWidth, 40)
 				.withPositionRelative(Window.MARGIN_LEFT, 50);
+		this.secondaryWindow.putRenderingBo(bo);
+		
+		bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Textfield", ControlRenderingBo.class)
+				.setCaption("Lorem ipsum dolor sit amet, consetetur sadipscing elitr")
+				.setFontSize(24)
+				.setType(TextfieldControl.class)
+				.setControlData(new TextfieldData(false, null))
+				.setVisible(true)
+				.setEnabled(true)
+				.withDimensionAbsolute(contentWidth, 44)
+				.withPositionRelative(Window.MARGIN_LEFT, 110);
+		this.secondaryWindow.putRenderingBo(bo);
+		
+		bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_TextArea", ControlRenderingBo.class)
+				.setCaption("Lorem ipsum dolor sit amet, consetetur sadipscing elitr,\nsed diam nonumy eirmod tempor invidunt ut labore et\ndolore magna aliquyam erat, sed diam voluptua. At vero\neos et accusam et justo duo dolores et ea rebum.")
+				.setFontSize(24)
+				.setType(MultiLineTextAreaControl.class)
+				.setControlData(new MultiLineTextAreaData(false, null, false))
+				.setVisible(true)
+				.setEnabled(true)
+				.withDimensionAbsolute(contentWidth, 150)
+				.withPositionRelative(Window.MARGIN_LEFT, 174);
 		this.secondaryWindow.putRenderingBo(bo);
 		
 		bo = this.renderingBoPool.acquire("DemoModule_SecondaryWindow_Button_Ok", ControlRenderingBo.class)
@@ -399,7 +428,7 @@ public class DemoModule extends AbstractClientModule {
 				.setVisible(true)
 				.setEnabled(true)
 				.withDimensionAbsolute(160, 60)
-				.withPositionRelative(RendererControl.REFERENCE_RESOLUTION.divide(7).getX() - 80, 200);
+				.withPositionRelative((this.secondaryWindow.getNormalizedDimension().getX() - 160) / 2, 344);
 		this.secondaryWindow.putRenderingBo(bo);
 	}
 	
