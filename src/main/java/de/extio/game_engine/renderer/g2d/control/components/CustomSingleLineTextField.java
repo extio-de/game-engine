@@ -462,16 +462,15 @@ public class CustomSingleLineTextField extends Component {
 		if (this.getGraphics() == null) {
 			return;
 		}
-		final int logicalMouseX = toLogicalCoord(mouseX);
-		final int textX = logicalMouseX - TEXT_PADDING + this.scrollOffsetX;
+		final int clickX = mouseX - (int) (TEXT_PADDING * this.scaleFactor) + (int) (this.scrollOffsetX * this.scaleFactor);
 
 		int bestPos = 0;
 		int bestDist = Integer.MAX_VALUE;
 
 		for (int j = 0; j <= this.text.length(); j++) {
 			final String substr = this.text.substring(0, j);
-			final int textWidth = G2DDrawFont.getTextAdvance(substr, this.getGraphics(), this.fontSize, 1.0);
-			final int dist = Math.abs(textWidth - textX);
+			final int textWidth = G2DDrawFont.getTextAdvance(substr, this.getGraphics(), this.fontSize, this.scaleFactor);
+			final int dist = Math.abs(textWidth - clickX);
 			if (dist < bestDist) {
 				bestDist = dist;
 				bestPos = j;
@@ -488,14 +487,16 @@ public class CustomSingleLineTextField extends Component {
 		}
 
 		final String beforeCaret = this.text.substring(0, this.caretPosition);
-		final int caretX = G2DDrawFont.getTextAdvance(beforeCaret, this.getGraphics(), this.fontSize, 1.0);
-		final int visibleWidth = getVisibleWidth();
+		final int marginScreen = (int) (TEXT_PADDING * this.scaleFactor);
+		final int caretContentScreenX = marginScreen + G2DDrawFont.getTextAdvance(beforeCaret, this.getGraphics(), this.fontSize, this.scaleFactor);
+		final int scrollScreen = (int) (this.scrollOffsetX * this.scaleFactor);
+		final int visibleScreenWidth = (int) (getVisibleWidth() * this.scaleFactor);
 
-		if (caretX < this.scrollOffsetX) {
-			this.scrollOffsetX = Math.max(0, caretX - TEXT_PADDING);
+		if (caretContentScreenX < scrollScreen + marginScreen) {
+			this.scrollOffsetX = Math.max(0, (int) ((caretContentScreenX - marginScreen) / this.scaleFactor));
 		}
-		else if (caretX > this.scrollOffsetX + visibleWidth - TEXT_PADDING * 2) {
-			this.scrollOffsetX = caretX - visibleWidth + TEXT_PADDING * 2;
+		else if (caretContentScreenX > scrollScreen + visibleScreenWidth - marginScreen) {
+			this.scrollOffsetX = (int) ((caretContentScreenX - visibleScreenWidth + marginScreen) / this.scaleFactor);
 		}
 
 		this.scrollOffsetX = Math.max(0, this.scrollOffsetX);
@@ -504,10 +505,6 @@ public class CustomSingleLineTextField extends Component {
 
 	private int getVisibleWidth() {
 		return (int) (this.getWidth() / this.scaleFactor);
-	}
-
-	private int toLogicalCoord(final int screenCoord) {
-		return (int) (screenCoord / this.scaleFactor);
 	}
 
 	private boolean hasSelection() {
@@ -698,12 +695,9 @@ public class CustomSingleLineTextField extends Component {
 			final String selected = this.text.substring(selStart, selEnd);
 
 			final int originX = TEXT_PADDING - this.scrollOffsetX;
-			final int beforeSelWidth = G2DDrawFont.getTextAdvance(beforeSel, g2d, this.fontSize, 1.0);
-			final int selWidth = G2DDrawFont.getTextAdvance(selected, g2d, this.fontSize, 1.0);
-			final int selX = originX + beforeSelWidth;
-			final int selScreenX = (int) (selX * this.scaleFactor);
+			final int selScreenX = (int) (originX * this.scaleFactor) + G2DDrawFont.getTextAdvance(beforeSel, g2d, this.fontSize, this.scaleFactor);
 			final int selScreenY = (int) (textY * this.scaleFactor);
-			final int selScreenWidth = (int) (selWidth * this.scaleFactor);
+			final int selScreenWidth = G2DDrawFont.getTextAdvance(selected, g2d, this.fontSize, this.scaleFactor);
 			final int selScreenHeight = (int) (rawFontHeight * this.scaleFactor);
 
 			g2d.setColor(fgColor);
@@ -737,7 +731,7 @@ public class CustomSingleLineTextField extends Component {
 			if (this.caretVisible) {
 				final String beforeCaret = this.text.substring(0, this.caretPosition);
 				final int caretX = (int) ((TEXT_PADDING - this.scrollOffsetX) * this.scaleFactor)
-						+ (int) (G2DDrawFont.getTextAdvance(beforeCaret, g2d, this.fontSize, 1.0) * this.scaleFactor);
+						+ G2DDrawFont.getTextAdvance(beforeCaret, g2d, this.fontSize, this.scaleFactor);
 				final int caretY = (int) (textY * this.scaleFactor);
 				final int caretHeight = (int) (rawFontHeight * this.scaleFactor);
 
