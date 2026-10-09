@@ -668,6 +668,14 @@ public class CustomMultiLineTextArea extends Component {
 		return this.cachedSpaceWidth;
 	}
 	
+	private int countTrailingSpaces(final String text) {
+		int count = 0;
+		for (int i = text.length() - 1; i >= 0 && text.charAt(i) == ' '; i--) {
+			count++;
+		}
+		return count;
+	}
+	
 	private void updateCaretPosition(final int mouseX, final int mouseY) {
 		final List<String> wrappedLines = getWrappedLines();
 		final List<String> rawLines = getLines();
@@ -696,7 +704,8 @@ public class CustomMultiLineTextArea extends Component {
 				
 				for (int j = 0; j <= clickedLine.length(); j++) {
 					final String substr = clickedLine.substring(0, j);
-					final int textWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
+					final int baseWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
+					final int textWidth = baseWidth + this.countTrailingSpaces(substr) * this.getSpaceWidth();
 					final int dist = Math.abs(textWidth - (logicalMouseX - CONTENT_MARGIN));
 					if (dist < bestDist) {
 						bestDist = dist;
@@ -790,7 +799,8 @@ public class CustomMultiLineTextArea extends Component {
 		if (text == null || text.isEmpty()) {
 			return 0;
 		}
-		return G2DDrawFont.getTextDimensions(text, g2d, this.fontSize, 1.0).getX();
+		final int baseWidth = G2DDrawFont.getTextDimensions(text, g2d, this.fontSize, 1.0).getX();
+		return baseWidth + this.countTrailingSpaces(text) * this.getSpaceWidth();
 	}
 
 	private void renderTextSegment(final Graphics2D g2d, final Color color, final int x, final int y, final String text) {
@@ -1074,8 +1084,8 @@ public class CustomMultiLineTextArea extends Component {
 						? caretWrappedLine.substring(0, caretPosInWrappedLine)
 						: "";
 				final var textDim = beforeCaret.isEmpty() ? ImmutableCoordI2.create(0, 0) : G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
-				final int spaceWidth = beforeCaret.endsWith(" ") ? getSpaceWidth() : 0;
-				final int caretX = textDim.getX() + toScreenCoord(CONTENT_MARGIN) + (int) (spaceWidth * this.scaleFactor);
+				final int trailingSpaceWidth = this.countTrailingSpaces(beforeCaret) * (int) (this.getSpaceWidth() * this.scaleFactor);
+				final int caretX = textDim.getX() + toScreenCoord(CONTENT_MARGIN) + trailingSpaceWidth;
 				final int caretY = (int) ((CONTENT_MARGIN + caretWrappedLineIndex * lineHeight - this.scrollOffsetY) * this.scaleFactor);
 				final int caretHeight = (int) (rawFontHeight * this.scaleFactor);
 				

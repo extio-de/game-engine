@@ -60,6 +60,10 @@ public class CustomSingleLineTextField extends Component {
 
 	private int cachedRawFontHeight = 0;
 
+	private int cachedSpaceWidth = 0;
+
+	private int cachedSpaceWidthFontSize = 0;
+
 	private final ThemeManager themeManager;
 
 	private final Consumer<String> onTextChanged;
@@ -382,7 +386,8 @@ public class CustomSingleLineTextField extends Component {
 
 		for (int j = 0; j <= this.text.length(); j++) {
 			final String substr = this.text.substring(0, j);
-			final int textWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
+			final int baseWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
+			final int textWidth = baseWidth + this.countTrailingSpaces(substr) * this.getSpaceWidth();
 			final int dist = Math.abs(textWidth - textX);
 			if (dist < bestDist) {
 				bestDist = dist;
@@ -400,7 +405,8 @@ public class CustomSingleLineTextField extends Component {
 		}
 
 		final String beforeCaret = this.text.substring(0, this.caretPosition);
-		final int caretX = G2DDrawFont.getTextDimensions(beforeCaret, this.getGraphics(), this.fontSize, 1.0).getX();
+		final int baseCaretX = G2DDrawFont.getTextDimensions(beforeCaret, this.getGraphics(), this.fontSize, 1.0).getX();
+		final int caretX = baseCaretX + this.countTrailingSpaces(beforeCaret) * this.getSpaceWidth();
 		final int visibleWidth = getVisibleWidth();
 
 		if (caretX < this.scrollOffsetX) {
@@ -416,6 +422,30 @@ public class CustomSingleLineTextField extends Component {
 
 	private int getVisibleWidth() {
 		return (int) (this.getWidth() / this.scaleFactor);
+	}
+
+	private int getSpaceWidth() {
+		if (this.cachedSpaceWidth > 0 && this.cachedSpaceWidthFontSize == this.fontSize) {
+			return this.cachedSpaceWidth;
+		}
+
+		if (this.getGraphics() == null) {
+			return 10;
+		}
+
+		final int widthWithoutSpace = G2DDrawFont.getTextDimensions("MM", this.getGraphics(), this.fontSize, 1.0).getX();
+		final int widthWithSpace = G2DDrawFont.getTextDimensions("M M", this.getGraphics(), this.fontSize, 1.0).getX();
+		this.cachedSpaceWidth = widthWithSpace - widthWithoutSpace;
+		this.cachedSpaceWidthFontSize = this.fontSize;
+		return this.cachedSpaceWidth;
+	}
+
+	private int countTrailingSpaces(final String text) {
+		int count = 0;
+		for (int i = text.length() - 1; i >= 0 && text.charAt(i) == ' '; i--) {
+			count++;
+		}
+		return count;
 	}
 
 	private int toLogicalCoord(final int screenCoord) {
@@ -574,8 +604,11 @@ public class CustomSingleLineTextField extends Component {
 			final String selected = this.text.substring(selStart, selEnd);
 			final String afterSel = this.text.substring(selEnd);
 
-			final int beforeSelWidth = G2DDrawFont.getTextDimensions(beforeSel, g2d, this.fontSize, this.scaleFactor).getX();
-			final int selWidth = G2DDrawFont.getTextDimensions(selected, g2d, this.fontSize, this.scaleFactor).getX();
+			final int baseBeforeSelWidth = G2DDrawFont.getTextDimensions(beforeSel, g2d, this.fontSize, this.scaleFactor).getX();
+			final int baseSelWidth = G2DDrawFont.getTextDimensions(selected, g2d, this.fontSize, this.scaleFactor).getX();
+			final int spaceWidthScaled = (int) (this.getSpaceWidth() * this.scaleFactor);
+			final int beforeSelWidth = baseBeforeSelWidth + this.countTrailingSpaces(beforeSel) * spaceWidthScaled;
+			final int selWidth = baseSelWidth + this.countTrailingSpaces(selected) * spaceWidthScaled;
 			final int drawOffsetX = TEXT_PADDING - (int) (this.scrollOffsetX * this.scaleFactor);
 
 			if (!beforeSel.isEmpty()) {
@@ -615,7 +648,8 @@ public class CustomSingleLineTextField extends Component {
 				final var textDim = beforeCaret.isEmpty()
 						? ImmutableCoordI2.create(0, 0)
 						: G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
-				final int caretX = textDim.getX() + TEXT_PADDING - (int) (this.scrollOffsetX * this.scaleFactor);
+				final int trailingSpaceWidth = this.countTrailingSpaces(beforeCaret) * (int) (this.getSpaceWidth() * this.scaleFactor);
+				final int caretX = textDim.getX() + trailingSpaceWidth + TEXT_PADDING - (int) (this.scrollOffsetX * this.scaleFactor);
 				final int caretY = (int) (textY * this.scaleFactor);
 				final int caretHeight = (int) (rawFontHeight * this.scaleFactor);
 
