@@ -259,6 +259,15 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 		return MutableCoordI2.create(pixBounds.x + pixBounds.width, pixBounds.height - (int) pixBounds.getMaxY());
 	}
 	
+	public static int getTextAdvance(final String text, final Graphics graphics, final int size_, final double scaleFactor) {
+		if (text == null || text.isEmpty()) {
+			return 0;
+		}
+		
+		final var textLayout = createTextLayout(text, graphics, size_, scaleFactor);
+		return (int) Math.round(textLayout.getAdvance());
+	}
+	
 	private static TextLayout createTextLayout(final String text, final Graphics graphics, final int size_, final double scaleFactor) {
 		final var cacheKey = new TextLayoutParameters(text, size_, scaleFactor);
 		return textLayoutCache.get(cacheKey, key -> {

@@ -60,10 +60,6 @@ public class CustomSingleLineTextField extends Component {
 
 	private int cachedRawFontHeight = 0;
 
-	private int cachedSpaceWidth = 0;
-
-	private int cachedSpaceWidthFontSize = 0;
-
 	private final ThemeManager themeManager;
 
 	private final Consumer<String> onTextChanged;
@@ -386,8 +382,7 @@ public class CustomSingleLineTextField extends Component {
 
 		for (int j = 0; j <= this.text.length(); j++) {
 			final String substr = this.text.substring(0, j);
-			final int baseWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
-			final int textWidth = baseWidth + this.countTrailingSpaces(substr) * this.getSpaceWidth();
+			final int textWidth = G2DDrawFont.getTextAdvance(substr, this.getGraphics(), this.fontSize, 1.0);
 			final int dist = Math.abs(textWidth - textX);
 			if (dist < bestDist) {
 				bestDist = dist;
@@ -405,8 +400,7 @@ public class CustomSingleLineTextField extends Component {
 		}
 
 		final String beforeCaret = this.text.substring(0, this.caretPosition);
-		final int baseCaretX = G2DDrawFont.getTextDimensions(beforeCaret, this.getGraphics(), this.fontSize, 1.0).getX();
-		final int caretX = baseCaretX + this.countTrailingSpaces(beforeCaret) * this.getSpaceWidth();
+		final int caretX = G2DDrawFont.getTextAdvance(beforeCaret, this.getGraphics(), this.fontSize, 1.0);
 		final int visibleWidth = getVisibleWidth();
 
 		if (caretX < this.scrollOffsetX) {
@@ -422,30 +416,6 @@ public class CustomSingleLineTextField extends Component {
 
 	private int getVisibleWidth() {
 		return (int) (this.getWidth() / this.scaleFactor);
-	}
-
-	private int getSpaceWidth() {
-		if (this.cachedSpaceWidth > 0 && this.cachedSpaceWidthFontSize == this.fontSize) {
-			return this.cachedSpaceWidth;
-		}
-
-		if (this.getGraphics() == null) {
-			return 10;
-		}
-
-		final int widthWithoutSpace = G2DDrawFont.getTextDimensions("MM", this.getGraphics(), this.fontSize, 1.0).getX();
-		final int widthWithSpace = G2DDrawFont.getTextDimensions("M M", this.getGraphics(), this.fontSize, 1.0).getX();
-		this.cachedSpaceWidth = widthWithSpace - widthWithoutSpace;
-		this.cachedSpaceWidthFontSize = this.fontSize;
-		return this.cachedSpaceWidth;
-	}
-
-	private int countTrailingSpaces(final String text) {
-		int count = 0;
-		for (int i = text.length() - 1; i >= 0 && text.charAt(i) == ' '; i--) {
-			count++;
-		}
-		return count;
 	}
 
 	private int toLogicalCoord(final int screenCoord) {
@@ -602,31 +572,28 @@ public class CustomSingleLineTextField extends Component {
 		if (hasSelection && !this.text.isEmpty()) {
 			final String beforeSel = this.text.substring(0, selStart);
 			final String selected = this.text.substring(selStart, selEnd);
-			final String afterSel = this.text.substring(selEnd);
 
-			final int baseBeforeSelWidth = G2DDrawFont.getTextDimensions(beforeSel, g2d, this.fontSize, this.scaleFactor).getX();
-			final int baseSelWidth = G2DDrawFont.getTextDimensions(selected, g2d, this.fontSize, this.scaleFactor).getX();
-			final int spaceWidthScaled = (int) (this.getSpaceWidth() * this.scaleFactor);
-			final int beforeSelWidth = baseBeforeSelWidth + this.countTrailingSpaces(beforeSel) * spaceWidthScaled;
-			final int selWidth = baseSelWidth + this.countTrailingSpaces(selected) * spaceWidthScaled;
-			final int drawOffsetX = TEXT_PADDING - (int) (this.scrollOffsetX * this.scaleFactor);
+			final int originX = TEXT_PADDING - this.scrollOffsetX;
+			final int beforeSelWidth = G2DDrawFont.getTextAdvance(beforeSel, g2d, this.fontSize, 1.0);
+			final int selWidth = G2DDrawFont.getTextAdvance(selected, g2d, this.fontSize, 1.0);
+			final int selX = originX + beforeSelWidth;
+			final int selScreenX = (int) (selX * this.scaleFactor);
+			final int selScreenY = (int) (textY * this.scaleFactor);
+			final int selScreenWidth = (int) (selWidth * this.scaleFactor);
+			final int selScreenHeight = (int) (rawFontHeight * this.scaleFactor);
 
-			if (!beforeSel.isEmpty()) {
-				g2d.setColor(fgColor);
-				G2DDrawFont.renderText(g2d, null, this.scaleFactor, (int) (TEXT_PADDING / this.scaleFactor) - this.scrollOffsetX, textY, this.fontSize, beforeSel);
-			}
+			g2d.setColor(fgColor);
+			G2DDrawFont.renderText(g2d, null, this.scaleFactor, originX, textY, this.fontSize, this.text);
 
-			g2d.setColor(theme.getSelectionPrimary().toColor());
-			g2d.fillRect(drawOffsetX + beforeSelWidth, (int) (textY * this.scaleFactor), selWidth, (int) (rawFontHeight * this.scaleFactor));
+			if (selScreenWidth > 0) {
+				g2d.setColor(theme.getSelectionPrimary().toColor());
+				g2d.fillRect(selScreenX, selScreenY, selScreenWidth, selScreenHeight);
 
-			g2d.setColor(theme.getBackgroundNormal().toColor());
-			G2DDrawFont.renderText(g2d, null, this.scaleFactor,
-					(int) ((drawOffsetX + beforeSelWidth) / this.scaleFactor), textY, this.fontSize, selected);
-
-			if (!afterSel.isEmpty()) {
-				g2d.setColor(fgColor);
-				G2DDrawFont.renderText(g2d, null, this.scaleFactor,
-						(int) ((drawOffsetX + beforeSelWidth + selWidth) / this.scaleFactor), textY, this.fontSize, afterSel);
+				final var previousClip = g2d.getClip();
+				g2d.clipRect(selScreenX, selScreenY, selScreenWidth, selScreenHeight);
+				g2d.setColor(theme.getBackgroundNormal().toColor());
+				G2DDrawFont.renderText(g2d, null, this.scaleFactor, originX, textY, this.fontSize, this.text);
+				g2d.setClip(previousClip);
 			}
 		}
 		else {
@@ -645,11 +612,8 @@ public class CustomSingleLineTextField extends Component {
 
 			if (this.caretVisible) {
 				final String beforeCaret = this.text.substring(0, this.caretPosition);
-				final var textDim = beforeCaret.isEmpty()
-						? ImmutableCoordI2.create(0, 0)
-						: G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
-				final int trailingSpaceWidth = this.countTrailingSpaces(beforeCaret) * (int) (this.getSpaceWidth() * this.scaleFactor);
-				final int caretX = textDim.getX() + trailingSpaceWidth + TEXT_PADDING - (int) (this.scrollOffsetX * this.scaleFactor);
+				final int caretX = (int) ((TEXT_PADDING - this.scrollOffsetX) * this.scaleFactor)
+						+ (int) (G2DDrawFont.getTextAdvance(beforeCaret, g2d, this.fontSize, 1.0) * this.scaleFactor);
 				final int caretY = (int) (textY * this.scaleFactor);
 				final int caretHeight = (int) (rawFontHeight * this.scaleFactor);
 
