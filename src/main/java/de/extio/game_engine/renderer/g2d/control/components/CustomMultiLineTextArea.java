@@ -86,8 +86,6 @@ public class CustomMultiLineTextArea extends Component {
 	
 	private int cachedRawFontHeight = 0;
 	
-	private int cachedSpaceWidth = 0;
-	
 	private List<String> cachedWrappedLines = null;
 	
 	private int cachedTextAreaWidth = -1;
@@ -112,7 +110,6 @@ public class CustomMultiLineTextArea extends Component {
 	public void setFontSize(final int fontSize) {
 		if (this.fontSize != fontSize) {
 			this.cachedLineHeight = 0;
-			this.cachedSpaceWidth = 0;
 			this.cachedFontSize = 0;
 			this.cachedRawFontHeight = 0;
 			this.cachedWrappedLines = null;
@@ -711,7 +708,7 @@ public class CustomMultiLineTextArea extends Component {
 			return wrapped;
 		}
 		
-		final int lineWidth = G2DDrawFont.getTextDimensions(line, this.getGraphics(), this.fontSize, 1.0).getX();
+		final int lineWidth = G2DDrawFont.getTextDimensions(line, this.getGraphics(), this.fontSize, this.scaleFactor).getX();
 		if (lineWidth <= maxWidth) {
 			wrapped.add(line);
 			return wrapped;
@@ -722,7 +719,7 @@ public class CustomMultiLineTextArea extends Component {
 		
 		for (final String word : words) {
 			final String testLine = currentLine.isEmpty() ? word : currentLine + " " + word;
-			final int testWidth = G2DDrawFont.getTextDimensions(testLine, this.getGraphics(), this.fontSize, 1.0).getX();
+			final int testWidth = G2DDrawFont.getTextDimensions(testLine, this.getGraphics(), this.fontSize, this.scaleFactor).getX();
 			
 			if (testWidth <= maxWidth) {
 				if (!currentLine.isEmpty()) {
@@ -757,11 +754,12 @@ public class CustomMultiLineTextArea extends Component {
 			return this.cachedWrappedLines;
 		}
 		
+		final int screenAreaWidth = toScreenCoord(textAreaWidth);
 		final List<String> rawLines = getLines();
 		final List<String> wrappedLines = new ArrayList<>();
 		
 		for (final String rawLine : rawLines) {
-			wrappedLines.addAll(wrapLine(rawLine, textAreaWidth));
+			wrappedLines.addAll(wrapLine(rawLine, screenAreaWidth));
 		}
 		
 		this.cachedWrappedLines = wrappedLines;
@@ -830,30 +828,6 @@ public class CustomMultiLineTextArea extends Component {
 		return height;
 	}
 	
-	private int getSpaceWidth() {
-		if (this.cachedSpaceWidth > 0 && this.cachedFontSize == this.fontSize) {
-			return this.cachedSpaceWidth;
-		}
-		
-		if (this.getGraphics() == null) {
-			return 10;
-		}
-		
-		final int width0 = (int) G2DDrawFont.getTextDimensions("MM", this.getGraphics(), this.fontSize, 1.0).getX();
-		final int width1 = (int) G2DDrawFont.getTextDimensions("M M", this.getGraphics(), this.fontSize, 1.0).getX();
-		this.cachedSpaceWidth = width1 - width0;
-		this.cachedFontSize = this.fontSize;
-		return this.cachedSpaceWidth;
-	}
-	
-	private int countTrailingSpaces(final String text) {
-		int count = 0;
-		for (int i = text.length() - 1; i >= 0 && text.charAt(i) == ' '; i--) {
-			count++;
-		}
-		return count;
-	}
-	
 	private void updateCaretPosition(final int mouseX, final int mouseY) {
 		final List<String> wrappedLines = getWrappedLines();
 		final List<String> rawLines = getLines();
@@ -861,17 +835,19 @@ public class CustomMultiLineTextArea extends Component {
 		final int textAreaWidth = getTextAreaWidth();
 		
 		// Convert mouse coordinates from screen pixels to logical coordinates
-		final int logicalMouseX = toLogicalCoord(mouseX);
 		final int logicalMouseY = toLogicalCoord(mouseY);
 		
 		final int clickedWrappedLine = Math.max(0, Math.min(wrappedLines.size() - 1, (Math.max(0, logicalMouseY - CONTENT_MARGIN) + this.scrollOffsetY) / lineHeight));
+		
+		final int screenAreaWidth = toScreenCoord(textAreaWidth);
+		final int clickX = mouseX - toScreenCoord(CONTENT_MARGIN);
 		
 		int wrappedLineCount = 0;
 		int charOffset = 0;
 		
 		for (int i = 0; i < rawLines.size(); i++) {
 			final String rawLine = rawLines.get(i);
-			final List<String> wrappedForThisLine = wrapLine(rawLine, textAreaWidth);
+			final List<String> wrappedForThisLine = wrapLine(rawLine, screenAreaWidth);
 			final int linesForThisRaw = wrappedForThisLine.size();
 			
 			if (clickedWrappedLine >= wrappedLineCount && clickedWrappedLine < wrappedLineCount + linesForThisRaw) {
@@ -882,9 +858,8 @@ public class CustomMultiLineTextArea extends Component {
 				
 				for (int j = 0; j <= clickedLine.length(); j++) {
 					final String substr = clickedLine.substring(0, j);
-					final int baseWidth = G2DDrawFont.getTextDimensions(substr, this.getGraphics(), this.fontSize, 1.0).getX();
-					final int textWidth = baseWidth + this.countTrailingSpaces(substr) * this.getSpaceWidth();
-					final int dist = Math.abs(textWidth - (logicalMouseX - CONTENT_MARGIN));
+					final int textWidth = G2DDrawFont.getTextAdvance(substr, this.getGraphics(), this.fontSize, this.scaleFactor);
+					final int dist = Math.abs(textWidth - clickX);
 					if (dist < bestDist) {
 						bestDist = dist;
 						bestPos = j;
@@ -942,7 +917,7 @@ public class CustomMultiLineTextArea extends Component {
 				break;
 			}
 			
-			final List<String> wrappedForThisLine = wrapLine(rawLine, textAreaWidth);
+			final List<String> wrappedForThisLine = wrapLine(rawLine, toScreenCoord(textAreaWidth));
 			wrappedLineIndex += wrappedForThisLine.size();
 			charCount += rawLineLength;
 		}
@@ -973,12 +948,11 @@ public class CustomMultiLineTextArea extends Component {
 		return (int) (logicalCoord * this.scaleFactor);
 	}
 
-	private int getLogicalTextWidth(final Graphics2D g2d, final String text) {
+	private int getScreenTextWidth(final Graphics2D g2d, final String text) {
 		if (text == null || text.isEmpty()) {
 			return 0;
 		}
-		final int baseWidth = G2DDrawFont.getTextDimensions(text, g2d, this.fontSize, 1.0).getX();
-		return baseWidth + this.countTrailingSpaces(text) * this.getSpaceWidth();
+		return G2DDrawFont.getTextAdvance(text, g2d, this.fontSize, this.scaleFactor);
 	}
 
 	private void renderTextSegment(final Graphics2D g2d, final Color color, final int x, final int y, final String text) {
@@ -993,8 +967,11 @@ public class CustomMultiLineTextArea extends Component {
 			final String line, final int lineSelStart, final int lineSelEnd) {
 		final var beforeSelection = line.substring(0, lineSelStart);
 		final var throughSelection = line.substring(0, lineSelEnd);
-		final var selectionStartX = x + this.getLogicalTextWidth(g2d, beforeSelection);
-		final var selectionEndX = x + this.getLogicalTextWidth(g2d, throughSelection);
+		final int originX = this.toScreenCoord(x);
+		final int originY = this.toScreenCoord(y);
+		final int originHeight = this.toScreenCoord(lineHeight);
+		final var selectionStartX = originX + this.getScreenTextWidth(g2d, beforeSelection);
+		final var selectionEndX = originX + this.getScreenTextWidth(g2d, throughSelection);
 		final var selectionWidth = Math.max(0, selectionEndX - selectionStartX);
 
 		this.renderTextSegment(g2d, fgColor, x, y, line);
@@ -1003,10 +980,10 @@ public class CustomMultiLineTextArea extends Component {
 		}
 
 		g2d.setColor(theme.getSelectionPrimary().toColor());
-		g2d.fillRect(this.toScreenCoord(selectionStartX), this.toScreenCoord(y), this.toScreenCoord(selectionWidth), this.toScreenCoord(lineHeight));
+		g2d.fillRect(selectionStartX, originY, selectionWidth, originHeight);
 
 		final var previousClip = g2d.getClip();
-		g2d.clipRect(this.toScreenCoord(selectionStartX), this.toScreenCoord(y), this.toScreenCoord(selectionWidth), this.toScreenCoord(lineHeight));
+		g2d.clipRect(selectionStartX, originY, selectionWidth, originHeight);
 		this.renderTextSegment(g2d, theme.getBackgroundNormal().toColor(), x, y, line);
 		g2d.setClip(previousClip);
 	}
@@ -1261,9 +1238,8 @@ public class CustomMultiLineTextArea extends Component {
 				final String beforeCaret = caretPosInWrappedLine > 0 && caretPosInWrappedLine <= caretWrappedLine.length()
 						? caretWrappedLine.substring(0, caretPosInWrappedLine)
 						: "";
-				final var textDim = beforeCaret.isEmpty() ? ImmutableCoordI2.create(0, 0) : G2DDrawFont.getTextDimensions(beforeCaret, g2d, this.fontSize, this.scaleFactor);
-				final int trailingSpaceWidth = this.countTrailingSpaces(beforeCaret) * (int) (this.getSpaceWidth() * this.scaleFactor);
-				final int caretX = textDim.getX() + toScreenCoord(CONTENT_MARGIN) + trailingSpaceWidth;
+				final int caretAdvance = G2DDrawFont.getTextAdvance(beforeCaret, g2d, this.fontSize, this.scaleFactor);
+				final int caretX = caretAdvance + toScreenCoord(CONTENT_MARGIN);
 				final int caretY = (int) ((CONTENT_MARGIN + caretWrappedLineIndex * lineHeight - this.scrollOffsetY) * this.scaleFactor);
 				final int caretHeight = (int) (rawFontHeight * this.scaleFactor);
 				
