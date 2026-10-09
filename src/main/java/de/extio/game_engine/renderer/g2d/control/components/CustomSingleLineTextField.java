@@ -142,9 +142,9 @@ public class CustomSingleLineTextField extends Component {
 					deleteSelection();
 					insertChar(ch);
 				}
-				else if (ch == '\b') {
-					backspace();
-				}
+			else if (ch == '\b' && !e.isControlDown()) {
+				backspace();
+			}
 			}
 
 			@Override
@@ -155,6 +155,7 @@ public class CustomSingleLineTextField extends Component {
 
 				final boolean shiftPressed = e.isShiftDown();
 				final boolean ctrlPressed = e.isControlDown();
+				final boolean altPressed = e.isAltDown();
 
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_ENTER:
@@ -164,26 +165,42 @@ public class CustomSingleLineTextField extends Component {
 							}
 						}
 						break;
-					case KeyEvent.VK_LEFT:
+				case KeyEvent.VK_LEFT:
+					if (ctrlPressed || altPressed) {
 						if (CustomSingleLineTextField.this.caretPosition > 0) {
-							CustomSingleLineTextField.this.caretPosition--;
+							moveCaretToPreviousWordStart();
 							if (!shiftPressed) {
 								CustomSingleLineTextField.this.selectionAnchor = CustomSingleLineTextField.this.caretPosition;
 							}
-							ensureCaretVisible();
-							CustomSingleLineTextField.this.dirty = true;
 						}
-						break;
-					case KeyEvent.VK_RIGHT:
+					}
+					else if (CustomSingleLineTextField.this.caretPosition > 0) {
+						CustomSingleLineTextField.this.caretPosition--;
+						if (!shiftPressed) {
+							CustomSingleLineTextField.this.selectionAnchor = CustomSingleLineTextField.this.caretPosition;
+						}
+						ensureCaretVisible();
+						CustomSingleLineTextField.this.dirty = true;
+					}
+					break;
+				case KeyEvent.VK_RIGHT:
+					if (ctrlPressed || altPressed) {
 						if (CustomSingleLineTextField.this.caretPosition < CustomSingleLineTextField.this.text.length()) {
-							CustomSingleLineTextField.this.caretPosition++;
+							moveCaretToNextWordEnd();
 							if (!shiftPressed) {
 								CustomSingleLineTextField.this.selectionAnchor = CustomSingleLineTextField.this.caretPosition;
 							}
-							ensureCaretVisible();
-							CustomSingleLineTextField.this.dirty = true;
 						}
-						break;
+					}
+					else if (CustomSingleLineTextField.this.caretPosition < CustomSingleLineTextField.this.text.length()) {
+						CustomSingleLineTextField.this.caretPosition++;
+						if (!shiftPressed) {
+							CustomSingleLineTextField.this.selectionAnchor = CustomSingleLineTextField.this.caretPosition;
+						}
+						ensureCaretVisible();
+						CustomSingleLineTextField.this.dirty = true;
+					}
+					break;
 					case KeyEvent.VK_HOME:
 						CustomSingleLineTextField.this.caretPosition = 0;
 						if (!shiftPressed) {
@@ -200,24 +217,34 @@ public class CustomSingleLineTextField extends Component {
 						ensureCaretVisible();
 						CustomSingleLineTextField.this.dirty = true;
 						break;
-					case KeyEvent.VK_DELETE:
-						if (!CustomSingleLineTextField.this.readonly) {
-							if (hasSelection()) {
-								if (e.isShiftDown()) {
-									cut();
-								}
-								else {
-									deleteSelection();
-								}
+				case KeyEvent.VK_DELETE:
+					if (ctrlPressed && !CustomSingleLineTextField.this.readonly) {
+						deleteWordForward();
+						e.consume();
+					}
+					else if (!CustomSingleLineTextField.this.readonly) {
+						if (hasSelection()) {
+							if (e.isShiftDown()) {
+								cut();
 							}
-							else if (CustomSingleLineTextField.this.caretPosition < CustomSingleLineTextField.this.text.length()) {
-								CustomSingleLineTextField.this.text = CustomSingleLineTextField.this.text.substring(0, CustomSingleLineTextField.this.caretPosition) +
-										CustomSingleLineTextField.this.text.substring(CustomSingleLineTextField.this.caretPosition + 1);
-								notifyTextChanged();
-								CustomSingleLineTextField.this.dirty = true;
+							else {
+								deleteSelection();
 							}
 						}
-						break;
+						else if (CustomSingleLineTextField.this.caretPosition < CustomSingleLineTextField.this.text.length()) {
+							CustomSingleLineTextField.this.text = CustomSingleLineTextField.this.text.substring(0, CustomSingleLineTextField.this.caretPosition) +
+									CustomSingleLineTextField.this.text.substring(CustomSingleLineTextField.this.caretPosition + 1);
+							notifyTextChanged();
+							CustomSingleLineTextField.this.dirty = true;
+						}
+					}
+					break;
+				case KeyEvent.VK_BACK_SPACE:
+					if (ctrlPressed && !CustomSingleLineTextField.this.readonly) {
+						deleteWordBackward();
+						e.consume();
+					}
+					break;
 					case KeyEvent.VK_C:
 						if (ctrlPressed) {
 							copy();
@@ -362,6 +389,67 @@ public class CustomSingleLineTextField extends Component {
 			notifyTextChanged();
 			this.dirty = true;
 		}
+	}
+
+	private void deleteWordBackward() {
+		if (hasSelection()) {
+			deleteSelection();
+			return;
+		}
+
+		if (this.caretPosition == 0) {
+			return;
+		}
+
+		int position = this.caretPosition;
+
+		if (isWordCharacter(this.text.charAt(position - 1))) {
+			while (position > 0 && isWordCharacter(this.text.charAt(position - 1))) {
+				position--;
+			}
+		}
+		else {
+			while (position > 0 && !isWordCharacter(this.text.charAt(position - 1))) {
+				position--;
+			}
+		}
+
+		this.text = this.text.substring(0, position) + this.text.substring(this.caretPosition);
+		this.caretPosition = position;
+		this.selectionAnchor = position;
+		ensureCaretVisible();
+		notifyTextChanged();
+		this.dirty = true;
+	}
+
+	private void deleteWordForward() {
+		if (hasSelection()) {
+			deleteSelection();
+			return;
+		}
+
+		final int length = this.text.length();
+		if (this.caretPosition >= length) {
+			return;
+		}
+
+		int position = this.caretPosition;
+
+		if (isWordCharacter(this.text.charAt(position))) {
+			while (position < length && isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+		else {
+			while (position < length && !isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+
+		this.text = this.text.substring(0, this.caretPosition) + this.text.substring(position);
+		ensureCaretVisible();
+		notifyTextChanged();
+		this.dirty = true;
 	}
 
 	private void notifyTextChanged() {
@@ -527,6 +615,42 @@ public class CustomSingleLineTextField extends Component {
 			this.caretPosition = end;
 			this.dirty = true;
 		}
+	}
+
+	private void moveCaretToPreviousWordStart() {
+		int position = this.caretPosition;
+
+		while (position > 0 && !isWordCharacter(this.text.charAt(position - 1))) {
+			position--;
+		}
+
+		while (position > 0 && isWordCharacter(this.text.charAt(position - 1))) {
+			position--;
+		}
+
+		this.caretPosition = position;
+		ensureCaretVisible();
+		this.dirty = true;
+	}
+
+	private void moveCaretToNextWordEnd() {
+		int position = this.caretPosition;
+		final int length = this.text.length();
+
+		if (position < length && isWordCharacter(this.text.charAt(position))) {
+			while (position < length && isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+		else {
+			while (position < length && !isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+
+		this.caretPosition = position;
+		ensureCaretVisible();
+		this.dirty = true;
 	}
 
 	private boolean isWordCharacter(final char ch) {

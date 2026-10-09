@@ -183,7 +183,7 @@ public class CustomMultiLineTextArea extends Component {
 					deleteSelection();
 					insertChar('\n');
 				}
-				else if (ch == '\b') {
+				else if (ch == '\b' && !e.isControlDown()) {
 					backspace();
 				}
 			}
@@ -196,71 +196,130 @@ public class CustomMultiLineTextArea extends Component {
 				
 				final boolean shiftPressed = e.isShiftDown();
 				final boolean ctrlPressed = e.isControlDown();
+				final boolean altPressed = e.isAltDown();
 				
 				switch (e.getKeyCode()) {
 					case KeyEvent.VK_LEFT:
+						if (ctrlPressed || altPressed) {
 						if (CustomMultiLineTextArea.this.caretPosition > 0) {
-							CustomMultiLineTextArea.this.caretPosition--;
+							moveCaretToPreviousWordStart();
 							if (!shiftPressed) {
 								CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
 							}
-							ensureCaretVisible();
-							CustomMultiLineTextArea.this.dirty = true;
 						}
-						break;
-					case KeyEvent.VK_RIGHT:
+					}
+					else if (CustomMultiLineTextArea.this.caretPosition > 0) {
+						CustomMultiLineTextArea.this.caretPosition--;
+						if (!shiftPressed) {
+							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+						}
+						ensureCaretVisible();
+						CustomMultiLineTextArea.this.dirty = true;
+					}
+					break;
+				case KeyEvent.VK_RIGHT:
+					if (ctrlPressed || altPressed) {
 						if (CustomMultiLineTextArea.this.caretPosition < CustomMultiLineTextArea.this.text.length()) {
-							CustomMultiLineTextArea.this.caretPosition++;
+							moveCaretToNextWordEnd();
 							if (!shiftPressed) {
 								CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
 							}
-							ensureCaretVisible();
+						}
+					}
+					else if (CustomMultiLineTextArea.this.caretPosition < CustomMultiLineTextArea.this.text.length()) {
+						CustomMultiLineTextArea.this.caretPosition++;
+						if (!shiftPressed) {
+							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+						}
+						ensureCaretVisible();
+						CustomMultiLineTextArea.this.dirty = true;
+					}
+					break;
+				case KeyEvent.VK_UP:
+					moveCaretUp();
+					if (!shiftPressed) {
+						CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+					}
+					break;
+				case KeyEvent.VK_DOWN:
+					moveCaretDown();
+					if (!shiftPressed) {
+						CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+					}
+					break;
+				case KeyEvent.VK_PAGE_UP:
+					moveCaretByPage(true);
+					if (!shiftPressed) {
+						CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+					}
+					break;
+				case KeyEvent.VK_PAGE_DOWN:
+					moveCaretByPage(false);
+					if (!shiftPressed) {
+						CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+					}
+					break;
+				case KeyEvent.VK_HOME:
+					if (ctrlPressed) {
+						CustomMultiLineTextArea.this.caretPosition = 0;
+						ensureCaretVisible();
+						CustomMultiLineTextArea.this.dirty = true;
+					}
+					else {
+						moveCaretToLineStart();
+					}
+					if (!shiftPressed) {
+						CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+					}
+					break;
+				case KeyEvent.VK_END:
+					if (ctrlPressed) {
+						CustomMultiLineTextArea.this.caretPosition = CustomMultiLineTextArea.this.text.length();
+						ensureCaretVisible();
+						CustomMultiLineTextArea.this.dirty = true;
+					}
+					else {
+						moveCaretToLineEnd();
+					}
+					if (!shiftPressed) {
+						CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
+					}
+					break;
+				case KeyEvent.VK_DELETE:
+					if (ctrlPressed && !CustomMultiLineTextArea.this.readonly) {
+						deleteWordForward();
+						e.consume();
+					}
+					else if (!CustomMultiLineTextArea.this.readonly) {
+						if (hasSelection()) {
+							if (e.isShiftDown()) {
+								cut();
+							}
+							else {
+								deleteSelection();
+							}
+						}
+						else if (CustomMultiLineTextArea.this.caretPosition < CustomMultiLineTextArea.this.text.length()) {
+							CustomMultiLineTextArea.this.text = CustomMultiLineTextArea.this.text.substring(0, CustomMultiLineTextArea.this.caretPosition) +
+									CustomMultiLineTextArea.this.text.substring(CustomMultiLineTextArea.this.caretPosition + 1);
+							CustomMultiLineTextArea.this.cachedWrappedLines = null;
+							notifyTextChanged();
 							CustomMultiLineTextArea.this.dirty = true;
 						}
-						break;
-					case KeyEvent.VK_UP:
-						moveCaretUp();
-						if (!shiftPressed) {
-							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
-						}
-						break;
-					case KeyEvent.VK_DOWN:
-						moveCaretDown();
-						if (!shiftPressed) {
-							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
-						}
-						break;
-					case KeyEvent.VK_HOME:
-						moveCaretToLineStart();
-						if (!shiftPressed) {
-							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
-						}
-						break;
-					case KeyEvent.VK_END:
-						moveCaretToLineEnd();
-						if (!shiftPressed) {
-							CustomMultiLineTextArea.this.selectionAnchor = CustomMultiLineTextArea.this.caretPosition;
-						}
-						break;
-					case KeyEvent.VK_DELETE:
-						if (!CustomMultiLineTextArea.this.readonly) {
-							if (hasSelection()) {
-								if (e.isShiftDown()) {
-									cut();
-								}
-								else {
-									deleteSelection();
-								}
-							}
-							else if (CustomMultiLineTextArea.this.caretPosition < CustomMultiLineTextArea.this.text.length()) {
-								CustomMultiLineTextArea.this.text = CustomMultiLineTextArea.this.text.substring(0, CustomMultiLineTextArea.this.caretPosition) +
-										CustomMultiLineTextArea.this.text.substring(CustomMultiLineTextArea.this.caretPosition + 1);
-								CustomMultiLineTextArea.this.cachedWrappedLines = null;
-								notifyTextChanged();
-								CustomMultiLineTextArea.this.dirty = true;
-							}
-						}
-						break;
+					}
+					break;
+				case KeyEvent.VK_BACK_SPACE:
+					if (ctrlPressed && !CustomMultiLineTextArea.this.readonly) {
+						deleteWordBackward();
+						e.consume();
+					}
+					break;
+				case KeyEvent.VK_TAB:
+					if (!CustomMultiLineTextArea.this.readonly) {
+						insertChar('\t');
+						e.consume();
+					}
+					break;
 					case KeyEvent.VK_C:
 						if (ctrlPressed) {
 							copy();
@@ -447,6 +506,69 @@ public class CustomMultiLineTextArea extends Component {
 		}
 	}
 	
+	private void deleteWordBackward() {
+		if (hasSelection()) {
+			deleteSelection();
+			return;
+		}
+		
+		if (this.caretPosition == 0) {
+			return;
+		}
+		
+		int position = this.caretPosition;
+		
+		if (isWordCharacter(this.text.charAt(position - 1))) {
+			while (position > 0 && isWordCharacter(this.text.charAt(position - 1))) {
+				position--;
+			}
+		}
+		else {
+			while (position > 0 && !isWordCharacter(this.text.charAt(position - 1))) {
+				position--;
+			}
+		}
+		
+		this.text = this.text.substring(0, position) + this.text.substring(this.caretPosition);
+		this.caretPosition = position;
+		this.selectionAnchor = position;
+		this.cachedWrappedLines = null;
+		ensureCaretVisible();
+		notifyTextChanged();
+		this.dirty = true;
+	}
+	
+	private void deleteWordForward() {
+		if (hasSelection()) {
+			deleteSelection();
+			return;
+		}
+		
+		final int length = this.text.length();
+		if (this.caretPosition >= length) {
+			return;
+		}
+		
+		int position = this.caretPosition;
+		
+		if (isWordCharacter(this.text.charAt(position))) {
+			while (position < length && isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+		else {
+			while (position < length && !isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+		
+		this.text = this.text.substring(0, this.caretPosition) + this.text.substring(position);
+		this.cachedWrappedLines = null;
+		ensureCaretVisible();
+		notifyTextChanged();
+		this.dirty = true;
+	}
+	
 	private void notifyTextChanged() {
 		this.recalculateScrollOffset();
 		if (this.onTextChanged != null) {
@@ -489,6 +611,62 @@ public class CustomMultiLineTextArea extends Component {
 			ensureCaretVisible();
 			this.dirty = true;
 		}
+	}
+	
+	private void moveCaretByPage(final boolean up) {
+		final List<String> wrappedLines = getWrappedLines();
+		final int lineHeight = getLineHeight();
+		final int linesPerPage = Math.max(1, getVisibleHeight() / lineHeight);
+		
+		final int currentWrappedLine = getWrappedLineIndexAtCaret();
+		final int lineStart = getCharOffsetAtWrappedLineStart(currentWrappedLine);
+		final int offsetInLine = this.caretPosition - lineStart;
+		
+		final int targetWrappedLine = Math.max(0, Math.min(wrappedLines.size() - 1, currentWrappedLine + (up ? -linesPerPage : linesPerPage)));
+		
+		if (targetWrappedLine != currentWrappedLine) {
+			final int targetLineStart = getCharOffsetAtWrappedLineStart(targetWrappedLine);
+			final int targetLineLength = wrappedLines.get(targetWrappedLine).length();
+			this.caretPosition = targetLineStart + Math.min(offsetInLine, targetLineLength);
+			ensureCaretVisible();
+			this.dirty = true;
+		}
+	}
+	
+	private void moveCaretToPreviousWordStart() {
+		int position = this.caretPosition;
+		
+		while (position > 0 && !isWordCharacter(this.text.charAt(position - 1))) {
+			position--;
+		}
+		
+		while (position > 0 && isWordCharacter(this.text.charAt(position - 1))) {
+			position--;
+		}
+		
+		this.caretPosition = position;
+		ensureCaretVisible();
+		this.dirty = true;
+	}
+	
+	private void moveCaretToNextWordEnd() {
+		int position = this.caretPosition;
+		final int length = this.text.length();
+		
+		if (position < length && isWordCharacter(this.text.charAt(position))) {
+			while (position < length && isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+		else {
+			while (position < length && !isWordCharacter(this.text.charAt(position))) {
+				position++;
+			}
+		}
+		
+		this.caretPosition = position;
+		ensureCaretVisible();
+		this.dirty = true;
 	}
 	
 	private void moveCaretToLineStart() {
