@@ -15,7 +15,6 @@ import java.util.concurrent.atomic.AtomicReference;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 
 import de.extio.game_engine.renderer.model.RenderingBo;
 import de.extio.game_engine.renderer.model.RenderingBoLayer;
@@ -63,6 +62,7 @@ public class G2DDrawFont extends G2DAbstractRenderingBo implements DrawFontRende
 				G2DDrawFont.baseFont = font;
 				G2DDrawFont.cachedFontRef.set(null);
 				G2DDrawFont.cachedFallbackFontRef.set(null);
+				G2DDrawFont.textLayoutCache.invalidateAll();
 			}
 			catch (final Exception e) {
 				LOGGER.warn(e.getMessage(), e);
