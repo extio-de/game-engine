@@ -9,8 +9,11 @@ import de.extio.game_engine.renderer.g2d.theme.G2DThemeManager;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonControl;
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ButtonData;
 import de.extio.game_engine.renderer.model.color.RgbaColor;
+import de.extio.game_engine.renderer.model.event.MouseEnterEvent;
+import de.extio.game_engine.renderer.model.event.MouseExitEvent;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.resource.StaticResource;
+import de.extio.game_engine.spatial2.model.ImmutableCoordI2;
 
 public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonControl {
 	
@@ -23,6 +26,8 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 	protected long lastControlDataUpdateTime;
 
 	protected long lastControlDataUpdateTimeInternal;
+
+	protected boolean hovered;
 	
 	@Override
 	public void setCustomData(final ButtonData data) {
@@ -68,7 +73,21 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 			this.control.setLocation(this.x, this.y);
 			this.positionModified = false;
 		}
-		this.tooltipMousePosition = this.control.getLastMousePosition();
+		final var mousePosition = this.control.getLastMousePosition();
+		final var hoveredNow = mousePosition != null && this.visible && this.enabled;
+		if (hoveredNow != this.hovered) {
+			this.hovered = hoveredNow;
+			final var coord = mousePosition != null
+					? ImmutableCoordI2.create(this.x + mousePosition.getX(), this.y + mousePosition.getY())
+					: ImmutableCoordI2.create(this.x + this.width / 2, this.y + this.height / 2);
+			if (hoveredNow) {
+				this.rendererData.getEventService().fire(new MouseEnterEvent(this.id, 0, coord, coord));
+			}
+			else {
+				this.rendererData.getEventService().fire(new MouseExitEvent(this.id, 0, coord, coord));
+			}
+		}
+		this.tooltipMousePosition = mousePosition;
 		
 		super.render();
 	}
@@ -82,6 +101,7 @@ public class G2DButtonControlImpl extends G2DBaseControlImpl implements ButtonCo
 		this.control.invalidate();
 		this.control.close();
 		((G2DRenderer) this.rendererData.getRenderer()).getMainFrame().remove(this.control);
+		this.hovered = false;
 		
 		super.close();
 	}

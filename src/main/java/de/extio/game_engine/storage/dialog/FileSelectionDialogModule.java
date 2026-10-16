@@ -9,6 +9,7 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Set;
 import java.util.UUID;
+import java.util.function.Function;
 
 import org.springframework.context.ApplicationContext;
 
@@ -30,6 +31,8 @@ import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonCon
 import de.extio.game_engine.renderer.model.bo.ControlRenderingBo.ToggleButtonData;
 import de.extio.game_engine.renderer.model.bo.DrawFontRenderingBo;
 import de.extio.game_engine.renderer.model.bo.HorizontalAlignment;
+import de.extio.game_engine.renderer.model.event.MouseEnterEvent;
+import de.extio.game_engine.renderer.model.event.MouseExitEvent;
 import de.extio.game_engine.renderer.model.event.UiControlEvent;
 import de.extio.game_engine.renderer.work.RenderingBoPool;
 import de.extio.game_engine.spatial2.model.Area2;
@@ -145,7 +148,11 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	
 	private String nameFieldValue;
 	
+	private Function<StorageItemDescriptor, String> tooltipDataProvider;
+	
 	private final Map<String, List<String>> folderPathByControlId = new HashMap<>();
+	
+	private final Map<UUID, String> tooltipCache = new HashMap<>();
 	
 	private final Map<String, StorageItemDescriptor> itemByControlId = new HashMap<>();
 	
@@ -188,6 +195,8 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	@Override
 	public void onShow() {
 		this.eventService.register(UiControlEvent.class, this.getId(), this::onUiControlEvent);
+		this.eventService.register(MouseEnterEvent.class, this.getId(), this::onItemMouseEnter);
+		this.eventService.register(MouseExitEvent.class, this.getId(), this::onItemMouseExit);
 		this.eventService.register(FileSelectionMoveDialogResponse.class, this.getId(), this::onMoveResponse);
 		this.eventService.register(FileSelectionNewFolderDialogResponse.class, this.getId(), this::onNewFolderResponse);
 		this.getModuleService().changeDisplayState(this.dialogWindow.getId(), true);
@@ -199,6 +208,8 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	@Override
 	public void onHide() {
 		this.eventService.unregister(UiControlEvent.class, this.getId());
+		this.eventService.unregister(MouseEnterEvent.class, this.getId());
+		this.eventService.unregister(MouseExitEvent.class, this.getId());
 		this.eventService.unregister(FileSelectionMoveDialogResponse.class, this.getId());
 		this.eventService.unregister(FileSelectionNewFolderDialogResponse.class, this.getId());
 		this.getModuleService().changeDisplayState(this.dialogWindow.getId(), false);
@@ -209,6 +220,10 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 	}
 	
 	public void open(final String requestId, final FileSelectionMode mode, final List<String> basePath, final String filterPattern, final boolean recursive, final boolean modal, final String initialName, final Window parentWindow) {
+		this.open(requestId, mode, basePath, filterPattern, recursive, modal, initialName, parentWindow, null);
+	}
+	
+	public void open(final String requestId, final FileSelectionMode mode, final List<String> basePath, final String filterPattern, final boolean recursive, final boolean modal, final String initialName, final Window parentWindow, final Function<StorageItemDescriptor, String> tooltipDataProvider) {
 		this.requestId = requestId;
 		this.mode = mode != null ? mode : FileSelectionMode.LOAD;
 		this.basePath = basePath != null ? List.copyOf(basePath) : List.of();
@@ -216,6 +231,8 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		this.filterPattern = filterPattern;
 		this.recursive = recursive;
 		this.modal = modal;
+		this.tooltipDataProvider = tooltipDataProvider;
+		this.tooltipCache.clear();
 		this.selectedDescriptor = null;
 		this.selectionIsNew = this.mode == FileSelectionMode.SAVE;
 		this.nameFieldValue = initialName != null && !initialName.isBlank() ? initialName.trim() : "";
@@ -266,6 +283,52 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 			case BUTTON_CANCEL -> this.onCancel();
 			default -> {
 			}
+		}
+	}
+	
+	private void onItemMouseEnter(final MouseEnterEvent event) {
+		if (this.tooltipDataProvider == null || event == null || event.getControlId() == null || !event.getControlId().startsWith(ITEM_PREFIX)) {
+			return;
+		}
+		final var descriptor = this.itemByControlId.get(event.getControlId());
+		if (descriptor == null) {
+			return;
+		}
+		final var data = this.resolveTooltipData(descriptor);
+		if (data == null || data.isBlank()) {
+			return;
+		}
+		this.updateItemTooltip(event.getControlId(), data);
+	}
+	
+	private void onItemMouseExit(final MouseExitEvent event) {
+	}
+	
+	private String resolveTooltipData(final StorageItemDescriptor descriptor) {
+		final var cached = this.tooltipCache.get(descriptor.id());
+		if (cached != null) {
+			return cached;
+		}
+		String data;
+		try {
+			data = this.tooltipDataProvider.apply(descriptor);
+		}
+		catch (final Exception ex) {
+			data = null;
+		}
+		if (data == null) {
+			data = "";
+		}
+		this.tooltipCache.put(descriptor.id(), data);
+		return data;
+	}
+	
+	private void updateItemTooltip(final String controlId, final String data) {
+		final var bo = this.itemsScrollArea.getRenderingBo(controlId, ControlRenderingBo.class);
+		if (bo != null) {
+			bo.setTooltip(data);
+			this.itemsScrollArea.putRenderingBo(bo);
+			this.dialogWindow.draw();
 		}
 	}
 	
@@ -685,6 +748,8 @@ public class FileSelectionDialogModule extends AbstractClientModule {
 		this.selectedDescriptor = null;
 		this.selectionIsNew = false;
 		this.nameFieldValue = "";
+		this.tooltipDataProvider = null;
+		this.tooltipCache.clear();
 		this.virtualFolders.clear();
 		this.folderPathByControlId.clear();
 		this.itemByControlId.clear();
