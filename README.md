@@ -63,6 +63,37 @@ The engine also serves as the foundation for **Exo's CYOA**, an LLM-driven choos
 
 ---
 
+## Source Distribution & Build
+
+This repository is a **source distribution only**. No prebuilt binaries or published artifacts are provided; you build the engine yourself and consume it as a Maven dependency.
+
+**Requirements**
+
+- JDK 25
+- Apache Maven 3.9 or newer
+
+**Build and install to your local Maven repository**
+
+```bash
+mvn clean install
+```
+
+This compiles the sources, runs the tests, and installs the library as `de.extio:game-engine`. To only produce the JAR without installing it, run `mvn clean package` (the artifact is written to `target/`).
+
+**Use it in your game**
+
+```xml
+<dependency>
+    <groupId>de.extio</groupId>
+    <artifactId>game-engine</artifactId>
+    <version>1.0.41</version>
+</dependency>
+```
+
+Note: All subsystems are pure Java except the optional Steamworks integration, which additionally requires the native Steamworks runtime libraries on the library path when enabled.
+
+---
+
 ## Domain Components
 
 ### Module System
