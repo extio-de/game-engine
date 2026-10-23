@@ -57,9 +57,9 @@ The demo module serves as both a reference implementation and a starting point f
 
 ## Background
 
-Exo's Game Engine is derived from [Spacecraft Tactics](https://store.steampowered.com/app/2642080/Spacecraft_Tactics), a 2D turn-based tactical space game released on Steam in 2023. The engine extracts and modernizes the core systems that powered Spacecraft Tactics' UI, campaign, and built-in editors. The engine does not include Spacecraft Tactics' Groovy-based mod system or game-specific logic such as the composite/entity system or tileset rendering. It focuses on the fundamental building blocks: modules, extensible renderer, events, storage, and other core subsystems that can be used to build new games.
+Exo's Game Engine is derived from [Spacecraft Tactics](https://www.extio.de/extio-de-v2/#/spacecraft-tactics) ([Steam](https://store.steampowered.com/app/2642080/Spacecraft_Tactics)), a 2D turn-based tactical space game released on Steam in 2023. The engine extracts and modernizes the core systems that powered Spacecraft Tactics' UI, campaign, and built-in editors. The engine does not include Spacecraft Tactics' Groovy-based mod system or game-specific logic such as the composite/entity system or tileset rendering. It focuses on the fundamental building blocks: modules, extensible renderer, events, storage, and other core subsystems that can be used to build new games.
 
-The engine also serves as the foundation for **Exo's CYOA**, an LLM-driven choose-your-own-adventure game that combines the game engine's rendering, module, and UI systems with agentic AI flows to create interactive narrative experiences.
+The engine also serves as the foundation for [Exo's CYOA](https://www.extio.de/extio-de-v2/#/exos-cyoa) ([Steam](https://store.steampowered.com/app/4929020/Exos_CYOA/)), an LLM-driven choose-your-own-adventure game that combines the game engine's rendering, module, and UI systems with agentic AI flows to create interactive narrative experiences.
 
 ---
 
