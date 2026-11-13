@@ -12,6 +12,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
@@ -89,7 +90,9 @@ public class G2DRenderer implements Renderer {
 		
 		System.setProperty("java.awt.headless", "false");
 		System.setProperty("sun.java2d.uiScale", "1");
-		System.setProperty("sun.java2d.opengl", "true");
+		if (Objects.requireNonNullElse(System.getProperty("os.name"), "").toLowerCase().contains("linux")) {
+			System.setProperty("sun.java2d.opengl", "true");
+		}
 		System.setProperty("awt.nativeDoubleBuffering", "true");
 		System.setProperty("awt.useSystemAAFontSettings", "on");
 		System.setProperty("swing.aatext", "true");
